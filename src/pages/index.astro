@@ -1,21 +1,178 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Hero from "../components/home/Hero.astro";
+import FeaturedProjects from "../components/home/FeaturedProjects.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import ProcessStep from "../components/ui/ProcessStep.astro";
+import Button from "../components/ui/Button.astro";
+import { getFeaturedProjects, getSiteSettings } from "../sanity/queries";
+
+let featuredProjects = [];
+let settings = null;
+
+try {
+  featuredProjects = await getFeaturedProjects();
+} catch (_e) {
+  // Sanity not configured yet -- render gracefully
+}
+
+try {
+  settings = await getSiteSettings();
+} catch (_e) {
+  // Sanity not configured yet -- render gracefully
+}
+
+const heroTitle = settings?.siteTitle ?? "La Sprezzatura";
+const heroTagline = settings?.tagline ?? "Luxury Interior Design · Long Island & New York City";
 ---
 
 <BaseLayout
   title="La Sprezzatura | Luxury Interior Design"
-  description="Luxury interior design studio serving Long Island and New York City. Creating spaces that feel effortlessly beautiful."
+  description="Award-winning luxury interior design studio serving Long Island and New York City. Creating spaces that feel effortlessly beautiful."
   transparentHeader={true}
 >
-  <!-- Minimal placeholder -- full home page content in Plan 02 -->
-  <section class="min-h-screen flex items-center justify-center bg-cream">
-    <div class="text-center px-6">
-      <h1 class="font-heading text-5xl md:text-7xl font-light tracking-wide text-charcoal">
-        La Sprezzatura
-      </h1>
-      <p class="mt-6 text-lg text-stone font-body tracking-wide">
-        Coming soon
+  <!-- 1. Hero -- full viewport with text overlay -->
+  <Hero
+    title={heroTitle}
+    tagline={heroTagline}
+  />
+
+  <!-- 2. Featured Projects -->
+  {
+    featuredProjects && featuredProjects.length > 0 && (
+      <section class="px-6 md:px-16 lg:px-24 py-24 md:py-32" data-animate="fade-up">
+        <SectionHeading tagline="Portfolio">
+          Our Work
+        </SectionHeading>
+        <FeaturedProjects projects={featuredProjects} />
+        <div class="mt-14 flex justify-center md:justify-start">
+          <Button href="/portfolio" variant="outline" size="lg">
+            View All Projects
+          </Button>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 3. About Teaser -->
+  <section
+    class="px-6 md:px-16 lg:px-24 py-24 md:py-32 bg-cream-dark"
+    data-animate="fade-up"
+  >
+    <div
+      class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center"
+    >
+      <!-- Image placeholder -->
+      <div class="order-2 md:order-1">
+        <div
+          class="aspect-[4/5] bg-gradient-to-br from-stone-light/30 to-stone/20 w-full max-w-sm md:max-w-none"
+        >
+        </div>
+      </div>
+      <!-- Text -->
+      <div class="order-1 md:order-2">
+        <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+          About
+        </p>
+        <h2
+          class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight mb-8"
+        >
+          Design should feel<br />effortless.
+        </h2>
+        <p class="text-base md:text-lg text-stone font-body leading-relaxed mb-4">
+          Liz brings a thoughtful, editorial eye to every project — whether a full
+          home renovation or a carefully curated refresh. Her work blends timeless
+          proportion with unexpected warmth.
+        </p>
+        <p class="text-base md:text-lg text-stone font-body leading-relaxed mb-10">
+          Based on Long Island and serving clients throughout New York City, La
+          Sprezzatura creates spaces that are beautiful to live in — not just to
+          photograph.
+        </p>
+        <Button href="/about" variant="outline">Learn More</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Process Preview -->
+  <section
+    class="px-6 md:px-16 lg:px-24 py-24 md:py-32"
+    data-animate="fade-up"
+  >
+    <div class="max-w-screen-xl mx-auto">
+      <SectionHeading tagline="How We Work">Our Process</SectionHeading>
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 md:gap-12"
+      >
+        <ProcessStep
+          number={1}
+          title="Discovery"
+          description="We begin with a deep conversation about your life, your aesthetic, and what your space needs to do for you."
+        />
+        <ProcessStep
+          number={2}
+          title="Concept"
+          description="We develop a cohesive vision — mood boards, space planning, and material palettes that capture the feeling of your future home."
+        />
+        <ProcessStep
+          number={3}
+          title="Design"
+          description="Every detail is refined: custom furniture, fabric selections, lighting, and art — all chosen with intention and care."
+        />
+        <ProcessStep
+          number={4}
+          title="Installation"
+          description="We orchestrate the final reveal, coordinating all trades and deliveries so your home arrives as one complete, beautiful whole."
+        />
+      </div>
+      <div class="mt-14 flex justify-center md:justify-start">
+        <Button href="/process" variant="outline">See the Full Process</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Testimonial (placeholder -- populated from Sanity in future) -->
+  <section
+    class="px-6 md:px-16 lg:px-24 py-24 md:py-32 bg-cream-dark"
+    data-animate="fade-up"
+  >
+    <div class="max-w-3xl mx-auto text-center">
+      <p class="text-xs uppercase tracking-widest text-stone mb-10 font-body">
+        What Clients Say
       </p>
+      <blockquote
+        class="font-heading text-2xl md:text-3xl lg:text-4xl font-light text-charcoal leading-relaxed italic mb-8"
+      >
+        "Working with Liz transformed not just our home, but how we live in it.
+        Every room tells a story we couldn't have imagined without her."
+      </blockquote>
+      <cite class="text-sm text-stone font-body tracking-wide not-italic">
+        — A. Richardson, East Hampton
+      </cite>
+    </div>
+  </section>
+
+  <!-- 6. CTA -->
+  <section
+    class="px-6 md:px-16 lg:px-24 py-24 md:py-32 text-center"
+    data-animate="fade-up"
+  >
+    <div class="max-w-2xl mx-auto">
+      <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+        Let's Connect
+      </p>
+      <h2
+        class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight mb-8"
+      >
+        Ready to transform<br />your space?
+      </h2>
+      <p
+        class="text-base md:text-lg text-stone font-body leading-relaxed mb-10"
+      >
+        Every beautiful room begins with a conversation. Tell us about your
+        project and let's start envisioning what's possible.
+      </p>
+      <Button href="/contact" size="lg">Start the Conversation</Button>
     </div>
   </section>
 </BaseLayout>

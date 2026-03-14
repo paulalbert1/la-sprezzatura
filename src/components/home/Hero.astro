@@ -1,0 +1,94 @@
+---
+import SanityImage from "../SanityImage.astro";
+
+interface Props {
+  image?: any;
+  title?: string;
+  tagline?: string;
+}
+
+const {
+  image,
+  title = "La Sprezzatura",
+  tagline = "Luxury Interior Design",
+} = Astro.props;
+---
+
+<section class="hero relative w-full h-screen min-h-[600px] overflow-hidden">
+  {
+    image ? (
+      <SanityImage
+        image={image}
+        alt={`${title} hero image`}
+        loading="eager"
+        fetchpriority="high"
+        sizes="100vw"
+        widths={[640, 1024, 1440, 1920]}
+        class="absolute inset-0 w-full h-full"
+      />
+    ) : (
+      <div class="absolute inset-0 bg-gradient-to-b from-cream-dark via-stone-light to-stone" />
+    )
+  }
+
+  <!-- Dark gradient overlay for text readability -->
+  <div
+    class="absolute inset-0"
+    style="background: linear-gradient(to top, rgba(44,41,38,0.65) 0%, rgba(44,41,38,0.2) 50%, rgba(44,41,38,0.05) 100%);"
+  >
+  </div>
+
+  <!-- Text content -->
+  <div
+    class="absolute bottom-0 left-0 right-0 px-8 md:px-16 lg:px-24 pb-20 md:pb-28"
+  >
+    <p
+      class="text-xs uppercase tracking-[0.35em] text-stone-light mb-5 font-body"
+    >
+      {tagline}
+    </p>
+    <h1
+      class="font-heading text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-light text-white leading-none tracking-wide"
+    >
+      {title}
+    </h1>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div
+    class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator"
+    aria-hidden="true"
+  >
+    <span class="text-xs uppercase tracking-widest text-white/60 font-body"
+      >Scroll</span
+    >
+    <div class="w-px h-10 bg-white/40 scroll-line"></div>
+  </div>
+</section>
+
+<style>
+  .scroll-line {
+    animation: scroll-pulse 2s ease-in-out infinite;
+    transform-origin: top;
+  }
+
+  @keyframes scroll-pulse {
+    0%,
+    100% {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+    20% {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+    80% {
+      transform: scaleY(1);
+      opacity: 0;
+    }
+  }
+</style>

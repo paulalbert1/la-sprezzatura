@@ -4,10 +4,23 @@ import vercel from "@astrojs/vercel";
 import sanity from "@sanity/astro";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
 
-const sanityProjectId =
-  process.env.PUBLIC_SANITY_PROJECT_ID ||
-  import.meta.env?.PUBLIC_SANITY_PROJECT_ID;
+// Load .env manually so astro.config.mjs can read PUBLIC_SANITY_* before Vite processes it
+const envPath = resolve(process.cwd(), ".env");
+if (existsSync(envPath)) {
+  readFileSync(envPath, "utf8")
+    .split("\n")
+    .forEach((line) => {
+      const [key, ...rest] = line.split("=");
+      if (key && rest.length) {
+        process.env[key.trim()] = rest.join("=").trim();
+      }
+    });
+}
+
+const sanityProjectId = process.env.PUBLIC_SANITY_PROJECT_ID;
 const hasSanity = sanityProjectId && sanityProjectId !== "placeholder";
 
 export default defineConfig({
