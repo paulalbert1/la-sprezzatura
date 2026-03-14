@@ -1,0 +1,242 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import ProcessStep from "../components/ui/ProcessStep.astro";
+import Button from "../components/ui/Button.astro";
+
+const steps = [
+  {
+    number: 1,
+    title: "Discovery",
+    description:
+      "We start by understanding your vision, lifestyle, and how you use your space. This includes an in-depth consultation, space analysis, and establishing the project scope and budget.",
+    timeline: "1–2 weeks",
+  },
+  {
+    number: 2,
+    title: "Concept",
+    description:
+      "We develop design concepts that translate your vision into a tangible direction. Mood boards, color palettes, preliminary layouts, and material selections begin to take shape.",
+    timeline: "2–3 weeks",
+  },
+  {
+    number: 3,
+    title: "Design Development",
+    description:
+      "Concepts are refined into detailed plans. Floor plans, elevations, material specifications, and furniture selections are finalized. This is where the design becomes real.",
+    timeline: "3–4 weeks",
+  },
+  {
+    number: 4,
+    title: "Procurement",
+    description:
+      "We source and order all materials, furnishings, and fixtures. Our industry relationships ensure quality and value. We manage the entire process from order to delivery.",
+    timeline: "6–12 weeks",
+  },
+  {
+    number: 5,
+    title: "Installation",
+    description:
+      "The transformation happens. We coordinate contractors, deliveries, and installations. Every detail is placed with intention, every decision considered.",
+    timeline: "1–4 weeks",
+  },
+  {
+    number: 6,
+    title: "Reveal",
+    description:
+      "The moment your space comes to life. We do a final walkthrough, style every surface, and hand you the keys to your beautifully designed home.",
+    timeline: "1 day",
+  },
+];
+---
+
+<BaseLayout
+  title="Our Design Process | La Sprezzatura Interior Design"
+  description="A six-step design process — from Discovery to Reveal — built around collaboration, clarity, and the joy of watching a space transform."
+>
+  <!-- Page Header -->
+  <section
+    class="pt-16 pb-12 md:pt-24 md:pb-16 px-6 max-w-[1200px] mx-auto"
+  >
+    <SectionHeading tagline="How We Work">Our Design Process</SectionHeading>
+    <p
+      class="font-body text-stone text-lg leading-relaxed max-w-2xl"
+      data-animate="fade-up"
+    >
+      Working with a designer doesn't have to be mysterious. From the moment we
+      meet to the day we hand over your keys, every step is intentional,
+      collaborative, and — we hope — genuinely enjoyable. Here's how a project
+      unfolds.
+    </p>
+  </section>
+
+  <!-- Timeline Steps -->
+  <section class="pb-20 md:pb-28 px-6 max-w-[1200px] mx-auto">
+    <!-- Desktop: alternating layout with connecting vertical line -->
+    <div class="hidden md:block relative">
+      <!-- Vertical connecting line -->
+      <div
+        class="absolute left-1/2 top-0 bottom-0 w-px bg-stone-light/30 -translate-x-1/2"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="space-y-0">
+        {
+          steps.map((step, i) => (
+            <div
+              class:list={[
+                "relative grid grid-cols-2 gap-16 items-center py-14",
+                i < steps.length - 1
+                  ? "border-b border-stone-light/20"
+                  : "",
+              ]}
+              data-animate="fade-up"
+            >
+              {/* Center dot on timeline */}
+              <div
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-terracotta ring-4 ring-cream z-10"
+                aria-hidden="true"
+              />
+
+              {/* Alternate left/right placement */}
+              {i % 2 === 0 ? (
+                <>
+                  <div class="text-right pr-12">
+                    <ProcessStep
+                      number={step.number}
+                      title={step.title}
+                      description={step.description}
+                      class="items-end text-right"
+                    />
+                  </div>
+                  <div class="pl-12">
+                    <div class="inline-block bg-cream-dark border border-stone-light/30 px-5 py-3">
+                      <p class="text-xs uppercase tracking-widest text-stone font-body">
+                        Typical timeline
+                      </p>
+                      <p class="font-heading text-xl text-charcoal font-light mt-1">
+                        {step.timeline}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div class="pr-12 text-left">
+                    <div class="inline-block bg-cream-dark border border-stone-light/30 px-5 py-3">
+                      <p class="text-xs uppercase tracking-widest text-stone font-body">
+                        Typical timeline
+                      </p>
+                      <p class="font-heading text-xl text-charcoal font-light mt-1">
+                        {step.timeline}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="pl-12">
+                    <ProcessStep
+                      number={step.number}
+                      title={step.title}
+                      description={step.description}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Mobile: stacked numbered cards -->
+    <div class="md:hidden space-y-6">
+      {
+        steps.map((step) => (
+          <div
+            class="relative bg-cream-dark border border-stone-light/30 p-6"
+            data-animate="fade-up"
+          >
+            {/* Terracotta top accent */}
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-terracotta" />
+            <ProcessStep
+              number={step.number}
+              title={step.title}
+              description={step.description}
+            />
+            <div class="mt-4 pt-4 border-t border-stone-light/30">
+              <span class="text-xs uppercase tracking-widest text-stone font-body">
+                {step.timeline}
+              </span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- FAQ / Reassurance Section -->
+  <section class="py-16 md:py-20 px-6 bg-cream-dark" data-animate="fade-up">
+    <div class="max-w-[800px] mx-auto">
+      <p class="text-xs uppercase tracking-widest text-terracotta mb-6 font-body">
+        Good to know
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="font-heading text-xl font-light text-charcoal mb-3">
+            We move at your pace
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            Timelines above are typical, not fixed. Every project is different.
+            We'll establish a realistic schedule together during Discovery.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl font-light text-charcoal mb-3">
+            Transparency throughout
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            No surprises on budget or timeline. We keep you informed at every
+            stage so decisions are never rushed.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl font-light text-charcoal mb-3">
+            Your input matters
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            Design is a collaboration. We present options, explain our
+            reasoning, and adjust based on your feedback — always.
+          </p>
+        </div>
+        <div>
+          <h3 class="font-heading text-xl font-light text-charcoal mb-3">
+            After the reveal
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            We don't disappear after installation day. If something needs
+            adjusting in the weeks after, we're here.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 md:py-28 px-6 text-center" data-animate="fade-up">
+    <div class="max-w-[600px] mx-auto">
+      <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+        Step one
+      </p>
+      <h2
+        class="font-heading text-4xl md:text-5xl font-light text-charcoal mb-6 leading-tight"
+      >
+        Every project begins with a conversation.
+      </h2>
+      <p class="font-body text-stone text-lg leading-relaxed mb-10">
+        Tell us about your space and what you're dreaming of. The rest follows
+        naturally.
+      </p>
+      <Button href="/contact" size="lg">Let's Talk</Button>
+    </div>
+  </section>
+</BaseLayout>

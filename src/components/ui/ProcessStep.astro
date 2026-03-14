@@ -1,0 +1,28 @@
+---
+interface Props {
+  number: string | number;
+  title: string;
+  description: string;
+  class?: string;
+}
+
+const { number, title, description, class: className = "" } = Astro.props;
+
+const numStr = String(number).padStart(2, "0");
+---
+
+<div class:list={["process-step flex flex-col", className]}>
+  <span
+    class="font-heading text-5xl md:text-6xl font-light text-terracotta leading-none mb-4"
+  >
+    {numStr}
+  </span>
+  <h3
+    class="font-heading text-xl md:text-2xl font-light text-charcoal mb-3 leading-tight"
+  >
+    {title}
+  </h3>
+  <p class="text-sm md:text-base text-stone font-body leading-relaxed">
+    {description}
+  </p>
+</div>

@@ -1,0 +1,188 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import Button from "../components/ui/Button.astro";
+
+// Services are defined statically for now; when Sanity is connected and
+// PUBLIC_SANITY_PROJECT_ID is set, replace this array with:
+//   import { getServices } from "../sanity/queries";
+//   const services = await getServices();
+const services = [
+  {
+    _id: "full-service",
+    title: "Full-Service Interior Design",
+    tagline: "End-to-end transformation",
+    description:
+      "Our flagship offering — complete end-to-end design from concept to installation. We handle every detail so you can walk in on reveal day and fall in love.",
+    features: [
+      "Space planning and floor plan development",
+      "Material, furniture, and finish selection",
+      "Custom millwork design",
+      "Procurement and vendor management",
+      "Contractor coordination",
+      "Installation day styling",
+    ],
+    idealFor:
+      "Homeowners undertaking full room or whole-home transformations who want a seamless, managed experience.",
+  },
+  {
+    _id: "consultation",
+    title: "Design Consultation",
+    tagline: "Expert guidance, your execution",
+    description:
+      "A focused session for clients who need a professional eye and a clear direction — but prefer to execute the vision themselves.",
+    features: [
+      "2-hour on-site consultation",
+      "Curated mood board with design direction",
+      "Material and finish recommendations",
+      "Furniture shopping list with sources",
+      "Color palette selection",
+    ],
+    idealFor:
+      "Homeowners who know what they want and are confident executing — they just need a professional to point them in the right direction.",
+  },
+  {
+    _id: "refresh-styling",
+    title: "Refresh & Styling",
+    tagline: "Polish what you already have",
+    description:
+      "Elevate your existing space without a full renovation. Sometimes the right pieces, placed intentionally, make all the difference.",
+    features: [
+      "Furniture rearrangement and editing",
+      "Accessory and art placement",
+      "Soft goods updates (pillows, throws, rugs)",
+      "Curated shopping list for new accents",
+      "Final styling walkthrough",
+    ],
+    idealFor:
+      "Homeowners who love their space but feel it needs a refresh — polished, not overhauled.",
+  },
+];
+---
+
+<BaseLayout
+  title="Interior Design Services | La Sprezzatura Interior Design"
+  description="Full-service interior design, design consultations, and styling services on Long Island and New York City. A design experience tailored to how you live."
+>
+  <!-- Page Header -->
+  <section class="pt-16 pb-12 md:pt-24 md:pb-16 px-6 max-w-[1200px] mx-auto">
+    <SectionHeading tagline="What We Offer">Our Services</SectionHeading>
+    <p
+      class="font-body text-stone text-lg leading-relaxed max-w-2xl"
+      data-animate="fade-up"
+    >
+      At La Sprezzatura, design isn't a transaction — it's a collaboration.
+      Whether you're transforming an entire home or simply need a discerning eye
+      for an afternoon, we meet you where you are with the same level of care
+      and intention.
+    </p>
+  </section>
+
+  <!-- Service Cards -->
+  <section class="pb-20 md:pb-28 px-6 max-w-[1200px] mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+      {
+        services.map((service) => (
+          <article
+            class="relative bg-cream-dark border border-stone-light/30 p-8 md:p-10 flex flex-col group"
+            data-animate="fade-up"
+          >
+            {/* Terracotta top accent line */}
+            <div class="absolute top-0 left-0 right-0 h-0.5 bg-terracotta" />
+
+            <div class="mb-6">
+              {service.tagline && (
+                <p class="text-xs uppercase tracking-widest text-terracotta mb-3 font-body">
+                  {service.tagline}
+                </p>
+              )}
+              <h2 class="font-heading text-2xl md:text-3xl font-light text-charcoal leading-snug">
+                {service.title}
+              </h2>
+            </div>
+
+            <p class="font-body text-stone leading-relaxed mb-8">
+              {service.description}
+            </p>
+
+            {service.features && service.features.length > 0 && (
+              <ul class="space-y-2 mb-8 flex-1">
+                {service.features.map((feature: string) => (
+                  <li class="flex items-start gap-3 font-body text-sm text-charcoal">
+                    <span
+                      class="mt-1.5 block w-1 h-1 rounded-full bg-terracotta flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {service.idealFor && (
+              <div class="mt-auto pt-6 border-t border-stone-light/30">
+                <p class="text-xs uppercase tracking-widest text-stone mb-2 font-body">
+                  Ideal for
+                </p>
+                <p class="font-body text-sm text-stone-dark leading-relaxed">
+                  {service.idealFor}
+                </p>
+              </div>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- How We Work Teaser -->
+  <section
+    class="py-16 md:py-20 px-6 bg-cream-dark"
+    data-animate="fade-up"
+  >
+    <div class="max-w-[1200px] mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+      <div class="max-w-xl">
+        <p class="text-xs uppercase tracking-widest text-terracotta mb-4 font-body">
+          The process
+        </p>
+        <h2
+          class="font-heading text-3xl md:text-4xl font-light text-charcoal leading-tight mb-4"
+        >
+          Curious how a project unfolds?
+        </h2>
+        <p class="font-body text-stone leading-relaxed">
+          From the first conversation to the final reveal, every stage of our
+          process is designed to feel collaborative, clear, and — above all —
+          enjoyable.
+        </p>
+      </div>
+      <div class="flex-shrink-0">
+        <Button href="/process" variant="outline" size="lg">
+          Our Design Process
+        </Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section
+    class="py-20 md:py-28 px-6 text-center"
+    data-animate="fade-up"
+  >
+    <div class="max-w-[600px] mx-auto">
+      <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+        Begin here
+      </p>
+      <h2
+        class="font-heading text-4xl md:text-5xl font-light text-charcoal mb-6 leading-tight"
+      >
+        Ready to begin?
+      </h2>
+      <p class="font-body text-stone text-lg leading-relaxed mb-10">
+        Every project starts with a conversation. Let's talk about your space,
+        your goals, and how we can help.
+      </p>
+      <Button href="/contact" size="lg">Schedule a Consultation</Button>
+    </div>
+  </section>
+</BaseLayout>
