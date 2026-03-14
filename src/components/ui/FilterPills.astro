@@ -1,0 +1,87 @@
+---
+interface Props {
+  roomTypes: string[];
+  styles: string[];
+}
+
+const { roomTypes, styles } = Astro.props;
+
+const allFilters = [
+  ...roomTypes.map((t) => ({ label: t, type: "room" as const })),
+  ...styles.map((s) => ({ label: s, type: "style" as const })),
+];
+---
+
+<div
+  class="filter-pills flex flex-wrap gap-3"
+  role="group"
+  aria-label="Filter projects"
+>
+  <button
+    class="filter-pill active px-5 py-2 rounded-full text-xs uppercase tracking-widest font-body transition-colors duration-200 cursor-pointer border bg-charcoal text-white border-charcoal"
+    data-filter="all"
+  >
+    All
+  </button>
+
+  {
+    allFilters.map(({ label, type }) => (
+      <button
+        class="filter-pill px-5 py-2 rounded-full text-xs uppercase tracking-widest font-body transition-colors duration-200 cursor-pointer border bg-cream-dark text-charcoal border-stone-light hover:bg-charcoal hover:text-white hover:border-charcoal"
+        data-filter={type}
+        data-value={label}
+      >
+        {label}
+      </button>
+    ))
+  }
+</div>
+
+<script>
+  function initFilters() {
+    const pills = document.querySelectorAll<HTMLButtonElement>(".filter-pill");
+    const cards =
+      document.querySelectorAll<HTMLElement>("[data-project-card]");
+
+    if (!pills.length || !cards.length) return;
+
+    function setActive(activePill: HTMLButtonElement) {
+      pills.forEach((p) => {
+        const isActive = p === activePill;
+        p.classList.toggle("active", isActive);
+        p.classList.toggle("bg-charcoal", isActive);
+        p.classList.toggle("text-white", isActive);
+        p.classList.toggle("border-charcoal", isActive);
+        p.classList.toggle("bg-cream-dark", !isActive);
+        p.classList.toggle("text-charcoal", !isActive);
+        p.classList.toggle("border-stone-light", !isActive);
+      });
+    }
+
+    function filterCards(filterType: string, filterValue?: string) {
+      cards.forEach((card) => {
+        if (filterType === "all") {
+          card.style.display = "";
+          return;
+        }
+        const matchRoom =
+          filterType === "room" && card.dataset.room === filterValue;
+        const matchStyle =
+          filterType === "style" && card.dataset.style === filterValue;
+        card.style.display = matchRoom || matchStyle ? "" : "none";
+      });
+    }
+
+    pills.forEach((pill) => {
+      pill.addEventListener("click", () => {
+        const filterType = pill.dataset.filter ?? "all";
+        const filterValue = pill.dataset.value;
+        setActive(pill);
+        filterCards(filterType, filterValue);
+      });
+    });
+  }
+
+  // Initialize on page load and on Astro view transitions
+  document.addEventListener("astro:page-load", initFilters);
+</script>

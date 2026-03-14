@@ -1,0 +1,231 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import SanityImage from "../../components/SanityImage.astro";
+import ProjectGallery from "../../components/portfolio/ProjectGallery.astro";
+import Lightbox from "../../components/portfolio/Lightbox.astro";
+import Button from "../../components/ui/Button.astro";
+import { PortableText } from "astro-portabletext";
+import { getProjects, getProjectBySlug } from "../../sanity/queries";
+import { urlFor } from "../../sanity/image";
+
+// Prerender as static HTML -- required when using Vercel adapter with hybrid output
+export const prerender = true;
+
+// Generate static paths from all project slugs (Pattern 4 from RESEARCH)
+export async function getStaticPaths() {
+  let projects: any[] = [];
+  try {
+    projects = await getProjects();
+  } catch (_e) {
+    // No Sanity content yet -- no paths to generate
+    return [];
+  }
+  return projects
+    .filter((p) => p?.slug?.current)
+    .map((project) => ({
+      params: { slug: project.slug.current },
+    }));
+}
+
+const { slug } = Astro.params;
+
+let project: any = null;
+try {
+  project = await getProjectBySlug(slug!);
+} catch (_e) {
+  // Project not found or Sanity unavailable
+}
+
+if (!project) {
+  return Astro.redirect("/portfolio");
+}
+
+const heroImageUrl = project.heroImage?.asset
+  ? urlFor(project.heroImage).width(1400).auto("format").quality(85).url()
+  : null;
+
+const galleryImages: any[] = project.images ?? [];
+const hasNarrative =
+  project.challenge?.length ||
+  project.approach?.length ||
+  project.outcome?.length;
+const hasTestimonial = project.testimonial?.quote;
+const hasGallery = galleryImages.length > 0;
+
+const pageDescription =
+  project.description ??
+  `${project.roomType ?? "Interior design"} project in ${project.location ?? "New York"}. A La Sprezzatura luxury design project.`;
+
+const ogImageUrl = heroImageUrl ?? undefined;
+---
+
+<BaseLayout
+  title={`${project.title} | La Sprezzatura Interior Design`}
+  description={pageDescription}
+  ogImage={ogImageUrl}
+>
+  <!-- Full-bleed hero -->
+  <section class="relative w-full" style="height: 75vh; min-height: 480px;">
+    {
+      project.heroImage ? (
+        <SanityImage
+          image={project.heroImage}
+          alt={project.title}
+          loading="eager"
+          fetchpriority="high"
+          sizes="100vw"
+          widths={[768, 1200, 1600, 1920]}
+          class="absolute inset-0 w-full h-full"
+        />
+      ) : (
+        <div class="absolute inset-0 bg-gradient-to-br from-cream-dark to-stone-light" />
+      )
+    }
+    <!-- Gradient overlay -->
+    <div
+      class="absolute inset-0"
+      style="background: linear-gradient(to top, rgba(44,41,38,0.7) 0%, rgba(44,41,38,0.1) 60%, transparent 100%);"
+    >
+    </div>
+    <!-- Title overlay -->
+    <div
+      class="absolute bottom-0 left-0 right-0 px-6 md:px-16 lg:px-24 pb-12 md:pb-16"
+    >
+      {
+        (project.roomType || project.style) && (
+          <p class="text-xs uppercase tracking-widest text-stone-light mb-3 font-body">
+            {[project.roomType, project.style].filter(Boolean).join(" · ")}
+          </p>
+        )
+      }
+      <h1
+        class="font-heading text-4xl md:text-6xl lg:text-7xl font-light text-white leading-tight"
+      >
+        {project.title}
+      </h1>
+      {
+        project.location && (
+          <p class="text-sm md:text-base text-white/70 font-body mt-3">
+            {project.location}
+          </p>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- Narrative sections -->
+  {
+    hasNarrative && (
+      <section
+        class="px-6 md:px-16 lg:px-24 py-20 md:py-28"
+        data-animate="fade-up"
+      >
+        <div class="max-w-3xl mx-auto">
+          {project.challenge?.length > 0 && (
+            <div class="mb-14">
+              <h2 class="font-heading text-2xl md:text-3xl font-light text-charcoal mb-6 tracking-wide">
+                The Challenge
+              </h2>
+              <div class="prose-content text-stone font-body text-base md:text-lg leading-relaxed">
+                <PortableText value={project.challenge} />
+              </div>
+            </div>
+          )}
+
+          {project.approach?.length > 0 && (
+            <div class="mb-14">
+              <h2 class="font-heading text-2xl md:text-3xl font-light text-charcoal mb-6 tracking-wide">
+                Our Approach
+              </h2>
+              <div class="prose-content text-stone font-body text-base md:text-lg leading-relaxed">
+                <PortableText value={project.approach} />
+              </div>
+            </div>
+          )}
+
+          {project.outcome?.length > 0 && (
+            <div class="mb-4">
+              <h2 class="font-heading text-2xl md:text-3xl font-light text-charcoal mb-6 tracking-wide">
+                The Result
+              </h2>
+              <div class="prose-content text-stone font-body text-base md:text-lg leading-relaxed">
+                <PortableText value={project.outcome} />
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Gallery -->
+  {
+    hasGallery && (
+      <section
+        class="px-6 md:px-16 lg:px-24 py-8 md:py-12"
+        data-animate="fade-up"
+      >
+        <div class="max-w-screen-xl mx-auto">
+          <ProjectGallery images={galleryImages} />
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Lightbox (only if there are gallery images) -->
+  {hasGallery && <Lightbox images={galleryImages} />}
+
+  <!-- Testimonial -->
+  {
+    hasTestimonial && (
+      <section
+        class="px-6 md:px-16 lg:px-24 py-20 md:py-28 bg-cream-dark"
+        data-animate="fade-up"
+      >
+        <div class="max-w-3xl mx-auto text-center">
+          <blockquote class="font-heading text-2xl md:text-3xl lg:text-4xl font-light text-charcoal leading-relaxed italic mb-8">
+            "{project.testimonial.quote}"
+          </blockquote>
+          {project.testimonial.clientName && (
+            <cite class="text-sm text-stone font-body tracking-wide not-italic">
+              — {project.testimonial.clientName}
+              {project.testimonial.location &&
+                `, ${project.testimonial.location}`}
+            </cite>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Navigation footer -->
+  <section class="px-6 md:px-16 lg:px-24 py-14 md:py-20 border-t border-stone-light/30">
+    <div
+      class="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6"
+    >
+      <Button href="/portfolio" variant="outline">
+        ← Back to Portfolio
+      </Button>
+      <Button href="/contact" variant="primary">
+        Start Your Project
+      </Button>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Prose styles for PortableText content */
+  .prose-content :global(p) {
+    margin-bottom: 1.25em;
+  }
+  .prose-content :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .prose-content :global(strong) {
+    font-weight: 500;
+    color: var(--color-charcoal);
+  }
+  .prose-content :global(em) {
+    font-style: italic;
+  }
+</style>

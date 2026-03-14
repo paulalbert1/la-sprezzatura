@@ -1,0 +1,77 @@
+---
+import SanityImage from "../SanityImage.astro";
+
+interface GalleryImage {
+  _key?: string;
+  alt?: string;
+  caption?: string;
+  asset?: any;
+  [key: string]: any;
+}
+
+interface Props {
+  images: GalleryImage[];
+}
+
+const { images } = Astro.props;
+---
+
+{
+  images && images.length > 0 && (
+    <div class="project-gallery flex flex-col gap-4 md:gap-6">
+      {images.map((image, index) => (
+        <figure
+          class="gallery-item cursor-pointer group"
+          data-lightbox-index={index}
+          role="button"
+          tabindex="0"
+          aria-label={`View image ${index + 1} of ${images.length} in full size`}
+        >
+          <div class="overflow-hidden w-full">
+            <SanityImage
+              image={image}
+              alt={image.alt ?? `Gallery image ${index + 1}`}
+              loading="lazy"
+              sizes="(max-width: 768px) 100vw, (max-width: 1440px) 80vw, 1200px"
+              widths={[640, 960, 1200, 1600]}
+              class="w-full transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+            />
+          </div>
+          {image.caption && (
+            <figcaption class="mt-3 text-sm text-stone font-body italic px-1">
+              {image.caption}
+            </figcaption>
+          )}
+        </figure>
+      ))}
+    </div>
+  )
+}
+
+<script>
+  // Store images data on the window for the lightbox to use
+  document.addEventListener("astro:page-load", () => {
+    const galleryItems =
+      document.querySelectorAll<HTMLElement>("[data-lightbox-index]");
+    if (!galleryItems.length) return;
+
+    galleryItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        const index = parseInt(item.dataset.lightboxIndex ?? "0", 10);
+        document.dispatchEvent(
+          new CustomEvent("lightbox:open", { detail: { index } }),
+        );
+      });
+
+      item.addEventListener("keydown", (e) => {
+        if ((e as KeyboardEvent).key === "Enter" || (e as KeyboardEvent).key === " ") {
+          e.preventDefault();
+          const index = parseInt(item.dataset.lightboxIndex ?? "0", 10);
+          document.dispatchEvent(
+            new CustomEvent("lightbox:open", { detail: { index } }),
+          );
+        }
+      });
+    });
+  });
+</script>

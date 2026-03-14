@@ -1,0 +1,273 @@
+---
+import { urlFor } from "../../sanity/image";
+
+interface LightboxImage {
+  alt?: string;
+  asset?: any;
+  [key: string]: any;
+}
+
+interface Props {
+  images: LightboxImage[];
+}
+
+const { images } = Astro.props;
+
+// Pre-compute high-resolution URLs for lightbox
+const lightboxImages = images.map((img) => ({
+  src: img.asset ? urlFor(img).width(1800).auto("format").quality(90).url() : "",
+  alt: img.alt ?? "",
+}));
+---
+
+<!-- Lightbox overlay -- hidden by default -->
+<div
+  id="lightbox"
+  class="fixed inset-0 z-50 hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Image lightbox"
+>
+  <!-- Dark backdrop -->
+  <div
+    id="lightbox-backdrop"
+    class="absolute inset-0 bg-charcoal/90"
+    aria-hidden="true"
+  >
+  </div>
+
+  <!-- Content -->
+  <div class="relative h-full flex flex-col items-center justify-center p-4 md:p-12">
+    <!-- Close button -->
+    <button
+      id="lightbox-close"
+      class="absolute top-4 right-4 md:top-6 md:right-6 text-white/80 hover:text-white transition-colors duration-200 z-10"
+      aria-label="Close lightbox"
+    >
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <line
+          x1="6"
+          y1="6"
+          x2="26"
+          y2="26"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"></line>
+        <line
+          x1="26"
+          y1="6"
+          x2="6"
+          y2="26"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"></line>
+      </svg>
+    </button>
+
+    <!-- Prev arrow -->
+    <button
+      id="lightbox-prev"
+      class="absolute left-3 md:left-6 text-white/70 hover:text-white transition-colors duration-200 z-10"
+      aria-label="Previous image"
+    >
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <polyline
+          points="25,8 13,20 25,32"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"></polyline>
+      </svg>
+    </button>
+
+    <!-- Image container -->
+    <div
+      id="lightbox-img-wrap"
+      class="relative flex items-center justify-center max-w-6xl max-h-[85vh] w-full"
+    >
+      <img
+        id="lightbox-img"
+        src=""
+        alt=""
+        class="max-w-full max-h-[85vh] object-contain lightbox-image"
+      />
+    </div>
+
+    <!-- Next arrow -->
+    <button
+      id="lightbox-next"
+      class="absolute right-3 md:right-6 text-white/70 hover:text-white transition-colors duration-200 z-10"
+      aria-label="Next image"
+    >
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <polyline
+          points="15,8 27,20 15,32"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"></polyline>
+      </svg>
+    </button>
+
+    <!-- Counter -->
+    <div
+      id="lightbox-counter"
+      class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-xs font-body tracking-widest"
+    >
+    </div>
+  </div>
+</div>
+
+<style>
+  #lightbox {
+    opacity: 0;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
+    visibility: hidden;
+  }
+  #lightbox.is-open {
+    opacity: 1;
+    visibility: visible;
+    display: flex !important;
+  }
+  .lightbox-image {
+    transition: opacity 0.2s ease;
+  }
+  .lightbox-image.loading {
+    opacity: 0;
+  }
+</style>
+
+<script define:vars={{ lightboxImages }}>
+  let currentIndex = 0;
+  const images = lightboxImages;
+
+  function openLightbox(index) {
+    currentIndex = Math.max(0, Math.min(index, images.length - 1));
+    showImage(currentIndex);
+    const lb = document.getElementById("lightbox");
+    if (lb) {
+      lb.classList.remove("hidden");
+      requestAnimationFrame(() => lb.classList.add("is-open"));
+      document.body.style.overflow = "hidden";
+      lb.focus();
+    }
+  }
+
+  function closeLightbox() {
+    const lb = document.getElementById("lightbox");
+    if (lb) {
+      lb.classList.remove("is-open");
+      setTimeout(() => {
+        lb.classList.add("hidden");
+        document.body.style.overflow = "";
+      }, 250);
+    }
+  }
+
+  function showImage(index) {
+    if (!images.length) return;
+    const img = document.getElementById("lightbox-img");
+    const counter = document.getElementById("lightbox-counter");
+    if (!img) return;
+
+    img.classList.add("loading");
+    img.onload = () => img.classList.remove("loading");
+    img.src = images[index]?.src ?? "";
+    img.alt = images[index]?.alt ?? "";
+
+    if (counter) {
+      counter.textContent = `${index + 1} / ${images.length}`;
+    }
+
+    // Show/hide arrows at edges
+    const prevBtn = document.getElementById("lightbox-prev");
+    const nextBtn = document.getElementById("lightbox-next");
+    if (prevBtn) prevBtn.style.opacity = index === 0 ? "0.2" : "";
+    if (nextBtn)
+      nextBtn.style.opacity = index === images.length - 1 ? "0.2" : "";
+  }
+
+  function initLightbox() {
+    const lb = document.getElementById("lightbox");
+    if (!lb) return;
+
+    document.getElementById("lightbox-close")?.addEventListener("click", closeLightbox);
+    document.getElementById("lightbox-backdrop")?.addEventListener("click", closeLightbox);
+
+    document.getElementById("lightbox-prev")?.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        showImage(currentIndex);
+      }
+    });
+
+    document.getElementById("lightbox-next")?.addEventListener("click", () => {
+      if (currentIndex < images.length - 1) {
+        currentIndex++;
+        showImage(currentIndex);
+      }
+    });
+
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+      if (!lb.classList.contains("is-open")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft" && currentIndex > 0) {
+        currentIndex--;
+        showImage(currentIndex);
+      }
+      if (e.key === "ArrowRight" && currentIndex < images.length - 1) {
+        currentIndex++;
+        showImage(currentIndex);
+      }
+    });
+
+    // Touch/swipe support
+    let touchStartX = 0;
+    lb.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+    lb.addEventListener("touchend", (e) => {
+      const delta = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(delta) > 50) {
+        if (delta > 0 && currentIndex < images.length - 1) {
+          currentIndex++;
+          showImage(currentIndex);
+        } else if (delta < 0 && currentIndex > 0) {
+          currentIndex--;
+          showImage(currentIndex);
+        }
+      }
+    });
+
+    // Listen for open events from gallery
+    document.addEventListener("lightbox:open", (e) => {
+      openLightbox(e.detail.index);
+    });
+  }
+
+  document.addEventListener("astro:page-load", initLightbox);
+</script>
