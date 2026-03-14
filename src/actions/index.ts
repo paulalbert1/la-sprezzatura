@@ -70,7 +70,7 @@ export const server = {
       const calcomLink =
         import.meta.env.PUBLIC_CALCOM_LINK || "lasprezzatura/consultation";
 
-      // Notification email to Liz
+      // Notification email to Elizabeth
       const notificationHtml = `
         <!DOCTYPE html>
         <html>
@@ -196,7 +196,7 @@ export const server = {
                 </div>
                 <p style="margin:0;font-size:15px;color:#4A4540;line-height:1.7;">
                   Warmly,<br>
-                  <span style="font-family:Georgia,serif;font-style:italic;font-size:18px;color:#2C2926;">Liz</span><br>
+                  <span style="font-family:Georgia,serif;font-style:italic;font-size:18px;color:#2C2926;">Elizabeth</span><br>
                   <span style="font-size:13px;color:#8A8478;">La Sprezzatura Interior Design</span>
                 </p>
               </td>
@@ -214,7 +214,7 @@ export const server = {
       `;
 
       try {
-        // Send notification to Liz
+        // Send notification to Elizabeth
         await resend.emails.send({
           from: "La Sprezzatura <onboarding@resend.dev>",
           to: [notifyEmail],
