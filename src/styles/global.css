@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+@theme {
+  /* Color palette -- warm neutrals */
+  --color-cream: #FAF8F5;
+  --color-cream-dark: #F5F0EB;
+  --color-stone: #8A8478;
+  --color-stone-light: #B8B0A4;
+  --color-stone-dark: #6B6358;
+  --color-charcoal: #2C2926;
+  --color-charcoal-light: #4A4540;
+  --color-terracotta: #C4836A;
+  --color-terracotta-light: #D4A08A;
+  --color-white: #FFFFFF;
+
+  /* Typography -- reference Fonts API CSS variables via @theme inline below */
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  --font-body: "DM Sans", "system-ui", sans-serif;
+
+  /* Spacing scale -- generous */
+  --spacing-section: 8rem;
+  --spacing-section-sm: 5rem;
+
+  /* Content widths */
+  --container-text: 1200px;
+
+  /* Animations */
+  --animate-fade-in-up: fade-in-up 0.8s ease-out forwards;
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Bridge Fonts API CSS variables into Tailwind utilities */
+@theme inline {
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+}
+
+/* Base styles */
+body {
+  font-family: var(--font-body);
+  color: var(--color-charcoal);
+  background-color: var(--color-cream);
+  line-height: 1.7;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 3px;
+}

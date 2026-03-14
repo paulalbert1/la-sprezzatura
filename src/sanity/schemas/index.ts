@@ -1,2 +1,5 @@
-// Phase 1: Empty schema array. Schemas added in Phase 2.
-export const schemaTypes: never[] = [];
+import { project } from "./project";
+import { service } from "./service";
+import { siteSettings } from "./siteSettings";
+
+export const schemaTypes = [project, service, siteSettings];

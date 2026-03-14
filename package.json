@@ -8,21 +8,27 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "biome check .",
-    "format": "biome format . --write"
+    "format": "biome format . --write",
+    "test": "vitest run"
   },
   "engines": {
     "node": ">=22.12.0"
   },
   "dependencies": {
     "@astrojs/react": "^5.0.0",
+    "@astrojs/sitemap": "^3.7.1",
     "@astrojs/vercel": "^10.0.0",
+    "@calcom/embed-react": "^1.5.3",
     "@sanity/astro": "^3.3.1",
     "@sanity/client": "^7.17.0",
     "@sanity/image-url": "^2.0.3",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^6.0.4",
+    "astro-portabletext": "^0.11.4",
+    "gsap": "^3.14.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "resend": "^6.4.2",
     "sanity": "^5.16.0",
     "tailwindcss": "^4.2.1"
   },
@@ -30,6 +36,7 @@
     "@biomejs/biome": "^2.4.7",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

@@ -1,8 +1,9 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import react from "@astrojs/react";
 import vercel from "@astrojs/vercel";
 import sanity from "@sanity/astro";
 import tailwindcss from "@tailwindcss/vite";
+import sitemap from "@astrojs/sitemap";
 
 const sanityProjectId =
   process.env.PUBLIC_SANITY_PROJECT_ID ||
@@ -10,6 +11,7 @@ const sanityProjectId =
 const hasSanity = sanityProjectId && sanityProjectId !== "placeholder";
 
 export default defineConfig({
+  site: "https://lasprezz.com",
   adapter: vercel(),
   integrations: [
     ...(hasSanity
@@ -26,6 +28,25 @@ export default defineConfig({
         ]
       : []),
     react(),
+    sitemap({
+      filter: (page) => !page.includes("/admin"),
+    }),
+  ],
+  fonts: [
+    {
+      provider: fontProviders.google(),
+      name: "Cormorant Garamond",
+      cssVariable: "--font-heading",
+      weights: ["300", "400", "500", "600"],
+      styles: ["normal", "italic"],
+    },
+    {
+      provider: fontProviders.google(),
+      name: "DM Sans",
+      cssVariable: "--font-body",
+      weights: ["300", "400", "500"],
+      styles: ["normal"],
+    },
   ],
   vite: {
     plugins: [tailwindcss()],
