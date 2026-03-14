@@ -17,15 +17,17 @@ const {
 <section class="hero relative w-full h-screen min-h-[600px] overflow-hidden">
   {
     image ? (
-      <SanityImage
-        image={image}
-        alt={`${title} hero image`}
-        loading="eager"
-        fetchpriority="high"
-        sizes="100vw"
-        widths={[640, 1024, 1440, 1920]}
-        class="absolute inset-0 w-full h-full"
-      />
+      <div class="absolute inset-0" data-animate="parallax">
+        <SanityImage
+          image={image}
+          alt={`${title} hero image`}
+          loading="eager"
+          fetchpriority="high"
+          sizes="100vw"
+          widths={[640, 1024, 1440, 1920]}
+          class="w-full h-full"
+        />
+      </div>
     ) : (
       <div class="absolute inset-0 bg-gradient-to-b from-cream-dark via-stone-light to-stone" />
     )

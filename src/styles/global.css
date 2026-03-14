@@ -74,3 +74,9 @@ html {
   outline: 2px solid var(--color-terracotta);
   outline-offset: 3px;
 }
+
+/* GSAP animation initial states -- prevent flash before ScrollTrigger activates */
+[data-animate="fade-up"],
+[data-animate-item] {
+  opacity: 0;
+}

@@ -6,6 +6,7 @@ import JsonLd from "../components/seo/JsonLd.astro";
 import Header from "../components/layout/Header.astro";
 import MobileMenu from "../components/layout/MobileMenu.astro";
 import Footer from "../components/layout/Footer.astro";
+import ScrollAnimations from "../components/animations/ScrollAnimations.astro";
 
 interface Props {
   title: string;
@@ -47,5 +48,6 @@ const {
       <slot />
     </main>
     <Footer />
+    <ScrollAnimations />
   </body>
 </html>
