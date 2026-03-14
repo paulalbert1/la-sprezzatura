@@ -4,7 +4,9 @@ import vercel from "@astrojs/vercel";
 import sanity from "@sanity/astro";
 import tailwindcss from "@tailwindcss/vite";
 
-const sanityProjectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID;
+const sanityProjectId =
+  process.env.PUBLIC_SANITY_PROJECT_ID ||
+  import.meta.env?.PUBLIC_SANITY_PROJECT_ID;
 const hasSanity = sanityProjectId && sanityProjectId !== "placeholder";
 
 export default defineConfig({
@@ -14,7 +16,10 @@ export default defineConfig({
       ? [
           sanity({
             projectId: sanityProjectId,
-            dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
+            dataset:
+              process.env.PUBLIC_SANITY_DATASET ||
+              import.meta.env?.PUBLIC_SANITY_DATASET ||
+              "production",
             useCdn: false,
             studioBasePath: "/admin",
           }),
