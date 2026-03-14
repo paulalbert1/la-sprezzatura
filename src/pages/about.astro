@@ -1,0 +1,215 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SectionHeading from "../components/ui/SectionHeading.astro";
+import Button from "../components/ui/Button.astro";
+---
+
+<BaseLayout
+  title="About Liz Alberti | La Sprezzatura Interior Design"
+  description="Meet Liz Alberti, founder and principal designer of La Sprezzatura. Based on Long Island's North Shore, Liz creates spaces that feel as beautiful as they do livable."
+>
+  <!-- Hero: Editorial layout with photo and name -->
+  <section
+    class="pt-16 md:pt-20 pb-0 px-6 max-w-[1200px] mx-auto"
+    data-animate="fade-up"
+  >
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-16 items-end">
+      <!-- Photo placeholder -->
+      <div class="order-1 md:order-none">
+        <div
+          class="relative w-full aspect-[3/4] bg-gradient-to-b from-cream-dark to-stone-light/40 flex items-end justify-start overflow-hidden"
+          aria-label="Photo of Liz Alberti, founder of La Sprezzatura"
+        >
+          <!-- Decorative corner element -->
+          <div
+            class="absolute top-6 left-6 w-12 h-12 border-l border-t border-terracotta/40"
+            aria-hidden="true"
+          >
+          </div>
+          <div
+            class="absolute bottom-6 right-6 w-12 h-12 border-r border-b border-terracotta/40"
+            aria-hidden="true"
+          >
+          </div>
+          <div class="p-8 text-stone-dark/40">
+            <p class="font-body text-xs uppercase tracking-widest">
+              Photo coming soon
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Name and title -->
+      <div class="pb-0 md:pb-12 pt-8 md:pt-0">
+        <p
+          class="text-xs uppercase tracking-widest text-terracotta mb-4 font-body"
+        >
+          Principal Designer
+        </p>
+        <h1
+          class="font-heading text-5xl md:text-7xl font-light text-charcoal leading-none mb-4"
+        >
+          Liz<br />Alberti
+        </h1>
+        <p class="font-body text-stone-dark tracking-wide text-sm uppercase">
+          Founder & Principal Designer
+        </p>
+        <div class="mt-8 w-16 h-px bg-terracotta"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story Section -->
+  <section
+    class="py-16 md:py-24 px-6"
+    data-animate="fade-up"
+  >
+    <div
+      class="max-w-[800px] mx-auto md:ml-auto md:mr-0 md:pr-8 lg:pr-24 xl:pr-0 xl:max-w-[900px] xl:mx-auto"
+    >
+      <p
+        class="font-heading text-2xl md:text-3xl font-light text-charcoal italic leading-relaxed mb-8"
+      >
+        "Interior design is more than choosing beautiful things — it's about
+        creating spaces that feel like an exhale."
+      </p>
+      <div
+        class="font-body text-charcoal leading-[1.9] space-y-6 text-base md:text-lg"
+      >
+        <p>
+          Spaces where you can set down the day and truly be home. That belief
+          is at the heart of everything I do at La Sprezzatura.
+        </p>
+        <p>
+          La Sprezzatura was born from a simple but deeply held conviction: that
+          thoughtful design should feel effortless. The Italian concept of
+          sprezzatura — the art of making something difficult look easy — guides
+          every project. Behind every seemingly simple design choice are hundreds
+          of considered decisions: the right depth of a sofa, the layering of
+          textiles, the way light falls across a room at 4 in the afternoon.
+        </p>
+        <p>
+          Based on Long Island's North Shore, I bring a blend of coastal ease
+          and metropolitan sophistication to every project. Whether it's a full
+          home renovation or refreshing a single room, I approach each space as
+          a collaboration — your life, your style, refined through a designer's
+          eye.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Design Philosophy -->
+  <section class="py-16 md:py-24 px-6 bg-cream-dark" data-animate="fade-up">
+    <div class="max-w-[1200px] mx-auto">
+      <SectionHeading tagline="What I believe">
+        Design Philosophy
+      </SectionHeading>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12">
+        {
+          [
+            {
+              principle: "Every room tells a story",
+              description:
+                "We design spaces that reflect who you are — not who you think you should be. The best rooms reveal something true about the people who live in them.",
+            },
+            {
+              principle: "Quality over quantity",
+              description:
+                "Fewer, better things. Investment pieces you'll love for decades rather than trends you'll tire of in two years. Restraint is its own kind of luxury.",
+            },
+            {
+              principle: "The details matter",
+              description:
+                "From the weight of a door handle to the height of a picture rail, every decision is deliberate. Spaces feel finished — or unfinished — for invisible reasons.",
+            },
+            {
+              principle: "Comfort is not negotiable",
+              description:
+                "Beautiful spaces must also be livable. A room you're afraid to use isn't well-designed — it's just staged. We design for real life.",
+            },
+          ].map((item) => (
+            <div class="group">
+              <div class="flex items-start gap-4 mb-4">
+                <div
+                  class="w-1 h-full min-h-[3rem] bg-terracotta flex-shrink-0 mt-1"
+                  aria-hidden="true"
+                />
+                <h3 class="font-heading text-2xl md:text-3xl font-light text-charcoal leading-tight">
+                  {item.principle}
+                </h3>
+              </div>
+              <p class="font-body text-stone leading-relaxed pl-5">
+                {item.description}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Personal Touches -->
+  <section class="py-16 md:py-20 px-6" data-animate="fade-up">
+    <div class="max-w-[800px] mx-auto">
+      <p class="text-xs uppercase tracking-widest text-stone mb-8 font-body">
+        Background
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div>
+          <h3
+            class="font-heading text-lg font-light text-charcoal mb-3 leading-tight"
+          >
+            Education & Training
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            Formally trained in interior design with a foundation in both the
+            technical and creative disciplines of the field.
+          </p>
+        </div>
+        <div>
+          <h3
+            class="font-heading text-lg font-light text-charcoal mb-3 leading-tight"
+          >
+            Based on Long Island
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            Serving clients across Long Island's North Shore and New York City,
+            with a deep appreciation for the coastal character of the region.
+          </p>
+        </div>
+        <div>
+          <h3
+            class="font-heading text-lg font-light text-charcoal mb-3 leading-tight"
+          >
+            The Name
+          </h3>
+          <p class="font-body text-sm text-stone leading-relaxed">
+            Sprezzatura: the studied carelessness that makes effortful things
+            appear natural. It's the feeling a well-designed room gives you.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section
+    class="py-20 md:py-28 px-6 text-center bg-cream-dark"
+    data-animate="fade-up"
+  >
+    <div class="max-w-[600px] mx-auto">
+      <h2
+        class="font-heading text-4xl md:text-5xl font-light text-charcoal mb-6 leading-tight"
+      >
+        Let's create something beautiful together.
+      </h2>
+      <p class="font-body text-stone text-lg leading-relaxed mb-10">
+        Every project begins with a conversation. Tell me about your space, and
+        we'll figure out the rest together.
+      </p>
+      <Button href="/contact" size="lg">Get in Touch</Button>
+    </div>
+  </section>
+</BaseLayout>
