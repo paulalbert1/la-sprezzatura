@@ -67,8 +67,7 @@ export const server = {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
 
-      const calcomLink =
-        import.meta.env.PUBLIC_CALCOM_LINK || "lasprezzatura/consultation";
+      const bookingLink = "https://fantastical.app/design-b1eD/meet-with-elizabeth-olivier";
 
       // Notification email to Elizabeth
       const notificationHtml = `
@@ -189,7 +188,7 @@ export const server = {
                   In the meantime, if you'd like to schedule a complimentary consultation right away, you can book a time directly on our calendar:
                 </p>
                 <div style="text-align:center;margin:32px 0;">
-                  <a href="https://cal.com/${calcomLink}"
+                  <a href="${bookingLink}"
                      style="display:inline-block;background-color:#C4836A;color:#FAF8F5;text-decoration:none;padding:14px 32px;font-size:14px;font-family:'DM Sans',system-ui,sans-serif;text-transform:uppercase;letter-spacing:0.12em;">
                     Book a Consultation
                   </a>

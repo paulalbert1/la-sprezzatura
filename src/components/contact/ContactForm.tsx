@@ -17,7 +17,7 @@ const PROJECT_TYPES = [
   "Living Space Redesign",
   "Office / Study",
   "Outdoor Living",
-  "Design Consultation",
+  "Carpet Curation",
   "Refresh & Styling",
   "Other",
 ];
@@ -70,7 +70,7 @@ function Field({ label, name, error, required, ...props }: InputProps) {
   );
 }
 
-export default function ContactForm({ calcomLink = "lasprezzatura/consultation" }: { calcomLink?: string }) {
+export default function ContactForm({ bookingLink = "https://fantastical.app/design-b1eD/meet-with-elizabeth-olivier" }: { bookingLink?: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, setState] = useState<FormState>({
     status: "idle",
@@ -164,7 +164,9 @@ export default function ContactForm({ calcomLink = "lasprezzatura/consultation" 
           We&apos;ve received your inquiry and will be in touch within 24 business hours. We can&apos;t wait to hear more about your space.
         </p>
         <a
-          href={`https://cal.com/${calcomLink}`}
+          href={bookingLink}
+          target="_blank"
+          rel="noopener noreferrer"
           className="inline-block bg-terracotta text-cream text-xs uppercase tracking-widest font-body px-8 py-4 hover:bg-terracotta-light transition-colors"
         >
           Book a Consultation

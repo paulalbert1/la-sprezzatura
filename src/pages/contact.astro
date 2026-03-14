@@ -2,9 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SectionHeading from "../components/ui/SectionHeading.astro";
 import ContactForm from "../components/contact/ContactForm";
-import CalBooking from "../components/contact/CalBooking";
-
-const calcomLink = import.meta.env.PUBLIC_CALCOM_LINK || "lasprezzatura/consultation";
+const bookingLink = "https://fantastical.app/design-b1eD/meet-with-elizabeth-olivier";
 ---
 
 <BaseLayout
@@ -28,7 +26,7 @@ const calcomLink = import.meta.env.PUBLIC_CALCOM_LINK || "lasprezzatura/consulta
 
       <!-- Contact Form (2/3 width on desktop) -->
       <div class="lg:col-span-2" data-animate="fade-up">
-        <ContactForm client:load calcomLink={calcomLink} />
+        <ContactForm client:load bookingLink={bookingLink} />
       </div>
 
       <!-- Contact Info Sidebar -->
@@ -96,24 +94,24 @@ const calcomLink = import.meta.env.PUBLIC_CALCOM_LINK || "lasprezzatura/consulta
     </div>
   </section>
 
-  <!-- Cal.com Booking Widget -->
+  <!-- Booking Section -->
   <section class="pb-24 md:pb-32 px-8 md:px-16 lg:px-24 max-w-7xl mx-auto">
-    <div data-animate="fade-up" class="mb-12">
+    <div data-animate="fade-up" class="text-center max-w-xl mx-auto">
       <SectionHeading tagline="Book a Consultation">
         Schedule a Time
       </SectionHeading>
-      <p class="text-stone-dark font-body text-lg leading-relaxed max-w-xl">
+      <p class="text-stone-dark font-body text-lg leading-relaxed mb-10">
         Our consultations are complimentary. We&rsquo;ll discuss your space, your vision,
         and how we can bring it to life together.
       </p>
-    </div>
-
-    <!-- Cal.com inline embed: client:visible lazy-loads once in viewport -->
-    <div
-      class="min-h-[600px] border border-stone-light/30 bg-cream-dark"
-      data-animate="fade-up"
-    >
-      <CalBooking client:visible calLink={calcomLink} />
+      <a
+        href={bookingLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-block bg-terracotta text-cream text-xs uppercase tracking-widest font-body px-10 py-4 hover:bg-terracotta-light transition-colors"
+      >
+        Book a Consultation
+      </a>
     </div>
   </section>
 </BaseLayout>
