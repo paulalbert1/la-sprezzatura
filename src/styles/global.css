@@ -75,8 +75,8 @@ html {
   outline-offset: 3px;
 }
 
-/* GSAP animation initial states -- prevent flash before ScrollTrigger activates */
-[data-animate="fade-up"],
-[data-animate-item] {
+/* GSAP animation initial states -- hide only when JS is available */
+.gsap-ready [data-animate="fade-up"],
+.gsap-ready [data-animate-item] {
   opacity: 0;
 }

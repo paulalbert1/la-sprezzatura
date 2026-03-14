@@ -78,6 +78,7 @@
 
   // Initial load and after view transitions
   document.addEventListener("astro:page-load", () => {
+    document.documentElement.classList.add("gsap-ready");
     initAnimations();
   });
 
