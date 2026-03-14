@@ -1,0 +1,89 @@
+---
+const currentYear = new Date().getFullYear();
+
+const navLinks = [
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/services", label: "Services" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+---
+
+<footer class="bg-cream-dark border-t border-stone-light/30 mt-auto">
+  <div class="max-w-screen-xl mx-auto px-6 md:px-12 py-16 md:py-20">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+      <!-- Brand column -->
+      <div>
+        <a
+          href="/"
+          class="font-heading text-xl uppercase tracking-widest text-charcoal hover:text-stone transition-colors"
+          style="letter-spacing: 0.2em;"
+        >
+          La Sprezzatura
+        </a>
+        <p class="mt-4 text-stone text-sm leading-relaxed max-w-xs">
+          Luxury interior design for Long Island and New York City. Creating
+          spaces that feel effortlessly beautiful.
+        </p>
+      </div>
+
+      <!-- Navigation column -->
+      <div>
+        <h3
+          class="font-heading text-xs uppercase tracking-widest text-stone mb-6"
+        >
+          Navigate
+        </h3>
+        <nav aria-label="Footer navigation">
+          <ul class="space-y-3">
+            {
+              navLinks.map(({ href, label }) => (
+                <li>
+                  <a
+                    href={href}
+                    class="text-charcoal-light text-sm hover:text-charcoal transition-colors"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Contact column -->
+      <div>
+        <h3
+          class="font-heading text-xs uppercase tracking-widest text-stone mb-6"
+        >
+          Get in Touch
+        </h3>
+        <address class="not-italic space-y-3">
+          <p class="text-charcoal-light text-sm">Long Island, New York</p>
+          <a
+            href="mailto:hello@lasprezz.com"
+            class="block text-charcoal-light text-sm hover:text-charcoal transition-colors"
+          >
+            hello@lasprezz.com
+          </a>
+        </address>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div
+      class="mt-12 pt-8 border-t border-stone-light/30 flex flex-col md:flex-row items-center justify-between gap-4"
+    >
+      <p class="text-stone text-xs">
+        &copy; {currentYear} La Sprezzatura Interior Design. All rights reserved.
+      </p>
+      <a
+        href="/privacy"
+        class="text-stone text-xs hover:text-charcoal transition-colors"
+      >
+        Privacy Policy
+      </a>
+    </div>
+  </div>
+</footer>

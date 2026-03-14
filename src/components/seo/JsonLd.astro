@@ -1,0 +1,20 @@
+---
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "La Sprezzatura Interior Design",
+  description:
+    "Luxury interior design studio serving Long Island and New York City. Full-service residential interior design with meticulous attention to detail.",
+  url: "https://lasprezz.com",
+  areaServed: [
+    { "@type": "City", name: "New York" },
+    { "@type": "AdministrativeArea", name: "Long Island" },
+    { "@type": "AdministrativeArea", name: "Nassau County" },
+    { "@type": "AdministrativeArea", name: "Suffolk County" },
+  ],
+  priceRange: "$$$",
+  sameAs: [],
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

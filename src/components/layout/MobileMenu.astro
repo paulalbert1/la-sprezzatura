@@ -1,0 +1,93 @@
+---
+import Navigation from "./Navigation.astro";
+---
+
+<!-- Mobile menu overlay -->
+<div
+  id="mobile-menu"
+  class="fixed inset-0 z-50 bg-cream flex flex-col items-center justify-center"
+  style="display: none;"
+  aria-modal="true"
+  role="dialog"
+  aria-label="Mobile navigation"
+>
+  <!-- Close button -->
+  <button
+    id="mobile-menu-close"
+    class="absolute top-6 right-6 p-2 text-charcoal hover:text-terracotta transition-colors duration-300"
+    aria-label="Close menu"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="28"
+      height="28"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Logo -->
+  <a
+    href="/"
+    class="font-heading text-2xl tracking-widest text-charcoal mb-16 uppercase"
+    style="letter-spacing: 0.25em;"
+  >
+    La Sprezzatura
+  </a>
+
+  <!-- Navigation links -->
+  <Navigation mobile={true} />
+
+  <!-- Contact CTA at bottom -->
+  <div class="absolute bottom-12 text-center">
+    <p class="text-stone text-xs uppercase tracking-widest font-body">
+      Long Island & New York City
+    </p>
+  </div>
+</div>
+
+<script>
+  function initMobileMenu() {
+    const menu = document.getElementById("mobile-menu");
+    const closeBtn = document.getElementById("mobile-menu-close");
+    const hamburger = document.getElementById("hamburger-btn");
+
+    if (!menu || !closeBtn || !hamburger) return;
+
+    function openMenu() {
+      menu.style.display = "flex";
+      document.body.style.overflow = "hidden";
+      hamburger.setAttribute("aria-expanded", "true");
+    }
+
+    function closeMenu() {
+      menu.style.display = "none";
+      document.body.style.overflow = "";
+      hamburger.setAttribute("aria-expanded", "false");
+    }
+
+    hamburger.addEventListener("click", openMenu);
+    closeBtn.addEventListener("click", closeMenu);
+
+    // Close on nav link click
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
+
+    // Close on Escape key
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && menu.style.display !== "none") {
+        closeMenu();
+      }
+    });
+  }
+
+  document.addEventListener("astro:page-load", initMobileMenu);
+</script>

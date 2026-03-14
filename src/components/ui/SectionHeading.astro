@@ -1,0 +1,21 @@
+---
+interface Props {
+  tagline?: string;
+  class?: string;
+}
+
+const { tagline, class: className = "" } = Astro.props;
+---
+
+<div class:list={["mb-12 md:mb-16", className]}>
+  {
+    tagline && (
+      <p class="text-xs uppercase tracking-widest text-stone mb-4 font-body">
+        {tagline}
+      </p>
+    )
+  }
+  <h2 class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight">
+    <slot />
+  </h2>
+</div>

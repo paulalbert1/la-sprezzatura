@@ -1,0 +1,44 @@
+---
+interface Props {
+  mobile?: boolean;
+}
+
+const { mobile = false } = Astro.props;
+
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/portfolio", label: "Portfolio" },
+  { href: "/services", label: "Services" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav
+  class:list={[
+    mobile
+      ? "flex flex-col items-center gap-10"
+      : "hidden md:flex items-center gap-10",
+  ]}
+  aria-label="Main navigation"
+>
+  {
+    links.map(({ href, label }) => (
+      <a
+        href={href}
+        class:list={[
+          "font-heading text-sm uppercase tracking-widest transition-colors duration-300",
+          mobile ? "text-3xl font-light" : "",
+          currentPath === href
+            ? "text-charcoal border-b border-charcoal pb-0.5"
+            : "text-charcoal-light hover:text-charcoal",
+        ]}
+        aria-current={currentPath === href ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))
+  }
+</nav>

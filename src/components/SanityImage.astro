@@ -1,0 +1,54 @@
+---
+import { urlFor } from "../sanity/image";
+
+interface Props {
+  image: any;
+  alt: string;
+  sizes?: string;
+  widths?: number[];
+  class?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "low" | "auto";
+}
+
+const {
+  image,
+  alt,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1200px) 80vw, 1200px",
+  widths = [400, 640, 800, 1200, 1600],
+  class: className = "",
+  loading = "lazy",
+  fetchpriority = "auto",
+} = Astro.props;
+
+const srcset = widths
+  .map((w) => `${urlFor(image).width(w).auto("format").quality(80).url()} ${w}w`)
+  .join(", ");
+
+const src = urlFor(image).width(1200).auto("format").quality(80).url();
+const lqip = image?.asset?.metadata?.lqip;
+---
+
+<div class:list={["relative overflow-hidden", className]}>
+  {
+    lqip && (
+      <img
+        src={lqip}
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 w-full h-full object-cover scale-110"
+        style="filter: blur(20px); transform: scale(1.1);"
+      />
+    )
+  }
+  <img
+    src={src}
+    srcset={srcset}
+    sizes={sizes}
+    alt={alt}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    class="relative w-full h-full object-cover"
+    onload="this.previousElementSibling?.remove()"
+  />
+</div>

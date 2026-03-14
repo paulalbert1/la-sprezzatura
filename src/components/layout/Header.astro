@@ -1,0 +1,90 @@
+---
+import Navigation from "./Navigation.astro";
+
+interface Props {
+  transparent?: boolean;
+}
+
+const { transparent = false } = Astro.props;
+---
+
+<header
+  id="site-header"
+  class:list={[
+    "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
+    transparent ? "bg-transparent" : "bg-cream shadow-sm",
+  ]}
+>
+  <div class="max-w-screen-xl mx-auto px-6 md:px-12 h-16 md:h-20 flex items-center justify-between">
+    <!-- Logo -->
+    <a
+      href="/"
+      class="font-heading text-lg md:text-xl uppercase tracking-widest text-charcoal hover:text-stone transition-colors duration-300"
+      style="letter-spacing: 0.2em;"
+    >
+      La Sprezzatura
+    </a>
+
+    <!-- Desktop navigation -->
+    <Navigation />
+
+    <!-- Mobile hamburger -->
+    <button
+      id="hamburger-btn"
+      class="md:hidden p-2 text-charcoal hover:text-terracotta transition-colors duration-300"
+      aria-label="Open navigation menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="26"
+        height="26"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<script>
+  function initHeader() {
+    const header = document.getElementById("site-header");
+    if (!header) return;
+
+    // Only apply transparent-to-sticky scroll behavior if header starts transparent
+    const isTransparent = header.classList.contains("bg-transparent");
+    if (!isTransparent) return;
+
+    function onScroll() {
+      if (window.scrollY > 50) {
+        header.classList.remove("bg-transparent");
+        header.classList.add("bg-cream", "shadow-sm");
+      } else {
+        header.classList.add("bg-transparent");
+        header.classList.remove("bg-cream", "shadow-sm");
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    // Cleanup on page transitions
+    document.addEventListener(
+      "astro:before-swap",
+      () => {
+        window.removeEventListener("scroll", onScroll);
+      },
+      { once: true },
+    );
+  }
+
+  document.addEventListener("astro:page-load", initHeader);
+</script>

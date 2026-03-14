@@ -2,15 +2,20 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout title="La Sprezzatura | Interior Design">
-  <main class="flex min-h-screen items-center justify-center">
-    <div class="text-center">
-      <h1 class="text-4xl font-light tracking-wide text-neutral-800">
+<BaseLayout
+  title="La Sprezzatura | Luxury Interior Design"
+  description="Luxury interior design studio serving Long Island and New York City. Creating spaces that feel effortlessly beautiful."
+  transparentHeader={true}
+>
+  <!-- Minimal placeholder -- full home page content in Plan 02 -->
+  <section class="min-h-screen flex items-center justify-center bg-cream">
+    <div class="text-center px-6">
+      <h1 class="font-heading text-5xl md:text-7xl font-light tracking-wide text-charcoal">
         La Sprezzatura
       </h1>
-      <p class="mt-4 text-lg text-neutral-500">
-        Coming Soon
+      <p class="mt-6 text-lg text-stone font-body tracking-wide">
+        Coming soon
       </p>
     </div>
-  </main>
+  </section>
 </BaseLayout>
