@@ -42,7 +42,7 @@ export default defineConfig({
       : []),
     react(),
     sitemap({
-      filter: (page) => !page.includes("/admin"),
+      filter: (page) => !page.includes("/admin") && !page.includes("/portal"),
     }),
   ],
   fonts: [
