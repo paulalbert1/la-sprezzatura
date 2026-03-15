@@ -1,20 +1,28 @@
 import { defineType, defineField } from "sanity";
+import { generatePortalToken } from "../../lib/generateToken";
+import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 
 export const project = defineType({
   name: "project",
   title: "Portfolio Project",
   type: "document",
+  groups: [
+    { name: "content", title: "Content", default: true },
+    { name: "portal", title: "Client Portal" },
+  ],
   fields: [
     defineField({
       name: "title",
       title: "Project Title",
       type: "string",
+      group: "content",
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: "slug",
       title: "URL Slug",
       type: "slug",
+      group: "content",
       options: { source: "title", maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
@@ -22,6 +30,7 @@ export const project = defineType({
       name: "heroImage",
       title: "Main Photo",
       type: "image",
+      group: "content",
       options: {
         hotspot: true,
         metadata: ["lqip", "palette"],
@@ -32,6 +41,7 @@ export const project = defineType({
       name: "images",
       title: "Project Gallery",
       type: "array",
+      group: "content",
       of: [
         {
           type: "image",
@@ -58,6 +68,7 @@ export const project = defineType({
       name: "roomType",
       title: "Room Type",
       type: "string",
+      group: "content",
       options: {
         list: [
           { title: "Living Room", value: "living-room" },
@@ -75,6 +86,7 @@ export const project = defineType({
       name: "style",
       title: "Design Style",
       type: "string",
+      group: "content",
       options: {
         list: [
           { title: "Contemporary", value: "contemporary" },
@@ -89,18 +101,21 @@ export const project = defineType({
       name: "location",
       title: "Project Location",
       type: "string",
+      group: "content",
       description: "e.g., North Shore, Long Island",
     }),
     defineField({
       name: "description",
       title: "Project Overview",
       type: "text",
+      group: "content",
       rows: 3,
     }),
     defineField({
       name: "challenge",
       title: "Design Challenge",
       type: "array",
+      group: "content",
       of: [{ type: "block" }],
       description: "What was the design challenge for this project?",
     }),
@@ -108,6 +123,7 @@ export const project = defineType({
       name: "approach",
       title: "Our Approach",
       type: "array",
+      group: "content",
       of: [{ type: "block" }],
       description: "How did we approach the design?",
     }),
@@ -115,6 +131,7 @@ export const project = defineType({
       name: "outcome",
       title: "The Result",
       type: "array",
+      group: "content",
       of: [{ type: "block" }],
       description: "What was the final outcome?",
     }),
@@ -122,6 +139,7 @@ export const project = defineType({
       name: "testimonial",
       title: "Client Testimonial",
       type: "object",
+      group: "content",
       fields: [
         defineField({ name: "quote", title: "Quote", type: "text" }),
         defineField({ name: "author", title: "Client Name", type: "string" }),
@@ -131,24 +149,28 @@ export const project = defineType({
       name: "completionDate",
       title: "Completion Date",
       type: "date",
+      group: "content",
     }),
     defineField({
       name: "featured",
       title: "Feature on Home Page",
       type: "boolean",
+      group: "content",
       initialValue: false,
     }),
     defineField({
       name: "order",
       title: "Display Order",
       type: "number",
+      group: "content",
       description: "Lower numbers appear first",
     }),
-    // Phase 3 forward-compatibility: pipeline stage for client portal
+    // Phase 3: Pipeline stage and client portal fields
     defineField({
       name: "pipelineStage",
       title: "Pipeline Stage",
       type: "string",
+      group: "portal",
       options: {
         list: [
           { title: "Discovery", value: "discovery" },
@@ -159,7 +181,32 @@ export const project = defineType({
           { title: "Closeout", value: "closeout" },
         ],
       },
-      hidden: true, // Hidden in Phase 2 -- exposed in Phase 3
+    }),
+    defineField({
+      name: "portalToken",
+      title: "Portal Token",
+      type: "string",
+      group: "portal",
+      readOnly: true,
+      initialValue: () => generatePortalToken(),
+      components: {
+        input: PortalUrlDisplay,
+      },
+    }),
+    defineField({
+      name: "clientName",
+      title: "Client Name",
+      type: "string",
+      group: "portal",
+      description: "Client's name shown on their portal page",
+    }),
+    defineField({
+      name: "portalEnabled",
+      title: "Portal Enabled",
+      type: "boolean",
+      group: "portal",
+      initialValue: false,
+      description: "Toggle to activate this project's client portal link",
     }),
   ],
   preview: {

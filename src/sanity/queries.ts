@@ -70,6 +70,16 @@ export async function getProjectBySlug(slug: string) {
   );
 }
 
+// Portal token lookup -- find project by PURL token (only if portal is enabled)
+export async function getProjectByPortalToken(token: string) {
+  return sanityClient.fetch(
+    `*[_type == "project" && portalToken == $token && portalEnabled == true][0]{
+      title, clientName, pipelineStage
+    }`,
+    { token },
+  );
+}
+
 // Featured projects for home page -- max 3
 export async function getFeaturedProjects() {
   return sanityClient.fetch(`
