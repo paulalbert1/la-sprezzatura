@@ -1,0 +1,107 @@
+---
+import { STAGES, STAGE_META, type StageKey } from "../../lib/portalStages";
+
+interface Props {
+  currentStage: StageKey;
+}
+
+const { currentStage } = Astro.props;
+const currentIndex = STAGES.findIndex((s) => s.value === currentStage);
+const currentDescription = STAGE_META[currentStage]?.description ?? "";
+---
+
+<div>
+  {/* Timeline */}
+  <div class="flex flex-col md:flex-row md:items-start gap-0">
+    {
+      STAGES.map((stage, i) => {
+        const status =
+          i < currentIndex
+            ? "completed"
+            : i === currentIndex
+              ? "current"
+              : "future";
+
+        return (
+          <div class="flex md:flex-col items-center relative flex-1">
+            {/* Connector line - vertical on mobile, horizontal on desktop */}
+            {i > 0 && (
+              <>
+                {/* Mobile connector (vertical) */}
+                <div
+                  class:list={[
+                    "absolute left-3.5 bottom-full w-0.5 h-full md:hidden",
+                    status === "future"
+                      ? "bg-stone-light/30"
+                      : "bg-terracotta/40",
+                  ]}
+                />
+                {/* Desktop connector (horizontal) */}
+                <div
+                  class:list={[
+                    "absolute top-3.5 right-1/2 h-0.5 w-full hidden md:block",
+                    status === "future"
+                      ? "bg-stone-light/30"
+                      : "bg-terracotta/40",
+                  ]}
+                />
+              </>
+            )}
+
+            {/* Stage dot */}
+            <div
+              class:list={[
+                "w-7 h-7 rounded-full flex items-center justify-center shrink-0 relative z-10",
+                status === "completed" && "bg-terracotta text-white",
+                status === "current" &&
+                  "bg-terracotta text-white ring-4 ring-terracotta/20",
+                status === "future" &&
+                  "bg-cream-dark border-2 border-stone-light/40",
+              ]}
+            >
+              {status === "completed" && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-3.5 h-3.5"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+              {status === "current" && (
+                <div class="w-2 h-2 rounded-full bg-white" />
+              )}
+            </div>
+
+            {/* Stage label */}
+            <span
+              class:list={[
+                "text-xs tracking-wide font-body",
+                status === "current"
+                  ? "text-charcoal font-medium"
+                  : "text-stone",
+                "ml-3 py-3 md:ml-0 md:py-0 md:text-center md:mt-2",
+              ]}
+            >
+              {stage.title}
+            </span>
+          </div>
+        );
+      })
+    }
+  </div>
+
+  {/* Current stage description */}
+  {
+    currentDescription && (
+      <p class="text-base text-charcoal-light leading-relaxed max-w-xl mx-auto text-center mt-8 font-body">
+        {currentDescription}
+      </p>
+    )
+  }
+</div>
