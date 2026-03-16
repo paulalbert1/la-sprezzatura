@@ -154,6 +154,8 @@ export const PROJECTS_BY_CLIENT_QUERY = `
     title,
     pipelineStage,
     engagementType,
+    completedAt,
+    projectStatus,
     "isPrimary": clients[client._ref == $clientId][0].isPrimary
   }
 `;
@@ -175,8 +177,102 @@ export async function getClientById(clientId: string) {
   return sanityClient.fetch(CLIENT_BY_ID_QUERY, { clientId });
 }
 
+// -- Phase 6: Project Detail Query --
+
+// Full project detail for the portal project page.
+// IMPORTANT: clientCost is NEVER included in projections -- only used to compute savings.
+export const PROJECT_DETAIL_QUERY = `
+  *[_type == "project" && _id == $projectId && portalEnabled == true && references($clientId)][0] {
+    _id,
+    title,
+    pipelineStage,
+    engagementType,
+    projectStatus,
+    completedAt,
+    "isPrimary": clients[client._ref == $clientId][0].isPrimary,
+    milestones[] | order(date asc) {
+      _key,
+      name,
+      date,
+      completed,
+      description,
+      notes[] {
+        _key,
+        text,
+        clientId,
+        clientName,
+        timestamp
+      }
+    },
+    select(engagementType == "full-interior-design" => {
+      "procurementItems": procurementItems[] {
+        _key,
+        name,
+        status,
+        installDate,
+        retailPrice,
+        "savings": retailPrice - clientCost,
+        trackingNumber
+      }
+    }),
+    artifacts[] {
+      _key,
+      artifactType,
+      customTypeName,
+      currentVersionKey,
+      signedFile {
+        asset-> {
+          url,
+          originalFilename
+        }
+      },
+      versions[] {
+        _key,
+        file {
+          asset-> {
+            url,
+            originalFilename,
+            mimeType,
+            size
+          }
+        },
+        uploadedAt,
+        note
+      },
+      decisionLog[] {
+        _key,
+        action,
+        versionKey,
+        clientId,
+        clientName,
+        feedback,
+        timestamp
+      },
+      notes[] {
+        _key,
+        text,
+        clientId,
+        clientName,
+        timestamp
+      },
+      notificationLog[] {
+        _key,
+        sentAt,
+        recipientEmail
+      }
+    }
+  }
+`;
+
+export async function getProjectDetail(
+  projectId: string,
+  clientId: string,
+) {
+  return sanityClient.fetch(PROJECT_DETAIL_QUERY, { projectId, clientId });
+}
+
 // PROC-03 Convention: All financial values (procurement costs, retail prices)
 // MUST be stored as integer cents using Sanity number field with .integer() validation.
 // Example: validation: (r) => r.integer().min(0)
 // This prevents floating-point rounding errors (e.g., $19.99 stored as 1999).
-// Procurement schema fields will be added in Phase 6 following this pattern.
+// Procurement schema fields added in Phase 6 following this pattern.

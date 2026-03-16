@@ -9,6 +9,9 @@ export const project = defineType({
   groups: [
     { name: "content", title: "Content", default: true },
     { name: "portal", title: "Client Portal" },
+    { name: "milestones", title: "Milestones" },
+    { name: "procurement", title: "Procurement" },
+    { name: "artifacts", title: "Artifacts" },
   ],
   fields: [
     defineField({
@@ -264,6 +267,383 @@ export const project = defineType({
           rows: 2,
           description:
             "e.g., Gate code, entry instructions \u2014 never shown to clients",
+        }),
+      ],
+    }),
+    defineField({
+      name: "projectStatus",
+      title: "Project Status",
+      type: "string",
+      group: "portal",
+      initialValue: "active",
+      options: {
+        list: [
+          { title: "Active", value: "active" },
+          { title: "Completed", value: "completed" },
+          { title: "Reopened", value: "reopened" },
+        ],
+      },
+    }),
+    defineField({
+      name: "completedAt",
+      title: "Completed At",
+      type: "datetime",
+      group: "portal",
+      readOnly: true,
+      description: "Set automatically when project is completed",
+    }),
+    // Phase 6: Milestones inline array
+    defineField({
+      name: "milestones",
+      title: "Milestones",
+      type: "array",
+      group: "milestones",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "milestone",
+          fields: [
+            defineField({
+              name: "name",
+              title: "Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({ name: "date", title: "Date", type: "date" }),
+            defineField({
+              name: "completed",
+              title: "Completed",
+              type: "boolean",
+              initialValue: false,
+            }),
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "text",
+              rows: 2,
+            }),
+            defineField({
+              name: "notes",
+              title: "Client Notes",
+              type: "array",
+              readOnly: true,
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  name: "clientNote",
+                  fields: [
+                    defineField({
+                      name: "text",
+                      title: "Note",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientId",
+                      title: "Client ID",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientName",
+                      title: "Client Name",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "timestamp",
+                      title: "Timestamp",
+                      type: "datetime",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: {
+              title: "name",
+              subtitle: "date",
+              completed: "completed",
+            },
+            prepare: ({ title, subtitle, completed }) => ({
+              title: title || "Untitled milestone",
+              subtitle: `${subtitle || "No date"} ${completed ? "(Complete)" : ""}`,
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 6: Procurement inline array
+    defineField({
+      name: "procurementItems",
+      title: "Procurement Items",
+      type: "array",
+      group: "procurement",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "procurementItem",
+          fields: [
+            defineField({
+              name: "name",
+              title: "Item Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "status",
+              title: "Status",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Pending", value: "pending" },
+                  { title: "Ordered", value: "ordered" },
+                  { title: "Warehouse", value: "warehouse" },
+                  { title: "In Transit", value: "in-transit" },
+                  { title: "Delivered", value: "delivered" },
+                  { title: "Installed", value: "installed" },
+                ],
+              },
+              initialValue: "pending",
+            }),
+            defineField({
+              name: "installDate",
+              title: "Install Date",
+              type: "date",
+            }),
+            defineField({
+              name: "clientCost",
+              title: "Client Cost (cents)",
+              type: "number",
+              validation: (r) => r.integer().min(0),
+              description:
+                "Amount in cents (e.g., 1999 = $19.99). Never shown to clients.",
+            }),
+            defineField({
+              name: "retailPrice",
+              title: "Retail/MSRP Price (cents)",
+              type: "number",
+              validation: (r) => r.integer().min(0),
+              description: "Amount in cents. Shown to clients as MSRP.",
+            }),
+            defineField({
+              name: "trackingNumber",
+              title: "Tracking Number",
+              type: "string",
+            }),
+          ],
+          preview: {
+            select: { title: "name", subtitle: "status" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Untitled item",
+              subtitle: subtitle
+                ? subtitle.charAt(0).toUpperCase() + subtitle.slice(1)
+                : "No status",
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 6: Artifacts inline array
+    defineField({
+      name: "artifacts",
+      title: "Artifacts",
+      type: "array",
+      group: "artifacts",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "artifact",
+          fields: [
+            defineField({
+              name: "artifactType",
+              title: "Type",
+              type: "string",
+              validation: (r) => r.required(),
+              options: {
+                list: [
+                  { title: "Proposal", value: "proposal" },
+                  { title: "Floor Plan", value: "floor-plan" },
+                  { title: "Design Board", value: "design-board" },
+                  { title: "Contract", value: "contract" },
+                  { title: "Warranty", value: "warranty" },
+                  { title: "Close Document", value: "close-document" },
+                  { title: "Custom", value: "custom" },
+                ],
+              },
+            }),
+            defineField({
+              name: "customTypeName",
+              title: "Custom Type Name",
+              type: "string",
+              hidden: ({ parent }) => parent?.artifactType !== "custom",
+            }),
+            defineField({
+              name: "currentVersionKey",
+              title: "Current Version Key",
+              type: "string",
+              readOnly: true,
+              description:
+                "Set automatically when client approves a version",
+            }),
+            defineField({
+              name: "signedFile",
+              title: "Signed Version (Contracts Only)",
+              type: "file",
+              hidden: ({ parent }) => parent?.artifactType !== "contract",
+              options: { accept: ".pdf" },
+            }),
+            defineField({
+              name: "versions",
+              title: "Versions",
+              type: "array",
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  name: "artifactVersion",
+                  fields: [
+                    defineField({
+                      name: "file",
+                      title: "File",
+                      type: "file",
+                      validation: (r) => r.required(),
+                    }),
+                    defineField({
+                      name: "uploadedAt",
+                      title: "Uploaded At",
+                      type: "datetime",
+                      initialValue: () => new Date().toISOString(),
+                    }),
+                    defineField({
+                      name: "note",
+                      title: "Upload Note",
+                      type: "text",
+                      rows: 2,
+                    }),
+                  ],
+                  preview: {
+                    select: { subtitle: "uploadedAt" },
+                    prepare: ({ subtitle }) => ({
+                      title: subtitle
+                        ? `Version uploaded ${new Date(subtitle).toLocaleDateString()}`
+                        : "New version",
+                    }),
+                  },
+                }),
+              ],
+            }),
+            defineField({
+              name: "decisionLog",
+              title: "Decision Log",
+              type: "array",
+              readOnly: true,
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  name: "decisionEntry",
+                  fields: [
+                    defineField({
+                      name: "action",
+                      title: "Action",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "versionKey",
+                      title: "Version Key",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientId",
+                      title: "Client ID",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientName",
+                      title: "Client Name",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "feedback",
+                      title: "Feedback",
+                      type: "text",
+                    }),
+                    defineField({
+                      name: "timestamp",
+                      title: "Timestamp",
+                      type: "datetime",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            defineField({
+              name: "notes",
+              title: "Client Notes",
+              type: "array",
+              readOnly: true,
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  name: "artifactNote",
+                  fields: [
+                    defineField({
+                      name: "text",
+                      title: "Note",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientId",
+                      title: "Client ID",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "clientName",
+                      title: "Client Name",
+                      type: "string",
+                    }),
+                    defineField({
+                      name: "timestamp",
+                      title: "Timestamp",
+                      type: "datetime",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            defineField({
+              name: "notificationLog",
+              title: "Notification Log",
+              type: "array",
+              readOnly: true,
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  name: "notificationEntry",
+                  fields: [
+                    defineField({
+                      name: "sentAt",
+                      title: "Sent At",
+                      type: "datetime",
+                    }),
+                    defineField({
+                      name: "recipientEmail",
+                      title: "Recipient",
+                      type: "string",
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { title: "artifactType", subtitle: "customTypeName" },
+            prepare: ({ title, subtitle }) => ({
+              title:
+                subtitle ||
+                (title
+                  ? title.charAt(0).toUpperCase() +
+                    title.slice(1).replace(/-/g, " ")
+                  : "Untitled artifact"),
+            }),
+          },
         }),
       ],
     }),
