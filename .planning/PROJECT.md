@@ -8,19 +8,27 @@ A full digital platform for La Sprezzatura, an interior design studio run by Eli
 
 A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work — the site itself is the first project a potential client experiences.
 
-## Current Milestone: v2.0 Client Portal Platform + Go-Live
+## Milestone Plan
 
-**Goal:** Expand the basic client portal into Liz's primary client operations tool — with per-project milestones, procurement tracking, tiered budget proposals, client data management, and ad hoc update emails — polish the public site, swap to Fantastical booking, and go live via DNS cutover.
+| Milestone | Focus | Phases |
+|-----------|-------|--------|
+| v2.0 Client Portal Foundation | Auth, client data, engagement types, core portal features | 5-6 |
+| v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 |
+| v3.0 Business Operations & Go-Live | Send Update emails, investment proposals, public site polish, DNS cutover | 9-10 |
+
+## Current Milestone: v2.0 Client Portal Foundation
+
+**Goal:** Secure portal access via magic link auth, client data model with engagement types, core portal features (milestones, procurement, artifacts) — the foundation every subsequent milestone builds on.
 
 **Target features:**
+- Magic link auth (replacing raw PURL access)
 - Client data model (contact info, address, preferred contact method)
+- Engagement type per project (Full Interior Design / Styling & Refreshing / Carpet Curating)
 - Custom per-project milestones with dates (replacing generic 6-stage pipeline)
-- Line-item procurement tracker (status, cost, retail, savings — evolves over time)
-- Budget proposals as versioned artifacts (Best/Better/Good tiers, client customizes)
-- "Send Update" — templated email snapshot of portal state + optional note + logging
-- Swap Cal.com for Fantastical Openings on contact page
-- Home page hero refresh (more visual impact / animation)
-- DNS cutover and go-live (from v1.0 Phase 4)
+- Line-item procurement tracker (status, cost, retail, savings — managed in Sanity)
+- Project artifacts with versioning and approval workflow
+- Post-project workflow (close document, warranty)
+- Rate limiter upgrade + Resend domain verification
 
 ## Requirements
 
@@ -35,13 +43,27 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - ✓ Basic client portal with PURL access, pipeline status, milestone timeline — v1.0
 - ✓ SEO foundations (meta, OG, structured data, sitemap) — v1.0
 
-### Active
+### Active (v2.0)
 
+- [ ] Magic link auth — cookie-based sessions, no passwords
 - [ ] Client data model in Sanity — phone, email, preferred contact, address per client
+- [ ] Engagement type toggle — Full Interior Design / Styling & Refreshing / Carpet Curating
 - [ ] Custom per-project milestones with dates (not generic pipeline stages)
 - [ ] Procurement tracker — line items with status/cost/retail/savings, managed in Sanity
-- [ ] Budget proposals — tiered pricing artifacts (Best/Better/Good) per project
+- [ ] Project artifacts with versioning, approval workflow, and decision log
+- [ ] Post-project workflow — close document, warranty, reopen
+
+### Planned (v2.5)
+
+- [ ] Contractor portal — magic link, floor plans, scope, estimate, minimal client info
+- [ ] Residential vs Commercial toggle
+- [ ] Building manager portal — magic link, commercial only, COIs, legal docs
+- [ ] Client sees contractor name + on-site schedule
+
+### Planned (v3.0)
+
 - [ ] Send Update — templated email to client with current portal state + optional note + delivery log
+- [ ] Budget proposals — tiered pricing artifacts (Best/Better/Good) per project
 - [ ] Fantastical Openings booking — replace Cal.com embed on contact page
 - [ ] Home page hero visual refresh — more impact, animation
 - [ ] DNS consolidation — all 4 domains to Cloudflare
@@ -89,8 +111,10 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | Microsoft 365 over Google Workspace | Already in use, migration disruptive, no reason to switch | — Pending |
 | Astro 6 over Next.js | Content-first site with islands architecture; better performance for portfolio-heavy site; Sanity integration mature | ✓ Good |
 | Fantastical over Cal.com | Liz already uses Fantastical as daily calendar; avoids dual availability management | — Pending |
-| PURL over account-based portal access | Zero friction for clients, faster to build, appropriate security for interior design data | — Pending |
+| PURL over account-based portal access | Zero friction for clients, faster to build, appropriate security for interior design data | ⚠️ Revisit — upgrading to magic link in v2.0 |
+| Restructure v2.0 into v2.0/v2.5/v3.0 | v2.0 had 43 requirements across 4 phases — scope creep. Split into foundation (v2.0), contractor/commercial (v2.5), operations + go-live (v3.0) | — Pending |
+| Engagement type on project schema | Full Interior Design / Styling & Refreshing / Carpet Curating controls available features. Added to v2.0 data foundation so schema is right from day one | — Pending |
 | Cloudflare for DNS | At-cost pricing, fastest authoritative DNS, consolidates 4 domains under one registrar | — Pending |
 
 ---
-*Last updated: 2026-03-15 after v2.0 milestone start*
+*Last updated: 2026-03-16 after v2.0 restructure into v2.0/v2.5/v3.0*
