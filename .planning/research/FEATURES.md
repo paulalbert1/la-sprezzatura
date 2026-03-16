@@ -1,214 +1,310 @@
 # Feature Research
 
-**Domain:** Interior design client operations portal (v2.0 -- extending existing portfolio site + basic portal)
-**Researched:** 2026-03-15
+**Domain:** Interior design contractor portal, building manager portal, and engagement type system (v2.5 — extending v2.0 client portal foundation)
+**Researched:** 2026-03-16
 **Confidence:** HIGH
 
-## Context: What Already Exists
+## Context: What v2.5 Adds
 
-The v1.0 build delivered a complete public portfolio site and a basic client portal. This research focuses exclusively on the v2.0 client portal platform features. The existing foundation includes:
+v2.0 delivered the client portal: magic link auth, client data model, custom milestones, procurement tracking, artifacts, engagement types on the project schema. v2.5 extends the platform into the contractor and commercial workflows that Full Interior Design projects require.
 
-- **Public site:** Home, Portfolio (gallery + project pages + lightbox), Services, Process, About, Contact, Privacy
-- **Contact form:** Resend email with auto-response and branded HTML templates
-- **Booking:** Fantastical Openings link (already replaced Cal.com embed)
-- **Basic portal:** PURL access (`/portal/[token]`), 6-stage pipeline (Discovery through Closeout), status badge, milestone timeline
-- **Sanity schemas:** `project` (with `portalToken`, `portalEnabled`, `pipelineStage`, `clientName`), `service`, `siteSettings`
-- **Infrastructure:** SSR on Vercel, rate limiting, generic 404 for invalid tokens
+The three new surfaces:
 
-The v2.0 milestone transforms the portal from a read-only status page into Liz's primary client operations tool. The goal is to replace the Canva PDFs she currently sends clients for schedules, order summaries, and budget overviews, while Canva remains her tool for visual design boards and mood boards.
+1. **Contractor portal** — Magic link access for trades and installers. Full Interior Design projects only. Contractors see what they need to do their job; nothing more.
+2. **Building manager portal** — Magic link access for commercial property managers. Commercial projects only. Document exchange for COIs and legal requirements.
+3. **Residential vs Commercial toggle** — A project-level classification that controls which features and portal types are enabled.
 
-## Industry Landscape
+The engagement type field (`Full Interior Design / Styling & Refreshing / Carpet Curating`) was added to the project schema in v2.0. v2.5 uses that field to gate the contractor portal.
 
-Interior design project management is served by platforms costing $49-$159/month per user (DesignFiles $49, Mydoma $64, Studio Designer $72-$109, Houzz Pro $99-$159). These are all-in-one tools: CRM, procurement, invoicing, client portal, presentations, and accounting. La Sprezzatura does not need all-in-one. It needs the client-facing pieces -- status visibility, procurement tracking, budget presentation -- built into the custom platform Liz already uses, with Sanity as the single source of truth for all data.
+---
 
-The competitive advantage of a custom-built portal over SaaS platforms: the portal looks and feels like the La Sprezzatura brand (not a generic software UI), data lives in a system Paul controls, and there are no per-user monthly fees. The tradeoff is build time, which is acceptable given the existing Astro + Sanity foundation.
+## Prior Research (v2.0 — Already Built or In-Flight)
 
-## Feature Landscape
+The following features are out of scope for this research. They are documented in the archived v2.0 FEATURES.md context:
 
-### Table Stakes (Clients and Liz Expect These)
+- Client portal with magic link auth
+- Client data model (contact, address, preferred contact)
+- Custom per-project milestones with dates
+- Procurement tracking with savings visibility
+- Project artifacts and approval workflow
+- Send Update email
+- Engagement type enum on project schema
 
-These features are table stakes because Liz currently delivers this information manually (via Canva PDFs and email). The portal must at minimum match her current manual process. Industry platforms all offer these. Missing any of them means the portal fails to reduce Liz's workload.
+---
+
+## Contractor Portal
+
+### What Contractors Actually Need
+
+Research into Buildertrend's subcontractor portal, construction industry norms, and the specific context (Liz as a solo designer coordinating trades) produces a clear, minimal information model. Contractors are non-technical, access the portal infrequently, and have one job: show up prepared.
+
+Industry standard: contractors get job location, scope, schedule, and documents. They do NOT get client contact information (that creates a situation where the contractor bypasses the GC/designer). Buildertrend's model is the clearest reference — subs see job info and documents but never internal pricing or client contact details.
+
+### Table Stakes (Contractors Expect These)
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| **Client data model** (phone, email, preferred contact, address) | Liz needs client contact info stored with the project, not in her head or scattered across email threads. Every CRM and project management tool has this. | LOW | Extend existing `project` schema in Sanity with contact fields. Group in a "Client Details" tab in Studio. `preferredContact` as dropdown (Phone/Email/Text). Address as structured object (street, city, state, zip). This data feeds the "Send Update" feature. |
-| **Custom per-project milestones with dates** | The current 6-stage generic pipeline (Discovery through Closeout) cannot represent real project timelines. Liz needs "Kitchen cabinets delivered 4/15" and "Tile installation starts 5/1" -- not just which of 6 phases the project is in. Clients ask "when?" not just "where?" | MEDIUM | Array of milestone objects in Sanity: `{title, date, status, notes}`. Status: Upcoming/In Progress/Complete. Replaces the fixed `STAGES` array in the portal view with project-specific milestones. Keep the overall pipeline stage as a separate high-level indicator. The MilestoneTimeline component gets rewritten to render dynamic milestones with actual dates. |
-| **Line-item procurement tracking** | Furniture and fixture procurement is the core of an interior design project. Clients currently get Canva PDF order summaries. They want to know: "Has my sofa shipped? When does the lighting arrive?" Studio Designer, Design Manager, and Programa all have item-level procurement tracking. | MEDIUM | Array of procurement items in Sanity per project: `{itemName, vendor, status, clientCost, retailPrice, notes}`. Status values: Ordered / Warehouse / In Transit / Delivered / Installed / Pending. Display savings (retail - client cost) per item and in aggregate. Portal shows a clean table with status indicators. Liz updates statuses in Sanity Studio as items move through the pipeline. |
-| **Budget proposals as versioned artifacts** | Liz currently creates tiered budget presentations in Canva. The industry standard is 2-3 budget tiers (Good/Better/Best or Bronze/Silver/Gold) so clients can choose their investment level, then customize. Proposify, Qwilr, and Studio Designer all support tiered proposals. This is how Liz already works -- the tool just needs to formalize it. | HIGH | Separate `budgetProposal` document type in Sanity, referenced by project. Each proposal has: version number, date, status (Draft/Presented/Selected/Archived), and 3 tiers. Each tier: name, total, and an array of line items `{category, item, cost, notes}`. When a client selects a tier, Liz marks it "Selected" and can then edit the line items as the project evolves. Portal displays the selected tier's breakdown. Versioning lets Liz create updated proposals without losing history. |
-| **"Send Update" templated email** | Liz manually writes client update emails. This is the #1 time drain she wants eliminated. Studio Designer and Mydoma auto-generate client-facing project summaries. An email that snapshots the current portal state (milestones, procurement status, next steps) + an optional personal note gives clients a branded, information-rich update in one click from Sanity Studio. | HIGH | Custom Sanity Studio action (button in the document view) that: (1) renders a branded HTML email template with current project data (milestones, procurement summary, budget status), (2) appends Liz's optional note, (3) sends via Resend to the client's email, (4) logs the send in a `updateLog` array on the project document. Uses the same branded email style as the existing contact form auto-response. Delivery logging is critical -- Liz needs to know what she sent and when. |
+| **Job address** | Contractors need to know where to show up. Standard in every construction portal. | LOW | Display project address. Source from client data model (already on project schema in v2.0). Do NOT show client name in a way that invites direct contact. Show "Project at [address]" — address only, no client name. |
+| **Scope of work** | Defines exactly what the contractor is hired to do. Without this, every site visit starts with a negotiation. | LOW | Rich text field on project in Sanity (`contractorScope`). Liz writes this per contractor engagement. Renders as formatted text in the portal. |
+| **Floor plans** | Contractors need the layout to plan their work. Standard document in any renovation. | MEDIUM | File upload field(s) on the project document in Sanity. PDFs and images. Display with a lightbox or direct PDF link in the portal. Reuse the artifacts infrastructure from v2.0 or add a dedicated `contractorDocs` array. |
+| **Deadline / key dates** | When the work needs to be done. Prevents "I didn't know the timeline" disputes. | LOW | One or more date fields: `contractorStartDate`, `contractorDeadline`. Optionally pull from the custom milestones already on the project. Display as a clear date block, not buried in prose. |
+| **Project notes** | Site-specific instructions, access codes, parking, building rules, material locations, etc. Liz writes these; contractors read them. | LOW | Plain text or rich text field (`contractorNotes`) in Sanity. Separate from scope of work — scope is the job; notes are the logistics. |
+| **Estimate visibility (designer-controlled)** | Contractors want to know what they'll be paid. The portal needs to show either the agreed final number or a PDF attachment — whichever Liz provides. | LOW | Two-mode field: Liz either enters a final number (`estimateAmount`) OR attaches a PDF (`estimatePdf`). Only one is shown at a time. The portal shows whichever is populated. Never show itemized internal costs — only the contractor-facing figure. |
+| **Next steps** | What action does the contractor take after reading the portal? Keeps things moving without Liz having to follow up. | LOW | Short text field (`contractorNextSteps`) — e.g., "Call Liz to confirm material delivery date before starting." Free text, Liz writes it. |
 
-### Differentiators (Competitive Advantage)
-
-Features that elevate the La Sprezzatura portal beyond what SaaS platforms offer, or that are notably absent from competing small-studio operations.
+### Differentiators (What Makes This Better Than a PDF)
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| **Savings visibility in procurement** | Most procurement tools show cost to client. Showing retail price alongside client cost and the savings delta gives clients a tangible, ongoing reminder of the value of working with a designer. "You saved $4,200 on this project so far." This is a trust-builder that SaaS platforms do not emphasize because they are designer-facing, not client-facing. | LOW | Already part of the procurement line items. Add a summary row: total retail, total client cost, total savings. Format as currency. This is the single best ROI communication feature in the portal. |
-| **Branded portal experience** | SaaS portals (Studio Designer, Mydoma) look like software. The La Sprezzatura portal looks like the La Sprezzatura website -- warm neutrals, editorial typography, generous whitespace. Every client interaction reinforces the brand. The portal IS a design artifact. | LOW | Already partially achieved with PortalLayout. Extend the design language to procurement tables, milestone timelines with dates, and budget displays. The custom build makes this possible; SaaS platforms never will. |
-| **Update email with delivery logging** | Most small studios send ad hoc emails with no record. The "Send Update" feature creates an audit trail: what was communicated, when, with what project state. This protects Liz ("I sent you the update on March 3rd showing the chairs were in transit") and gives clients confidence. | MEDIUM | The `updateLog` array on the project document: `{sentAt, recipientEmail, note, snapshotSummary}`. `snapshotSummary` is a short text string generated at send time (e.g., "6 of 12 items delivered, 3 milestones complete"). Viewable in Sanity Studio. Not shown in client portal -- this is for Liz's records. |
-| **One-click portal link in Sanity** | The existing `PortalUrlDisplay` custom component already shows the PURL in Sanity Studio. Extending this to show last update sent, client last viewed (if possible), and a quick "Copy link" + "Send Update" button turns the Sanity project document into a client operations dashboard. | LOW | Enhance the existing `PortalUrlDisplay` React component in Sanity Studio. Add last-sent date from `updateLog`. Copy-to-clipboard already works. |
-| **Budget proposal versioning** | Most platforms let you create a proposal. Few make it easy to create v2 after the client says "I like tier 2 but can we swap the dining table?" Versioning means Liz creates a new version, the old one is archived, and the client always sees the current active proposal. No confusion about "which PDF was the latest?" | MEDIUM | The `budgetProposal` document has a `version` number and `status`. Only one proposal per project can be status=Selected at a time. Previous versions are status=Archived and still accessible in Sanity Studio for reference. The portal always shows the Selected version. |
-| **Home page hero visual refresh** | While not a portal feature, refreshing the hero section with more visual impact and animation raises the bar for the public-facing site. First impressions matter for client acquisition. | MEDIUM | GSAP-powered hero with parallax imagery, text reveal animations, and more editorial visual treatment. Builds on the existing GSAP ScrollTrigger infrastructure. |
+| **"Refer to Liz" directive** | Makes the privacy model explicit. The portal is not a client contact sheet — it's a job brief. Displaying a prominent "Questions? Contact Liz" line with Liz's number eliminates any ambiguity about who the contractor communicates with. | LOW | Hard-coded text in the portal layout, not configurable. Always present. Liz's business phone/email pulled from `siteSettings` in Sanity. |
+| **Magic link access (no account)** | Contractors do not have accounts or passwords to manage. Liz sends a link; they click it; they see the job. Appropriate for people who are on a job site with a phone, not at a desk. | MEDIUM | Extend the existing magic link auth system from v2.0. Generate a contractor-specific token on the project document. Different URL path from client portal: `/contractor/[token]`. Token scoped to contractor view — cannot access client portal data even with URL manipulation. |
+| **Branded but minimal UI** | The portal looks like La Sprezzatura, not a generic construction app. First impression for a contractor: this designer runs a tight operation. | LOW | Reuse PortalLayout and design tokens. Strip out client-specific sections (milestones, procurement, budget). Show only the contractor data model fields. Clean, direct, no clutter. |
+| **Document download without login friction** | Floor plans and PDFs should open or download immediately on link click. Contractors do not want to navigate a file system. | LOW | Direct file URLs from Sanity CDN. Display as a prominent button: "Download Floor Plans (PDF)". No multi-level navigation. |
 
-### Anti-Features (Commonly Requested, Often Problematic)
-
-Features to explicitly NOT build in v2.0.
+### Anti-Features (Do Not Build for Contractor Portal)
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Full invoicing / payment in portal** | "Clients should pay through the portal." | QuickBooks handles invoicing. Rebuilding payment processing (Stripe, ACH) in a custom portal is weeks of work with PCI compliance implications. QuickBooks already sends professional invoices with payment links. Duplicating this is not worth the complexity. | Add a "View Invoice" link in the portal that deep-links to the QuickBooks payment page. Or display invoice status (Paid/Outstanding) read from QuickBooks via Zapier. Do not process payments. |
-| **Selections approval workflow** | "Clients should approve/decline items in the portal." | Approval workflows need notification systems, conflict resolution (what if the client declines everything?), comment threads, and revision tracking. This is a full SaaS feature. Liz's current process is a phone call or email -- which works at her project volume (3-5 active). | Show procurement items with their status. For approvals, Liz sends a Canva mood board and discusses on a call. Formalize approvals only if client volume exceeds what personal communication can handle. |
-| **Real-time procurement status sync** | "Item statuses should update automatically from vendors." | No vendor API exists for this. Design Manager and Studio Designer require manual status updates too. Automated sync would require per-vendor integrations with companies that do not offer APIs. | Liz updates statuses in Sanity Studio when she gets shipping notifications. Manual but simple and reliable. The portal reflects whatever Sanity has. |
-| **Client login / password system** | "As we add more features, clients need accounts." | Still not justified at 3-5 active projects. PURLs work. Password resets, forgotten passwords, and account management create support burden. The PURL token is already 22 characters of random base62 -- brute-force infeasible. | Stay with PURLs for v2.0. Evaluate magic link auth (Clerk) only if client count exceeds 10+ concurrent projects or if sensitive financial data is exposed in the portal. |
-| **Client messaging / chat in portal** | "Clients should be able to message through the portal." | Chat creates an expectation of immediate response. Liz is a solo designer, not a support team. Unread message indicators create anxiety on both sides. | Email and phone remain the communication channels. The "Send Update" feature handles outbound. Inbound goes through normal email. |
-| **PDF export of portal content** | "Clients should be able to download a PDF of their project status." | PDF generation from dynamic HTML is fragile, ugly, and a maintenance burden. Libraries like Puppeteer or wkhtmltopdf are heavy dependencies. | The portal IS the living document. The "Send Update" email serves as a snapshot. If a client needs a paper record, they can print the portal page (add print-friendly CSS, which is trivial). |
-| **Drag-and-drop reordering of milestones** | "Liz should drag milestones to reorder." | Complex Sanity Studio customization for a feature used rarely. Milestones are typically created once and updated as dates change, not frequently reordered. | Milestones render in date order. Add an `order` field as a fallback for milestones without dates. Sanity's default array UI with move up/down handles the rare reorder case. |
+| **Client contact information** | "Contractors need to reach the client directly sometimes." | This is exactly what Liz does not want. It creates a situation where contractors negotiate scope or schedule changes directly with the client, bypassing Liz. Liz coordinates everything. | Display "Questions? Contact Liz: [phone]" prominently. The message is: all project communication goes through the designer. |
+| **Contractor-to-designer messaging in portal** | "Contractors should be able to ask questions through the portal." | Adds notification complexity and an expectation of real-time response. Liz does not want another inbox. Contractors can text or call — that's how trades work. | Show Liz's contact info. Contractors call or text. Keep it simple. |
+| **Contractor accounts / profiles** | "Store contractor info, past jobs, ratings." | This is contractor CRM territory. Out of scope for a single-designer studio managing 3-5 projects. The portal is a job brief, not a contractor management system. | Contractors are managed as people Liz knows. The portal is per-project, not per-contractor. |
+| **Change order workflow** | "Contractors should submit change orders through the portal." | Full change order management (submission, review, pricing, approval) is an enterprise construction feature. Adds weeks of complexity. | Changes are handled via phone/email between Liz and the contractor, as they are today. |
+| **Photo upload by contractor** | "Contractors should document their work in the portal." | Adds storage management, review workflow, and notification complexity. Liz visits the site; she takes photos herself. | Not built. Contractors email photos if needed. |
+| **Contractor-side estimate submission / bidding** | "Contractors should submit bids through the portal." | Bid management is pre-engagement. The portal is for active, engaged contractors. Bids happen via email and phone, as they do today. | Portal only shows confirmed, active contractor information. |
+
+---
+
+## Building Manager Portal
+
+### What Building Managers Actually Need
+
+NYC commercial renovations require COI collection before work begins. Building managers are gatekeepers: they must see that the contractor has appropriate insurance coverage and that the design firm's work complies with building-specific legal requirements. They do not need to see detailed project budgets or client procurement lists.
+
+Key finding from NYC COI research: building managers require the contractor to name the building/management company as "additionally insured" on the COI. They want to see general liability ($1-2M), workers' comp, and sometimes umbrella coverage. The ACORD 25 form is the standard document format.
+
+Building managers are professional property administrators, not Liz's clients. The portal serves them as a document drop and communication channel, not a project status dashboard.
+
+### Table Stakes (Building Managers Expect These)
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Client / project identification** | Building managers need to know which tenant/unit the work is for. They manage many units simultaneously. | LOW | Show: building address, unit or suite number, client name (unlike the contractor portal, the building manager is a professional stakeholder who needs to know whose project this is), project type, designer name and contact info. |
+| **COI document section** | The COI is the primary document a building manager needs before approving any contractor work. This is the whole reason the portal exists. | MEDIUM | A dedicated `cois` array on the project document: `{contractor, insuranceCompany, policyNumber, expirationDate, coverageTypes[], documentFile}`. Upload in Sanity. Portal displays as a list with expiration dates and a download button per COI. If a COI is expired, show a visual warning. |
+| **Legal documents section** | Building-specific forms, compliance letters, alteration agreements. Varies by building but all commercial renovations require some form of paperwork. | MEDIUM | Generic `legalDocs` array on the project: `{docType, description, uploadedAt, file}`. Liz uploads whatever the building requires. Portal displays as a download list. No workflow — just document hosting and download. |
+| **Designer / firm contact info** | Building managers need to reach Liz directly for questions, not the client. | LOW | Hard-coded from `siteSettings`. Always present. Include: firm name, designer name, phone, email. |
+| **Contractor info section (on request)** | Building managers sometimes need to verify contractor credentials directly. Not always required upfront — they may ask for it. | LOW | Show contractor name and license number if populated on the project. This is the one place the contractor's business identity is visible. Not the same as the contractor portal — this is for the building manager's verification purposes. |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **COI expiration awareness** | A COI that expires mid-project is a compliance failure. Showing expiration dates prominently, with a visual warning for expired or soon-to-expire certificates, keeps the building manager informed and prevents work stoppages. | LOW | Compare `expirationDate` against current date. Show a red "Expired" or yellow "Expiring soon (< 30 days)" badge next to each COI. No automated reminders — just visual state in the portal. Liz sees the same badges in Sanity Studio. |
+| **Magic link access, no account required** | Building managers do not want another system login. One link per project, shared by Liz when the project is ready. Professional, low-friction. | MEDIUM | Same magic link infrastructure as client and contractor portals. Third token type: `buildingManagerToken`. Separate URL path: `/building/[token]`. Scoped to only the building manager view — cannot access client or contractor portal data. |
+| **Clean document download experience** | Building managers are downloading documents to print, email, or file. Every document should be immediately downloadable as a PDF with one click. No preview-first flows. | LOW | Direct CDN links for all uploaded files. Label each document clearly by type. "Download COI — [Contractor Name] (expires [date])" is the button text. |
+
+### Anti-Features (Do Not Build for Building Manager Portal)
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| **Approval workflow (manager approves documents)** | "The building manager should approve COIs before work begins." | Approval workflows require notifications, status tracking, re-upload flows, and audit trails. This is a full compliance management product. La Sprezzatura does not need to replicate TrustLayer or myCOI. The portal is a document drop, not a compliance platform. | Liz manages approval conversations over email and phone. The portal provides the documents. Approvals happen outside the system. |
+| **Document request feature** | "The building manager should be able to request specific documents through the portal." | Creates a task management layer: requests, notifications, fulfillment tracking. Adds complexity for a very rare interaction pattern. Liz handles 3-5 commercial projects at most. | Building managers email or call Liz to request documents. Liz uploads to Sanity and re-shares the portal link. |
+| **Building manager messaging in portal** | "The building manager should be able to ask questions in the portal." | Same problem as contractor messaging: creates an inbox Liz did not ask for. Building managers are professionals who will email or call. | Contact info for Liz is always visible. Communication is out-of-band. |
+| **Multi-project view for building managers** | "A building in NYC might have multiple La Sprezzatura projects." | Building managers with multiple active projects would theoretically benefit from a dashboard. But this is a theoretical problem — the reality is Liz has 3-5 total active projects, likely 1-2 commercial. Building-level dashboards are enterprise CRM features. | One portal link per project. If the same building manager oversees two projects, they get two links. Simple. |
+
+---
+
+## Engagement Type System (Residential vs Commercial Toggle)
+
+### What This Controls
+
+The engagement type is already on the project schema from v2.0. v2.5 adds a second axis: residential vs commercial project classification. Together these two fields gate which portal views and data fields are available:
+
+| Classification | Contractor Portal | Building Manager Portal | COIs Required | Legal Docs Section |
+|----------------|------------------|------------------------|---------------|--------------------|
+| Full Interior Design, Residential | YES | NO | NO | NO |
+| Full Interior Design, Commercial | YES | YES | YES | YES |
+| Styling & Refreshing, Residential | NO | NO | NO | NO |
+| Styling & Refreshing, Commercial | NO | YES | YES | YES |
+| Carpet Curating, Residential | NO | NO | NO | NO |
+| Carpet Curating, Commercial | NO | YES | YES | YES |
+
+Key decisions embedded in this matrix:
+- Contractor portal is Full Interior Design only (because only Full Interior Design projects involve installation and trade coordination)
+- Building manager portal is commercial only (building managers are irrelevant for residential)
+- COIs and legal docs are commercial only (residential homes do not require COI submission to a building manager)
+
+### Table Stakes
+
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **Residential vs Commercial field on project** | The system needs to know which project type it is to show/hide the right portal views and fields in Sanity Studio. Without this, the contractor and building manager portal logic cannot be conditionalized. | LOW | Add `projectType` field to the Sanity project schema: `enum('residential', 'commercial')`. Default: residential. Single select. |
+| **Conditional field display in Sanity Studio** | When `projectType = residential`, the building manager section should not appear in Sanity Studio. When `engagementType != 'fullInteriorDesign'`, the contractor section should not appear. This reduces clutter for Liz — she should only see fields that are relevant. | MEDIUM | Use Sanity's `hidden` callback on field definitions: `hidden: ({document}) => document?.projectType !== 'commercial'`. Apply to: `buildingManagerToken`, `cois`, `legalDocs`, and the building manager section group. Similarly, gate contractor fields on engagement type. |
+| **Portal routing by token type** | Each token type (client, contractor, building manager) must route to a different portal view with different data. The system must not allow token confusion — a contractor token cannot accidentally render a client view. | LOW | Token type is embedded in the token schema or derived from which field it matches. Check order: `portalToken` → client view, `contractorToken` → contractor view, `buildingManagerToken` → building manager view. If none match: generic 404. |
+
+### Differentiators
+
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Schema-driven gating (no code flags)** | Field visibility and portal feature availability are controlled by Sanity document data, not hardcoded feature flags. Adding a new commercial project automatically reveals the building manager fields in Studio. No code changes needed to enable features for a new project. | MEDIUM | The `hidden` callbacks on Sanity fields and conditional rendering in the portal components both read from the same project document fields. Single source of truth in Sanity. |
+| **Engagement type controls UX depth throughout** | `Styling & Refreshing` and `Carpet Curating` projects do not need milestones in the same depth as Full Interior Design. Showing a simplified portal view for lower-engagement projects lets Liz tailor the client experience without separate portal templates. | LOW | In the client portal, use `engagementType` to show/hide sections. For Styling & Refreshing: show milestones and artifacts, but skip procurement and budget. For Carpet Curating: show milestones only (deadline and delivery). This is a progressive disclosure pattern — the same portal template adapts to complexity level. |
+
+### Anti-Features
+
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| **Sub-types for each engagement** | "Carpet Curating could be residential or commercial." | The current scope has Carpet Curating as a simpler residential engagement. Adding a residential/commercial axis to all three engagement types creates 6 combinations, most of which are theoretical. Complexity ahead of actual need. | Default Carpet Curating and Styling & Refreshing to residential behavior unless the project is explicitly commercial. The commercial toggle is sufficient to activate building manager features regardless of engagement type. |
+| **Public-facing engagement type filter on portfolio** | "Visitors should filter portfolio by engagement type." | Engagement types are internal business categories, not visitor-facing language. "Carpet Curating" means nothing to a prospective client browsing a portfolio. | Keep portfolio filtering by room type (kitchen, living room, office) — language visitors understand. Engagement types stay internal. |
+
+---
 
 ## Feature Dependencies
 
 ```
-Client Data Model (contact fields on project)
-    |-- required by --> Send Update (needs client email address)
-    |-- required by --> Budget Proposal (needs client to present to)
+Residential/Commercial Toggle (projectType field)
+    |-- required by --> Building Manager Portal (commercial only)
+    |-- required by --> COI section visibility (commercial only)
+    |-- required by --> Legal docs section visibility (commercial only)
+    |-- required by --> Conditional field display in Sanity Studio
 
-Custom Per-Project Milestones
-    |-- requires --> Project schema extension (array of milestone objects)
-    |-- displayed in --> Portal page (replaces generic pipeline timeline)
-    |-- included in --> Send Update email (milestone summary)
+Engagement Type (already exists from v2.0)
+    |-- required by --> Contractor Portal (Full Interior Design only)
+    |-- required by --> Contractor section visibility in Sanity Studio
+    |-- controls --> Portal section depth (milestones/procurement/artifacts shown per type)
 
-Procurement Tracking
-    |-- requires --> Project schema extension (array of procurement items)
-    |-- displayed in --> Portal page (item table with statuses)
-    |-- included in --> Send Update email (procurement summary)
-    |-- enhances --> Savings Visibility (retail vs client cost math)
+Magic Link Auth System (v2.0)
+    |-- extended by --> Contractor token generation (contractorToken field)
+    |-- extended by --> Building Manager token generation (buildingManagerToken field)
+    |-- required by --> Contractor Portal route (/contractor/[token])
+    |-- required by --> Building Manager Portal route (/building/[token])
 
-Budget Proposals
-    |-- requires --> New budgetProposal document type in Sanity
-    |-- requires --> Reference from project to budgetProposal(s)
-    |-- displayed in --> Portal page (selected tier breakdown)
-    |-- included in --> Send Update email (budget overview)
-    |-- enhances --> Budget Versioning (archive old, activate new)
+Client Data Model — Address (v2.0)
+    |-- required by --> Contractor Portal (shows project address)
 
-Send Update Email
-    |-- requires --> Client Data Model (email address to send to)
-    |-- requires --> Resend integration (already exists for contact form)
-    |-- requires --> React Email template (branded HTML)
-    |-- requires --> Custom Sanity Studio action (button + UI)
-    |-- reads from --> Milestones, Procurement, Budget (for snapshot)
-    |-- writes to --> Update Log (delivery record on project)
+Project Milestones (v2.0)
+    |-- optionally displayed in --> Contractor Portal (key dates / deadline)
 
-Fantastical Openings Booking
-    |-- replaces --> Cal.com link (already done -- contact page uses Fantastical link)
-    |-- independent of --> Portal features
-    |-- note: Already implemented. Fantastical Openings is link-based only (no embed/iframe).
+Contractor Portal
+    |-- requires --> projectType (address) from Client Data Model
+    |-- requires --> contractorToken on project document
+    |-- requires --> engagementType = 'fullInteriorDesign'
+    |-- reads --> contractorScope, contractorNotes, contractorNextSteps, estimateAmount/Pdf
+    |-- reads --> contractorDocs (floor plans, PDFs)
+    |-- does NOT read --> client contact info, procurement data, budget data
 
-Home Page Hero Refresh
-    |-- requires --> GSAP (already installed)
-    |-- independent of --> Portal features
-    |-- enhances --> Public site visual impact
+Building Manager Portal
+    |-- requires --> projectType = 'commercial'
+    |-- requires --> buildingManagerToken on project document
+    |-- reads --> cois[], legalDocs[], client name + address, contractor name + license
+    |-- does NOT read --> procurement data, budget data, client phone/email
+
+COI Section
+    |-- requires --> projectType = 'commercial'
+    |-- lives on --> project document in Sanity (cois[] array)
+    |-- displayed in --> Building Manager Portal
+    |-- displayed in --> Sanity Studio (for Liz to manage)
+
+Legal Docs Section
+    |-- requires --> projectType = 'commercial'
+    |-- lives on --> project document in Sanity (legalDocs[] array)
+    |-- displayed in --> Building Manager Portal
+    |-- displayed in --> Sanity Studio (for Liz to manage)
 ```
 
 ### Dependency Notes
 
-- **Client Data Model is the foundation.** Send Update cannot work without an email address on the project. Build this first.
-- **Milestones, Procurement, and Budget are parallel workstreams.** They all extend the project schema but are independent of each other. Can be built and shipped incrementally.
-- **Send Update is the capstone.** It reads from all other features (milestones, procurement, budget) to compose the email. Build it last after the data sources exist.
-- **Budget Proposals are the highest-complexity feature.** A separate document type with versioning, tier structure, and line items. Start with a simple single-version approach if time is tight; add versioning as an enhancement.
-- **Fantastical booking is already done.** The contact page already links to Fantastical Openings. No embed exists (Fantastical is link-only, not embeddable like Cal.com was). Confirm this is acceptable or add a styled booking section around the external link.
-- **Home page hero is fully independent.** Can be done in any order. No dependencies on portal work.
+- **v2.0 magic link auth is the foundation for both portals.** The contractor and building manager portals are the same auth pattern with different token fields and different rendered views. Do not build a separate auth system — extend the existing token infrastructure.
+- **Address from v2.0 client data model feeds the contractor portal.** The contractor needs to know where to go. This is already on the project document from v2.0.
+- **The engagement type field from v2.0 gates the contractor portal.** No additional schema work needed to determine if contractor features should be enabled — check `engagementType === 'fullInteriorDesign'`.
+- **The new residential/commercial toggle is the only schema addition with broad implications.** It unlocks the building manager portal, COI section, and legal docs. Add it to the project schema early in the phase.
+- **Contractor and building manager portals are parallel, not dependent on each other.** A commercial Full Interior Design project uses both. A commercial Styling & Refreshing project uses only the building manager portal. They share infrastructure (magic links, layout) but are independent views.
+
+---
 
 ## MVP Definition
 
-### Launch With (v2.0 Core)
+### Launch With (v2.5 Core)
 
-The minimum to make the portal operational for Liz's current clients. These features replace the Canva PDFs and manual email updates.
+The minimum to make contractor and commercial workflows operational.
 
-- [ ] **Client data model** -- phone, email, preferred contact, address per project. Foundation for everything else.
-- [ ] **Custom milestones with dates** -- per-project milestones replace the generic 6-stage pipeline in the portal view. Liz creates milestones like "Cabinet delivery: April 15" instead of picking from a fixed list.
-- [ ] **Procurement tracking** -- line items with status, client cost, retail price. Portal shows a clean table. Liz updates in Sanity Studio.
-- [ ] **Savings visibility** -- total retail vs total client cost, savings amount. Automatic from procurement data.
-- [ ] **Send Update email** -- one-click branded email from Sanity Studio with portal snapshot + optional note + delivery log.
-- [ ] **Home page hero refresh** -- more visual impact for the public site.
+- [ ] **Residential/commercial toggle** (`projectType` field) — gating mechanism for everything commercial. Without it, the building manager portal cannot be conditionalized. Build first.
+- [ ] **Contractor portal** — `/contractor/[token]` route. Shows: address, scope, floor plans, deadline, notes, estimate, next steps, "refer to Liz" contact. Magic link token generation in Sanity. Gated on `engagementType = fullInteriorDesign`.
+- [ ] **Building manager portal** — `/building/[token]` route. Shows: client name + address, COI list with download links and expiration badges, legal docs download list, designer contact info, contractor name/license. Magic link token generation in Sanity. Gated on `projectType = commercial`.
+- [ ] **COI document management in Sanity** — `cois[]` array on project document with contractor name, expiration date, file upload. Conditional display in Studio on `projectType = commercial`.
+- [ ] **Legal docs in Sanity** — `legalDocs[]` array on project document with doc type, description, file. Conditional display in Studio.
+- [ ] **Client sees contractor on-site schedule** — Small addition to the client portal: when `contractorToken` is populated, show contractor name and on-site dates in the milestones section. Clients know who is coming and when. This was explicitly called out in the v2.5 requirements.
 
-### Add After Validation (v2.x)
+### Add After Validation (v2.5+)
 
-Features to add once the core portal is in use with real clients.
-
-- [ ] **Budget proposals** -- tiered pricing artifacts. Add after milestones and procurement are stable, because budget proposals reference many of the same items. Trigger: Liz has a new client where she wants to present options digitally instead of via Canva PDF.
-- [ ] **Budget versioning** -- multiple proposal versions per project. Trigger: Liz needs to revise a presented budget and keep history.
-- [ ] **Update log visible in Sanity Studio** -- browsable history of all "Send Update" emails per project. Immediate implementation logs the data; polished Sanity UI to browse logs can come later.
-- [ ] **Print-friendly portal CSS** -- `@media print` stylesheet for clients who want a paper copy of their project status.
+- [ ] **COI expiration alerts to Liz** — Email or Sanity Studio notification when a COI is within 30 days of expiring. Currently only visual badges in the portal. Add alerts once the COI workflow is established and Liz knows which contractors run long projects.
+- [ ] **Contractor portal with milestone pull-through** — Instead of separate `contractorStartDate`/`contractorDeadline` fields, pull from the custom milestones already on the project and filter for milestones tagged as contractor-relevant. More powerful but requires milestone tagging — defer until the milestone system is proven in production.
 
 ### Future Consideration (v3+)
 
-Features to defer until the portal has proven its value with real clients.
+- [ ] **Building manager multi-project view** — If Liz regularly works in the same commercial building, a landing page that lists all active projects in that building for the same building manager contact. Premature at current project volume.
+- [ ] **COI renewal workflow** — Automated reminder emails to contractors when COIs are near expiration. Requires contractor email storage and Resend integration extension. Only worth building if commercial project volume increases.
+- [ ] **Contractor bid submission** — Pre-engagement portal for contractors to submit estimates. Only relevant if Liz moves to a formal bidding process.
 
-- [ ] **QuickBooks integration** -- display invoice status in portal. Defer until Liz has migrated from FreshBooks to QuickBooks and the accounting workflow is stable.
-- [ ] **Selections approval workflow** -- in-portal approve/decline of materials and furniture. Defer until client volume exceeds what phone/email can handle.
-- [ ] **File sharing in portal** -- mood boards, floor plans, contracts. Defer because Canva handles visual deliverables well and clients already receive files via email.
-- [ ] **Magic link authentication** -- passwordless login via email. Defer until concurrent project count exceeds 10+ or portal contains financially sensitive data.
-- [ ] **Client-initiated messaging** -- in-portal communication. Defer indefinitely; email and phone work.
+---
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Client data model | HIGH | LOW | P1 |
-| Custom per-project milestones | HIGH | MEDIUM | P1 |
-| Procurement tracking (line items) | HIGH | MEDIUM | P1 |
-| Savings visibility | HIGH | LOW | P1 |
-| Send Update email | HIGH | HIGH | P1 |
-| Home page hero refresh | MEDIUM | MEDIUM | P1 |
-| Budget proposals (tiered) | HIGH | HIGH | P2 |
-| Budget versioning | MEDIUM | MEDIUM | P2 |
-| Update log in Sanity Studio | MEDIUM | LOW | P2 |
-| Print-friendly portal CSS | LOW | LOW | P2 |
-| QuickBooks integration | MEDIUM | HIGH | P3 |
-| Selections approval workflow | MEDIUM | HIGH | P3 |
-| File sharing in portal | MEDIUM | MEDIUM | P3 |
-| Magic link auth | LOW | MEDIUM | P3 |
+| Residential/commercial toggle (`projectType`) | HIGH | LOW | P1 |
+| Contractor portal (scope, floor plans, deadline, estimate) | HIGH | MEDIUM | P1 |
+| Building manager portal (COIs, legal docs, contact info) | HIGH | MEDIUM | P1 |
+| COI document section in Sanity + portal | HIGH | LOW | P1 |
+| Legal docs section in Sanity + portal | MEDIUM | LOW | P1 |
+| Client sees contractor on-site schedule | MEDIUM | LOW | P1 |
+| Conditional field display in Sanity Studio | MEDIUM | LOW | P1 |
+| COI expiration visual badges | MEDIUM | LOW | P1 |
+| Engagement type controls portal section depth | MEDIUM | MEDIUM | P2 |
+| COI expiration alerts to Liz | LOW | MEDIUM | P2 |
+| Contractor portal with milestone pull-through | LOW | MEDIUM | P3 |
+| Building manager multi-project view | LOW | HIGH | P3 |
+| COI renewal workflow to contractors | LOW | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for v2.0 -- features that replace Liz's manual Canva + email workflow
-- P2: Should have, add when the core portal is stable and in use
-- P3: Future consideration, evaluate based on real usage patterns
+- P1: Must have for v2.5 launch — features that deliver contractor and commercial workflows
+- P2: Add once v2.5 is stable and in use with real projects
+- P3: Future consideration, evaluate based on actual commercial project volume
+
+---
 
 ## Competitor Feature Analysis
 
-| Feature | Studio Designer ($72-109/mo) | Mydoma ($64-99/mo) | DesignFiles ($49-69/mo) | Design Manager ($varies) | La Sprezzatura v2.0 |
-|---------|-----|-----|-----|-----|-----|
-| Client portal | Full-featured: approvals, payments, project tracking | Branded hub: presentations, approvals, invoices, messaging | Client collaboration: presentations, contracts, portal | Not client-facing; designer-side only | PURL-based: milestones, procurement, budget, branded to match site |
-| Procurement tracking | Full PO management, vendor communication, receiving reports | Product sourcing with markup | Product sourcing, PO generation | Enterprise PO management with receiving, warehousing, CFA tracking | Line-item tracking with status, cost, retail, savings. Manual update by Liz. |
-| Budget/proposals | Proposals via portal, PDF, or interactive docs | Branded presentations with approval | Templates with e-signature | Detailed cost tracking with markup | Tiered proposals (Good/Better/Best) with versioning. Portal displays selected tier. |
-| Client communication | Portal notifications, email | In-portal messaging, email | Email notifications | Reports only (no client portal) | "Send Update" branded email with portal state snapshot + delivery logging |
-| Milestone tracking | Phase-based project management | Task-based project tracking | Task tracking with deadlines | Project scheduling | Custom per-project milestones with dates, status, and notes |
-| Item status tracking | Ordered/Received/Delivered with dates | Basic status tracking | Order tracking | Ship date, receive date, CFA date, quantity tracking | Ordered/Warehouse/In Transit/Delivered/Installed/Pending |
-| Cost to designer | $72-109/mo per user | $64-99/mo per user | $49-69/mo per user | Custom pricing | $0/mo (custom built, Sanity free tier, Resend free tier) |
+| Feature | Buildertrend (residential construction) | Procore (commercial construction) | Studio Designer (interior design) | La Sprezzatura v2.5 |
+|---------|---|---|---|---|
+| Contractor / sub portal | Full: schedule, documents, bids, RFIs, selections, messaging | Full: submittals, RFIs, change orders, drawings, daily logs | Not a contractor-facing tool | Minimal: scope, floor plans, deadline, estimate, notes. No messaging, no bid management. |
+| Client info visibility for subs | Explicitly hidden: subs see job address, not client contact | Access-controlled per user role | N/A | Address only. "Refer to Liz" for all communication. |
+| Document sharing | File folders, permission-based access | Drawing log with version control | File sharing via portal | Direct download links: floor plans, estimate PDF. Flat list, no folders. |
+| Building manager / compliance | Not applicable (residential focus) | Submittal tracking, RFI, inspection | Not built | COI document list with expiration dates, legal docs, download links. No approval workflow. |
+| COI management | Not built | COI tracking via integrations | Not built | COI array with expiration date display. Visual badges for expired/expiring. No automated tracking. |
+| Engagement type gating | Not applicable | Not applicable | Not applicable (all-or-nothing) | Full Interior Design gates contractor portal. Commercial gates building manager. Same platform, different surfaces per project type. |
+| Cost to designer | $499-$799/mo | $375+/mo | $72-109/mo | $0/mo additional (extends existing Sanity + Vercel + Resend stack) |
 
-**Key insight:** La Sprezzatura's portal does not need to match SaaS feature depth. It needs to match the information clients receive today (via Canva PDFs) in a better format (a living portal page), while reducing Liz's time spent creating and sending those PDFs. The SaaS platforms solve for 20-person firms with multiple project managers. La Sprezzatura solves for one designer with 3-5 active projects who wants to look polished and save time.
+**Key insight:** Buildertrend and Procore solve for large teams with dozens of active subs and formal compliance workflows. La Sprezzatura's contractor portal is intentionally minimal — a digital job brief, not a project management system. The competitive advantage is that it exists at all (most single-designer studios share PDFs via email), it looks like the La Sprezzatura brand, and it lives in the same system as everything else.
+
+---
 
 ## Sources
 
-- [Studio Designer - Client Portal](https://www.studiodesigner.com/features/client-portal/) -- client-facing features: approvals, payments, project tracking
-- [Studio Designer - Procurement](https://www.studiodesigner.com/features/interior-design-procurement/) -- propose, source, procure workflow
-- [Design Manager - Purchasing](https://www.designmanager.com/feature/purchasing) -- PO management, item status tracking, receiving reports
-- [Design Manager - Purchase Order Status](https://www.designmanager.com/blog/dm-tips-purchase-order-status-window) -- ship date, receive date, CFA tracking fields
-- [DesignFiles - Procurement Software](https://join.designfiles.co/features/interior-design-procurement-software/) -- PO generation, budget tracking, client collaboration
-- [Mydoma Studio - Client Portal](https://mydomastudio.com/features/client-portal/) -- branded client hub, approvals, invoices, messaging
-- [Programa - Procurement](https://programa.design/interior-design-procurement-software) -- FF&E management, specification sheets
-- [Interior Design Pricing Packages - DesignFiles Blog](https://blog.designfiles.co/interior-design-pricing-packages/) -- tiered pricing strategies
-- [Interior Design Proposal Presentation - Programa Blog](https://programa.design/blog/interior-design-proposal-presentation) -- proposal best practices
-- [Fantastical Openings Help](https://flexibits.com/fantastical/help/openings) -- link-based scheduling, no embed support
-- [Fantastical Scheduling](https://flexibits.com/fantastical/scheduling) -- Zapier integration, conference call support
-- [Interior Design Procurement Process - Designed for the Creative Mind](https://www.designedforthecreativemind.com/blog/what-is-the-interior-design-procurement-process-behind-the-scenes-series) -- status tracking: ordered, shipped, received, delivered, installed
-- [Inventory Management for Interior Designers - Design Logistics Group](https://www.designlogisticsgroup.net/post/inventory-management-for-interior-designers-best-practices-checklist) -- warehouse management, receiving best practices
-- [Sanity Docs - Object Type](https://www.sanity.io/docs/studio/object-type) -- nested object patterns for Sanity schemas
-- [Sanity Docs - Schema Field Types](https://www.sanity.io/docs/schema-field-types) -- array and reference field best practices
-- [Sanity Docs - Fields and Relationships](https://www.sanity.io/docs/developer-guides/deciding-fields-and-relationships) -- nested vs referenced document patterns
-- [Client Email Templates for Interior Designers - IDCO Studio](https://www.idco.studio/client-email-templates) -- communication templates and best practices
-- [Resend - Email Templates](https://resend.com/docs/dashboard/emails/email-templates) -- templated email with variable substitution
-- [React Email](https://github.com/resend/react-email) -- React component-based email templates
+- [Buildertrend - Subcontractor Overview](https://buildertrend.com/help-article/subcontractor-overview/) — what subs see in the portal; confirmation that client contact info is explicitly hidden from subs
+- [Buildertrend - Sub Portal Job Information](https://helpcenter.buildertrend.net/en/articles/4274896-sub-portal-job-information) — job address, notes, project manager contact visible to subs
+- [Buildertrend - Subcontractor Software](https://buildertrend.com/communication/subcontractor-software/) — scope of work, documents, schedule features
+- [COI Requirements for NY Projects - BGES Group](https://bgesgroup.com/certificate-of-insurance-coi-requirements-for-ny-projects-a-contractors-guide) — NY-specific: general liability $1M/$2M, workers' comp statutory, additional insured endorsements required, ACORD 25 standard form
+- [NYC Building COI Requirements - Avant-Garde Moving](https://www.avantgardemoving.com/blog/nyc-building-rules-coi-requirements-essential-guide) — building managers require contractor to name building as additional insured; submit before work begins
+- [Brick Underground - COI in NYC](https://www.brickunderground.com/live/whats-a-certificate-of-insurance-nyc) — COI workflow for NYC residential buildings; same pattern applies to commercial
+- [Vendor COI Guide - GetJones](https://getjones.com/blog/vendor-certificate-of-insurance-guide/) — COI fields: insured name, coverage types, limits, expiration date, certificate holder
+- [Top COI Tracking Software 2025 - Vertikal RMS](https://www.vertikalrms.com/article/best-coi-tracking-software-2025-top-coi-platforms-for-contractors/) — enterprise COI tracking landscape; confirms manual upload + display is the baseline for small firms
+- [What is COI in CRE - Visitt](https://visitt.io/glossary/certificate-of-insurance-coi) — building manager's role: collecting COIs from every party interacting with the property
+- [Magic Links Guide - Postmark](https://postmarkapp.com/blog/magic-links) — magic links best practices: expiration, one-time use, email deliverability
+- [Magic Links for Contractors - Descope](https://www.descope.com/blog/post/magic-link-uses) — use case: supplier/vendor portals where partners access infrequently; eliminates password support burden
+- [Full-Service Interior Design - KED Interiors](https://www.kedinteriors.com/blog-2-1/what-full-service-interior-design-really-includes-and-why-its-not-la-carte) — Full Interior Design scope: space planning, procurement, contractor coordination, installation oversight
+- [Interior Styling vs Interior Design - L+P](https://www.lp-interiors.com/blog/interior-styling-vs-interior-design) — Styling: no contractor coordination, no construction. Confirms engagement type drives whether a contractor portal is needed.
+- [Commercial vs Residential Interior Design - Blackwell & Jennings](https://www.blackwellandjennings.com/blog/what-are-the-differences-between-residential-and-commercial-interior-design) — commercial adds: building codes, stricter material specs, COIs, stakeholder complexity (building manager, property owner, tenant)
+- [Sanity - Hidden Callback Docs](https://www.sanity.io/docs/conditional-fields) — `hidden` callback on field definitions for conditional display in Studio
 
 ---
-*Feature research for: La Sprezzatura v2.0 Client Portal Platform*
-*Researched: 2026-03-15*
+*Feature research for: La Sprezzatura v2.5 — Contractor Portal, Building Manager Portal, Residential/Commercial Workflows*
+*Researched: 2026-03-16*

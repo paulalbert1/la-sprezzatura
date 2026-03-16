@@ -1,678 +1,1074 @@
 # Architecture Research
 
-**Domain:** Client operations portal expansion for existing Astro 6 + Sanity interior design studio platform
-**Researched:** 2026-03-15
+**Domain:** Contractor portal, building manager portal, engagement type system, residential/commercial classification — extending the existing Astro 6 + Sanity + Vercel platform
+**Researched:** 2026-03-16
 **Confidence:** HIGH
 
-## System Overview (v2.0)
+---
+
+## Context: What This Milestone Adds
+
+This is the v2.5 milestone. v2.0 (Phases 5-6) established magic-link auth, the `client` document type, the full portal feature set (milestones, procurement, artifacts), and the authenticated client portal at `/portal/dashboard` and `/portal/project/[id]`. v2.5 adds three new portal personas and one new data classification system on top of that foundation.
+
+**New in v2.5:**
+- `contractor` portal — authenticated via magic link, sees floor plans + scope + estimate + minimal client info (name and address only, no contact details)
+- `buildingManager` portal — authenticated via magic link, commercial projects only, sees COIs, legal docs, and can request contractor info
+- Engagement type toggle — Full Interior Design / Styling & Refreshing / Carpet Curating, controls which portal sections appear
+- Residential vs. Commercial classification — project-level toggle, gates building manager portal access
+
+**Design constraint carrying forward:** All portal views (client, contractor, building manager) use the same magic link auth pattern established in Phase 5. The auth plumbing is reused, not rebuilt.
+
+---
+
+## System Overview (v2.5)
 
 ```
-                      VISITOR / CLIENT BROWSER
-                                |
-                  +-------------+---------------+
-                  |             |               |
-          PUBLIC SITE    CLIENT PORTAL     SANITY STUDIO
-          (prerender)    (SSR, PURL)       (/admin)
-          /             /portal/[token]
-          /portfolio
-          /services
-          /contact
-                  |             |               |
-                  +------+------+-------+-------+
-                         |              |
-              +---------------------+   |
-              |  ASTRO 6 (VERCEL)   |   |
-              |  output: "server"   |   |
-              |                     |   |
-              |  src/pages/         |   |
-              |  src/actions/       |   |
-              |  src/lib/           |   |
-              +--+------+------+---+   |
-                 |      |      |       |
-           +-----+  +---+--+  +--+    |
-           |        |      |   |      |
-        SANITY   RESEND   (v2)  |   Sanity Cloud
-        (Read)   (Email)  Send  |   (Write via
-                  Update  |     |    Studio UI)
-                          |     |
-                   Fantastical  Cloudflare
-                   Openings     (DNS/CDN)
-                   (external
-                    link)
+                    VISITOR / CLIENT / CONTRACTOR / BUILDING MGR BROWSER
+                                          |
+             +----------+----------+------+-------+-----------+
+             |          |          |              |           |
+       PUBLIC SITE  CLIENT       CONTRACTOR   BLDG MGR   SANITY STUDIO
+       (prerender)  PORTAL       PORTAL       PORTAL      (/admin)
+       /            /portal/*    /contractor/* /manager/*
+       /portfolio
+       /services
+       /contact
+             |          |          |              |           |
+             +----+------+----------+--------------+-----+----+
+                  |                                     |
+     +---------------------------+                      |
+     |  ASTRO 6 + VERCEL SSR     |                      |
+     |                           |                      |
+     |  src/middleware.ts        |                      |
+     |  (session guard for all   |                      |
+     |   three portal namespaces)|                      |
+     |                           |                  Sanity Cloud
+     |  src/pages/               |                  (Write via
+     |    portal/*  (client)     |                   Studio UI)
+     |    contractor/* (new)     |                      |
+     |    manager/*   (new)      |                      |
+     |                           |
+     |  src/actions/index.ts     |
+     |  (requestMagicLink,       |
+     |   verifyMagicLink         |
+     |   + new portal-type param)|
+     +--+----------+-------------+
+        |          |
+   UPSTASH      SANITY
+   REDIS         (Read)
+   (tokens,      GROQ queries
+    sessions)    per role
+        |
+      RESEND
+   (magic link
+    emails)
 ```
 
-### What Changes from v1.0 to v2.0
+### What Changes from v2.0 to v2.5
 
-| Area | v1.0 (Current) | v2.0 (Target) | Change Type |
-|------|----------------|---------------|-------------|
-| Sanity schemas | 3 types: project, service, siteSettings | 4 types: project (extended), client (new), service, siteSettings | New type + modified type |
-| Portal page | Single SSR page showing pipeline stage + generic timeline | Multi-section SSR page: milestones, procurement, budget proposals | Modified page (significant) |
-| GROQ queries | Simple portal token lookup returning 3 fields | Rich portal query returning client, milestones, procurement, proposals | Modified query |
-| Server actions | 1 action: submitContact | 2 actions: submitContact, sendUpdate | New action |
-| Email templates | Contact form notification + auto-response (inline HTML) | Add portal update email template | New template |
-| Sanity Studio | Basic project editing, 2 field groups (content, portal) | Extended project editing, 3+ field groups, client document management | Modified config |
-| Contact page | Cal.com embed component + Fantastical link | Fantastical link only (remove Cal.com) | Modified page (simplification) |
-| Portal components | 3: PortalLayout, StatusBadge, MilestoneTimeline | 6+: add ProcurementTable, BudgetProposal, UpdateSection | New components |
+| Area | v2.0 (Post Phase 6) | v2.5 (This Milestone) | Change Type |
+|------|---------------------|----------------------|-------------|
+| Sanity schemas | `project` (with engagement, clients[], milestones, procurement) | `project` extended: add `projectType` (residential/commercial), `engagementType` fields. New `contractor` document type. New `buildingManager` document type. | New types + field additions |
+| Portal personas | Client only | Client + Contractor + Building Manager | New route namespaces + session roles |
+| Route structure | `/portal/*` | `/portal/*` + `/contractor/*` + `/manager/*` | New namespaces |
+| Session model | `clientId` in session payload | `{ userId, role: 'client' | 'contractor' | 'buildingManager' }` in session payload | Extended session data |
+| Middleware | Guards `/portal/*`, passes `locals.clientId` | Guards all three namespaces, passes `locals.userId` + `locals.userRole` | Modified middleware |
+| Magic link action | Accepts email, looks up client | Accepts email + `portalType` hint OR infers from persona document lookup | Modified action |
+| GROQ queries | Client-centric portal queries | New contractor query (redacted client info), new building manager query (commercial docs only) | New queries |
+| Portal UX | Single authenticated client view | Three distinct portal views per role, all dead-simple | New pages + components |
+| Engagement type | Field exists on project schema (added in Phase 5) | Controls which portal sections render (milestones / procurement / carpet schedule) | Feature activation (existing field) |
+| `App.Locals` | `clientId: string` | `userId: string; userRole: 'client' | 'contractor' | 'buildingManager'` | Extended |
 
-### Component Responsibilities
+---
 
-| Component | Responsibility | Implementation |
-|-----------|----------------|----------------|
-| `project` schema (extended) | Portfolio content + portal operations: milestones, procurement, budget proposals, update log | Sanity document type with field groups: content, portal, milestones, procurement, proposals |
-| `client` schema (new) | Client contact info: name, email, phone, address, preferred contact method | Sanity document type, referenced by project |
-| Portal page `/portal/[token]` | Render full portal dashboard from GROQ data | Astro SSR page with expanded component tree |
-| `sendUpdate` action (new) | Compose + send branded email snapshot of portal state to client, log delivery | Astro server action calling Resend + writing log entry to Sanity via mutation API |
-| Portal components (new) | Render milestones, procurement table, budget proposals in portal | Astro components consuming GROQ-fetched data |
-| Contact page (modified) | Remove Cal.com embed, keep Fantastical link | Remove CalBooking.tsx import, remove @calcom/embed-react dep |
+## Sanity Schema Evolution
 
-## Data Modeling Decisions
+### Strategy: Additive-Only, No Migrations Required
 
-This is the most critical architectural decision for v2.0. Each feature needs a clear answer: inline array on the project document, or separate document type with references?
+All schema changes in v2.5 are additive (new fields with no `validation: r => r.required()` that would break existing documents, or new document types). Existing project documents do not need migration. New fields default to `undefined` and render gracefully when absent.
 
-### Decision Framework Applied
+The only exception: if the codebase added `engagementType` as a required field in Phase 5, remove the `required()` constraint or backfill existing documents before v2.5 deploys. Check the Phase 5 implementation before starting.
 
-Sanity's guidance: use separate document types when content needs independent management, filtering, or growth potential. Use inline objects when the structure serves a narrow, supporting purpose within its parent.
+### New Document Types
 
-For La Sprezzatura, the decision factor is **Liz's editing UX**. She manages one project at a time in Sanity Studio. Procurement items, milestones, and budget tiers are meaningless outside their parent project. They will never be queried independently ("show all milestones across all projects" is not a use case). Inline arrays keep everything on one editing screen, which is simpler for a non-technical user.
-
-**Exception:** Client data. A client may have multiple projects over time. Client contact info (phone, email, address) should not be duplicated across projects. A separate `client` document type with a reference from `project` is the right call.
-
-### Sanity Technical Constraints Verified
-
-- Max document size: 32 MB (HIGH confidence -- verified via official docs)
-- Max attributes per document: 1,000 on free/growth plans (HIGH confidence)
-- Arrays cannot contain arrays directly (must wrap in objects) (HIGH confidence)
-- An interior design project with 20 milestones, 50 procurement items, and 3 budget proposals will use roughly 200-300 attributes -- well within limits
-
-### Recommended Data Model
-
-#### 1. `client` Document Type (NEW)
+#### `contractor` Document Type
 
 ```typescript
-// src/sanity/schemas/client.ts
+// src/sanity/schemas/contractor.ts
 defineType({
-  name: "client",
-  title: "Client",
+  name: "contractor",
+  title: "Contractor",
   type: "document",
   fields: [
-    { name: "name", type: "string", title: "Client Name" },
-    { name: "email", type: "string", title: "Email" },
-    { name: "phone", type: "string", title: "Phone" },
-    { name: "preferredContact", type: "string", title: "Preferred Contact Method",
-      options: { list: ["email", "phone", "text"] } },
-    { name: "address", type: "object", title: "Address", fields: [
-      { name: "street", type: "string" },
-      { name: "city", type: "string" },
-      { name: "state", type: "string" },
-      { name: "zip", type: "string" },
-    ]},
+    defineField({ name: "name", title: "Company / Contractor Name", type: "string",
+      validation: r => r.required() }),
+    defineField({ name: "contactName", title: "Contact Person", type: "string" }),
+    defineField({ name: "email", title: "Email Address", type: "string",
+      validation: r => r.required().email() }),
+    defineField({ name: "phone", title: "Phone", type: "string" }),
+    defineField({ name: "trade", title: "Trade / Specialty", type: "string",
+      description: "e.g., General Contractor, Electrician, Plumber, Carpenter" }),
+    defineField({ name: "licenseNumber", title: "License Number", type: "string" }),
+    defineField({ name: "notes", title: "Internal Notes", type: "text",
+      description: "Liz's notes about working with this contractor — never shown in portal" }),
   ],
+  preview: {
+    select: { title: "name", subtitle: "trade" },
+  },
 })
 ```
 
-**Rationale:** Separate document because a client may have multiple projects. Contact info changes once, updates everywhere. Liz manages clients as first-class entities in Studio.
+**Why a separate document type:** Contractors work across multiple projects. Contact info belongs to the contractor, not the project. Liz will have a short roster of trusted contractors she uses repeatedly. A `contractor` document type gives her a rolodex in Sanity Studio that she manages once.
 
-#### 2. `project` Schema Extensions (MODIFIED)
-
-Add to existing project schema in the `portal` field group:
+#### `buildingManager` Document Type
 
 ```typescript
-// New field: reference to client document
-defineField({
-  name: "client",
-  title: "Client",
-  type: "reference",
-  to: [{ type: "client" }],
-  group: "portal",
-}),
-
-// Replace pipelineStage with custom milestones
-defineField({
-  name: "milestones",
-  title: "Project Milestones",
-  type: "array",
-  group: "portal",
-  of: [{
-    type: "object",
-    name: "milestone",
-    title: "Milestone",
-    fields: [
-      { name: "title", type: "string", title: "Milestone" },
-      { name: "targetDate", type: "date", title: "Target Date" },
-      { name: "completedDate", type: "date", title: "Completed Date" },
-      { name: "status", type: "string", title: "Status",
-        options: { list: ["upcoming", "current", "completed"] },
-        initialValue: "upcoming" },
-      { name: "description", type: "text", title: "Description", rows: 2 },
-    ],
-    preview: {
-      select: { title: "title", subtitle: "status" },
-    },
-  }],
-}),
-
-// Procurement line items
-defineField({
-  name: "procurement",
-  title: "Procurement Items",
-  type: "array",
-  group: "portal",
-  of: [{
-    type: "object",
-    name: "procurementItem",
-    fields: [
-      { name: "item", type: "string", title: "Item" },
-      { name: "vendor", type: "string", title: "Vendor" },
-      { name: "status", type: "string", title: "Status",
-        options: { list: [
-          { title: "Specifying", value: "specifying" },
-          { title: "Ordered", value: "ordered" },
-          { title: "In Transit", value: "in-transit" },
-          { title: "Delivered", value: "delivered" },
-          { title: "Installed", value: "installed" },
-        ]}},
-      { name: "costPrice", type: "number", title: "Cost Price" },
-      { name: "retailPrice", type: "number", title: "Retail Price" },
-      { name: "notes", type: "text", title: "Notes", rows: 2 },
-    ],
-    preview: {
-      select: { title: "item", subtitle: "status" },
-    },
-  }],
-}),
-
-// Budget proposals as versioned snapshots
-defineField({
-  name: "budgetProposals",
-  title: "Budget Proposals",
-  type: "array",
-  group: "portal",
-  of: [{
-    type: "object",
-    name: "budgetProposal",
-    fields: [
-      { name: "version", type: "string", title: "Version Label",
-        description: "e.g., 'Initial Proposal', 'Revised March 2026'" },
-      { name: "createdAt", type: "datetime", title: "Date Created" },
-      { name: "tiers", type: "array", title: "Tiers", of: [{
-        type: "object",
-        name: "budgetTier",
-        fields: [
-          { name: "tierName", type: "string", title: "Tier Name",
-            description: "e.g., Best, Better, Good" },
-          { name: "totalAmount", type: "number", title: "Total Amount" },
-          { name: "description", type: "text", title: "Description", rows: 3 },
-          { name: "lineItems", type: "array", title: "Line Items", of: [{
-            type: "object",
-            fields: [
-              { name: "category", type: "string", title: "Category" },
-              { name: "amount", type: "number", title: "Amount" },
-              { name: "notes", type: "string", title: "Notes" },
-            ],
-          }]},
-          { name: "selected", type: "boolean", title: "Client Selected",
-            initialValue: false },
-        ],
-      }]},
-    ],
-    preview: {
-      select: { title: "version", subtitle: "createdAt" },
-    },
-  }],
-}),
-
-// Update delivery log
-defineField({
-  name: "updateLog",
-  title: "Update Delivery Log",
-  type: "array",
-  group: "portal",
-  readOnly: true,
-  of: [{
-    type: "object",
-    name: "updateEntry",
-    fields: [
-      { name: "sentAt", type: "datetime", title: "Sent At" },
-      { name: "recipientEmail", type: "string", title: "Sent To" },
-      { name: "note", type: "text", title: "Note Included" },
-      { name: "resendId", type: "string", title: "Resend Message ID" },
-    ],
-    preview: {
-      select: { title: "sentAt", subtitle: "recipientEmail" },
-    },
-  }],
-}),
+// src/sanity/schemas/buildingManager.ts
+defineType({
+  name: "buildingManager",
+  title: "Building Manager",
+  type: "document",
+  fields: [
+    defineField({ name: "name", title: "Full Name", type: "string",
+      validation: r => r.required() }),
+    defineField({ name: "email", title: "Email Address", type: "string",
+      validation: r => r.required().email() }),
+    defineField({ name: "phone", title: "Phone", type: "string" }),
+    defineField({ name: "buildingName", title: "Building Name", type: "string",
+      description: "e.g., 225 West 39th Street Condo" }),
+    defineField({ name: "buildingAddress", title: "Building Address", type: "object",
+      fields: [
+        defineField({ name: "street", type: "string" }),
+        defineField({ name: "city", type: "string" }),
+        defineField({ name: "state", type: "string" }),
+        defineField({ name: "zip", type: "string" }),
+      ],
+    }),
+    defineField({ name: "notes", title: "Internal Notes", type: "text",
+      description: "Liz's notes — never shown in portal" }),
+  ],
+  preview: {
+    select: { title: "name", subtitle: "buildingName" },
+  },
+})
 ```
 
-**Rationale for inline arrays instead of separate documents:**
+**Why a separate document type:** Same reasoning as contractor. A building manager oversees one building but multiple renovation projects within it. Their contact info is independent of any single project.
 
-| Data | Decision | Why |
-|------|----------|-----|
-| Milestones | Inline array on project | Never queried cross-project. 5-15 items per project. Editing milestones in context of their project is the natural workflow. |
-| Procurement items | Inline array on project | Same reasoning. 10-50 items per project. Liz manages procurement per project, not globally. |
-| Budget proposals | Inline array on project | Versioned snapshots are snapshots *of this project*. 2-5 proposals per project max. Each contains tier sub-objects. |
-| Update log | Inline array on project | Append-only audit trail. Written by server action, read-only in Studio. Never needs independent management. |
-| Client | **Separate document** | Reused across projects. Contact info is independently managed. Natural "client list" view in Studio. |
+### Project Schema Extensions
 
-**Note on nested arrays:** Budget proposals contain tiers, which contain line items -- that is arrays within arrays within arrays. Sanity does not allow direct array nesting, but this works because the arrays contain **objects** that themselves have array fields. This is the documented workaround and is fully supported.
-
-### pipelineStage Field: Keep or Remove?
-
-**Keep it.** The `pipelineStage` field serves a different purpose than custom milestones. Pipeline stage is a high-level categorical status (Discovery, Procurement, etc.) that drives the status badge. Custom milestones are the granular tasks within and across those stages. The portal can display both: the stage badge at the top, and the detailed milestone timeline below.
-
-However, consider making it **derived from milestones** in the future -- for now, keeping both as independent fields is simpler and avoids complex computed-field logic in Sanity.
-
-## Recommended Project Structure (v2.0 Changes)
-
-```
-src/
-├── actions/
-│   └── index.ts                  # MODIFIED: add sendUpdate action
-├── components/
-│   ├── portal/
-│   │   ├── PortalLayout.astro    # existing (minor updates)
-│   │   ├── StatusBadge.astro     # existing (no change)
-│   │   ├── MilestoneTimeline.astro  # MODIFIED: custom milestones, not generic stages
-│   │   ├── ProcurementTable.astro   # NEW: line items with status/cost/savings
-│   │   ├── BudgetProposal.astro     # NEW: tiered budget display
-│   │   ├── SendUpdateForm.astro     # NEW: (or .tsx if needs interactivity)
-│   │   └── UpdateLog.astro          # NEW: delivery history display
-│   ├── contact/
-│   │   ├── ContactForm.tsx       # existing (no change)
-│   │   └── CalBooking.tsx        # REMOVE (replaced by Fantastical link)
-│   └── ...                       # existing components unchanged
-├── lib/
-│   ├── portalStages.ts           # existing -- keep for backward compat, may deprecate
-│   ├── rateLimit.ts              # existing (no change)
-│   ├── generateToken.ts          # existing (no change)
-│   └── email/                    # NEW: email template builders
-│       └── portalUpdate.ts       # HTML template for portal update emails
-├── pages/
-│   ├── portal/
-│   │   └── [token].astro         # MODIFIED: expanded to render all portal sections
-│   ├── contact.astro             # MODIFIED: remove Cal.com, Fantastical link already there
-│   └── ...                       # existing pages unchanged
-├── sanity/
-│   ├── schemas/
-│   │   ├── project.ts            # MODIFIED: add milestones, procurement, proposals, updateLog, client ref
-│   │   ├── client.ts             # NEW: client document type
-│   │   ├── index.ts              # MODIFIED: register client schema
-│   │   ├── service.ts            # existing (no change)
-│   │   └── siteSettings.ts       # existing (no change)
-│   ├── queries.ts                # MODIFIED: expand portal query, add client queries
-│   ├── mutations.ts              # NEW: server-side write operations (update log append)
-│   ├── components/
-│   │   └── PortalUrlDisplay.tsx  # existing (no change)
-│   └── image.ts                  # existing (no change)
-└── styles/
-    └── global.css                # existing (may add portal-specific utility classes)
-```
-
-### Structure Rationale
-
-- **`sanity/mutations.ts` (new):** Server-side write operations require a Sanity client initialized with a write token (`SANITY_API_TOKEN` with editor/write permissions). This is separate from the read-only `sanity:client` provided by `@sanity/astro`. The mutation module creates a second client with write credentials, used only in server actions. The write token must never be exposed to the client.
-
-- **`lib/email/portalUpdate.ts` (new):** The contact form action already has inline HTML email templates. For portal updates, extract email template building into a dedicated module. Use the same inline HTML approach (not React Email -- avoids adding a dependency for a single template). The template function accepts the portal state snapshot and returns HTML.
-
-- **Portal components split by concern:** Each portal section (milestones, procurement, proposals) gets its own Astro component. The `[token].astro` page composes them. This keeps individual components testable and the page file manageable.
-
-- **No new pages added:** All portal features render on the single `/portal/[token]` page. Adding sub-routes (`/portal/[token]/procurement`) would be premature -- the data volume does not justify navigation, and a single-page portal is simpler for clients.
-
-## Architectural Patterns
-
-### Pattern 1: Sanity Write-Back from Astro Server Actions
-
-**What:** When the "Send Update" action runs, it needs to append an entry to the project's `updateLog` array in Sanity. This requires server-side mutations using the Sanity client with a write token.
-
-**When to use:** Any time Astro needs to write data back to Sanity (logging, status updates, timestamps). Currently the only write path from the Astro app -- all other Sanity writes happen through Studio.
-
-**Trade-offs:** Introduces a second Sanity client (write-capable) alongside the read-only one from `@sanity/astro`. Requires a new environment variable (`SANITY_API_WRITE_TOKEN`). The write token has broad permissions, so it must be used only in server actions, never in client-side code. This is a narrow, well-contained pattern -- one action, one mutation.
-
-**Implementation:**
+Add to the existing `project` schema (portal field group):
 
 ```typescript
-// src/sanity/mutations.ts
-import { createClient } from "@sanity/client";
-
-// Write-capable client for server-side mutations only
-const writeClient = createClient({
-  projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
-  dataset: import.meta.env.PUBLIC_SANITY_DATASET || "production",
-  apiVersion: "2026-03-15",
-  token: import.meta.env.SANITY_API_WRITE_TOKEN,
-  useCdn: false,
-});
-
-export async function appendUpdateLog(
-  projectId: string,
-  entry: { sentAt: string; recipientEmail: string; note: string; resendId: string }
-) {
-  return writeClient
-    .patch(projectId)
-    .setIfMissing({ updateLog: [] })
-    .append("updateLog", [{ _type: "updateEntry", _key: crypto.randomUUID(), ...entry }])
-    .commit();
-}
-```
-
-### Pattern 2: Snapshot Email via Server Action
-
-**What:** The "Send Update" action captures the current portal state, renders it into a branded HTML email, sends it via Resend, and logs the delivery. This is a server action (like the existing `submitContact`), not an API endpoint.
-
-**When to use:** Liz clicks "Send Update" in Sanity Studio or on an admin-facing trigger. The action reads the project, builds the email, sends it, and writes the log entry.
-
-**Trade-offs:** Using Astro server actions keeps this consistent with the existing contact form pattern. The action needs to: (1) fetch the project with full portal data from Sanity, (2) fetch the client email from the referenced client document, (3) render the email HTML, (4) send via Resend, (5) write the log entry via mutation. This is 5 steps in one action, which is acceptable for a low-frequency operation.
-
-**Where the trigger lives:** The cleanest UX is a custom Sanity Studio action (a document action plugin that calls the Astro server action endpoint). This keeps the trigger inside Studio where Liz already manages projects. Alternative: a simple form on the portal page visible only to Liz (authenticated by a secondary secret). The Studio action is better UX but more complex to build. Recommend starting with a **Studio document action** that calls `/_actions/sendUpdate` since the infrastructure (React in Studio, Astro actions exposing endpoints) already exists.
-
-### Pattern 3: Portal as Single-Page Composition
-
-**What:** The portal remains a single SSR page at `/portal/[token]` that renders all sections (milestones, procurement, budget proposals) in a vertical scroll layout. No client-side routing, no tabs, no sub-pages.
-
-**When to use:** When the total data per project is small (a few dozen items across all sections) and the client's mental model is "view my project status" -- a single destination.
-
-**Trade-offs:** Simpler than multi-page portal. All data fetched in one GROQ query. No navigation state to manage. Downside: if the page grows very long, clients may not scroll to see all sections. Mitigate with a sticky section nav (anchor links) if needed. At the current feature scope (milestones + procurement + proposals), a single page is appropriate.
-
-**Implementation sketch:**
-
-```astro
----
-// src/pages/portal/[token].astro
-export const prerender = false;
-const project = await getPortalProject(token);
-// project now includes: milestones[], procurement[], budgetProposals[], client->
----
-<PortalLayout title={project.title}>
-  <PortalHeader project={project} />
-  <StatusBadge stage={project.pipelineStage} />
-  <MilestoneTimeline milestones={project.milestones} />
-  <ProcurementTable items={project.procurement} />
-  <BudgetProposal proposals={project.budgetProposals} />
-  <ContactCTA client={project.client} />
-</PortalLayout>
-```
-
-## Data Flow
-
-### Portal Page Load (v2.0)
-
-```
-Client clicks PURL (/portal/abc123)
-    |
-    v
-Astro SSR: rate limit check (existing)
-    |
-    v
-GROQ query: fetch project by token (expanded)
-    |
-    +---> Project metadata (title, pipelineStage, portalEnabled)
-    +---> client-> { name, email, phone, preferredContact }
-    +---> milestones[] { title, targetDate, completedDate, status, description }
-    +---> procurement[] { item, vendor, status, costPrice, retailPrice, notes }
-    +---> budgetProposals[] { version, createdAt, tiers[] { tierName, totalAmount, ... } }
-    |
-    v
-Render portal page with all sections
-    |
-    v
-Client views milestones, procurement status, budget proposals
-```
-
-### Send Update Flow (NEW)
-
-```
-Liz triggers "Send Update" (via Studio action or admin form)
-    |
-    v
-POST /_actions/sendUpdate { projectId, note (optional) }
-    |
-    v
-Astro server action:
-    1. Fetch project + client from Sanity (read client)
-    2. Build email HTML snapshot (milestones, procurement summary, note)
-    3. Send via Resend to client.email
-    4. Append to project.updateLog via Sanity mutation (write client)
-    |
-    v
-Return { success: true, resendId }
-```
-
-### Expanded GROQ Query
-
-```groq
-*[_type == "project" && portalToken == $token && portalEnabled == true][0]{
-  _id,
-  title,
-  clientName,               // legacy field, keep for backward compat
-  pipelineStage,
-  "client": client-> {
-    name,
-    email,
-    phone,
-    preferredContact,
-    address
+// Residential vs. Commercial classification
+defineField({
+  name: "projectType",
+  title: "Project Type",
+  type: "string",
+  group: "portal",
+  options: {
+    list: [
+      { title: "Residential", value: "residential" },
+      { title: "Commercial", value: "commercial" },
+    ],
+    layout: "radio",
   },
-  milestones[] {
-    _key,
-    title,
-    targetDate,
-    completedDate,
-    status,
-    description
+  initialValue: "residential",
+  description: "Commercial projects unlock Building Manager portal access",
+}),
+
+// Engagement type (may already exist from Phase 5 — verify before adding)
+defineField({
+  name: "engagementType",
+  title: "Engagement Type",
+  type: "string",
+  group: "portal",
+  options: {
+    list: [
+      { title: "Full Interior Design", value: "full" },
+      { title: "Styling & Refreshing", value: "styling" },
+      { title: "Carpet Curating", value: "carpet" },
+    ],
+    layout: "radio",
   },
-  procurement[] {
-    _key,
-    item,
-    vendor,
-    status,
-    costPrice,
-    retailPrice,
-    notes
-  },
-  budgetProposals[] {
-    _key,
-    version,
-    createdAt,
-    tiers[] {
-      _key,
-      tierName,
-      totalAmount,
-      description,
-      lineItems[] {
-        category,
-        amount,
-        notes
+  initialValue: "full",
+  description: "Controls which portal sections are visible to the client",
+}),
+
+// Contractors assigned to this project
+defineField({
+  name: "contractors",
+  title: "Contractors",
+  type: "array",
+  group: "portal",
+  of: [
+    defineArrayMember({
+      type: "object",
+      fields: [
+        defineField({ name: "contractor", type: "reference", to: [{ type: "contractor" }],
+          validation: r => r.required() }),
+        defineField({ name: "role", title: "Role on This Project", type: "string",
+          description: "e.g., General Contractor, Tile Installer" }),
+        defineField({ name: "scopeNotes", title: "Scope Notes", type: "text",
+          rows: 3,
+          description: "What this contractor is responsible for on this project" }),
+      ],
+      preview: {
+        select: { title: "contractor.name", subtitle: "role" },
       },
-      selected
-    }
+    }),
+  ],
+}),
+
+// Building manager (commercial projects only)
+defineField({
+  name: "buildingManager",
+  title: "Building Manager",
+  type: "reference",
+  to: [{ type: "buildingManager" }],
+  group: "portal",
+  description: "Only set for commercial projects",
+  // Conditionally shown in Studio UI only when projectType === 'commercial'
+  // Use Sanity's `hidden` rule: hidden: ({ parent }) => parent?.projectType !== 'commercial'
+  hidden: ({ parent }) => parent?.projectType !== "commercial",
+}),
+
+// Floor plan and scope artifacts visible to contractors
+defineField({
+  name: "contractorDocuments",
+  title: "Contractor Documents",
+  type: "array",
+  group: "portal",
+  description: "Documents visible to assigned contractors — floor plans, scope, estimates",
+  of: [
+    defineArrayMember({
+      type: "object",
+      fields: [
+        defineField({ name: "title", type: "string", title: "Document Title",
+          validation: r => r.required() }),
+        defineField({ name: "documentType", type: "string", title: "Type",
+          options: { list: [
+            { title: "Floor Plan", value: "floor-plan" },
+            { title: "Scope of Work", value: "scope" },
+            { title: "Estimate", value: "estimate" },
+            { title: "Site Survey", value: "site-survey" },
+            { title: "Other", value: "other" },
+          ]}
+        }),
+        defineField({ name: "file", type: "file", title: "File",
+          description: "PDF or image" }),
+        defineField({ name: "notes", type: "text", title: "Notes", rows: 2 }),
+      ],
+      preview: {
+        select: { title: "title", subtitle: "documentType" },
+      },
+    }),
+  ],
+}),
+
+// Commercial/building manager documents (COIs, legal docs)
+defineField({
+  name: "buildingDocuments",
+  title: "Building Documents",
+  type: "array",
+  group: "portal",
+  description: "Documents visible to building manager — COIs, permits, legal docs",
+  hidden: ({ parent }) => parent?.projectType !== "commercial",
+  of: [
+    defineArrayMember({
+      type: "object",
+      fields: [
+        defineField({ name: "title", type: "string", title: "Document Title",
+          validation: r => r.required() }),
+        defineField({ name: "documentType", type: "string", title: "Type",
+          options: { list: [
+            { title: "Certificate of Insurance (COI)", value: "coi" },
+            { title: "Building Permit", value: "permit" },
+            { title: "Work Authorization", value: "work-auth" },
+            { title: "DOB Filing", value: "dob" },
+            { title: "Other", value: "other" },
+          ]}
+        }),
+        defineField({ name: "file", type: "file", title: "File" }),
+        defineField({ name: "expirationDate", type: "date", title: "Expiration Date",
+          description: "For COIs and permits" }),
+        defineField({ name: "notes", type: "text", title: "Notes", rows: 2 }),
+      ],
+      preview: {
+        select: { title: "title", subtitle: "documentType" },
+      },
+    }),
+  ],
+}),
+```
+
+### Schema Registration
+
+```typescript
+// src/sanity/schemas/index.ts
+import { project } from "./project";
+import { client } from "./client";
+import { contractor } from "./contractor";         // NEW
+import { buildingManager } from "./buildingManager"; // NEW
+import { service } from "./service";
+import { siteSettings } from "./siteSettings";
+
+export const schemaTypes = [project, client, contractor, buildingManager, service, siteSettings];
+```
+
+---
+
+## Route Structure
+
+### New URL Namespaces
+
+```
+/portal/login              existing — shared login page (add portalType detection)
+/portal/verify             existing — shared magic link verification
+/portal/dashboard          existing — client dashboard
+/portal/project/[id]       existing — client project detail
+
+/contractor/login          NEW — same form, same action, portalType='contractor'
+/contractor/dashboard      NEW — list of projects this contractor is assigned to
+/contractor/project/[id]   NEW — contractor view: floor plans, scope, client name+address only
+
+/manager/login             NEW — same form, portalType='buildingManager'
+/manager/dashboard         NEW — list of commercial projects for this building
+/manager/project/[id]      NEW — building manager view: COIs, legal docs, contractor info request
+```
+
+**Why separate namespaces instead of a single `/portal/[role]/...`:**
+
+- Contractors and building managers have URLs they bookmark. A clear `/contractor/` prefix makes the URL self-describing — they know they're in the contractor portal.
+- Middleware can guard entire route namespaces with a simple `pathname.startsWith()` check rather than inspecting role within a shared namespace.
+- The portals have completely different landing pages and UX — sharing a namespace adds no benefit and obscures intent.
+
+**Shared `/portal/login` or separate login pages?**
+
+Use separate login pages with separate routes, but they can share the same Astro component (pass `portalType` as a prop from the page). This makes it possible to brand each login page differently if needed ("Contractor Access" vs "Client Portal") while keeping one form component.
+
+### Login Page Variants
+
+```
+/portal/login     → <LoginPage portalType="client" />
+/contractor/login → <LoginPage portalType="contractor" />
+/manager/login    → <LoginPage portalType="buildingManager" />
+```
+
+The `portalType` value is included as a hidden form field in the magic link request. The `requestMagicLink` action uses it to look up the right document type (client vs contractor vs buildingManager) and set the session role.
+
+---
+
+## Session Model Evolution
+
+### Current v2.0 Session (from Phase 5)
+
+```
+Redis key: session:{token}
+Value: clientId (string)
+
+App.Locals:
+  clientId: string | undefined
+```
+
+### v2.5 Session (Extended)
+
+```
+Redis key: session:{token}
+Value: JSON.stringify({ userId: string, role: 'client' | 'contractor' | 'buildingManager' })
+
+App.Locals:
+  userId: string | undefined
+  userRole: 'client' | 'contractor' | 'buildingManager' | undefined
+```
+
+**Migration:** The Phase 5 implementation stored `clientId` as a plain string. v2.5 changes the session value to a JSON object. This is a breaking change to session storage. Handle with:
+
+1. During verification, always write the new JSON format.
+2. In middleware, attempt to parse as JSON; if it fails (old session format), treat as `{ userId: value, role: 'client' }` for backward compatibility, then rewrite the session in the new format.
+3. After v2.5 deploys, old sessions expire within 30 days without any forced logout.
+
+```typescript
+// src/lib/session.ts — session read/write helpers
+export type SessionRole = 'client' | 'contractor' | 'buildingManager';
+
+export interface SessionPayload {
+  userId: string;
+  role: SessionRole;
+}
+
+export function encodeSession(payload: SessionPayload): string {
+  return JSON.stringify(payload);
+}
+
+export function decodeSession(raw: string | null): SessionPayload | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed.userId && parsed.role) return parsed;
+    // Backward compat: plain string from Phase 5 (clientId only)
+    return { userId: raw, role: 'client' };
+  } catch {
+    // Backward compat: non-JSON string was a clientId
+    return { userId: raw, role: 'client' };
   }
 }
 ```
 
-### Budget Proposal Display Logic
-
-Budget proposals are versioned snapshots. The portal shows the **most recent proposal** by default. Older proposals are accessible but collapsed. Within a proposal, tiers (Best/Better/Good) display side-by-side on desktop, stacked on mobile. The `selected` boolean on each tier indicates what the client chose. Liz sets this manually in Studio after the client communicates their choice (no client-side selection workflow at this stage -- that is a v3 feature per REQUIREMENTS out-of-scope).
-
-### Procurement Savings Calculation
-
-The portal displays a "savings" column computed from `retailPrice - costPrice` for each procurement item. This is calculated at render time in the Astro component, not stored in Sanity. The total savings across all items is displayed as a summary. This makes the value proposition of the designer's trade pricing visible to the client.
-
-## Sanity Studio Configuration Changes
-
-### Field Groups on Project Document
-
-```
-Content (default) | Portal | Milestones | Procurement | Proposals
-```
-
-Add 3 new field groups to the project schema to keep the editing experience organized. The "Portal" group retains the client reference, portalToken, portalEnabled, and pipelineStage. Milestones, procurement, and proposals each get their own group tab so Liz does not scroll through one enormous form.
-
-### Studio Structure Update
+### `App.Locals` Extension
 
 ```typescript
-// sanity.config.ts structure update
-S.list()
-  .title("Content")
-  .items([
-    S.listItem().title("Site Settings").id("siteSettings")
-      .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
-    S.divider(),
-    S.documentTypeListItem("client").title("Clients"),      // NEW
-    S.documentTypeListItem("project").title("Portfolio Projects"),
-    S.documentTypeListItem("service").title("Services"),
-  ])
+// src/env.d.ts
+declare namespace App {
+  interface Locals {
+    // v2.0: clientId (may still exist if Phase 5 uses it)
+    // v2.5: unified userId + role
+    userId: string | undefined;
+    userRole: 'client' | 'contractor' | 'buildingManager' | undefined;
+    // Keep clientId as an alias pointing to userId when role === 'client'
+    // to avoid breaking Phase 5/6 portal pages that read locals.clientId
+    clientId: string | undefined;
+  }
+}
 ```
 
-**Clients appear above Projects** in the Studio sidebar because Liz should create a client before creating/linking a project. This ordering reinforces the workflow.
+---
+
+## Middleware Evolution
+
+### v2.5 Middleware Strategy
+
+The middleware must guard three namespaces and inject the right role into `locals`. It also enforces access rules (building manager can only see commercial projects).
+
+```typescript
+// src/middleware.ts
+import { defineMiddleware } from "astro:middleware";
+import { redis } from "./lib/redis";
+import { decodeSession } from "./lib/session";
+
+const PUBLIC_PATHS = [
+  "/portal/login",
+  "/portal/verify",
+  "/contractor/login",
+  "/contractor/verify",
+  "/manager/login",
+  "/manager/verify",
+];
+
+const ROLE_NAMESPACES: Record<string, 'client' | 'contractor' | 'buildingManager'> = {
+  "/portal": "client",
+  "/contractor": "contractor",
+  "/manager": "buildingManager",
+};
+
+export const onRequest = defineMiddleware(async (context, next) => {
+  const pathname = context.url.pathname;
+
+  // Determine which namespace this request is in
+  const namespace = Object.keys(ROLE_NAMESPACES).find(ns =>
+    pathname.startsWith(ns)
+  );
+
+  // Not a portal route — pass through
+  if (!namespace) return next();
+
+  // Public portal paths (login, verify) — pass through
+  if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) return next();
+
+  // Validate session
+  const sessionToken = context.cookies.get("portal_session")?.value;
+  if (!sessionToken) {
+    const loginPath = namespace === "/portal" ? "/portal/login"
+      : namespace === "/contractor" ? "/contractor/login"
+      : "/manager/login";
+    return context.redirect(loginPath);
+  }
+
+  const raw = await redis.get<string>(`session:${sessionToken}`);
+  const session = decodeSession(raw);
+
+  if (!session) {
+    context.cookies.delete("portal_session", { path: "/" });
+    const loginPath = namespace === "/portal" ? "/portal/login"
+      : namespace === "/contractor" ? "/contractor/login"
+      : "/manager/login";
+    return context.redirect(loginPath);
+  }
+
+  // Role-namespace mismatch: a client trying to access /contractor/* or vice versa
+  const expectedRole = ROLE_NAMESPACES[namespace];
+  if (session.role !== expectedRole) {
+    // Redirect to their correct namespace, not to a generic error
+    const correctLogin = session.role === "client" ? "/portal/login"
+      : session.role === "contractor" ? "/contractor/login"
+      : "/manager/login";
+    return context.redirect(correctLogin);
+  }
+
+  // Inject into locals
+  context.locals.userId = session.userId;
+  context.locals.userRole = session.role;
+  // Backward compat alias for client portal pages written in Phase 5/6
+  if (session.role === "client") {
+    context.locals.clientId = session.userId;
+  }
+
+  return next();
+});
+```
+
+---
+
+## Magic Link Action Evolution
+
+### Updated `requestMagicLink` Action
+
+The action needs to accept which portal type the user is logging into, look up the right document type, and store the role in the session.
+
+```typescript
+// src/actions/index.ts — updated requestMagicLink
+requestMagicLink: defineAction({
+  accept: "form",
+  input: z.object({
+    email: z.string().email(),
+    portalType: z.enum(["client", "contractor", "buildingManager"]).default("client"),
+  }),
+  handler: async (input) => {
+    // Rate limit by email
+    const { success } = await magicLinkRatelimit.limit(`magic:${input.email.toLowerCase()}`);
+    if (!success) throw new ActionError({ code: "TOO_MANY_REQUESTS", message: "..." });
+
+    // Look up the right persona document type
+    const user = await getUserByEmail(input.email, input.portalType);
+
+    if (user) {
+      const token = generatePortalToken(32);
+      // Store both userId and role in the magic link token
+      await redis.set(`magic:${token}`, JSON.stringify({
+        userId: user._id,
+        role: input.portalType,
+      }), { ex: 900 }); // 15 min TTL
+
+      await resend.emails.send({
+        from: "La Sprezzatura <noreply@send.lasprezz.com>",
+        to: [input.email],
+        subject: "Your La Sprezzatura Portal Access",
+        html: buildMagicLinkEmail(token, input.portalType),
+      });
+    }
+
+    return { success: true }; // Always succeed (anti-enumeration)
+  },
+}),
+```
+
+### New GROQ Helper: `getUserByEmail`
+
+```typescript
+// src/sanity/queries.ts — addition
+export async function getUserByEmail(
+  email: string,
+  portalType: "client" | "contractor" | "buildingManager"
+) {
+  const type = portalType === "client" ? "client"
+    : portalType === "contractor" ? "contractor"
+    : "buildingManager";
+
+  return sanityClient.fetch(
+    `*[_type == $type && email == $email][0] { _id, name, email }`,
+    { type, email }
+  );
+}
+```
+
+### Verify Page (Unchanged in Logic, Updated to Handle JSON Payload)
+
+The `/portal/verify`, `/contractor/verify`, and `/manager/verify` pages share the same verification logic. Because the magic link token now stores a JSON payload (userId + role), the verify page reads both and redirects to the correct dashboard.
+
+All three verify routes can point to a single implementation — either a shared layout or a single `/verify` route that checks which namespace the token came from.
+
+**Recommended:** Create one shared `/verify` page at `/portal/verify` and redirect all magic links there, passing the `portalType` as a query param in the email link. This keeps verify logic in one place.
+
+```
+Magic link URL: /portal/verify?token=XXX&type=contractor
+→ Verify, create session with role=contractor
+→ Redirect to /contractor/dashboard
+```
+
+---
+
+## Data Access Rules (GROQ Projections by Role)
+
+The key security constraint: **contractors see client name and address only — no phone, email, or contact info.** This is enforced in the GROQ query projection, not in the frontend.
+
+### Contractor Portal Query
+
+```groq
+// Get projects where contractor is assigned
+// Called with { contractorId }
+*[_type == "project" && portalEnabled == true
+  && contractors[].contractor._ref match $contractorId] {
+  _id,
+  title,
+  // Client: name and address ONLY — no email, phone, preferredContact
+  "clients": clients[] {
+    "name": client->name,
+    "address": client->address,
+    "isPrimary": isPrimary
+  },
+  // Project address for on-site navigation
+  projectAddress {
+    street, city, state, zip
+    // adminNotes intentionally excluded — Liz's internal notes
+  },
+  pipelineStage,
+  // Contractor's own scope on this project
+  "myRole": contractors[contractor._ref == $contractorId][0].role,
+  "myScope": contractors[contractor._ref == $contractorId][0].scopeNotes,
+  // Floor plans, scope docs, estimates
+  contractorDocuments[] {
+    _key, title, documentType,
+    "fileUrl": file.asset->url,
+    notes
+  }
+}
+```
+
+**What is explicitly excluded from contractor queries:**
+- `clients[].client->email`
+- `clients[].client->phone`
+- `clients[].client->preferredContact`
+- `milestones` (client-facing workflow, not contractor concern)
+- `procurement` (client cost data)
+- `buildingDocuments`
+- `updateLog`
+- Any field with "Internal" in its description
+
+### Building Manager Portal Query
+
+```groq
+// Get commercial projects for this building manager
+// Called with { buildingManagerId }
+*[_type == "project" && portalEnabled == true
+  && projectType == "commercial"
+  && buildingManager._ref == $buildingManagerId] {
+  _id,
+  title,
+  projectAddress { street, city, state, zip },
+  pipelineStage,
+  // Building docs: COIs, permits, legal
+  buildingDocuments[] {
+    _key, title, documentType,
+    "fileUrl": file.asset->url,
+    expirationDate, notes
+  },
+  // Contractor info available for building manager to request
+  // (they can see contractor names and trades, not private contact info)
+  "contractors": contractors[] {
+    "name": contractor->name,
+    "trade": contractor->trade,
+    "license": contractor->licenseNumber
+    // No phone or email — building manager must request contact info from Liz
+  }
+}
+```
+
+**Building manager cannot see:**
+- Client name, email, phone, or address
+- Procurement data
+- Milestones (client-facing)
+- Contractor phone/email (must request from Liz)
+
+---
+
+## Engagement Type: Portal Section Gating
+
+The `engagementType` field on the project schema (Full / Styling / Carpet) controls which sections render in the client portal. This is a display rule, not a data rule — all sections can have data, only some sections render.
+
+### Engagement Type Feature Matrix
+
+| Section | Full Interior Design | Styling & Refreshing | Carpet Curating |
+|---------|---------------------|----------------------|-----------------|
+| Milestones | YES | YES | YES (simplified) |
+| Procurement table | YES | YES (soft goods, no major construction) | YES (carpet items only) |
+| Savings summary | YES | YES | YES |
+| Contractor documents | YES | NO (no contractors) | NO |
+| Building documents | Commercial only | NO | NO |
+| Budget proposals | YES | YES | YES |
+
+### Implementation Pattern
+
+The client portal project detail page reads `engagementType` from the GROQ result and conditionally renders sections:
+
+```astro
+---
+// src/pages/portal/project/[id].astro
+const { engagementType, projectType } = project;
+const showContractorDocs = engagementType === "full";
+const showBuildingDocs = projectType === "commercial" && engagementType === "full";
+---
+
+<MilestoneTimeline milestones={project.milestones} {engagementType} />
+<ProcurementTable items={project.procurement} />
+{showContractorDocs && <ContractorInfo contractors={project.contractors} />}
+{showBuildingDocs && <BuildingDocuments docs={project.buildingDocuments} />}
+```
+
+**Do not branch on engagement type in Sanity queries** — fetch all fields and conditionally render in the template. This keeps GROQ simple and allows Liz to change engagement type without data loss.
+
+---
+
+## New Portal Components
+
+All new components follow the existing Astro component convention: server-rendered, no client-side JS unless interactive.
+
+```
+src/components/
+├── portal/
+│   ├── PortalLayout.astro          existing
+│   ├── StatusBadge.astro            existing
+│   ├── MilestoneTimeline.astro      existing (modified for engagementType prop)
+│   ├── ProcurementTable.astro       existing (Phase 6)
+│   ├── ArtifactList.astro           existing (Phase 6)
+│   ├── ContractorInfo.astro         NEW — client portal: shows contractor name + on-site schedule only
+│   └── ConfidentialityNotice.astro  existing (Phase 6)
+├── contractor/
+│   ├── ContractorLayout.astro       NEW — layout shell for contractor portal (reuses PortalLayout pattern)
+│   ├── ProjectCard.astro            NEW — card showing project title, address, pipeline stage
+│   ├── DocumentList.astro           NEW — renders contractorDocuments (floor plans, scope, estimate)
+│   └── ScopeSection.astro           NEW — shows contractor's specific role + scope notes for this project
+└── manager/
+    ├── ManagerLayout.astro          NEW — layout shell for building manager portal
+    ├── ProjectCard.astro            NEW — commercial project card (or reuse contractor/ProjectCard with variant prop)
+    ├── BuildingDocumentList.astro   NEW — COIs, permits with expiration date highlighting
+    └── ContractorRoster.astro       NEW — contractor names + trades (no contact info, with "request info" CTA)
+```
+
+**UX principle for contractor portal:** Contractors are not technical. The portal must be dead simple. One page per project. No tabs, no navigation, no configuration. Show: project name, address, their scope, and the documents. That's it. Design for someone checking it on a phone at a job site.
+
+---
+
+## Recommended File Structure (v2.5 Additions)
+
+```
+src/
+├── sanity/
+│   ├── schemas/
+│   │   ├── contractor.ts           NEW
+│   │   ├── buildingManager.ts      NEW
+│   │   ├── project.ts              MODIFIED: add projectType, engagementType (if not from Phase 5),
+│   │   │                           contractors[], buildingManager ref,
+│   │   │                           contractorDocuments[], buildingDocuments[]
+│   │   └── index.ts                MODIFIED: register contractor, buildingManager
+│   └── queries.ts                  MODIFIED: add getContractorProjects(), getBuildingManagerProjects(),
+│                                   getUserByEmail() updated to handle all 3 types
+├── lib/
+│   └── session.ts                  MODIFIED: add SessionPayload type, encodeSession(), decodeSession()
+│                                   (or NEW if Phase 5 didn't create this file)
+├── middleware.ts                   MODIFIED: multi-namespace guard, role injection
+├── actions/
+│   └── index.ts                    MODIFIED: requestMagicLink accepts portalType param
+├── pages/
+│   ├── portal/                     existing (client portal, minor engagement-type additions)
+│   │   └── project/
+│   │       └── [id].astro          MODIFIED: add engagementType conditional rendering
+│   ├── contractor/
+│   │   ├── login.astro             NEW: login page for contractors
+│   │   ├── verify.astro            NEW: (or redirect to /portal/verify?type=contractor)
+│   │   ├── dashboard.astro         NEW: list of assigned projects
+│   │   └── project/
+│   │       └── [id].astro          NEW: contractor detail view (scope + docs, redacted client info)
+│   └── manager/
+│       ├── login.astro             NEW: login page for building managers
+│       ├── verify.astro            NEW: (or redirect to /portal/verify?type=buildingManager)
+│       ├── dashboard.astro         NEW: list of commercial projects for this building
+│       └── project/
+│           └── [id].astro          NEW: building manager view (building docs + contractor roster)
+└── components/
+    ├── portal/
+    │   └── ContractorInfo.astro    NEW: client-facing view of contractor (name + schedule only)
+    ├── contractor/
+    │   ├── ContractorLayout.astro  NEW
+    │   ├── ProjectCard.astro       NEW
+    │   ├── DocumentList.astro      NEW
+    │   └── ScopeSection.astro      NEW
+    └── manager/
+        ├── ManagerLayout.astro     NEW
+        ├── ProjectCard.astro       NEW
+        ├── BuildingDocumentList.astro NEW
+        └── ContractorRoster.astro  NEW
+```
+
+---
+
+## Data Flow
+
+### Contractor Magic Link Authentication
+
+```
+Liz sends contractor their portal link
+    |
+    v
+Contractor visits /contractor/login
+    |
+    v
+Enters email → POST to requestMagicLink { email, portalType: 'contractor' }
+    |
+    v
+Action: look up *[_type == "contractor" && email == $email]
+    |
+    +-- if found: generate token, store { userId: contractor._id, role: 'contractor' } in Redis
+    |             send magic link email to contractor
+    +-- if not:   return success (anti-enumeration — same as client flow)
+    |
+    v
+Contractor clicks link → /portal/verify?token=XXX&type=contractor
+    |
+    v
+Verify page: redis.getdel(`magic:${token}`) → JSON payload
+    |
+    v
+Create session: redis.set(`session:${sessionToken}`, JSON.stringify({ userId, role: 'contractor' }))
+    |
+    v
+Set cookie, redirect to /contractor/dashboard
+```
+
+### Contractor Project Detail View
+
+```
+GET /contractor/project/[id]
+    |
+    v
+Middleware: validate session, confirm role === 'contractor', inject locals.userId
+    |
+    v
+GROQ query: fetch project where id === $id
+            AND contractors[].contractor._ref matches locals.userId
+            (security check — contractor can only see projects they're assigned to)
+    |
+    v
+Projection: client name+address ONLY, projectAddress, myScope, contractorDocuments[]
+    |
+    v
+Render: ContractorLayout > ScopeSection + DocumentList
+```
+
+### Engagement Type Portal Gating
+
+```
+GET /portal/project/[id]
+    |
+    v
+Middleware: validate client session, inject clientId
+    |
+    v
+GROQ query: fetch project with all portal fields (milestones, procurement, contractors, etc.)
+    |
+    v
+Page reads: project.engagementType, project.projectType
+    |
+    v
+Conditional render:
+  engagementType === "full"    → show milestones + procurement + contractor info
+  engagementType === "styling" → show milestones + procurement (no contractors shown)
+  engagementType === "carpet"  → show milestones + procurement (carpet items only label)
+  projectType === "commercial" → show building manager notice (not client-facing detail)
+```
+
+---
+
+## Build Order (Dependency Chain)
+
+Build order respects the rule: no downstream feature can be built until its upstream data and auth exists.
+
+### Layer 1: Schema (No Runtime Dependencies)
+
+1. Create `src/sanity/schemas/contractor.ts`
+2. Create `src/sanity/schemas/buildingManager.ts`
+3. Modify `project.ts`: add `projectType`, `engagementType` (confirm Phase 5 status), `contractors[]`, `buildingManager` ref, `contractorDocuments[]`, `buildingDocuments[]`
+4. Register new schemas in `index.ts`
+5. Update `sanity.config.ts` structure tool: add Contractors + Building Managers to sidebar
+
+**Why first:** All subsequent layers depend on these document types existing. Liz cannot enter test data until schemas are deployed to Sanity Studio.
+
+### Layer 2: Session + Auth Plumbing
+
+1. Update `src/lib/session.ts`: add `SessionPayload` type, `encodeSession()`, `decodeSession()` with backward compat
+2. Update `src/env.d.ts`: extend `App.Locals` to include `userId`, `userRole`, backward-compat `clientId`
+3. Update `src/middleware.ts`: multi-namespace routing, role enforcement
+4. Update `requestMagicLink` action: accept `portalType` param, look up right document type
+5. Create/update `getUserByEmail()` in `queries.ts` to support all three types
+
+**Why second:** Route pages need middleware working correctly before any portal page can render. Session model must be finalized before pages read from `locals`.
+
+### Layer 3: Contractor Portal Pages + Components
+
+1. Create `src/pages/contractor/login.astro`
+2. Create `src/pages/contractor/verify.astro` (or route to shared verify)
+3. Create GROQ query `getContractorProjects()` with redacted client info projection
+4. Create `src/components/contractor/` component tree (ContractorLayout, ProjectCard, DocumentList, ScopeSection)
+5. Create `src/pages/contractor/dashboard.astro`
+6. Create `src/pages/contractor/project/[id].astro`
+
+**Why third:** Auth plumbing must work before portal pages can be built and tested end-to-end.
+
+### Layer 4: Building Manager Portal Pages + Components
+
+1. Create `src/pages/manager/login.astro`, `verify.astro`
+2. Create GROQ query `getBuildingManagerProjects()` with commercial-only + no-client-info projection
+3. Create `src/components/manager/` component tree (ManagerLayout, ProjectCard, BuildingDocumentList, ContractorRoster)
+4. Create `src/pages/manager/dashboard.astro`
+5. Create `src/pages/manager/project/[id].astro`
+
+**Why fourth:** Follows contractor portal as a parallel pattern. Can be built alongside Layer 3 if two workstreams are running.
+
+### Layer 5: Engagement Type UI + Client Portal Integration
+
+1. Verify `engagementType` field is on project schema (from Phase 5 or added in Layer 1)
+2. Update client portal project detail page to conditionally render sections by engagement type
+3. Add `ContractorInfo.astro` to client portal (shows contractor name + schedule — not contact info)
+4. Test: Full project → all sections visible; Styling project → no contractor section; Carpet project → simplified milestone + procurement
+
+**Why fifth (last):** This is an additive feature on top of the already-working client portal. All new data (contractor assignments, documents) must exist in Sanity before it can be displayed in the client-facing view.
+
+---
 
 ## Integration Points
 
+### Existing Code: What Gets Modified
+
+| File | Change | Risk |
+|------|--------|------|
+| `src/middleware.ts` | Multi-namespace routing, role injection | MEDIUM — Middleware changes affect all portal routes. Must not break existing client sessions. |
+| `src/actions/index.ts` | Add `portalType` param to `requestMagicLink` | LOW — Additive param with default of `'client'`. Existing client flow unchanged if default is correct. |
+| `src/sanity/schemas/project.ts` | Add new fields | LOW — Additive. Existing project documents unaffected. |
+| `src/sanity/schemas/index.ts` | Register 2 new schemas | LOW — Additive. |
+| `src/sanity/queries.ts` | Add `getContractorProjects()`, `getBuildingManagerProjects()`, update `getUserByEmail()` | LOW — New functions. |
+| `src/lib/session.ts` | Extend session payload shape | MEDIUM — Breaking change to Redis session values. Handle with backward-compat decode. |
+| `src/env.d.ts` | Extend `App.Locals` | LOW — TypeScript only. |
+| `src/pages/portal/project/[id].astro` | Conditional rendering by `engagementType` | LOW — Reads a new field, conditionally renders new sections. |
+
+### Existing Code: What Stays Unchanged
+
+| File | Reason |
+|------|--------|
+| `src/pages/portal/login.astro` | New portal types get their own login pages |
+| `src/pages/portal/dashboard.astro` | Client dashboard is unchanged |
+| `src/lib/generateToken.ts` | Reused as-is for all magic link tokens |
+| `src/lib/redis.ts` | Shared Redis client, no changes needed |
+| `src/lib/rateLimit.ts` | Magic link rate limiter works for all portal types |
+| `src/components/portal/PortalLayout.astro` | Clients still use this. Contractor/manager get their own layout variants. |
+| `src/components/portal/StatusBadge.astro` | Reused in contractor and client portal cards |
+| All public site pages | Zero dependency on portal personas |
+
 ### External Services
 
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Sanity (read) | `sanity:client` from `@sanity/astro`, GROQ queries in `src/sanity/queries.ts` | Existing pattern. Expand portal query to include new fields. No changes to client config. |
-| Sanity (write) | `@sanity/client` with write token in `src/sanity/mutations.ts` | **NEW.** Requires `SANITY_API_WRITE_TOKEN` env var. Used only in `sendUpdate` server action. Create a Sanity API token with "Editor" role in sanity.io/manage. |
-| Resend | `resend` SDK in server actions | Existing pattern. Add portal update email template. Same API key, same `from` address. |
-| Fantastical Openings | External link (`https://fantastical.app/design-b1eD/...`) | **No embed, no API, no iframe.** Fantastical Openings does not provide an embeddable widget. Integration is a styled button linking to the Fantastical booking page. The existing contact page already has this link -- the Cal.com embed and dependency should simply be removed. |
+| Service | Change | Notes |
+|---------|--------|-------|
+| Upstash Redis | Session value format changes from plain string to JSON | Backward-compat decode handles existing client sessions |
+| Sanity | Two new document types registered | No Studio config file changes needed beyond schema registration and desk structure update |
+| Resend | Same magic link email template, same sender | `portalType` can optionally customize subject line ("Your Contractor Portal Access") |
 
-### Fantastical Openings Integration Detail
+---
 
-Fantastical Openings does not offer an embeddable calendar widget like Cal.com does. The integration is strictly an **external link** to Liz's Fantastical booking page. The current contact page already links to `https://fantastical.app/design-b1eD/meet-with-elizabeth-olivier`. The v2.0 change is:
+## Security Constraints
 
-1. Remove the `CalBooking.tsx` component (currently unused -- the page already uses a link instead)
-2. Remove the `@calcom/embed-react` dependency from `package.json`
-3. Keep the existing Fantastical link button on the contact page (already implemented)
+These are hard requirements, not suggestions.
 
-This is a cleanup task, not a new integration.
+**Contractor cannot see client contact info — enforced in GROQ projection, not in frontend.**
 
-### Internal Boundaries
+The GROQ query for contractor portal must never include `client->email`, `client->phone`, or `client->preferredContact`. The `contractorDocuments` projection also must exclude `adminNotes` on the project address (internal access notes like gate codes). These fields are physically absent from the query result — there is nothing to accidentally render.
 
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Portal page -> Sanity (read) | GROQ query via `sanity:client` | Expanded query, same read pattern. SSR, no caching (clients see fresh data). |
-| sendUpdate action -> Sanity (write) | Mutation via `@sanity/client` with write token | New boundary. Write token scoped to server actions only. Append-only pattern (updateLog). |
-| sendUpdate action -> Resend | `resend.emails.send()` | Same pattern as contact form. New email template for portal updates. |
-| Studio custom action -> Astro action endpoint | HTTP POST to `/_actions/sendUpdate` | Studio document action (React component) calls the Astro action endpoint. Requires the action endpoint to accept the call (may need CORS or a shared secret for auth). |
-| Project document -> Client document | Sanity reference (`{ _type: "reference", _ref: clientId }`) | Standard Sanity reference. GROQ dereferences with `client->`. |
+**Contractor can only see projects they're assigned to.**
+
+The contractor project query must filter on `contractors[].contractor._ref == $contractorId`. A contractor who guesses a valid project ID (e.g., `/contractor/project/abc123`) must get a 404, not the project data. The GROQ filter `&& contractors[].contractor._ref match $contractorId` enforces this. Never fetch by ID alone in the contractor portal — always require the assignment check.
+
+**Building manager can only see commercial projects.**
+
+The building manager query must filter `projectType == "commercial"`. A building manager URL like `/manager/project/[residential-project-id]` must 404.
+
+**Role-namespace enforcement in middleware.**
+
+A contractor with a valid session must not be able to access `/portal/*` (client routes). The middleware role-namespace check handles this — a contractor session token redirects to `/contractor/login` if they hit `/portal/*`.
+
+**Magic link email links to the correct portal namespace.**
+
+The magic link email sent to a contractor must link to `/portal/verify?token=XXX&type=contractor`, not to `/portal/verify?token=XXX`. The `type` param ensures the verify page redirects to `/contractor/dashboard` after successful authentication, not `/portal/dashboard`.
+
+---
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Single `/portal/[role]/...` Namespace
+
+**What people do:** Route all portals under `/portal/contractor/[id]`, `/portal/manager/[id]`, sharing the namespace and extracting role from the URL.
+
+**Why it is wrong for this project:** Contractors and building managers have bookmarks. A `/contractor/` URL is self-describing. Mixing portals under `/portal/` complicates middleware (must inspect URL segment to determine expected role) and gives contractors a confusing URL that includes "portal" — a word they associate with the client-facing product.
+
+**Do this instead:** Separate route namespaces per persona. `/contractor/*`, `/manager/*`, `/portal/*`. Middleware guards each independently.
+
+### Anti-Pattern 2: Filtering Client Data in the Frontend
+
+**What people do:** Fetch the full project including client email, phone, etc., then conditionally hide those fields in the React/Astro component.
+
+**Why it is wrong:** The full data is still in the HTML source. A technically curious contractor opens DevTools and sees the client's phone number. It is also fragile — a future component change could accidentally expose the field.
+
+**Do this instead:** The GROQ projection for contractor queries never fetches those fields. If it's not in the query result, it can't be shown. Defense in depth: the Sanity API token used for reads has the minimum necessary permissions.
+
+### Anti-Pattern 3: Building the Contractor Portal as a React SPA
+
+**What people do:** Add React state management, client-side routing, and complex interactive features to the contractor portal.
+
+**Why it is wrong:** Contractors check their portal on a phone at a job site. They need to see their scope and download a PDF. Zero JavaScript, instant load, mobile-first. The Astro SSR pattern already used for the client portal is correct.
+
+**Do this instead:** Astro SSR pages with zero client-side JavaScript. For file downloads (floor plans, scope), use `<a href={fileUrl} download>` — no JS needed.
+
+### Anti-Pattern 4: Separate Magic Link Implementations Per Portal Type
+
+**What people do:** Copy the `requestMagicLink` action into `requestContractorMagicLink` and `requestManagerMagicLink`, making three nearly-identical implementations.
+
+**Why it is wrong:** Three action handlers to maintain. Bug fixes must be applied three times. Drift between implementations is inevitable.
+
+**Do this instead:** One `requestMagicLink` action with a `portalType` enum parameter. The lookup function dispatches to the correct Sanity document type. The session payload carries the role. Single implementation, single point of maintenance.
+
+### Anti-Pattern 5: Requiring `projectType == "commercial"` Only in the Building Manager GROQ Query
+
+**What people do:** Rely solely on the GROQ query filter to prevent residential projects from appearing in the building manager portal.
+
+**Why it is wrong:** If a project is incorrectly marked `commercial` in Sanity, it appears in the building manager portal, potentially leaking residential client data. Defense in depth requires the middleware or page to double-check before rendering.
+
+**Do this instead:** Add a server-side guard in the page itself: if a project fetched for the building manager portal is residential (`projectType !== "commercial"`), return 404. The GROQ filter is the first line; the page guard is the second.
+
+---
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 1-10 active projects (launch) | Current architecture is fine. All data on single project documents. GROQ queries are fast. Sanity free tier handles it easily. |
-| 10-50 active projects | No changes needed. 50 project documents with inline arrays is trivial for Sanity. Consider adding a "Projects Dashboard" view in Studio with custom ordering/filtering. |
-| 50+ active projects | Unlikely for a solo interior design studio. If reached: consider extracting procurement items to a separate document type with references for cross-project vendor reporting. But do not build this now. |
+| 1-3 contractors (launch) | Current architecture is fine. One Redis instance, one Sanity dataset, no per-contractor isolation needed. |
+| 3-20 contractors | No architectural change. Sanity handles 20 contractor documents trivially. Redis sessions are per-user, not per-role. |
+| Building manager access (commercial projects only) | One-to-one: one building manager per building. At 3-5 commercial projects, this is a trivial number of building manager users. |
+| 20+ contractors | Consider adding contractor specialization filtering in the dashboard if Liz manages many contractors across many projects. Not needed at launch. |
 
-### Scaling Priorities
+**First bottleneck:** None anticipated. The portal handles 3-10 concurrent users at peak (clients, contractors, managers checking during an installation day). Vercel serverless handles this trivially.
 
-1. **First concern: Studio editing performance.** Large inline arrays (50+ procurement items) can slow down the Studio editing experience. Mitigation: Sanity's array UI handles this fine up to ~100 items. For an interior design project, 50 items is a realistic maximum. If a single project has 100+ procurement items, consider paginating the array display or splitting into categories.
-
-2. **Second concern: Portal page render time.** A single GROQ query fetching all portal data (milestones + procurement + proposals) for one project is fast -- sub-100ms. This will not be a bottleneck. The rate limiter (10 requests/minute/IP) provides adequate protection against abuse.
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Separate Document Types for Everything
-
-**What people do:** Create separate Sanity document types for `milestone`, `procurementItem`, `budgetProposal`, and `updateLogEntry`, then use arrays of references on the project document.
-
-**Why it is wrong for this project:** It fragments the editing experience. Liz would need to create milestone documents in a separate Studio list, then link them to the project. It creates orphan document risk (milestones without projects). It makes GROQ queries more complex (multiple joins). And it provides zero benefit when milestones are never queried independently.
-
-**Do this instead:** Inline arrays of objects on the project document. One screen, one document, all project data together.
-
-### Anti-Pattern 2: Client-Side State for Portal
-
-**What people do:** Add React state management (useState, context, or a state library) to the portal page for tabs, filters, or interactive features, turning it into a client-side React app.
-
-**Why it is wrong for this project:** The portal is a read-only status display. The client does not interact with it beyond viewing. SSR with Astro components (zero JS shipped to the client) is ideal -- fast, simple, no hydration issues. The only interactive element is the "Send Update" form, which can use a standard HTML form submission.
-
-**Do this instead:** Keep the portal as pure Astro SSR components. If you later need interactivity (selection approval, comments), add targeted React islands with `client:load` only for those specific components.
-
-### Anti-Pattern 3: Building Email Templates with React Email
-
-**What people do:** Add `react-email` as a dependency and build email templates as React components, rendered server-side to HTML.
-
-**Why it is wrong for this project:** React Email is a great tool, but adding it for a single email template (portal update) is dependency bloat. The existing contact form already uses inline HTML strings for email templates and they work well. Consistency with the existing pattern is more valuable than architectural elegance.
-
-**Do this instead:** Build the portal update email template as a TypeScript function that returns an HTML string, matching the pattern already used in `src/actions/index.ts`. Extract the branded email chrome (header, footer, colors) into a shared helper if the templates start duplicating.
-
-### Anti-Pattern 4: Using Sanity Webhooks for the "Send Update" Feature
-
-**What people do:** Set up a Sanity webhook that fires when a project document is mutated, then detect if the mutation was a "send update" trigger and auto-send the email.
-
-**Why it is wrong for this project:** Webhooks fire on every document mutation -- any field change, any save. Detecting "Liz clicked Send Update" from a generic mutation event requires fragile heuristics (did the updateLog array grow? was it a manual edit or an action?). It is unreliable and overcomplicated.
-
-**Do this instead:** Use an explicit action trigger. Liz clicks a button (Studio document action) that calls the Astro server action endpoint. The action sends the email and logs it. No ambiguity, no false triggers.
-
-## Build Order (Dependency Chain for v2.0)
-
-### Layer 1: Schema + Data Model (no runtime dependencies)
-
-1. Create `client` schema (`src/sanity/schemas/client.ts`)
-2. Add new field groups to `project` schema
-3. Add `milestones` array field to project
-4. Add `procurement` array field to project
-5. Add `budgetProposals` array field to project
-6. Add `updateLog` array field to project (readOnly)
-7. Add `client` reference field to project
-8. Register `client` in schema index
-9. Update Studio structure (sanity.config.ts) to show Clients
-
-**Why first:** Schemas must exist before data can be entered or queried. No code changes depend on runtime behavior.
-
-### Layer 2: Portal Display Components (depends on Layer 1)
-
-1. Expand GROQ portal query to fetch new fields
-2. Build `MilestoneTimeline` v2 (custom milestones, not generic stages)
-3. Build `ProcurementTable` component
-4. Build `BudgetProposal` component
-5. Update `[token].astro` to compose new components
-6. Update `PortalLayout.astro` if needed (section nav, etc.)
-
-**Why second:** Display components can be built and visually reviewed as soon as schemas exist and test data is entered. No external service dependencies.
-
-### Layer 3: Send Update + Write-Back (depends on Layers 1-2)
-
-1. Create `src/sanity/mutations.ts` (write client)
-2. Create portal update email template (`src/lib/email/portalUpdate.ts`)
-3. Add `sendUpdate` server action to `src/actions/index.ts`
-4. Add `SANITY_API_WRITE_TOKEN` to `.env` and Vercel env vars
-5. Build Studio document action for "Send Update" trigger (or admin form)
-6. Test end-to-end: trigger -> email sent -> log entry written
-
-**Why third:** Requires both the data model (Layer 1) and the portal state to snapshot (Layer 2) to be in place. Also requires Resend and the write token to be configured.
-
-### Layer 4: Cleanup + Polish
-
-1. Remove `@calcom/embed-react` from `package.json`
-2. Remove `CalBooking.tsx` component
-3. Verify Fantastical link on contact page is sufficient
-4. Review portal mobile responsiveness
-5. Enter real project data for testing
-
-**Why last:** Cleanup tasks have no downstream dependencies. Can be done in any order.
-
-## Environment Variables (New)
-
-| Variable | Purpose | Where |
-|----------|---------|-------|
-| `SANITY_API_WRITE_TOKEN` | Server-side Sanity mutations (update log) | `.env` + Vercel env vars |
-
-All other env vars (Sanity project ID, dataset, Resend API key) are already configured.
+---
 
 ## Sources
 
-- [Sanity Technical Limits](https://www.sanity.io/docs/content-lake/technical-limits) -- Document size (32MB), attribute limits (1,000 on free/growth)
-- [Sanity: Deciding Fields and Relationships](https://www.sanity.io/docs/developer-guides/deciding-fields-and-relationships) -- When to use inline objects vs document types
-- [Sanity Array Type](https://www.sanity.io/docs/studio/array-type) -- Array field configuration, nested array restrictions
-- [Sanity Reference Type](https://www.sanity.io/docs/studio/reference-type) -- Cross-document references
-- [Sanity Mutation API](https://www.sanity.io/docs/http-reference/mutation) -- Server-side write operations
-- [Sanity Transactions](https://www.sanity.io/docs/transactions) -- Atomic mutations
-- [Astro Actions](https://docs.astro.build/en/guides/actions/) -- Server action definitions and endpoints
-- [Resend + Astro Integration](https://resend.com/docs/send-with-astro) -- Email sending from Astro server actions
-- [Fantastical Openings Help](https://flexibits.com/fantastical/help/openings) -- Booking page (link-only, no embed widget)
-- [Flexibits Account Openings](https://flexibits.com/account/help/openings) -- Fantastical scheduling page management
+- Phase 5 RESEARCH.md (`/Users/paulalbert/Dropbox/GitHub/la-sprezzatura/.planning/phases/05-data-foundation-auth-and-infrastructure/05-RESEARCH.md`) — Session model, middleware pattern, magic link auth implementation
+- Existing `src/middleware.ts` pattern (Phase 5 implementation) — Middleware guard structure
+- Existing `src/actions/index.ts` — Action definition pattern, Zod schema, ActionError
+- Existing `src/sanity/schemas/project.ts` — Current schema structure
+- Existing `src/sanity/queries.ts` — GROQ query patterns
+- [Astro Middleware Docs](https://docs.astro.build/en/guides/middleware/) — `defineMiddleware`, `locals`, `pathname.startsWith()`
+- [Sanity Reference Type](https://www.sanity.io/docs/studio/reference-type) — Reference fields, GROQ dereferencing with `->`
+- [Sanity Conditional Hidden/ReadOnly](https://www.sanity.io/docs/conditional-fields) — `hidden: ({ parent }) => ...` pattern for commercial-only fields
+- [Sanity File Type](https://www.sanity.io/docs/file-type) — File upload fields for contractor/building documents
+- [Upstash Redis GETDEL](https://upstash.com/docs/redis/sdks/ts/commands/string/getdel) — Atomic magic link token consumption
 
 ---
-*Architecture research for: La Sprezzatura v2.0 Client Portal Platform*
-*Researched: 2026-03-15*
+
+*Architecture research for: La Sprezzatura v2.5 — Contractor Portal, Building Manager Portal, Engagement Types, Residential/Commercial Classification*
+*Researched: 2026-03-16*
