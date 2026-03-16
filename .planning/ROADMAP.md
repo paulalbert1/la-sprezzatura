@@ -109,12 +109,14 @@ Plans:
   2. Liz uploads a new version of a design board artifact in Sanity Studio; the client sees the new version as current and previous versions visually muted, and can approve/select versions with their decisions recorded in a timestamped log
   3. Liz marks the final milestone complete and generates a close document; the client sees the project as completed but can still access it, and Liz can later reopen it for warranty work that the client can submit through the portal
   4. The portal displays a confidentiality notice about not sharing the access link, and clients can submit notes at artifact review points and milestone checkpoints
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
-- [ ] 06-03: TBD
+- [ ] 06-01-PLAN.md -- Schema extensions (milestones, procurement, artifacts), utility libraries with tests, GROQ queries, and Sanity write client
+- [ ] 06-02-PLAN.md -- Project detail page, milestones section, procurement table, dashboard 30-day visibility filter
+- [ ] 06-03-PLAN.md -- Artifact section UI, approval/notes React forms, and Astro Actions for client interactions
+- [ ] 06-04-PLAN.md -- Wire artifacts into page, Sanity Studio document actions (Notify Client, Complete Project, Reopen)
+- [ ] 06-05-PLAN.md -- Close document PDF generation, warranty claim form, post-project features
 
 ### Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage
 **Goal**: The Sanity schema supports contractors, building managers, residential/commercial classification, and engagement type feature gating; the auth system handles multi-role sessions with namespace isolation; and private documents are stored in Vercel Blob with signed URLs -- all architectural decisions resolved before any portal UI is built
@@ -187,7 +189,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
 | 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
-| 6. Portal Features | v2.0 | 0/? | Not started | - |
+| 6. Portal Features | v2.0 | 0/5 | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/? | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
@@ -199,3 +201,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 *v2.0 roadmap created: 2026-03-16*
 *Restructured into v2.0/v2.5/v3.0: 2026-03-16*
 *Phase 5 plans created: 2026-03-16*
+*Phase 6 plans created: 2026-03-16*
