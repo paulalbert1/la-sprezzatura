@@ -1,0 +1,16 @@
+---
+import type { Milestone } from "../../lib/milestoneUtils";
+
+interface Props {
+  milestones: Milestone[];
+  pipelineStage: string;
+  isCompleted: boolean;
+}
+
+const { milestones, pipelineStage, isCompleted } = Astro.props;
+---
+
+<!-- Stub: fully implemented in Task 2 -->
+<section class="py-12 border-t border-stone-light/20">
+  <h2 class="font-heading text-xl font-light text-charcoal">Milestones</h2>
+</section>

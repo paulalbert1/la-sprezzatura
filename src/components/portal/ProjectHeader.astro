@@ -1,0 +1,39 @@
+---
+import StatusBadge from "./StatusBadge.astro";
+import { STAGE_META, type StageKey } from "../../lib/portalStages";
+
+interface Props {
+  project: {
+    title: string;
+    pipelineStage: string;
+    engagementType: string;
+  };
+}
+
+const { project } = Astro.props;
+
+const ENGAGEMENT_LABELS: Record<string, string> = {
+  "full-interior-design": "Full Interior Design",
+  "styling-refreshing": "Styling & Refreshing",
+  "carpet-curating": "Carpet Curating",
+};
+---
+
+<div class="text-center mb-8">
+  <h1
+    class="font-heading text-3xl md:text-4xl font-light text-charcoal mb-3"
+  >
+    {project.title}
+  </h1>
+  <div class="flex items-center justify-center gap-3 flex-wrap">
+    <StatusBadge
+      stage={STAGE_META[project.pipelineStage as StageKey]?.title || project.pipelineStage}
+      isComplete={project.pipelineStage === "closeout"}
+    />
+    {project.engagementType && (
+      <span class="text-xs text-stone uppercase tracking-widest font-body">
+        {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+      </span>
+    )}
+  </div>
+</div>

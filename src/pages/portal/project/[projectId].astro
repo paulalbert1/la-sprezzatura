@@ -1,0 +1,97 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../../components/portal/PortalLayout.astro";
+import ProjectHeader from "../../../components/portal/ProjectHeader.astro";
+import ConfidentialityBanner from "../../../components/portal/ConfidentialityBanner.astro";
+import PostProjectBanner from "../../../components/portal/PostProjectBanner.astro";
+import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
+import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
+import {
+  getProjectDetail,
+  getProjectsByClientId,
+} from "../../../sanity/queries";
+import {
+  isProjectCompleted,
+  isProjectReopened,
+} from "../../../lib/projectVisibility";
+
+// clientId injected by middleware (guaranteed by auth guard)
+const clientId = Astro.locals.clientId!;
+
+// Get projectId from dynamic route param
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/portal/dashboard");
+}
+
+// Fetch full project detail (scoped to this client)
+const project = await getProjectDetail(projectId, clientId);
+if (!project) {
+  return Astro.redirect("/portal/dashboard");
+}
+
+// Determine project state
+const isCompleted = isProjectCompleted(project);
+const isReopened = isProjectReopened(project);
+
+// Engagement type gating
+const showProcurement = project.engagementType === "full-interior-design";
+
+// Multi-project detection for "Back to Dashboard" link
+const allProjects = await getProjectsByClientId(clientId);
+const isMultiProject = (allProjects?.length || 0) > 1;
+---
+
+<PortalLayout title={`${project.title} | La Sprezzatura`}>
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {isMultiProject && (
+        <a
+          href="/portal/dashboard"
+          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
+        >
+          &larr; Back to Dashboard
+        </a>
+      )}
+
+      <p
+        class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"
+      >
+        La Sprezzatura
+      </p>
+
+      <ProjectHeader project={project} />
+      <ConfidentialityBanner />
+
+      {isCompleted && !isReopened && (
+        <PostProjectBanner completedAt={project.completedAt} />
+      )}
+
+      <!-- Milestones section (always visible) -->
+      <MilestoneSection
+        milestones={project.milestones || []}
+        pipelineStage={project.pipelineStage}
+        isCompleted={isCompleted && !isReopened}
+      />
+
+      <!-- Procurement section (Full Interior Design only) -->
+      {showProcurement && (
+        <ProcurementTable items={project.procurementItems || []} />
+      )}
+
+      <!-- Artifacts section placeholder (Plan 03) -->
+
+      <!-- Warranty section placeholder (Plan 05) -->
+
+      <div class="mt-16 text-center">
+        <a
+          href="/portal/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>

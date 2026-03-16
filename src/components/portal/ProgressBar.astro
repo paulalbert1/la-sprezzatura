@@ -1,0 +1,14 @@
+---
+interface Props {
+  percent: number;
+}
+
+const { percent } = Astro.props;
+---
+
+<div class="w-full h-1 bg-cream-dark rounded-full overflow-hidden">
+  <div
+    class="h-full bg-terracotta rounded-full transition-all duration-500"
+    style={`width: ${Math.min(100, Math.max(0, percent))}%`}
+  />
+</div>

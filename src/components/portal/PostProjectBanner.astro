@@ -1,0 +1,26 @@
+---
+interface Props {
+  completedAt?: string;
+}
+
+const { completedAt } = Astro.props;
+
+const formattedDate = completedAt
+  ? new Date(completedAt).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    })
+  : null;
+---
+
+<div class="bg-cream-dark border border-stone-light/20 px-6 py-6 text-center mb-8">
+  <h2 class="font-heading text-xl font-light text-charcoal mb-2">
+    Project Complete
+  </h2>
+  <p class="text-sm text-stone font-body">
+    {completedAt
+      ? `This project was completed on ${formattedDate}. You can view all details below.`
+      : "This project has been completed. You can view all details below."}
+  </p>
+</div>
