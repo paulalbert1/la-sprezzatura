@@ -1,4 +1,4 @@
-import { defineType, defineField } from "sanity";
+import { defineType, defineField, defineArrayMember } from "sanity";
 import { generatePortalToken } from "../../lib/generateToken";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 
@@ -194,19 +194,78 @@ export const project = defineType({
       },
     }),
     defineField({
-      name: "clientName",
-      title: "Client Name",
-      type: "string",
-      group: "portal",
-      description: "Client's name shown on their portal page",
-    }),
-    defineField({
       name: "portalEnabled",
       title: "Portal Enabled",
       type: "boolean",
       group: "portal",
       initialValue: false,
       description: "Toggle to activate this project's client portal link",
+    }),
+    defineField({
+      name: "clients",
+      title: "Clients",
+      type: "array",
+      group: "portal",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "client",
+              title: "Client",
+              type: "reference",
+              to: [{ type: "client" }],
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "isPrimary",
+              title: "Primary Contact",
+              type: "boolean",
+              initialValue: false,
+            }),
+          ],
+          preview: {
+            select: { title: "client.name", subtitle: "isPrimary" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Select client",
+              subtitle: subtitle ? "Primary Contact" : "Additional Client",
+            }),
+          },
+        }),
+      ],
+    }),
+    defineField({
+      name: "engagementType",
+      title: "Engagement Type",
+      type: "string",
+      group: "portal",
+      options: {
+        list: [
+          { title: "Full Interior Design", value: "full-interior-design" },
+          { title: "Styling & Refreshing", value: "styling-refreshing" },
+          { title: "Carpet Curating", value: "carpet-curating" },
+        ],
+      },
+    }),
+    defineField({
+      name: "projectAddress",
+      title: "Project Location",
+      type: "object",
+      group: "portal",
+      fields: [
+        defineField({ name: "street", title: "Street", type: "string" }),
+        defineField({ name: "city", title: "City", type: "string" }),
+        defineField({ name: "state", title: "State", type: "string" }),
+        defineField({ name: "zip", title: "ZIP Code", type: "string" }),
+        defineField({
+          name: "adminNotes",
+          title: "Access Notes (Internal)",
+          type: "text",
+          rows: 2,
+          description:
+            "e.g., Gate code, entry instructions \u2014 never shown to clients",
+        }),
+      ],
     }),
   ],
   preview: {
