@@ -92,11 +92,13 @@ Plans:
   3. An unauthenticated visitor sees only a branded login page requesting their email -- no project names, statuses, or client data are visible
   4. Liz can create a client record in Sanity Studio with name, email, phone, address, and preferred contact method, link that client to one or more projects, and set each project's engagement type (Full Interior Design, Styling & Refreshing, or Carpet Curating)
   5. Sending a test email from the verified send.lasprezz.com domain delivers successfully to Gmail, Outlook, and Yahoo inboxes with SPF/DKIM passing
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: TBD
-- [ ] 05-02: TBD
+- [ ] 05-01-PLAN.md -- Sanity schemas (client type, project extensions, engagement type) and GROQ queries
+- [ ] 05-02-PLAN.md -- Upstash Redis client, persistent rate limiter, session helpers, and middleware
+- [ ] 05-03-PLAN.md -- Magic link auth flow (actions, verify, login, dashboard, PURL redirect, logout)
+- [ ] 05-04-PLAN.md -- Upstash Redis setup, Resend domain DNS verification, and end-to-end visual verification
 
 ### Phase 6: Portal Features
 **Goal**: The authenticated portal is Liz's primary client communication tool -- clients see custom milestones with dates, a procurement table with savings, uploadable artifacts with version history and approval workflow, and post-project warranty access -- all managed by Liz through Sanity Studio
@@ -184,7 +186,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Public Portfolio Site | v1.0 | 4/4 | Complete | 2026-03-14 |
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
 | 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
-| 5. Data Foundation, Auth, and Infrastructure | v2.0 | 0/? | Not started | - |
+| 5. Data Foundation, Auth, and Infrastructure | v2.0 | 0/4 | Planned | - |
 | 6. Portal Features | v2.0 | 0/? | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/? | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |
@@ -196,3 +198,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 *v1.0 shipped: 2026-03-15 (Phases 1-3)*
 *v2.0 roadmap created: 2026-03-16*
 *Restructured into v2.0/v2.5/v3.0: 2026-03-16*
+*Phase 5 plans created: 2026-03-16*
