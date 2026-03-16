@@ -1,5 +1,13 @@
 ---
-import type { Milestone } from "../../lib/milestoneUtils";
+import {
+  sortMilestones,
+  getMilestoneProgress,
+  type Milestone,
+} from "../../lib/milestoneUtils";
+import MilestoneTimeline from "./MilestoneTimeline.astro";
+import MilestoneItem from "./MilestoneItem.astro";
+import ProgressBar from "./ProgressBar.astro";
+import type { StageKey } from "../../lib/portalStages";
 
 interface Props {
   milestones: Milestone[];
@@ -8,9 +16,55 @@ interface Props {
 }
 
 const { milestones, pipelineStage, isCompleted } = Astro.props;
+
+const sorted = sortMilestones(milestones);
+const progress = getMilestoneProgress(sorted);
+// Find the first incomplete milestone index for "current" status
+const firstIncompleteIndex = sorted.findIndex((m) => !m.completed);
 ---
 
-<!-- Stub: fully implemented in Task 2 -->
 <section class="py-12 border-t border-stone-light/20">
-  <h2 class="font-heading text-xl font-light text-charcoal">Milestones</h2>
+  <div class="flex items-baseline justify-between mb-4">
+    <h2 class="font-heading text-xl font-light text-charcoal">
+      Milestones
+    </h2>
+    {progress.total > 0 && (
+      <span class="text-xs text-stone font-body">
+        {progress.completed} of {progress.total} complete
+      </span>
+    )}
+  </div>
+
+  {progress.total > 0 && (
+    <div class="mb-6">
+      <ProgressBar percent={progress.percent} />
+    </div>
+  )}
+
+  <!-- Compact 6-stage pipeline status bar -->
+  <div class="mb-8">
+    <MilestoneTimeline currentStage={pipelineStage as StageKey} />
+  </div>
+
+  <!-- Detailed milestones list -->
+  {sorted.length === 0 ? (
+    <div class="text-center py-8">
+      <p class="text-sm text-stone font-body font-light">
+        No milestones added yet.
+      </p>
+      <p class="text-xs text-stone-light font-body mt-1">
+        Liz will update this as your project progresses.
+      </p>
+    </div>
+  ) : (
+    <div class="space-y-0">
+      {sorted.map((milestone, index) => (
+        <MilestoneItem
+          milestone={milestone}
+          isFirstIncomplete={index === firstIncompleteIndex}
+          isCompleted={isCompleted}
+        />
+      ))}
+    </div>
+  )}
 </section>

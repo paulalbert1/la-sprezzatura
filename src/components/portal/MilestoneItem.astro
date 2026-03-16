@@ -1,0 +1,125 @@
+---
+import {
+  getMilestoneStatus,
+  formatRelativeDate,
+  type Milestone,
+} from "../../lib/milestoneUtils";
+
+interface Props {
+  milestone: Milestone;
+  isFirstIncomplete: boolean;
+  isCompleted: boolean;
+}
+
+const { milestone, isFirstIncomplete, isCompleted } = Astro.props;
+
+const status = getMilestoneStatus(milestone, isFirstIncomplete);
+const formattedDate = milestone.date
+  ? new Date(milestone.date + "T00:00:00").toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })
+  : null;
+const relativeDate = milestone.date
+  ? formatRelativeDate(milestone.date)
+  : null;
+const isOverdue = status === "overdue";
+---
+
+<div class="flex gap-4 py-4">
+  <!-- Status dot -->
+  <div class="flex flex-col items-center">
+    <div
+      class:list={[
+        "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+        status === "completed" && "bg-terracotta text-white",
+        status === "current" &&
+          "bg-cream ring-4 ring-terracotta/20 border-2 border-terracotta",
+        status === "overdue" && "bg-cream border-2 border-stone-light",
+        status === "upcoming" &&
+          "bg-cream-dark border-2 border-stone-light/40",
+      ]}
+    >
+      {status === "completed" && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="w-3.5 h-3.5"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      )}
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 min-w-0">
+    <div class="flex items-baseline justify-between gap-2">
+      <h3
+        class:list={[
+          "font-body text-sm",
+          status === "completed" ? "text-stone" : "text-charcoal",
+        ]}
+      >
+        {milestone.name}
+      </h3>
+      {formattedDate && (
+        <div class="flex items-center gap-2 shrink-0">
+          <span
+            class:list={[
+              "text-xs font-body",
+              isOverdue ? "text-[#D4A08A]" : "text-stone",
+            ]}
+          >
+            {formattedDate}
+          </span>
+          {!milestone.completed && relativeDate && (
+            <span
+              class:list={[
+                "text-xs font-body",
+                isOverdue
+                  ? "text-[#D4A08A] bg-stone-light/10 px-2 py-0.5 rounded"
+                  : "text-stone-light",
+              ]}
+            >
+              {isOverdue ? "Overdue" : relativeDate}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+
+    {milestone.description && (
+      <p class="text-xs text-stone font-body mt-1 leading-relaxed">
+        {milestone.description}
+      </p>
+    )}
+
+    <!-- Existing notes -->
+    {milestone.notes && milestone.notes.length > 0 && (
+      <div class="mt-3 space-y-2">
+        {milestone.notes.map((note) => (
+          <div class="bg-cream-dark px-3 py-2 text-xs font-body">
+            <span class="text-charcoal tracking-wide">{note.clientName}</span>
+            <span class="text-stone-light mx-1">&middot;</span>
+            <span class="text-stone-light">
+              {new Date(note.timestamp).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+            <p class="text-stone mt-1">{note.text}</p>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- ClientNoteForm placeholder (Plan 03 adds interactive form) -->
+  </div>
+</div>

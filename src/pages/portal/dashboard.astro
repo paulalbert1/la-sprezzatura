@@ -5,6 +5,7 @@ import PortalLayout from "../../components/portal/PortalLayout.astro";
 import StatusBadge from "../../components/portal/StatusBadge.astro";
 import { getProjectsByClientId, getClientById } from "../../sanity/queries";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
+import { isProjectVisible } from "../../lib/projectVisibility";
 
 // clientId injected by middleware (guaranteed by auth guard)
 const clientId = Astro.locals.clientId!;
@@ -21,9 +22,10 @@ if (projects.length === 1) {
   return Astro.redirect(`/portal/project/${projects[0]._id}`);
 }
 
-// Separate active vs completed projects
-const activeProjects = projects.filter((p: any) => p.pipelineStage !== "closeout");
-const completedProjects = projects.filter((p: any) => p.pipelineStage === "closeout");
+// Filter by 30-day visibility window, then separate active vs completed
+const visibleProjects = projects.filter((p: any) => isProjectVisible(p));
+const activeProjects = visibleProjects.filter((p: any) => p.projectStatus !== "completed");
+const completedProjects = visibleProjects.filter((p: any) => p.projectStatus === "completed");
 const activeCount = activeProjects.length;
 
 // Engagement type display mapping
