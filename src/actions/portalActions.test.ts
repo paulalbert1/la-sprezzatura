@@ -4,6 +4,7 @@ import {
   requestChangesSchema,
   milestoneNoteSchema,
   artifactNoteSchema,
+  warrantyClaimSchema,
 } from "./portalSchemas";
 
 describe("approveArtifact schema", () => {
@@ -163,5 +164,23 @@ describe("submitArtifactNote schema", () => {
       text: "a".repeat(501),
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("warrantyClaimSchema", () => {
+  it("rejects description under 10 chars", () => {
+    const result = warrantyClaimSchema.safeParse({ projectId: "abc", description: "short" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid claim without photo", () => {
+    const result = warrantyClaimSchema.safeParse({ projectId: "abc", description: "The kitchen faucet is leaking from the base." });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts valid claim with photo", () => {
+    const photo = new File(["fake-image-data"], "leak.jpg", { type: "image/jpeg" });
+    const result = warrantyClaimSchema.safeParse({ projectId: "abc", description: "The kitchen faucet is leaking from the base.", photo });
+    expect(result.success).toBe(true);
   });
 });
