@@ -43,7 +43,7 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Touch targets for approval/action buttons: minimum 44px height (accessibility requirement)
-- Progress bar height: 6px (slim progress bar per CONTEXT.md)
+- Progress bar height: 4px (slim decorative bar -- one spacing unit)
 - Timeline connector dots: 28px diameter (7 x 4, matches existing MilestoneTimeline.astro pattern of `w-7 h-7`)
 
 ---
@@ -57,7 +57,7 @@ Exceptions:
 | Heading | 20px (text-xl) | 300 (light) | 1.2 | Cormorant Garamond | Section headings (Milestones, Procurement, Artifacts), artifact names |
 | Display | 32px mobile / 40px desktop (text-3xl md:text-4xl) | 300 (light) | 1.2 | Cormorant Garamond | Project title in header |
 
-Weights used: 300 (light, headings) and 400 (normal, body). Semibold (500/600) is NOT used -- the luxury aesthetic relies on light weights. The exception is `font-medium` (500) for emphasis on current stage labels and client names in notes (established pattern in MilestoneTimeline.astro and LoginForm.tsx).
+Weights used: 300 (light, headings) and 400 (normal, body). Only two weights are permitted. Emphasis for current stage labels and client names in notes is achieved via `text-charcoal` color contrast against `text-stone` surroundings and `tracking-wide` letter-spacing -- NOT via a third font weight.
 
 Source: Existing patterns in `dashboard.astro` (text-4xl md:text-5xl for page heading, text-xl for cards), `SectionHeading.astro`, `LoginForm.tsx`
 
@@ -73,7 +73,7 @@ Source: Existing patterns in `dashboard.astro` (text-4xl md:text-5xl for page he
 | Destructive | `#C4836A` (terracotta at 30% opacity) | Error banners border + background tint (established pattern: `border-terracotta/30 bg-terracotta/5`) |
 
 ### Accent Reserved For
-- Primary action buttons (Approve, Submit Note, Download)
+- Primary action buttons (Approve Version, Submit Note, Download PDF)
 - StatusBadge background tint for active stages (`bg-terracotta/10 text-terracotta`)
 - Focus rings on all interactive elements (`ring-terracotta`)
 - Active pipeline stage dots (solid terracotta)
@@ -125,7 +125,7 @@ Source: `global.css` color tokens, `StatusBadge.astro`, `dashboard.astro`, `Logi
 | ClientNoteForm | React (.tsx) | `src/components/portal/ClientNoteForm.tsx` | Add note textarea with submit, used on milestones and artifacts (client:load) |
 | WarrantyClaimForm | React (.tsx) | `src/components/portal/WarrantyClaimForm.tsx` | Freeform text + optional photo upload for warranty claims (client:load) |
 | PostProjectBanner | Astro | `src/components/portal/PostProjectBanner.astro` | "Project Complete" banner with muted overlay for completed projects |
-| ProgressBar | Astro | `src/components/portal/ProgressBar.astro` | Slim progress bar (6px height, terracotta fill on cream-dark track) |
+| ProgressBar | Astro | `src/components/portal/ProgressBar.astro` | Slim progress bar (4px height, terracotta fill on cream-dark track) |
 
 ---
 
@@ -228,7 +228,7 @@ Source: CONTEXT.md locked decision
 | Delivered | `bg-emerald-50 text-emerald-700` (positive) |
 | Installed | `bg-emerald-50 text-emerald-700` (positive) |
 
-Badge shape: `px-3 py-1 rounded-full text-xs font-body font-medium tracking-wide` (matches StatusBadge.astro pattern)
+Badge shape: `px-3 py-1 rounded-full text-xs font-body tracking-wide` (matches StatusBadge.astro pattern)
 
 ### Artifact Card States
 
@@ -242,18 +242,18 @@ Badge shape: `px-3 py-1 rounded-full text-xs font-body font-medium tracking-wide
 
 ### Artifact Approval Flow
 
-1. Client clicks "Approve" button
+1. Client clicks "Approve Version" button
 2. Confirmation dialog appears:
    - Checkbox: "I confirm this approval on behalf of all parties associated with this project." (AUTH-04, fixed wording)
    - "Confirm Approval" button (disabled until checkbox checked)
-   - "Cancel" link
+   - "Keep Reviewing" link (dismisses dialog, returns to artifact card)
 3. On confirm: action submits, decision log entry created, button state transitions to "Approved"
 
 1. Client clicks "Request Changes" button
 2. Dialog appears:
    - Required textarea: "What changes would you like?" (min 1 character)
    - "Submit Feedback" button (disabled until text entered)
-   - "Cancel" link
+   - "Go Back" link (dismisses dialog, returns to artifact card)
 3. On confirm: action submits, decision log entry created with feedback text, status transitions to "Changes Requested"
 
 ### Form States (all React forms: ArtifactApprovalForm, ClientNoteForm, WarrantyClaimForm)
@@ -270,7 +270,7 @@ Badge shape: `px-3 py-1 rounded-full text-xs font-body font-medium tracking-wide
 | Element | Treatment |
 |---------|-----------|
 | PostProjectBanner | Full-width cream-dark banner: "Project Complete" heading + completion date + "This project was completed on [date]. You can view all details below." |
-| Action buttons | All hidden (Approve, Request Changes, Add Note, Submit Warranty) |
+| Action buttons | All hidden (Approve Version, Request Changes, Add Note, Submit Warranty) |
 | Interactive forms | Not rendered |
 | Content | Fully readable, not muted (client needs to reference milestones, procurement, artifacts) |
 | Card hover states | Disabled (no pointer cursor) |
@@ -295,14 +295,17 @@ Exception: Reopened projects (for warranty) re-enable the WarrantyClaimForm sect
 
 | Element | Copy |
 |---------|------|
-| Primary CTA (approval) | "Approve" |
+| Primary CTA (approval) | "Approve Version" |
 | Secondary CTA (changes) | "Request Changes" |
 | Note submission CTA | "Submit Note" |
 | Warranty CTA | "Submit Warranty Request" |
-| Download CTA | "Download" |
+| Download CTA | "Download PDF" |
 | Confidentiality notice | "This portal is private to you. Please don't share your access link." |
 | Approval confirmation checkbox | "I confirm this approval on behalf of all parties associated with this project." |
+| Approval dialog confirm button | "Confirm Approval" |
+| Approval dialog dismiss | "Keep Reviewing" |
 | Changes request prompt | "What changes would you like?" |
+| Changes dialog dismiss | "Go Back" |
 | Empty milestones heading | "No milestones added yet." |
 | Empty milestones body | "Liz will update this as your project progresses." |
 | Empty procurement heading | "No procurement items added yet." |
