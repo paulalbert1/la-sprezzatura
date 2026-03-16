@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-03-16
+revised: 2026-03-16
 ---
 
 # Phase 5 -- UI Design Contract
@@ -50,9 +51,11 @@ Exceptions: 44px minimum touch target height on login button and dashboard proje
 | Role | Size | Weight | Line Height | Font |
 |------|------|--------|-------------|------|
 | Body | 16px (`text-base`) | 400 (regular) | 1.7 | DM Sans |
-| Label | 12px (`text-xs`) | 500 (medium) | 1.5 | DM Sans, uppercase, `tracking-widest` |
+| Label | 12px (`text-xs`) | 400 (regular) | 1.5 | DM Sans, uppercase, `tracking-widest` |
 | Heading | 24px (`text-2xl`) | 300 (light) | 1.2 | Cormorant Garamond |
 | Display | 40px mobile / 48px desktop (`text-4xl md:text-5xl`) | 300 (light) | 1.2 | Cormorant Garamond |
+
+Weights declared: 300 (light) for Heading and Display, 400 (regular) for Body and Label. Two weights total. Label hierarchy is established through its 12px size, uppercase transform, and `tracking-widest` letter-spacing -- a separate weight is not needed.
 
 Source: Existing codebase patterns from `[token].astro`, `ContactForm.tsx`, `Hero.astro`. Labels use the established uppercase tracking pattern (`text-xs uppercase tracking-widest text-stone`).
 
@@ -71,7 +74,7 @@ Source: Existing codebase patterns from `[token].astro`, `ContactForm.tsx`, `Her
 | Destructive | `#C4836A` (terracotta at 10% bg) | Error borders, field validation errors (follows existing pattern: `border-terracotta` with `bg-terracotta/5`) |
 | Success | `#059669` (emerald-700) | Completed stage badges (follows existing `StatusBadge.astro` pattern: `bg-emerald-50 text-emerald-700`) |
 
-Accent reserved for: Login "Continue" button fill, focus ring on email input, active pipeline stage badge on dashboard cards, underline on "contact Liz" links, terracotta divider line above "Message Received" confirmation.
+Accent reserved for: Login "Send Access Link" button fill, focus ring on email input, active pipeline stage badge on dashboard cards, underline on "contact Liz" links, terracotta divider line above "Message Received" confirmation.
 
 Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.tsx` error patterns.
 
@@ -83,13 +86,15 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 
 **Layout:** Centered single-column form, max-width 400px, vertically centered in viewport. Wrapped in `PortalLayout.astro`.
 
+**Visual hierarchy:** Primary focal point: display heading ("Welcome to Your Portal"). Secondary: email input field + CTA button group. Tertiary: help text and error messages.
+
 **Elements:**
 - Brand mark: `text-xs text-stone tracking-[0.2em] uppercase` -- "La Sprezzatura" (matches existing portal branding pattern)
 - Heading: `font-heading text-4xl md:text-5xl font-light text-charcoal text-center` -- "Welcome to Your Portal"
 - Subtitle: `text-base text-stone font-body text-center` -- "Enter your email to access your projects"
 - Email input: follows `ContactForm.tsx` Field pattern -- `bg-cream-dark border border-stone-light px-4 py-3 font-body text-sm` with `focus:ring-2 focus:ring-terracotta`
 - Label: `text-xs uppercase tracking-widest text-stone mb-2 font-body` -- "Email Address"
-- Submit button: `bg-terracotta text-white text-xs uppercase tracking-widest font-body px-10 py-4 w-full hover:bg-terracotta-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed` -- "Continue"
+- Submit button: `bg-terracotta text-white text-xs uppercase tracking-widest font-body px-10 py-4 w-full hover:bg-terracotta-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed` -- "Send Access Link"
 - Loading state: button text changes to "Sending..." with `disabled` attribute
 - Help text below form: `text-sm text-stone text-center mt-6` -- "We'll send a secure access link to your email"
 
@@ -107,6 +112,8 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 
 **Layout:** Minimal -- this is a transient redirect page. Users see it briefly while token is consumed.
 
+**Visual hierarchy:** Single centered element: "Verifying..." text. No interactive elements.
+
 **Elements:**
 - Brand mark: same as login
 - Heading: "Verifying..." (visible only during the brief server-side processing)
@@ -121,6 +128,8 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 ### Page 3: Dashboard (`/portal/dashboard`)
 
 **Layout:** Centered single-column, max-width 640px (matches existing `max-w-2xl` portal pattern). Wrapped in `PortalLayout.astro`.
+
+**Visual hierarchy:** Primary focal point: display heading ("Welcome back, {firstName}"). Secondary: project card grid. Tertiary: completed projects section and sign-out link.
 
 **Elements:**
 - Brand mark: same as login/existing portal
@@ -140,20 +149,24 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 
 **Auto-redirect:** If client has exactly 1 project, server-side redirect to project detail view (`/portal/project/{id}`) -- dashboard page never renders.
 
-**Logout:** Text link in footer area -- `text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest` -- "Sign Out". Clears session cookie and redirects to login.
+**Logout:** Text link in footer area -- `text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest` -- "Sign Out". No confirmation dialog -- direct clear of session cookie and redirect to `/portal/login`.
 
 ### Page 4: PURL Redirect (`/portal/[token]`)
 
 **Layout:** Centered message, same pattern as existing 404 state in `[token].astro`.
 
+**Visual hierarchy:** Primary focal point: heading ("We've Upgraded Your Portal"). Secondary: CTA button.
+
 **Elements:**
 - Heading: `font-heading text-3xl font-light text-charcoal mb-4` -- "We've Upgraded Your Portal"
 - Body: `text-stone font-body leading-relaxed` -- "For your security, we've added email verification. Enter your email address to access your projects."
-- CTA link: styled as outline button (`border border-stone-light/40 px-6 py-2.5 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors`) -- "Go to Login" linking to `/portal/login`
+- CTA link: styled as outline button (`border border-stone-light/40 px-6 py-3 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors`) -- "Go to Login" linking to `/portal/login`
 
 ### Page 5: Magic Link Email Template
 
 **Layout:** HTML email with inline CSS, max-width 600px, centered. Follows existing email template pattern in `src/actions/index.ts`.
+
+**Visual hierarchy:** Primary focal point: CTA button ("Access Your Portal"). Secondary: heading and body text. Tertiary: fallback link and footer.
 
 **Elements:**
 - Background: `#FAF8F5` (cream) body, `#FFFFFF` (white) content card
@@ -175,7 +188,7 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 | Login page heading | Welcome to Your Portal |
 | Login page subtitle | Enter your email to access your projects |
 | Login label | Email Address |
-| Login CTA (idle) | Continue |
+| Login CTA (idle) | Send Access Link |
 | Login CTA (submitting) | Sending... |
 | Login help text | We'll send a secure access link to your email |
 | Login success heading | Check Your Email |
@@ -201,7 +214,8 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 | Email CTA | Access Your Portal |
 | Email fallback | If the button doesn't work, copy and paste this link: |
 | Email footer | This is an automated message from La Sprezzatura. If you didn't request this link, you can safely ignore this email. |
-| Logout link | Sign Out |
+| Sign Out link | Sign Out |
+| Sign Out confirmation | No confirmation -- direct session clear and redirect to `/portal/login` |
 
 ---
 
@@ -232,7 +246,7 @@ Source: Existing `global.css` color tokens, `StatusBadge.astro`, `ContactForm.ts
 
 - 30-day httpOnly cookie -- client is automatically recognized on return visits
 - Expired session: middleware redirects to `/portal/login` transparently
-- Sign Out: clears cookie and redirects to `/portal/login`
+- Sign Out: clears cookie and redirects to `/portal/login` (no confirmation dialog)
 
 ---
 
