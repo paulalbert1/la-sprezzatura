@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-16T15:33:00.000Z"
-last_activity: 2026-03-16 -- completed 05-02 infrastructure layer
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-03-16T15:41:57Z"
+last_activity: 2026-03-16 -- completed 05-03 magic link auth flow and portal pages
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -26,18 +26,18 @@ See: .planning/PROJECT.md (updated 2026-03-16)
 ## Current Position
 
 Phase: 5 (v2.0 -- Data Foundation, Auth, and Infrastructure)
-Plan: 2 of 4 complete (05-01 data foundation + 05-02 infrastructure done)
+Plan: 3 of 4 complete (05-01 data foundation + 05-02 infrastructure + 05-03 auth flow done)
 Status: Executing
-Last activity: 2026-03-16 -- completed 05-01 data foundation + 05-02 infrastructure
+Last activity: 2026-03-16 -- completed 05-03 magic link auth flow and portal pages
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: ~14 min
-- Total execution time: ~1.7 hours
+- Total plans completed: 8
+- Average duration: ~13 min
+- Total execution time: ~1.8 hours
 
 **By Phase:**
 
@@ -47,10 +47,10 @@ Progress: [█████░░░░░] 50%
 | 02-public-portfolio-site | 4/4 complete | ~50min | ~13min |
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 
-| 05-data-foundation-auth | 2/4 in progress | -- | -- |
+| 05-data-foundation-auth | 3/4 in progress | -- | -- |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4min), 03-02 (~15min), 05-01 (3min), 05-02 (3min)
+- Last 5 plans: 03-02 (~15min), 05-01 (3min), 05-02 (3min), 05-03 (5min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -74,6 +74,10 @@ Recent decisions affecting current work:
 - [05-02]: Single Redis database with key prefix namespacing for sessions + rate limits
 - [05-02]: Direct cookie + Upstash Redis for session storage (not Astro Sessions API)
 - [05-02]: clearSession uses fire-and-forget Redis delete to avoid blocking redirects
+- [05-03]: User enumeration prevention: always return success regardless of email existence
+- [05-03]: Atomic token consumption via redis.getdel() for single-use magic links
+- [05-03]: PURL redirect shows upgrade message instead of 404 for existing bookmarked links
+- [05-03]: Dashboard auto-redirects single-project clients to project detail view
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T15:32:22Z
-Stopped at: Completed 05-01-PLAN.md and 05-02-PLAN.md
-Resume file: .planning/phases/05-data-foundation-auth-and-infrastructure/05-01-SUMMARY.md
+Last session: 2026-03-16T15:41:57Z
+Stopped at: Completed 05-03-PLAN.md
+Resume file: .planning/phases/05-data-foundation-auth-and-infrastructure/05-03-SUMMARY.md

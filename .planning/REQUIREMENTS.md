@@ -49,9 +49,9 @@
 
 ### Authentication (AUTH)
 
-- [ ] **AUTH-01**: Client receives a magic link email to access the portal -- no password or account creation -- Phase 5
+- [x] **AUTH-01**: Client receives a magic link email to access the portal -- no password or account creation -- Phase 5
 - [x] **AUTH-02**: Magic link grants a cookie-based session that persists across visits -- Phase 5
-- [ ] **AUTH-03**: Authenticated client sees a dashboard of all their projects (active and historical) -- Phase 5
+- [x] **AUTH-03**: Authenticated client sees a dashboard of all their projects (active and historical) -- Phase 5
 - [x] **AUTH-04**: Artifact approvals, notes, and decisions are attributed to the authenticated client's identity; when signing off, primary contact confirms they are approving on behalf of all parties (checkbox) -- Phase 5
 - [x] **AUTH-05**: Unauthenticated visitors see a branded login page requesting their email -- no project data exposed -- Phase 5
 
