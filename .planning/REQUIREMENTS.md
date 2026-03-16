@@ -50,10 +50,10 @@
 ### Authentication (AUTH)
 
 - [ ] **AUTH-01**: Client receives a magic link email to access the portal -- no password or account creation -- Phase 5
-- [ ] **AUTH-02**: Magic link grants a cookie-based session that persists across visits -- Phase 5
+- [x] **AUTH-02**: Magic link grants a cookie-based session that persists across visits -- Phase 5
 - [ ] **AUTH-03**: Authenticated client sees a dashboard of all their projects (active and historical) -- Phase 5
-- [ ] **AUTH-04**: Artifact approvals, notes, and decisions are attributed to the authenticated client's identity; when signing off, primary contact confirms they are approving on behalf of all parties (checkbox) -- Phase 5
-- [ ] **AUTH-05**: Unauthenticated visitors see a branded login page requesting their email -- no project data exposed -- Phase 5
+- [x] **AUTH-04**: Artifact approvals, notes, and decisions are attributed to the authenticated client's identity; when signing off, primary contact confirms they are approving on behalf of all parties (checkbox) -- Phase 5
+- [x] **AUTH-05**: Unauthenticated visitors see a branded login page requesting their email -- no project data exposed -- Phase 5
 
 ### Client Data (CLNT)
 
@@ -102,7 +102,7 @@
 
 ### Infrastructure (INFRA)
 
-- [ ] **INFRA-07**: Rate limiter upgraded from in-memory to persistent storage for serverless -- Phase 5
+- [x] **INFRA-07**: Rate limiter upgraded from in-memory to persistent storage for serverless -- Phase 5
 - [ ] **INFRA-08**: Resend domain verified for lasprezz.com with SPF/DKIM coexisting with Microsoft 365 -- Phase 5
 
 ## v2.5 Requirements (Contractor & Commercial Workflows -- Phases 7-8)
