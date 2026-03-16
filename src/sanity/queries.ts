@@ -130,3 +130,40 @@ export async function getServices() {
     }
   `);
 }
+
+// -- Phase 5: Auth & Client Queries --
+
+// GROQ: Look up client by email (magic link request)
+export const CLIENT_BY_EMAIL_QUERY = `
+  *[_type == "client" && email == $email][0] {
+    _id,
+    name,
+    email
+  }
+`;
+
+export async function getClientByEmail(email: string) {
+  return sanityClient.fetch(CLIENT_BY_EMAIL_QUERY, { email });
+}
+
+// GROQ: Get all portal-enabled projects for an authenticated client
+// Uses references() built-in to match the client _id in the clients[] array
+export const PROJECTS_BY_CLIENT_QUERY = `
+  *[_type == "project" && portalEnabled == true && references($clientId)] | order(pipelineStage asc) {
+    _id,
+    title,
+    pipelineStage,
+    engagementType,
+    "isPrimary": clients[client._ref == $clientId][0].isPrimary
+  }
+`;
+
+export async function getProjectsByClientId(clientId: string) {
+  return sanityClient.fetch(PROJECTS_BY_CLIENT_QUERY, { clientId });
+}
+
+// PROC-03 Convention: All financial values (procurement costs, retail prices)
+// MUST be stored as integer cents using Sanity number field with .integer() validation.
+// Example: validation: (r) => r.integer().min(0)
+// This prevents floating-point rounding errors (e.g., $19.99 stored as 1999).
+// Procurement schema fields will be added in Phase 6 following this pattern.
