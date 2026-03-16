@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: planning
-stopped_at: Restructuring milestones, Phase 5 research done
+stopped_at: Roadmap restructured for v2.0/v2.5/v3.0, ready to plan Phase 5
 last_updated: "2026-03-16"
-last_activity: 2026-03-16 -- restructured v2.0 into v2.0/v2.5/v3.0
+last_activity: 2026-03-16 -- roadmap written for v2.0/v2.5/v3.0 milestone structure
 progress:
-  total_phases: 2
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Updating requirements and roadmap for restructured milestones, then planning Phase 5
+**Current focus:** v2.0 Phase 5 -- Data Foundation, Auth, and Infrastructure
 
 ## Current Position
 
-Phase: 5 (v2.0 — Data Foundation, Auth, and Infrastructure)
-Plan: Ready to plan (research + context done, needs UI-SPEC before planning)
-Status: Updating requirements/roadmap for milestone restructure
-Last activity: 2026-03-16 -- restructured v2.0 into v2.0/v2.5/v3.0
+Phase: 5 (v2.0 -- Data Foundation, Auth, and Infrastructure)
+Plan: Ready to plan (research + context done)
+Status: Ready to plan
+Last activity: 2026-03-16 -- roadmap written for v2.0/v2.5/v3.0
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -60,17 +60,12 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v2.0 Roadmap]: Phase 4 DNS cutover deferred from v1.0, carried forward to v3.0 (cutover-last)
-- [v2.0 Roadmap]: Magic-link auth replaces raw PURL access -- cookie-based sessions, no passwords
-- [v2.0 Roadmap]: All financial values stored as integer cents (PROC-03) -- decided in Phase 5 before any financial schema
-- [v2.0 Roadmap]: Resend domain verification (send.lasprezz.com) in Phase 5 -- DNS propagation needs lead time
-- [v2.0 Roadmap]: Rate limiter upgrade (INFRA-07) in Phase 5 -- before financial data goes live
 - [v2.0 Restructure]: Split v2.0 (43 reqs, 4 phases) into v2.0/v2.5/v3.0 -- scope creep mitigation
-- [v2.0 Restructure]: Engagement type toggle added to v2.0 Phase 5 -- schema must be right from day one
-- [v2.0 Restructure]: Budget proposals (ARTF-05/06/07) deferred to v3.0
-- [v2.0 Restructure]: Send Update (SEND-01/02/03) deferred to v3.0
-- [v2.0 Restructure]: DNS cutover (INFRA-01/02/03/04/06) deferred to v3.0
-- [v2.5]: Contractor portal, building manager portal, residential/commercial toggle -- new milestone
+- [v2.0 Restructure]: Engagement type toggle added to v2.0 Phase 5 (ENGMT-01) -- schema right from day one
+- [v2.0 Restructure]: Budget proposals (ARTF-05/06/07) deferred to v3.0 Phase 9
+- [v2.0 Restructure]: Send Update (SEND-01/02/03) deferred to v3.0 Phase 9
+- [v2.0 Restructure]: DNS cutover (INFRA-01/02/03/04/06) deferred to v3.0 Phase 10
+- [v2.5]: Contractor portal, building manager portal, residential/commercial toggle -- new milestone (Phases 7-8)
 
 ### Pending Todos
 
@@ -83,10 +78,10 @@ None yet.
 - Sanity Studio document action API for Send Update trigger needs prototyping during v3.0 planning
 - Budget proposal schema: 3 levels of nested arrays need UX testing before committing (v3.0 planning)
 - Contractor portal needs simple UX -- contractors are generally not technical people
-- Building manager COI/legal doc exchange workflow needs more detail during v2.5 planning
+- Sanity file assets vs. Vercel Blob: resolve in Phase 7 planning (PITFALLS.md recommends Blob)
 
 ## Session Continuity
 
 Last session: 2026-03-16
-Stopped at: Milestone restructure in progress — updating requirements and roadmap
+Stopped at: Roadmap restructured for v2.0/v2.5/v3.0 -- ready to plan Phase 5
 Resume file: .planning/ROADMAP.md

@@ -3,7 +3,9 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-3 (shipped 2026-03-15)
-- 🚧 **v2.0 Client Portal Platform + Go-Live** - Phases 5-8 (in progress)
+- 🚧 **v2.0 Client Portal Foundation** - Phases 5-6 (in progress)
+- 📋 **v2.5 Contractor & Commercial Workflows** - Phases 7-8 (planned)
+- 📋 **v3.0 Business Operations & Go-Live** - Phases 9-10 (planned)
 
 ## Phases
 
@@ -51,32 +53,44 @@ Plans:
 
 </details>
 
-**Note:** v1.0 Phase 4 (DNS Cutover) was planned but not executed. Its requirements (INFRA-01 through INFRA-04, INFRA-06) are carried forward into v2.0 Phase 8.
+**Note:** v1.0 Phase 4 (DNS Cutover) was planned but not executed. Its requirements (INFRA-01 through INFRA-04, INFRA-06) are carried forward into v3.0 Phase 10.
 
-### v2.0 Client Portal Platform + Go-Live (In Progress)
+### v2.0 Client Portal Foundation (In Progress)
 
-**Milestone Goal:** Expand the basic client portal into Liz's primary client operations tool -- per-project milestones, procurement tracking, artifact management with tiered budget proposals, client data model with magic-link auth, ad hoc update emails -- then polish the public site and go live via DNS cutover.
+**Milestone Goal:** Secure portal access via magic link auth, client data model with engagement types, core portal features (milestones, procurement, artifacts, post-project workflow) -- the foundation every subsequent milestone builds on.
 
 **Phase Numbering:**
-- Integer phases (5, 6, 7, 8): Planned milestone work
+- Integer phases (5, 6): Planned milestone work
 - Decimal phases (5.1, 6.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, magic-link auth, rate limiter upgrade, and Resend domain verification
+- [ ] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, engagement type toggle, magic-link auth, rate limiter upgrade, and Resend domain verification
 - [ ] **Phase 6: Portal Features** - Milestones, procurement, artifacts, post-project workflow, and portal UX on the authenticated portal
-- [ ] **Phase 7: Send Update, Investment Proposals, and Public Site Polish** - Email capstone, tiered budget proposals, hero animation refresh, and Fantastical booking swap
-- [ ] **Phase 8: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
+
+### v2.5 Contractor & Commercial Workflows (Planned)
+
+**Milestone Goal:** Extend the portal platform to contractors and building managers -- residential/commercial project classification, engagement type gating of portal features, contractor portal with scoped project access, building manager portal for commercial compliance documents, and private document storage via Vercel Blob.
+
+- [ ] **Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage** - Contractor and building manager data models, residential/commercial toggle, engagement type feature gating, multi-role session model, and Vercel Blob document storage foundation
+- [ ] **Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility** - Contractor portal UI (scope, floor plans, estimates), building manager portal UI (COIs, legal docs), and client-facing contractor schedule
+
+### v3.0 Business Operations & Go-Live (Planned)
+
+**Milestone Goal:** Complete the business operations tooling -- ad hoc client update emails, tiered investment proposals, public site polish -- then consolidate DNS and go live, replacing the Wix site.
+
+- [ ] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap
+- [ ] **Phase 10: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
 
 ## Phase Details
 
 ### Phase 5: Data Foundation, Auth, and Infrastructure
-**Goal**: Clients can securely access the portal via magic link, the Sanity schema supports all v2.0 data (clients, milestones, procurement, artifacts), and email infrastructure is production-ready -- the foundation every subsequent phase builds on
+**Goal**: Clients can securely access the portal via magic link, the Sanity schema supports all v2.0 data (clients, milestones, procurement, artifacts), engagement type is set per project, and email infrastructure is production-ready -- the foundation every subsequent phase builds on
 **Depends on**: Phase 3 (v1.0)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, CLNT-04, CLNT-05, PROC-03, INFRA-07, INFRA-08
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, CLNT-04, CLNT-05, ENGMT-01, PROC-03, INFRA-07, INFRA-08
 **Success Criteria** (what must be TRUE):
   1. A client enters their email on the portal login page, receives a magic link email, clicks it, and lands on a dashboard showing their projects -- no password or account creation involved
   2. The client closes their browser, reopens the portal URL days later, and is still logged in (cookie-based session persists)
   3. An unauthenticated visitor sees only a branded login page requesting their email -- no project names, statuses, or client data are visible
-  4. Liz can create a client record in Sanity Studio with name, email, phone, address, and preferred contact method, and link that client to one or more projects
+  4. Liz can create a client record in Sanity Studio with name, email, phone, address, and preferred contact method, link that client to one or more projects, and set each project's engagement type (Full Interior Design, Styling & Refreshing, or Carpet Curating)
   5. Sending a test email from the verified send.lasprezz.com domain delivers successfully to Gmail, Outlook, and Yahoo inboxes with SPF/DKIM passing
 **Plans**: TBD
 
@@ -87,7 +101,7 @@ Plans:
 ### Phase 6: Portal Features
 **Goal**: The authenticated portal is Liz's primary client communication tool -- clients see custom milestones with dates, a procurement table with savings, uploadable artifacts with version history and approval workflow, and post-project warranty access -- all managed by Liz through Sanity Studio
 **Depends on**: Phase 5
-**Requirements**: MILE-01, MILE-02, MILE-03, PROC-01, PROC-02, ARTF-01, ARTF-02, ARTF-03, ARTF-04, ARTF-08, ARTF-09, PORT-05, PORT-06, PORT-07, CLNT-06, CLNT-07, POST-01, POST-02, POST-03, POST-04
+**Requirements**: CLNT-06, CLNT-07, MILE-01, MILE-02, MILE-03, PROC-01, PROC-02, ARTF-01, ARTF-02, ARTF-03, ARTF-04, ARTF-08, ARTF-09, PORT-05, PORT-06, PORT-07, POST-01, POST-02, POST-03, POST-04
 **Success Criteria** (what must be TRUE):
   1. A client logs in and sees a dashboard greeting them by name with all their active and completed projects; clicking a project shows custom milestones with dates and completion indicators, a procurement table with line-item statuses and total savings, and uploaded artifacts with version history
   2. Liz uploads a new version of a design board artifact in Sanity Studio; the client sees the new version as current and previous versions visually muted, and can approve/select versions with their decisions recorded in a timestamped log
@@ -100,10 +114,39 @@ Plans:
 - [ ] 06-02: TBD
 - [ ] 06-03: TBD
 
-### Phase 7: Send Update, Investment Proposals, and Public Site Polish
-**Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered budget proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before go-live
+### Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage
+**Goal**: The Sanity schema supports contractors, building managers, residential/commercial classification, and engagement type feature gating; the auth system handles multi-role sessions with namespace isolation; and private documents are stored in Vercel Blob with signed URLs -- all architectural decisions resolved before any portal UI is built
 **Depends on**: Phase 6
-**Requirements**: SEND-01, SEND-02, SEND-03, ARTF-05, ARTF-06, ARTF-07, SITE-08, BOOK-01
+**Requirements**: ENGMT-02, PRJT-01, PRJT-02, CONTR-01, CONTR-02, CONTR-05, CONTR-06, CONTR-07, BLDG-01, DOCS-01
+**Success Criteria** (what must be TRUE):
+  1. Liz can create contractor records in Sanity Studio (name, email, phone, company, trade), assign contractors to Full Interior Design projects, and upload a final estimate per contractor per project; contractor fields are hidden for non-Full Interior Design engagement types
+  2. Liz can toggle a project between Residential and Commercial; commercial projects show building manager contact fields and a COI section in Sanity Studio, while residential projects hide them entirely
+  3. A contractor receives a magic link email, clicks it, and lands on a session-gated page -- the session carries a role that prevents access to client portal routes, and vice versa
+  4. COI documents, floor plans, and legal documents uploaded through Sanity Studio are stored in Vercel Blob with signed URLs; direct Blob URLs without a valid signature return an error
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: TBD
+- [ ] 07-02: TBD
+
+### Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility
+**Goal**: Contractors can view their assigned project scope, floor plans, estimates, and notes through a branded portal; building managers can access COI documents, legal docs, and client contact info for commercial projects; and clients can see which contractors are assigned to their project with on-site schedule dates
+**Depends on**: Phase 7
+**Requirements**: CONTR-03, CONTR-04, BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06, CVIS-01
+**Success Criteria** (what must be TRUE):
+  1. A contractor logs in via magic link and sees their assigned project with floor plans (downloadable via signed URL), scope of work, deadline, estimate, and notes -- but sees only the client name and project address with a "contact Liz" notice instead of client email or phone
+  2. A building manager logs in via magic link on a commercial project and sees the client name and contact info, a COI section with certificates showing expiration date badges, a legal documents section with downloadable PDFs, and can request contractor info (name and license only, with "contact Liz" for more)
+  3. A client viewing their Full Interior Design project on the portal sees a contractor section showing assigned contractor names and on-site schedule dates
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
+
+### Phase 9: Send Update, Investment Proposals, and Public Site Polish
+**Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered investment proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before go-live
+**Depends on**: Phase 8
+**Requirements**: SEND-01, SEND-02, SEND-03, ARTF-05, ARTF-06, ARTF-07, BOOK-01, SITE-08
 **Success Criteria** (what must be TRUE):
   1. Liz clicks "Send Update" on a project in Sanity Studio, adds an optional personal note, previews the email, confirms, and the client receives a branded email showing current milestones, procurement status, and pending artifact reviews -- the delivery is logged with timestamp and recipient on the project
   2. Liz creates a proposal artifact with Good/Better/Best tiers and line items; the client views the tiers on the portal, selects their preferred tier (or mixes items across tiers), and completes a readiness check with eagerness rating and reservations capture before approval
@@ -112,12 +155,12 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 09-01: TBD
+- [ ] 09-02: TBD
 
-### Phase 8: DNS Cutover and Go-Live
+### Phase 10: DNS Cutover and Go-Live
 **Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
-**Depends on**: Phase 7
+**Depends on**: Phase 9
 **Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06
 **Success Criteria** (what must be TRUE):
   1. Visiting lasprezz.com in a browser shows the new site (not Wix) with a valid HTTPS certificate
@@ -128,25 +171,28 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 10-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 5 -> 6 -> 7 -> 8
+Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Project Scaffold and Staging Deploy | v1.0 | 1/1 | Complete | 2026-03-14 |
 | 2. Public Portfolio Site | v1.0 | 4/4 | Complete | 2026-03-14 |
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
-| 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v2.0 Phase 8) | - |
+| 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 0/? | Not started | - |
 | 6. Portal Features | v2.0 | 0/? | Not started | - |
-| 7. Send Update, Investment Proposals, and Public Site Polish | v2.0 | 0/? | Not started | - |
-| 8. DNS Cutover and Go-Live | v2.0 | 0/? | Not started | - |
+| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/? | Not started | - |
+| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |
+| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
+| 10. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
 *v1.0 shipped: 2026-03-15 (Phases 1-3)*
 *v2.0 roadmap created: 2026-03-16*
+*Restructured into v2.0/v2.5/v3.0: 2026-03-16*
