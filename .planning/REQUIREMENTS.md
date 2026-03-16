@@ -57,14 +57,14 @@
 
 ### Client Data (CLNT)
 
-- [ ] **CLNT-04**: Liz can create client records in Sanity with name, email, phone, address, and preferred contact method -- Phase 5
-- [ ] **CLNT-05**: A client can have multiple projects and a project can have multiple clients; one client is designated as the primary contact -- Phase 5
+- [x] **CLNT-04**: Liz can create client records in Sanity with name, email, phone, address, and preferred contact method -- Phase 5
+- [x] **CLNT-05**: A client can have multiple projects and a project can have multiple clients; one client is designated as the primary contact -- Phase 5
 - [ ] **CLNT-06**: Portal greets client by name and shows all their active and historical projects -- Phase 6
 - [ ] **CLNT-07**: Active clients can view completed projects alongside current ones (e.g., living room done, bedroom in progress) -- Phase 6
 
 ### Engagement Type (ENGMT)
 
-- [ ] **ENGMT-01**: Liz can set engagement type on a project: Full Interior Design, Styling & Refreshing, or Carpet Curating -- Phase 5
+- [x] **ENGMT-01**: Liz can set engagement type on a project: Full Interior Design, Styling & Refreshing, or Carpet Curating -- Phase 5
 
 ### Milestones (MILE)
 
@@ -76,7 +76,7 @@
 
 - [ ] **PROC-01**: Liz can add procurement line items with name, status (Ordered/Warehouse/In Transit/Pending/Delivered/Installed), install date, client cost, retail price -- Phase 6
 - [ ] **PROC-02**: Client sees procurement table on portal with statuses and savings (retail minus client cost) -- Phase 6
-- [ ] **PROC-03**: All financial values stored as integer cents to prevent rounding errors -- Phase 5
+- [x] **PROC-03**: All financial values stored as integer cents to prevent rounding errors -- Phase 5
 
 ### Project Artifacts (ARTF)
 
@@ -228,8 +228,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | Phase 5 | Pending |
 | CLNT-04, CLNT-05 | Phase 5 | Pending |
-| ENGMT-01 | Phase 5 | Pending |
-| PROC-03 | Phase 5 | Pending |
+| ENGMT-01 | Phase 5 | Complete |
+| PROC-03 | Phase 5 | Complete |
 | INFRA-07, INFRA-08 | Phase 5 | Pending |
 | CLNT-06, CLNT-07 | Phase 6 | Pending |
 | MILE-01, MILE-02, MILE-03 | Phase 6 | Pending |
