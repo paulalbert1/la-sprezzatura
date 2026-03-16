@@ -1,6 +1,9 @@
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { schemaTypes } from "./src/sanity/schemas";
+import { NotifyClientAction } from "./src/sanity/actions/notifyClient";
+import { CompleteProjectAction } from "./src/sanity/actions/completeProject";
+import { ReopenProjectAction } from "./src/sanity/actions/reopenProject";
 
 export default defineConfig({
   name: "la-sprezzatura",
@@ -25,6 +28,8 @@ export default defineConfig({
             S.divider(),
             // Portfolio Projects
             S.documentTypeListItem("project").title("Portfolio Projects"),
+            // Clients
+            S.documentTypeListItem("client").title("Clients"),
             // Services
             S.documentTypeListItem("service").title("Services"),
           ]),
@@ -32,5 +37,18 @@ export default defineConfig({
   ],
   schema: {
     types: schemaTypes,
+  },
+  document: {
+    actions: (prev, context) => {
+      if (context.schemaType === "project") {
+        return [
+          ...prev,
+          NotifyClientAction,
+          CompleteProjectAction,
+          ReopenProjectAction,
+        ];
+      }
+      return prev;
+    },
   },
 });
