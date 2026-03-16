@@ -63,7 +63,7 @@ Plans:
 - Integer phases (5, 6): Planned milestone work
 - Decimal phases (5.1, 6.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, engagement type toggle, magic-link auth, rate limiter upgrade, and Resend domain verification
+- [x] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, engagement type toggle, magic-link auth, rate limiter upgrade, and Resend domain verification
 - [ ] **Phase 6: Portal Features** - Milestones, procurement, artifacts, post-project workflow, and portal UX on the authenticated portal
 
 ### v2.5 Contractor & Commercial Workflows (Planned)
@@ -95,10 +95,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Sanity schemas (client type, project extensions, engagement type) and GROQ queries
-- [ ] 05-02-PLAN.md -- Upstash Redis client, persistent rate limiter, session helpers, and middleware
-- [ ] 05-03-PLAN.md -- Magic link auth flow (actions, verify, login, dashboard, PURL redirect, logout)
-- [ ] 05-04-PLAN.md -- Upstash Redis setup, Resend domain DNS verification, and end-to-end visual verification
+- [x] 05-01-PLAN.md -- Sanity schemas (client type, project extensions, engagement type) and GROQ queries
+- [x] 05-02-PLAN.md -- Upstash Redis client, persistent rate limiter, session helpers, and middleware
+- [x] 05-03-PLAN.md -- Magic link auth flow (actions, verify, login, dashboard, PURL redirect, logout)
+- [x] 05-04-PLAN.md -- Upstash Redis setup, Resend domain DNS verification, and end-to-end visual verification
 
 ### Phase 6: Portal Features
 **Goal**: The authenticated portal is Liz's primary client communication tool -- clients see custom milestones with dates, a procurement table with savings, uploadable artifacts with version history and approval workflow, and post-project warranty access -- all managed by Liz through Sanity Studio
@@ -186,7 +186,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 2. Public Portfolio Site | v1.0 | 4/4 | Complete | 2026-03-14 |
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
 | 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
-| 5. Data Foundation, Auth, and Infrastructure | v2.0 | 0/4 | Planned | - |
+| 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Portal Features | v2.0 | 0/? | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/? | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |

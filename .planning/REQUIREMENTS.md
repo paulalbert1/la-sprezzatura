@@ -226,11 +226,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | Phase 5 | Pending |
-| CLNT-04, CLNT-05 | Phase 5 | Pending |
+| AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | Phase 5 | Complete |
+| CLNT-04, CLNT-05 | Phase 5 | Complete |
 | ENGMT-01 | Phase 5 | Complete |
 | PROC-03 | Phase 5 | Complete |
-| INFRA-07, INFRA-08 | Phase 5 | Pending |
+| INFRA-07 | Phase 5 | Complete |
+| INFRA-08 | Phase 5 | Deferred (Wix DNS limitation -- revisit at Phase 10) |
 | CLNT-06, CLNT-07 | Phase 6 | Pending |
 | MILE-01, MILE-02, MILE-03 | Phase 6 | Pending |
 | PROC-01, PROC-02 | Phase 6 | Pending |

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
-status: executing
-stopped_at: Completed 05-03-PLAN.md
-last_updated: "2026-03-16T15:41:57Z"
-last_activity: 2026-03-16 -- completed 05-03 magic link auth flow and portal pages
+status: completed
+stopped_at: Completed 05-04-PLAN.md (Phase 5 complete)
+last_updated: "2026-03-16T16:51:57.509Z"
+last_activity: 2026-03-16 -- completed 05-04 external service setup and verification
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.0 Phase 5 -- Data Foundation, Auth, and Infrastructure
+**Current focus:** v2.0 Phase 5 complete -- ready for Phase 6 (Portal Features)
 
 ## Current Position
 
-Phase: 5 (v2.0 -- Data Foundation, Auth, and Infrastructure)
-Plan: 3 of 4 complete (05-01 data foundation + 05-02 infrastructure + 05-03 auth flow done)
-Status: Executing
-Last activity: 2026-03-16 -- completed 05-03 magic link auth flow and portal pages
+Phase: 5 (v2.0 -- Data Foundation, Auth, and Infrastructure) -- COMPLETE
+Plan: 4 of 4 complete (all Phase 5 plans done)
+Status: Phase complete
+Last activity: 2026-03-16 -- completed 05-04 external service setup and verification
 
-Progress: [███████░░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: ~13 min
+- Total plans completed: 9
+- Average duration: ~12 min
 - Total execution time: ~1.8 hours
 
 **By Phase:**
@@ -47,10 +47,10 @@ Progress: [███████░░░] 75%
 | 02-public-portfolio-site | 4/4 complete | ~50min | ~13min |
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 
-| 05-data-foundation-auth | 3/4 in progress | -- | -- |
+| 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (~15min), 05-01 (3min), 05-02 (3min), 05-03 (5min)
+- Last 5 plans: 05-01 (3min), 05-02 (3min), 05-03 (5min), 05-04 (2min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -78,6 +78,9 @@ Recent decisions affecting current work:
 - [05-03]: Atomic token consumption via redis.getdel() for single-use magic links
 - [05-03]: PURL redirect shows upgrade message instead of 404 for existing bookmarked links
 - [05-03]: Dashboard auto-redirects single-project clients to project detail view
+- [05-04]: Redis env vars changed to KV_REST_API_URL/KV_REST_API_TOKEN (Vercel Marketplace standard)
+- [05-04]: Old Redis Cloud integration replaced with Upstash for Redis via Vercel Marketplace
+- [05-04]: INFRA-08 (Resend domain) deferred -- Wix DNS lacks subdomain MX support; revisit at Phase 10 DNS migration
 
 ### Pending Todos
 
@@ -86,7 +89,7 @@ None yet.
 ### Blockers/Concerns
 
 - DNS record audit needed for all 4 domains before v3.0 cutover
-- Resend sandbox only delivers to account owner until domain verified (Phase 5 addresses this)
+- Resend sandbox only delivers to account owner until domain verified (INFRA-08 deferred -- Wix DNS cannot set subdomain MX records; will resolve at Phase 10 DNS migration to Cloudflare)
 - Sanity Studio document action API for Send Update trigger needs prototyping during v3.0 planning
 - Budget proposal schema: 3 levels of nested arrays need UX testing before committing (v3.0 planning)
 - Contractor portal needs simple UX -- contractors are generally not technical people
@@ -94,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T15:41:57Z
-Stopped at: Completed 05-03-PLAN.md
-Resume file: .planning/phases/05-data-foundation-auth-and-infrastructure/05-03-SUMMARY.md
+Last session: 2026-03-16T16:51:57.508Z
+Stopped at: Completed 05-04-PLAN.md (Phase 5 complete)
+Resume file: None
