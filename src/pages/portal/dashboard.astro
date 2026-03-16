@@ -1,0 +1,149 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../components/portal/PortalLayout.astro";
+import StatusBadge from "../../components/portal/StatusBadge.astro";
+import { getProjectsByClientId, getClientById } from "../../sanity/queries";
+import { STAGE_META, type StageKey } from "../../lib/portalStages";
+
+// clientId injected by middleware (guaranteed by auth guard)
+const clientId = Astro.locals.clientId!;
+
+// Fetch client name for greeting
+const client = await getClientById(clientId);
+const firstName = client?.name?.split(" ")[0] || "there";
+
+// Fetch all portal-enabled projects for this client
+const projects = await getProjectsByClientId(clientId) || [];
+
+// Auto-redirect: if exactly 1 project, skip dashboard
+if (projects.length === 1) {
+  return Astro.redirect(`/portal/project/${projects[0]._id}`);
+}
+
+// Separate active vs completed projects
+const activeProjects = projects.filter((p: any) => p.pipelineStage !== "closeout");
+const completedProjects = projects.filter((p: any) => p.pipelineStage === "closeout");
+const activeCount = activeProjects.length;
+
+// Engagement type display mapping
+const ENGAGEMENT_LABELS: Record<string, string> = {
+  "full-interior-design": "Full Interior Design",
+  "styling-refreshing": "Styling & Refreshing",
+  "carpet-curating": "Carpet Curating",
+};
+---
+
+<PortalLayout title="Dashboard | La Sprezzatura">
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
+        La Sprezzatura
+      </p>
+
+      {/* Greeting */}
+      <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
+        Welcome back, {firstName}
+      </h1>
+      <p class="text-lg text-stone font-body text-center mb-8">
+        {activeCount === 0
+          ? "No active projects"
+          : activeCount === 1
+            ? "1 active project"
+            : `${activeCount} active projects`}
+      </p>
+
+      {/* Empty state */}
+      {projects.length === 0 && (
+        <div class="text-center py-12">
+          <h2 class="font-heading text-2xl font-light text-charcoal mb-4">
+            No Projects Yet
+          </h2>
+          <p class="text-stone font-body leading-relaxed">
+            Your designer hasn't set up any projects for you yet. If you believe this is an error, please contact{" "}
+            <a
+              href="mailto:liz@lasprezz.com"
+              class="text-terracotta hover:text-terracotta-light transition-colors underline underline-offset-2"
+            >
+              liz@lasprezz.com
+            </a>
+            .
+          </p>
+        </div>
+      )}
+
+      {/* Active project cards */}
+      {activeProjects.length > 0 && (
+        <div class:list={[
+          "grid gap-4",
+          activeProjects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1",
+        ]}>
+          {activeProjects.map((project: any) => {
+            const stage = project.pipelineStage as StageKey;
+            const stageMeta = STAGE_META[stage] || { title: stage };
+            return (
+              <a
+                href={`/portal/project/${project._id}`}
+                class="block bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors cursor-pointer"
+              >
+                <h3 class="font-heading text-xl font-light text-charcoal mb-2">
+                  {project.title}
+                </h3>
+                {project.engagementType && (
+                  <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
+                    {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+                  </p>
+                )}
+                <StatusBadge
+                  stage={stageMeta.title}
+                  isComplete={stage === "closeout"}
+                />
+              </a>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Completed projects */}
+      {completedProjects.length > 0 && (
+        <>
+          <p class="text-xs text-stone uppercase tracking-widest font-body mt-10 mb-4">
+            Completed Projects
+          </p>
+          <div class:list={[
+            "grid gap-4",
+            completedProjects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1",
+          ]}>
+            {completedProjects.map((project: any) => (
+              <a
+                href={`/portal/project/${project._id}`}
+                class="block bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors cursor-pointer opacity-60"
+              >
+                <h3 class="font-heading text-xl font-light text-charcoal mb-2">
+                  {project.title}
+                </h3>
+                {project.engagementType && (
+                  <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
+                    {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+                  </p>
+                )}
+                <StatusBadge stage="Closeout" isComplete={true} />
+              </a>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Sign out link */}
+      <div class="mt-16 text-center">
+        <a
+          href="/portal/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>

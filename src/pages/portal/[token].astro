@@ -2,141 +2,31 @@
 export const prerender = false;
 
 import PortalLayout from "../../components/portal/PortalLayout.astro";
-import MilestoneTimeline from "../../components/portal/MilestoneTimeline.astro";
-import StatusBadge from "../../components/portal/StatusBadge.astro";
-import { getProjectByPortalToken } from "../../sanity/queries";
-import { STAGE_META, type StageKey } from "../../lib/portalStages";
-import { contactRatelimit } from "../../lib/rateLimit";
 
-const { token } = Astro.params;
-
-// Rate limiting: extract client IP
-const ip =
-  Astro.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-  Astro.request.headers.get("x-real-ip") ||
-  "unknown";
-
-let rateLimited = false;
-try {
-  const { success } = await contactRatelimit.limit(ip);
-  if (!success) rateLimited = true;
-} catch {
-  rateLimited = true;
-}
-
-// Query Sanity for the project (returns null if no match or portalEnabled is false)
-let project: {
-  title: string;
-  clientName: string | null;
-  pipelineStage: StageKey;
-} | null = null;
-
-if (!rateLimited && token) {
-  project = await getProjectByPortalToken(token);
-}
-
-// Determine current stage and metadata
-const currentStage: StageKey = project?.pipelineStage ?? "discovery";
-const stageMeta = STAGE_META[currentStage];
-
-// Set response status for error cases
-if (rateLimited) {
-  Astro.response.status = 429;
-} else if (!project) {
-  Astro.response.status = 404;
-}
+// Old PURL links now redirect with an upgrade message
+// No rate limiting or Sanity query needed -- just display the message
 ---
 
-{
-  rateLimited ? (
-    <PortalLayout title="Please Try Again Later">
-      <main class="flex-1 flex items-center justify-center px-6">
-        <div class="text-center max-w-md">
-          <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
-            Please Try Again Later
-          </h1>
-          <p class="text-stone font-body leading-relaxed">
-            Too many requests. Please wait a moment and try again.
-          </p>
-        </div>
-      </main>
-    </PortalLayout>
-  ) : !project ? (
-    <PortalLayout title="Project Not Found">
-      <main class="flex-1 flex items-center justify-center px-6">
-        <div class="text-center max-w-md">
-          <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
-            Project Not Found
-          </h1>
-          <p class="text-stone font-body leading-relaxed">
-            This project link is not active. If you believe this is an error,
-            please contact your designer at{" "}
-            <a
-              href="mailto:liz@lasprezz.com"
-              class="text-terracotta hover:text-terracotta-light transition-colors underline underline-offset-2"
-            >
-              liz@lasprezz.com
-            </a>
-            .
-          </p>
-        </div>
-      </main>
-    </PortalLayout>
-  ) : (
-    <PortalLayout title={`${project.title} | La Sprezzatura`}>
-      <main class="flex-1">
-        <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-          {/* La Sprezzatura branding */}
-          <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
-            La Sprezzatura
-          </p>
+<PortalLayout title="Portal Upgraded | La Sprezzatura">
+  <main class="flex-1 flex items-center justify-center px-6">
+    <div class="text-center max-w-md">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
+        La Sprezzatura
+      </p>
 
-          {/* Project title */}
-          <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
-            {project.title}
-          </h1>
-
-          {/* Client greeting or spacer */}
-          {project.clientName ? (
-            <p class="text-lg text-stone font-body text-center mb-8">
-              Welcome, {project.clientName}
-            </p>
-          ) : (
-            <div class="mb-8" />
-          )}
-
-          {/* Status badge */}
-          <div class="flex justify-center mb-12">
-            <StatusBadge
-              stage={stageMeta.title}
-              isComplete={currentStage === "closeout"}
-            />
-          </div>
-
-          {/* Divider */}
-          <hr class="border-stone-light/20 mb-12" />
-
-          {/* Timeline section */}
-          <h2 class="font-heading text-2xl text-charcoal text-center mb-8">
-            Project Timeline
-          </h2>
-
-          <MilestoneTimeline currentStage={currentStage} />
-
-          {/* Contact CTA */}
-          <div class="mt-16 text-center">
-            <p class="text-stone font-body mb-4">
-              Questions about your project?
-            </p>
-            <a
-              href="mailto:liz@lasprezz.com"
-              class="inline-block border border-stone-light/40 px-6 py-2.5 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors"
-            >
-              Contact Elizabeth
-            </a>
-          </div>
-        </div>
-      </main>
-    </PortalLayout>
-  )
-}
+      <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
+        We've Upgraded Your Portal
+      </h1>
+      <p class="text-stone font-body leading-relaxed mb-8">
+        For your security, we've added email verification. Enter your email address to access your projects.
+      </p>
+      <a
+        href="/portal/login"
+        class="inline-block border border-stone-light/40 px-6 py-3 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors font-body"
+      >
+        Go to Login
+      </a>
+    </div>
+  </main>
+</PortalLayout>

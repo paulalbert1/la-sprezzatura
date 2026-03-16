@@ -162,6 +162,19 @@ export async function getProjectsByClientId(clientId: string) {
   return sanityClient.fetch(PROJECTS_BY_CLIENT_QUERY, { clientId });
 }
 
+// GROQ: Get client by ID (for dashboard greeting)
+export const CLIENT_BY_ID_QUERY = `
+  *[_type == "client" && _id == $clientId][0] {
+    _id,
+    name,
+    email
+  }
+`;
+
+export async function getClientById(clientId: string) {
+  return sanityClient.fetch(CLIENT_BY_ID_QUERY, { clientId });
+}
+
 // PROC-03 Convention: All financial values (procurement costs, retail prices)
 // MUST be stored as integer cents using Sanity number field with .integer() validation.
 // Example: validation: (r) => r.integer().min(0)
