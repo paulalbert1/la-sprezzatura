@@ -59,7 +59,7 @@
 
 - [x] **CLNT-04**: Liz can create client records in Sanity with name, email, phone, address, and preferred contact method -- Phase 5
 - [x] **CLNT-05**: A client can have multiple projects and a project can have multiple clients; one client is designated as the primary contact -- Phase 5
-- [ ] **CLNT-06**: Portal greets client by name and shows all their active and historical projects -- Phase 6
+- [x] **CLNT-06**: Portal greets client by name and shows all their active and historical projects -- Phase 6
 - [x] **CLNT-07**: Active clients can view completed projects alongside current ones (e.g., living room done, bedroom in progress) -- Phase 6
 
 ### Engagement Type (ENGMT)
@@ -69,8 +69,8 @@
 ### Milestones (MILE)
 
 - [x] **MILE-01**: Liz can define custom per-project milestones with name, date, and completion status in Sanity -- Phase 6
-- [ ] **MILE-02**: Client sees milestone timeline with dates and completion indicators on the portal -- Phase 6
-- [ ] **MILE-03**: The 6-stage pipeline is retained as high-level status alongside detailed milestones -- Phase 6
+- [x] **MILE-02**: Client sees milestone timeline with dates and completion indicators on the portal -- Phase 6
+- [x] **MILE-03**: The 6-stage pipeline is retained as high-level status alongside detailed milestones -- Phase 6
 
 ### Procurement (PROC)
 
@@ -89,7 +89,7 @@
 
 ### Portal Experience (PORT)
 
-- [ ] **PORT-05**: Portal displays a confidentiality notice about not sharing the access link -- Phase 6
+- [x] **PORT-05**: Portal displays a confidentiality notice about not sharing the access link -- Phase 6
 - [ ] **PORT-06**: Client can submit notes at appropriate workflow points (artifacts, milestones) -- Phase 6
 - [ ] **PORT-07**: Portal shows all project artifacts with current status, version history, and decision log -- Phase 6
 
