@@ -82,16 +82,16 @@
 
 - [x] **ARTF-01**: Liz can upload project artifacts of configurable types (proposal, floor plan, design board, contract, warranty, close document) -- Phase 6
 - [x] **ARTF-02**: Artifacts support revisions -- new versions are created, previous versions remain viewable but visually muted -- Phase 6
-- [ ] **ARTF-03**: Client can review and select/approve artifact versions; non-selected versions are muted -- Phase 6
+- [x] **ARTF-03**: Client can review and select/approve artifact versions; non-selected versions are muted -- Phase 6
 - [x] **ARTF-04**: All selections, approvals, and decisions are recorded in a decision log with timestamps -- Phase 6
 - [x] **ARTF-08**: Contract artifacts support upload of a signed version by the designer -- Phase 6
-- [ ] **ARTF-09**: Client can provide notes/feedback on artifacts at review points -- Phase 6
+- [x] **ARTF-09**: Client can provide notes/feedback on artifacts at review points -- Phase 6
 
 ### Portal Experience (PORT)
 
 - [x] **PORT-05**: Portal displays a confidentiality notice about not sharing the access link -- Phase 6
-- [ ] **PORT-06**: Client can submit notes at appropriate workflow points (artifacts, milestones) -- Phase 6
-- [ ] **PORT-07**: Portal shows all project artifacts with current status, version history, and decision log -- Phase 6
+- [x] **PORT-06**: Client can submit notes at appropriate workflow points (artifacts, milestones) -- Phase 6
+- [x] **PORT-07**: Portal shows all project artifacts with current status, version history, and decision log -- Phase 6
 
 ### Post-Project (POST)
 

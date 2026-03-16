@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-16T19:57:05.783Z"
-last_activity: 2026-03-16 -- completed 06-02 project detail page (milestones, procurement, dashboard filter)
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-03-16T19:56:10Z"
+last_activity: 2026-03-16 -- completed 06-03 artifact interaction (approval forms, notes, 4 Astro Actions)
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
-  percent: 67
+  completed_plans: 8
+  percent: 78
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 2 of 5
+**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 3 of 5
 
 ## Current Position
 
 Phase: 6 (v2.0 -- Portal Features)
-Plan: 2 of 5 complete
+Plan: 3 of 5 complete
 Status: Executing
-Last activity: 2026-03-16 -- completed 06-02 project detail page (milestones, procurement, dashboard filter)
+Last activity: 2026-03-16 -- completed 06-03 artifact interaction (approval forms, notes, 4 Astro Actions)
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
+- Total plans completed: 12
 - Average duration: ~10 min
-- Total execution time: ~2.0 hours
+- Total execution time: ~2.1 hours
 
 **By Phase:**
 
@@ -47,10 +47,10 @@ Progress: [███████░░░] 67%
 | 02-public-portfolio-site | 4/4 complete | ~50min | ~13min |
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
-| 06-portal-features | 2/5 complete | ~12min | ~6min |
+| 06-portal-features | 3/5 complete | ~19min | ~6min |
 
 **Recent Trend:**
-- Last 5 plans: 05-03 (5min), 05-04 (2min), 06-01 (6min), 06-02 (6min)
+- Last 5 plans: 05-04 (2min), 06-01 (6min), 06-02 (6min), 06-03 (7min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -85,6 +85,7 @@ Recent decisions affecting current work:
 - [06-01]: GROQ select() for conditional procurement inclusion based on engagement type
 - [06-01]: Procurement savings computed server-side in GROQ -- clientCost never sent to client
 - [06-02]: Procurement items accessed via project.procurementItems (from GROQ select() conditional projection)
+- [06-03]: Zod schemas extracted to portalSchemas.ts for testability (astro:actions virtual module unresolvable in vitest)
 
 ### Pending Todos
 
@@ -101,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:57:05.781Z
-Stopped at: Completed 06-02-PLAN.md
-Resume file: .planning/phases/06-portal-features/06-03-PLAN.md
+Last session: 2026-03-16T19:56:10Z
+Stopped at: Completed 06-03-PLAN.md
+Resume file: .planning/phases/06-portal-features/06-04-PLAN.md
