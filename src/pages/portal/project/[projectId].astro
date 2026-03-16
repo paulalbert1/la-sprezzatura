@@ -8,6 +8,7 @@ import PostProjectBanner from "../../../components/portal/PostProjectBanner.astr
 import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
 import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
 import ArtifactSection from "../../../components/portal/ArtifactSection.astro";
+import WarrantyClaimForm from "../../../components/portal/WarrantyClaimForm.tsx";
 import {
   getProjectDetail,
   getProjectsByClientId,
@@ -38,6 +39,7 @@ const isReopened = isProjectReopened(project);
 
 // Engagement type gating
 const showProcurement = project.engagementType === "full-interior-design";
+const showCloseDocument = project.engagementType === "full-interior-design";
 
 // Multi-project detection for "Back to Dashboard" link
 const allProjects = await getProjectsByClientId(clientId);
@@ -89,7 +91,28 @@ const isMultiProject = (allProjects?.length || 0) > 1;
         isCompleted={isCompleted && !isReopened}
       />
 
-      <!-- Warranty section placeholder (Plan 05) -->
+      <!-- Close document download (Full Interior Design completed projects only) -->
+      {isCompleted && showCloseDocument && (
+        <section class="py-12 border-t border-stone-light/20">
+          <h2 class="font-heading text-xl font-light text-charcoal mb-4">
+            Close Document
+          </h2>
+          <p class="text-sm text-stone font-body mb-4">
+            A summary of your completed project including milestones, procurement savings, and approved documents.
+          </p>
+          <a
+            href={`/api/close-document?projectId=${project._id}`}
+            class="inline-flex items-center gap-2 bg-terracotta text-white text-xs uppercase tracking-widest font-body px-8 py-3 hover:bg-terracotta-light transition-colors"
+          >
+            Download PDF
+          </a>
+        </section>
+      )}
+
+      <!-- Warranty claim form (reopened projects only) -->
+      {isReopened && (
+        <WarrantyClaimForm client:load projectId={project._id} />
+      )}
 
       <div class="mt-16 text-center">
         <a
