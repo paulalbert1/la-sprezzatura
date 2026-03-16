@@ -95,10 +95,10 @@
 
 ### Post-Project (POST)
 
-- [ ] **POST-01**: After final milestone, Liz can generate a project close document (PDF) -- Phase 6
-- [ ] **POST-02**: Liz can reopen a completed project for warranty work -- Phase 6
-- [ ] **POST-03**: Liz can upload warranty items to a reopened project -- Phase 6
-- [ ] **POST-04**: Client can submit a warranty claim through the portal on a reopened project -- Phase 6
+- [x] **POST-01**: After final milestone, Liz can generate a project close document (PDF) -- Phase 6
+- [x] **POST-02**: Liz can reopen a completed project for warranty work -- Phase 6
+- [x] **POST-03**: Liz can upload warranty items to a reopened project -- Phase 6
+- [x] **POST-04**: Client can submit a warranty claim through the portal on a reopened project -- Phase 6
 
 ### Infrastructure (INFRA)
 

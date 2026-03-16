@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-03-16T19:56:10Z"
-last_activity: 2026-03-16 -- completed 06-03 artifact interaction (approval forms, notes, 4 Astro Actions)
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-03-16T20:05:32Z"
+last_activity: 2026-03-16 -- completed 06-05 post-project features (close document PDF, warranty claims with photo upload)
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 78
+  completed_plans: 9
+  percent: 89
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 3 of 5
+**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 5 of 5
 
 ## Current Position
 
 Phase: 6 (v2.0 -- Portal Features)
-Plan: 3 of 5 complete
+Plan: 5 of 5 complete
 Status: Executing
-Last activity: 2026-03-16 -- completed 06-03 artifact interaction (approval forms, notes, 4 Astro Actions)
+Last activity: 2026-03-16 -- completed 06-05 post-project features (close document PDF, warranty claims with photo upload)
 
-Progress: [████████░░] 78%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -47,10 +47,10 @@ Progress: [████████░░] 78%
 | 02-public-portfolio-site | 4/4 complete | ~50min | ~13min |
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
-| 06-portal-features | 3/5 complete | ~19min | ~6min |
+| 06-portal-features | 5/5 complete | ~24min | ~5min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (2min), 06-01 (6min), 06-02 (6min), 06-03 (7min)
+- Last 5 plans: 06-01 (6min), 06-02 (6min), 06-03 (7min), 06-04 (?min), 06-05 (5min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -86,6 +86,11 @@ Recent decisions affecting current work:
 - [06-01]: Procurement savings computed server-side in GROQ -- clientCost never sent to client
 - [06-02]: Procurement items accessed via project.procurementItems (from GROQ select() conditional projection)
 - [06-03]: Zod schemas extracted to portalSchemas.ts for testability (astro:actions virtual module unresolvable in vitest)
+- [06-05]: PDFKit with in-memory buffer pattern for serverless-compatible close document PDF generation
+- [06-05]: warrantyClaimSchema extracted to portalSchemas.ts following 06-03 pattern
+- [06-05]: Photo upload to Sanity CDN via sanityWriteClient.assets.upload in warranty claim action
+- [Phase 06]: [06-04]: API route for notify-artifact instead of Astro Action -- Sanity Studio runs in browser context
+- [Phase 06]: [06-04]: Document actions appended to prev to preserve built-in Sanity actions (Publish, Delete, etc.)
 
 ### Pending Todos
 
@@ -102,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T19:56:10Z
-Stopped at: Completed 06-03-PLAN.md
-Resume file: .planning/phases/06-portal-features/06-04-PLAN.md
+Last session: 2026-03-16T20:05:32Z
+Stopped at: Completed 06-05-PLAN.md
+Resume file: Phase 06 complete -- all 5 plans executed
