@@ -1,0 +1,167 @@
+import { describe, it, expect } from "vitest";
+import {
+  approveArtifactSchema,
+  requestChangesSchema,
+  milestoneNoteSchema,
+  artifactNoteSchema,
+} from "./portalSchemas";
+
+describe("approveArtifact schema", () => {
+  it("rejects missing confirmed field", () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "ghi",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects confirmed="false" (only "true" accepted)', () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "ghi",
+      confirmed: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid input", () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "ghi",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty projectId", () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "",
+      artifactKey: "def",
+      versionKey: "ghi",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty artifactKey", () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "",
+      versionKey: "ghi",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty versionKey", () => {
+    const result = approveArtifactSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("requestArtifactChanges schema", () => {
+  it("rejects empty feedback", () => {
+    const result = requestChangesSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "ghi",
+      feedback: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty projectId", () => {
+    const result = requestChangesSchema.safeParse({
+      projectId: "",
+      artifactKey: "def",
+      versionKey: "ghi",
+      feedback: "Please change the color",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid input", () => {
+    const result = requestChangesSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      versionKey: "ghi",
+      feedback: "Please change the color",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("submitMilestoneNote schema", () => {
+  it("rejects empty text", () => {
+    const result = milestoneNoteSchema.safeParse({
+      projectId: "abc",
+      milestoneKey: "def",
+      text: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects text over 500 chars", () => {
+    const result = milestoneNoteSchema.safeParse({
+      projectId: "abc",
+      milestoneKey: "def",
+      text: "a".repeat(501),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid input", () => {
+    const result = milestoneNoteSchema.safeParse({
+      projectId: "abc",
+      milestoneKey: "def",
+      text: "Looks great",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts text at exactly 500 chars", () => {
+    const result = milestoneNoteSchema.safeParse({
+      projectId: "abc",
+      milestoneKey: "def",
+      text: "a".repeat(500),
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("submitArtifactNote schema", () => {
+  it("rejects empty text", () => {
+    const result = artifactNoteSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      text: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts valid input", () => {
+    const result = artifactNoteSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      text: "Note here",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects text over 500 chars", () => {
+    const result = artifactNoteSchema.safeParse({
+      projectId: "abc",
+      artifactKey: "def",
+      text: "a".repeat(501),
+    });
+    expect(result.success).toBe(false);
+  });
+});
