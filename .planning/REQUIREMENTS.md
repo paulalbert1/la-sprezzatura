@@ -45,9 +45,7 @@
 - [x] **CLNT-02**: Portal displays project name, status badge, pipeline stage, milestone timeline -- Phase 3
 - [x] **CLNT-03**: Project pipeline schema in Sanity with 6 stages -- Phase 3
 
-## v2 Requirements
-
-Requirements for milestone v2.0: Client Portal Platform + Go-Live.
+## v2.0 Requirements (Client Portal Foundation -- Phases 5-6)
 
 ### Authentication (AUTH)
 
@@ -63,6 +61,10 @@ Requirements for milestone v2.0: Client Portal Platform + Go-Live.
 - [ ] **CLNT-05**: A client can have multiple projects and a project can have multiple clients; one client is designated as the primary contact -- Phase 5
 - [ ] **CLNT-06**: Portal greets client by name and shows all their active and historical projects -- Phase 6
 - [ ] **CLNT-07**: Active clients can view completed projects alongside current ones (e.g., living room done, bedroom in progress) -- Phase 6
+
+### Engagement Type (ENGMT)
+
+- [ ] **ENGMT-01**: Liz can set engagement type on a project: Full Interior Design, Styling & Refreshing, or Carpet Curating -- Phase 5
 
 ### Milestones (MILE)
 
@@ -82,9 +84,6 @@ Requirements for milestone v2.0: Client Portal Platform + Go-Live.
 - [ ] **ARTF-02**: Artifacts support revisions -- new versions are created, previous versions remain viewable but visually muted -- Phase 6
 - [ ] **ARTF-03**: Client can review and select/approve artifact versions; non-selected versions are muted -- Phase 6
 - [ ] **ARTF-04**: All selections, approvals, and decisions are recorded in a decision log with timestamps -- Phase 6
-- [ ] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 7
-- [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 7
-- [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 7
 - [ ] **ARTF-08**: Contract artifacts support upload of a signed version by the designer -- Phase 6
 - [ ] **ARTF-09**: Client can provide notes/feedback on artifacts at review points -- Phase 6
 
@@ -94,12 +93,6 @@ Requirements for milestone v2.0: Client Portal Platform + Go-Live.
 - [ ] **PORT-06**: Client can submit notes at appropriate workflow points (artifacts, milestones) -- Phase 6
 - [ ] **PORT-07**: Portal shows all project artifacts with current status, version history, and decision log -- Phase 6
 
-### Send Update (SEND)
-
-- [ ] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project -- Phase 7
-- [ ] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz -- Phase 7
-- [ ] **SEND-03**: Every sent update is logged with timestamp and recipient on the project -- Phase 7
-
 ### Post-Project (POST)
 
 - [ ] **POST-01**: After final milestone, Liz can generate a project close document (PDF) -- Phase 6
@@ -107,27 +100,79 @@ Requirements for milestone v2.0: Client Portal Platform + Go-Live.
 - [ ] **POST-03**: Liz can upload warranty items to a reopened project -- Phase 6
 - [ ] **POST-04**: Client can submit a warranty claim through the portal on a reopened project -- Phase 6
 
-### Booking (BOOK)
-
-- [ ] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed -- Phase 7
-
-### Public Site Polish (SITE)
-
-- [ ] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation -- Phase 7
-
 ### Infrastructure (INFRA)
 
 - [ ] **INFRA-07**: Rate limiter upgraded from in-memory to persistent storage for serverless -- Phase 5
 - [ ] **INFRA-08**: Resend domain verified for lasprezz.com with SPF/DKIM coexisting with Microsoft 365 -- Phase 5
-- [ ] **INFRA-01**: DNS consolidation -- all 4 domains (lasprezz.com, lasprezzaturany.com, lasprezzny.com, casadeolivier.com) to Cloudflare -- Phase 8
-- [ ] **INFRA-02**: Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC -- Phase 8
-- [ ] **INFRA-03**: Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com -- Phase 8
-- [ ] **INFRA-04**: Redirect consolidation -- secondary domains redirect to lasprezz.com -- Phase 8
-- [ ] **INFRA-06**: Cloudflare DNS with SSL for all domains -- Phase 8
+
+## v2.5 Requirements (Contractor & Commercial Workflows -- Phases 7-8)
+
+### Engagement Type & Classification (ENGMT/PRJT)
+
+- [ ] **ENGMT-02**: Engagement type controls which Sanity Studio fields and portal features are visible per project -- Phase 7
+- [ ] **PRJT-01**: Liz can toggle a project between Residential and Commercial -- Phase 7
+- [ ] **PRJT-02**: Commercial projects show building manager fields and COI section in Sanity Studio; residential projects hide them -- Phase 7
+
+### Contractor Portal (CONTR)
+
+- [ ] **CONTR-01**: Liz can create contractor records in Sanity with name, email, phone, company, and trade -- Phase 7
+- [ ] **CONTR-02**: Contractor receives a magic link email to access their portal view -- no password or account creation -- Phase 7
+- [ ] **CONTR-03**: Contractor portal shows floor plans, scope of work, deadline, notes, and next steps for assigned projects -- Phase 8
+- [ ] **CONTR-04**: Contractor sees client name and project address only -- no client email, phone, or contact info ("contact Liz" shown instead) -- Phase 8
+- [ ] **CONTR-05**: Liz uploads final estimate as PDF or inputs the dollar amount per contractor per project -- Phase 7
+- [ ] **CONTR-06**: Contractor portal is only available for Full Interior Design projects -- Phase 7
+- [ ] **CONTR-07**: Contractor can be assigned to multiple projects; a project can have multiple contractors -- Phase 7
+
+### Building Manager Portal (BLDG)
+
+- [ ] **BLDG-01**: Liz can add building manager contact info (name, email, phone) to commercial projects -- Phase 7
+- [ ] **BLDG-02**: Building manager receives a magic link email to access their portal view -- Phase 8
+- [ ] **BLDG-03**: Building manager sees client name and contact info for the project -- Phase 8
+- [ ] **BLDG-04**: Building manager has a COI section showing certificates of insurance with expiration dates -- Phase 8
+- [ ] **BLDG-05**: Building manager has a legal documents section for building requirements and PDFs -- Phase 8
+- [ ] **BLDG-06**: Building manager can request contractor info (name, license -- not direct contact, "contact Liz" for more) -- Phase 8
+
+### Client Contractor Visibility (CVIS)
+
+- [ ] **CVIS-01**: Client sees contractor name and on-site schedule dates on their project portal -- Phase 8
+
+### Document Storage (DOCS)
+
+- [ ] **DOCS-01**: COI documents, floor plans, and legal documents stored with private access (Vercel Blob with signed URLs, not public Sanity CDN) -- Phase 7
+
+## v3.0 Requirements (Business Operations & Go-Live -- Phases 9-10)
+
+### Send Update (SEND)
+
+- [ ] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project -- Phase 9
+- [ ] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz -- Phase 9
+- [ ] **SEND-03**: Every sent update is logged with timestamp and recipient on the project -- Phase 9
+
+### Project Artifacts - Investment Proposals (ARTF)
+
+- [ ] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 9
+- [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 9
+- [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 9
+
+### Booking (BOOK)
+
+- [ ] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed -- Phase 9
+
+### Public Site Polish (SITE)
+
+- [ ] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation -- Phase 9
+
+### Infrastructure (INFRA)
+
+- [ ] **INFRA-01**: DNS consolidation -- all 4 domains (lasprezz.com, lasprezzaturany.com, lasprezzny.com, casadeolivier.com) to Cloudflare -- Phase 10
+- [ ] **INFRA-02**: Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC -- Phase 10
+- [ ] **INFRA-03**: Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com -- Phase 10
+- [ ] **INFRA-04**: Redirect consolidation -- secondary domains redirect to lasprezz.com -- Phase 10
+- [ ] **INFRA-06**: Cloudflare DNS with SSL for all domains -- Phase 10
 
 ## Future Requirements
 
-Deferred beyond v2.0. Tracked but not in current roadmap.
+Deferred beyond v3.0. Tracked but not in current roadmap.
 
 ### Portfolio Enhancements
 
@@ -159,6 +204,8 @@ Explicitly excluded. Documented to prevent scope creep.
 | Dubsado CRM | Premature. Contact form + Fantastical + portal covers needs. |
 | Google Workspace migration | Stay on Microsoft 365 -- already in use, no reason to switch. |
 | Multi-party contract signing | Single approval per artifact for v2.0. Revisit if co-signer workflow needed. |
+| Building manager approval workflow | Document exchange only -- no sign-off or approval chain for v2.5 |
+| Contractor messaging/chat | Contractors contact Liz directly -- portal is read-only job brief |
 
 ## Traceability
 
@@ -175,66 +222,59 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SEO-01, SEO-02, SEO-03, SEO-04, SEO-05 | Phase 2 | Complete |
 | CLNT-01, CLNT-02, CLNT-03 | Phase 3 | Complete |
 
-### v2 Requirements
+### v2.0 Requirements (Client Portal Foundation)
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 5 | Pending |
-| AUTH-02 | Phase 5 | Pending |
-| AUTH-03 | Phase 5 | Pending |
-| AUTH-04 | Phase 5 | Pending |
-| AUTH-05 | Phase 5 | Pending |
-| CLNT-04 | Phase 5 | Pending |
-| CLNT-05 | Phase 5 | Pending |
+| AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05 | Phase 5 | Pending |
+| CLNT-04, CLNT-05 | Phase 5 | Pending |
+| ENGMT-01 | Phase 5 | Pending |
 | PROC-03 | Phase 5 | Pending |
-| INFRA-07 | Phase 5 | Pending |
-| INFRA-08 | Phase 5 | Pending |
-| MILE-01 | Phase 6 | Pending |
-| MILE-02 | Phase 6 | Pending |
-| MILE-03 | Phase 6 | Pending |
-| PROC-01 | Phase 6 | Pending |
-| PROC-02 | Phase 6 | Pending |
-| ARTF-01 | Phase 6 | Pending |
-| ARTF-02 | Phase 6 | Pending |
-| ARTF-03 | Phase 6 | Pending |
-| ARTF-04 | Phase 6 | Pending |
-| ARTF-08 | Phase 6 | Pending |
-| ARTF-09 | Phase 6 | Pending |
-| PORT-05 | Phase 6 | Pending |
-| PORT-06 | Phase 6 | Pending |
-| PORT-07 | Phase 6 | Pending |
-| CLNT-06 | Phase 6 | Pending |
-| CLNT-07 | Phase 6 | Pending |
-| POST-01 | Phase 6 | Pending |
-| POST-02 | Phase 6 | Pending |
-| POST-03 | Phase 6 | Pending |
-| POST-04 | Phase 6 | Pending |
-| SEND-01 | Phase 7 | Pending |
-| SEND-02 | Phase 7 | Pending |
-| SEND-03 | Phase 7 | Pending |
-| ARTF-05 | Phase 7 | Pending |
-| ARTF-06 | Phase 7 | Pending |
-| ARTF-07 | Phase 7 | Pending |
-| SITE-08 | Phase 7 | Pending |
-| BOOK-01 | Phase 7 | Pending |
-| INFRA-01 | Phase 8 | Pending |
-| INFRA-02 | Phase 8 | Pending |
-| INFRA-03 | Phase 8 | Pending |
-| INFRA-04 | Phase 8 | Pending |
-| INFRA-06 | Phase 8 | Pending |
+| INFRA-07, INFRA-08 | Phase 5 | Pending |
+| CLNT-06, CLNT-07 | Phase 6 | Pending |
+| MILE-01, MILE-02, MILE-03 | Phase 6 | Pending |
+| PROC-01, PROC-02 | Phase 6 | Pending |
+| ARTF-01, ARTF-02, ARTF-03, ARTF-04, ARTF-08, ARTF-09 | Phase 6 | Pending |
+| PORT-05, PORT-06, PORT-07 | Phase 6 | Pending |
+| POST-01, POST-02, POST-03, POST-04 | Phase 6 | Pending |
+
+### v2.5 Requirements (Contractor & Commercial)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ENGMT-02, PRJT-01, PRJT-02 | Phase 7 | Pending |
+| CONTR-01, CONTR-02, CONTR-05, CONTR-06, CONTR-07 | Phase 7 | Pending |
+| BLDG-01 | Phase 7 | Pending |
+| DOCS-01 | Phase 7 | Pending |
+| CONTR-03, CONTR-04 | Phase 8 | Pending |
+| BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Pending |
+| CVIS-01 | Phase 8 | Pending |
+
+### v3.0 Requirements (Business Operations & Go-Live)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SEND-01, SEND-02, SEND-03 | Phase 9 | Pending |
+| ARTF-05, ARTF-06, ARTF-07 | Phase 9 | Pending |
+| BOOK-01, SITE-08 | Phase 9 | Pending |
+| INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06 | Phase 10 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total (all complete)
-- v2 requirements: 43 total
-- Mapped to phases: 43/43
+- v2.0 requirements: 31 total (Phases 5-6)
+- v2.5 requirements: 18 total (Phases 7-8)
+- v3.0 requirements: 13 total (Phases 9-10)
+- Total mapped: 83/83
 - Unmapped: 0
 
-**By phase:**
-- Phase 5 (Data Foundation, Auth, and Infrastructure): 10 requirements
-- Phase 6 (Portal Features): 20 requirements
-- Phase 7 (Send Update, Investment Proposals, and Public Site Polish): 8 requirements
-- Phase 8 (DNS Cutover and Go-Live): 5 requirements
+**By milestone/phase:**
+- v2.0 Phase 5 (Data Foundation, Auth, Infrastructure): 11 requirements
+- v2.0 Phase 6 (Portal Features): 20 requirements
+- v2.5 Phase 7 (Schema, Auth Extension, Contractor Foundation): 10 requirements
+- v2.5 Phase 8 (Contractor Portal UI, Building Manager Portal): 8 requirements
+- v3.0 Phase 9 (Send Update, Proposals, Public Site Polish): 8 requirements
+- v3.0 Phase 10 (DNS Cutover and Go-Live): 5 requirements
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-16 after v2.0 roadmap creation (all 43 v2 requirements mapped)*
+*Last updated: 2026-03-16 after milestone restructure (v2.0 → v2.0/v2.5/v3.0, +18 v2.5 requirements, +1 ENGMT-01 to v2.0)*
