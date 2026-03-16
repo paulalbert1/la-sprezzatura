@@ -6,7 +6,7 @@ import MilestoneTimeline from "../../components/portal/MilestoneTimeline.astro";
 import StatusBadge from "../../components/portal/StatusBadge.astro";
 import { getProjectByPortalToken } from "../../sanity/queries";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
-import { checkRateLimit } from "../../lib/rateLimit";
+import { contactRatelimit } from "../../lib/rateLimit";
 
 const { token } = Astro.params;
 
@@ -18,7 +18,8 @@ const ip =
 
 let rateLimited = false;
 try {
-  checkRateLimit(ip, { maxRequests: 10, windowMs: 60_000 });
+  const { success } = await contactRatelimit.limit(ip);
+  if (!success) rateLimited = true;
 } catch {
   rateLimited = true;
 }

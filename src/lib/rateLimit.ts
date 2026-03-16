@@ -1,36 +1,16 @@
-/**
- * Reusable in-memory rate limiter.
- * Tracks request counts per IP with a sliding window.
- * Throws a generic Error (not ActionError) so it can be used outside Astro Actions.
- */
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+import { Ratelimit } from "@upstash/ratelimit";
+import { redis } from "./redis";
 
-interface RateLimitOptions {
-  /** Maximum requests allowed in the window (default: 3) */
-  maxRequests?: number;
-  /** Window duration in milliseconds (default: 60_000 = 1 minute) */
-  windowMs?: number;
-}
+// Magic link requests: 3 per 10 minutes per email address
+export const magicLinkRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "10 m"),
+  prefix: "ratelimit:magic",
+});
 
-export function checkRateLimit(
-  ip: string,
-  options?: RateLimitOptions,
-): void {
-  const maxRequests = options?.maxRequests ?? 3;
-  const windowMs = options?.windowMs ?? 60_000;
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (entry) {
-    if (now < entry.resetAt) {
-      if (entry.count >= maxRequests) {
-        throw new Error("Too many requests");
-      }
-      entry.count++;
-    } else {
-      rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
-    }
-  } else {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
-  }
-}
+// Contact form submissions: 3 per 1 minute per IP
+export const contactRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "1 m"),
+  prefix: "ratelimit:contact",
+});

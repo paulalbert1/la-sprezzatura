@@ -1,28 +1,6 @@
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
-
-// Simple in-memory rate limiter: max 3 submissions per minute per IP
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): void {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (entry) {
-    if (now < entry.resetAt) {
-      if (entry.count >= 3) {
-        throw new ActionError({
-          code: "TOO_MANY_REQUESTS",
-          message: "Too many submissions. Please wait a moment before trying again.",
-        });
-      }
-      entry.count++;
-    } else {
-      rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
-    }
-  } else {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + 60_000 });
-  }
-}
+import { contactRatelimit } from "../lib/rateLimit";
 
 export const server = {
   submitContact: defineAction({
@@ -43,7 +21,13 @@ export const server = {
         context.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         context.request.headers.get("x-real-ip") ||
         "unknown";
-      checkRateLimit(ip);
+      const { success } = await contactRatelimit.limit(ip);
+      if (!success) {
+        throw new ActionError({
+          code: "TOO_MANY_REQUESTS",
+          message: "Too many submissions. Please wait a moment before trying again.",
+        });
+      }
 
       const apiKey = import.meta.env.RESEND_API_KEY;
       const notifyEmail =
