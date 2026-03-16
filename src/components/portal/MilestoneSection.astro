@@ -13,9 +13,10 @@ interface Props {
   milestones: Milestone[];
   pipelineStage: string;
   isCompleted: boolean;
+  projectId: string;
 }
 
-const { milestones, pipelineStage, isCompleted } = Astro.props;
+const { milestones, pipelineStage, isCompleted, projectId } = Astro.props;
 
 const sorted = sortMilestones(milestones);
 const progress = getMilestoneProgress(sorted);
@@ -63,6 +64,7 @@ const firstIncompleteIndex = sorted.findIndex((m) => !m.completed);
           milestone={milestone}
           isFirstIncomplete={index === firstIncompleteIndex}
           isCompleted={isCompleted}
+          projectId={projectId}
         />
       ))}
     </div>

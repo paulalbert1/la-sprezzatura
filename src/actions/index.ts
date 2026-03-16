@@ -11,7 +11,10 @@ import {
   requestChangesSchema,
   milestoneNoteSchema,
   artifactNoteSchema,
+  warrantyClaimSchema,
 } from "./portalSchemas";
+
+export { warrantyClaimSchema };
 
 export const server = {
   submitContact: defineAction({
@@ -424,6 +427,71 @@ export const server = {
           clientName: client?.name || "Client",
           timestamp: new Date().toISOString(),
         }])
+        .commit({ autoGenerateArrayKeys: true });
+
+      return { success: true };
+    },
+  }),
+
+  submitWarrantyClaim: defineAction({
+    accept: "form",
+    input: warrantyClaimSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      // Upload photo to Sanity CDN if provided
+      let photoAssetRef: string | null = null;
+      if (input.photo && input.photo.size > 0) {
+        const photoBuffer = Buffer.from(await input.photo.arrayBuffer());
+        const asset = await sanityWriteClient.assets.upload("image", photoBuffer, {
+          filename: input.photo.name,
+          contentType: input.photo.type,
+        });
+        photoAssetRef = asset._id;
+      }
+
+      // Add warranty claim as an artifact on the project
+      const artifactData: any = {
+        _key: generatePortalToken(8),
+        _type: "artifact",
+        artifactType: "warranty",
+        customTypeName: null,
+        currentVersionKey: null,
+        versions: [],
+        decisionLog: [{
+          _key: generatePortalToken(8),
+          action: "warranty-claim",
+          clientId,
+          clientName: client?.name || "Client",
+          feedback: input.description,
+          timestamp: new Date().toISOString(),
+          ...(photoAssetRef ? { photoAssetId: photoAssetRef } : {}),
+        }],
+        notes: [],
+      };
+
+      // If photo was uploaded, attach as a version on the warranty artifact
+      if (photoAssetRef) {
+        const versionKey = generatePortalToken(8);
+        artifactData.currentVersionKey = versionKey;
+        artifactData.versions = [{
+          _key: versionKey,
+          _type: "artifactVersion",
+          label: "Warranty Photo",
+          file: {
+            _type: "image",
+            asset: { _type: "reference", _ref: photoAssetRef },
+          },
+          uploadedAt: new Date().toISOString(),
+        }];
+      }
+
+      await sanityWriteClient
+        .patch(input.projectId)
+        .insert("after", "artifacts[-1]", [artifactData])
         .commit({ autoGenerateArrayKeys: true });
 
       return { success: true };

@@ -4,14 +4,16 @@ import {
   formatRelativeDate,
   type Milestone,
 } from "../../lib/milestoneUtils";
+import ClientNoteForm from "./ClientNoteForm.tsx";
 
 interface Props {
   milestone: Milestone;
   isFirstIncomplete: boolean;
   isCompleted: boolean;
+  projectId: string;
 }
 
-const { milestone, isFirstIncomplete, isCompleted } = Astro.props;
+const { milestone, isFirstIncomplete, isCompleted, projectId } = Astro.props;
 
 const status = getMilestoneStatus(milestone, isFirstIncomplete);
 const formattedDate = milestone.date
@@ -120,6 +122,15 @@ const isOverdue = status === "overdue";
       </div>
     )}
 
-    <!-- ClientNoteForm placeholder (Plan 03 adds interactive form) -->
+    {!isCompleted && (
+      <div class="mt-2">
+        <ClientNoteForm
+          client:load
+          projectId={projectId}
+          targetKey={milestone._key}
+          targetType="milestone"
+        />
+      </div>
+    )}
   </div>
 </div>

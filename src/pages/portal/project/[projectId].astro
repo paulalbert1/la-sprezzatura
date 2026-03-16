@@ -7,6 +7,7 @@ import ConfidentialityBanner from "../../../components/portal/ConfidentialityBan
 import PostProjectBanner from "../../../components/portal/PostProjectBanner.astro";
 import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
 import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
+import ArtifactSection from "../../../components/portal/ArtifactSection.astro";
 import {
   getProjectDetail,
   getProjectsByClientId,
@@ -73,6 +74,7 @@ const isMultiProject = (allProjects?.length || 0) > 1;
         milestones={project.milestones || []}
         pipelineStage={project.pipelineStage}
         isCompleted={isCompleted && !isReopened}
+        projectId={project._id}
       />
 
       <!-- Procurement section (Full Interior Design only) -->
@@ -80,7 +82,12 @@ const isMultiProject = (allProjects?.length || 0) > 1;
         <ProcurementTable items={project.procurementItems || []} />
       )}
 
-      <!-- Artifacts section placeholder (Plan 03) -->
+      <!-- Artifacts section -->
+      <ArtifactSection
+        artifacts={project.artifacts || []}
+        projectId={project._id}
+        isCompleted={isCompleted && !isReopened}
+      />
 
       <!-- Warranty section placeholder (Plan 05) -->
 
