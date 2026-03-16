@@ -1,0 +1,37 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../components/portal/PortalLayout.astro";
+import LoginForm from "../../components/portal/LoginForm.tsx";
+
+// Check for error query param (e.g., from expired magic link redirect)
+const errorParam = Astro.url.searchParams.get("error");
+let initialError: string | undefined;
+if (errorParam === "expired") {
+  initialError = "This link has expired or has already been used. Please request a new one.";
+}
+---
+
+<PortalLayout title="Login | La Sprezzatura">
+  <main class="flex-1 flex items-center justify-center px-6">
+    <div class="w-full max-w-md text-center">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
+        La Sprezzatura
+      </p>
+
+      {/* Heading */}
+      <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal mb-3">
+        Welcome to Your Portal
+      </h1>
+
+      {/* Subtitle */}
+      <p class="text-base text-stone font-body mb-10">
+        Enter your email to access your projects
+      </p>
+
+      {/* Login form (React, client:load for interactivity) */}
+      <LoginForm client:load initialError={initialError} />
+    </div>
+  </main>
+</PortalLayout>

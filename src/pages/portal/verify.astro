@@ -1,0 +1,24 @@
+---
+export const prerender = false;
+
+import { redis } from "../../lib/redis";
+import { createSession } from "../../lib/session";
+
+const token = Astro.url.searchParams.get("token");
+
+if (!token) {
+  return Astro.redirect("/portal/login?error=expired");
+}
+
+// Atomic get-and-delete: single-use token enforcement
+const clientId = await redis.getdel(`magic:${token}`) as string | null;
+
+if (!clientId) {
+  return Astro.redirect("/portal/login?error=expired");
+}
+
+// Create 30-day session (sets httpOnly cookie + stores in Redis)
+await createSession(Astro.cookies, clientId);
+
+return Astro.redirect("/portal/dashboard");
+---
