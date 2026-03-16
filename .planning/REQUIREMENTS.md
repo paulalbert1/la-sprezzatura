@@ -60,7 +60,7 @@
 - [x] **CLNT-04**: Liz can create client records in Sanity with name, email, phone, address, and preferred contact method -- Phase 5
 - [x] **CLNT-05**: A client can have multiple projects and a project can have multiple clients; one client is designated as the primary contact -- Phase 5
 - [ ] **CLNT-06**: Portal greets client by name and shows all their active and historical projects -- Phase 6
-- [ ] **CLNT-07**: Active clients can view completed projects alongside current ones (e.g., living room done, bedroom in progress) -- Phase 6
+- [x] **CLNT-07**: Active clients can view completed projects alongside current ones (e.g., living room done, bedroom in progress) -- Phase 6
 
 ### Engagement Type (ENGMT)
 
@@ -68,23 +68,23 @@
 
 ### Milestones (MILE)
 
-- [ ] **MILE-01**: Liz can define custom per-project milestones with name, date, and completion status in Sanity -- Phase 6
+- [x] **MILE-01**: Liz can define custom per-project milestones with name, date, and completion status in Sanity -- Phase 6
 - [ ] **MILE-02**: Client sees milestone timeline with dates and completion indicators on the portal -- Phase 6
 - [ ] **MILE-03**: The 6-stage pipeline is retained as high-level status alongside detailed milestones -- Phase 6
 
 ### Procurement (PROC)
 
-- [ ] **PROC-01**: Liz can add procurement line items with name, status (Ordered/Warehouse/In Transit/Pending/Delivered/Installed), install date, client cost, retail price -- Phase 6
-- [ ] **PROC-02**: Client sees procurement table on portal with statuses and savings (retail minus client cost) -- Phase 6
+- [x] **PROC-01**: Liz can add procurement line items with name, status (Ordered/Warehouse/In Transit/Pending/Delivered/Installed), install date, client cost, retail price -- Phase 6
+- [x] **PROC-02**: Client sees procurement table on portal with statuses and savings (retail minus client cost) -- Phase 6
 - [x] **PROC-03**: All financial values stored as integer cents to prevent rounding errors -- Phase 5
 
 ### Project Artifacts (ARTF)
 
-- [ ] **ARTF-01**: Liz can upload project artifacts of configurable types (proposal, floor plan, design board, contract, warranty, close document) -- Phase 6
-- [ ] **ARTF-02**: Artifacts support revisions -- new versions are created, previous versions remain viewable but visually muted -- Phase 6
+- [x] **ARTF-01**: Liz can upload project artifacts of configurable types (proposal, floor plan, design board, contract, warranty, close document) -- Phase 6
+- [x] **ARTF-02**: Artifacts support revisions -- new versions are created, previous versions remain viewable but visually muted -- Phase 6
 - [ ] **ARTF-03**: Client can review and select/approve artifact versions; non-selected versions are muted -- Phase 6
-- [ ] **ARTF-04**: All selections, approvals, and decisions are recorded in a decision log with timestamps -- Phase 6
-- [ ] **ARTF-08**: Contract artifacts support upload of a signed version by the designer -- Phase 6
+- [x] **ARTF-04**: All selections, approvals, and decisions are recorded in a decision log with timestamps -- Phase 6
+- [x] **ARTF-08**: Contract artifacts support upload of a signed version by the designer -- Phase 6
 - [ ] **ARTF-09**: Client can provide notes/feedback on artifacts at review points -- Phase 6
 
 ### Portal Experience (PORT)

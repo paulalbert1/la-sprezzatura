@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
-status: completed
-stopped_at: Phase 6 UI-SPEC approved
-last_updated: "2026-03-16T18:31:06.799Z"
-last_activity: 2026-03-16 -- completed 05-04 external service setup and verification
+status: executing
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-16T19:44:15Z"
+last_activity: 2026-03-16 -- completed 06-01 data foundation (schema, queries, utilities)
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.0 Phase 5 complete -- ready for Phase 6 (Portal Features)
+**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 1 of 5
 
 ## Current Position
 
-Phase: 5 (v2.0 -- Data Foundation, Auth, and Infrastructure) -- COMPLETE
-Plan: 4 of 4 complete (all Phase 5 plans done)
-Status: Phase complete
-Last activity: 2026-03-16 -- completed 05-04 external service setup and verification
+Phase: 6 (v2.0 -- Portal Features)
+Plan: 1 of 5 complete
+Status: Executing
+Last activity: 2026-03-16 -- completed 06-01 data foundation (schema, queries, utilities)
 
-Progress: [██████████] 100%
+Progress: [██--------] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: ~12 min
-- Total execution time: ~1.8 hours
+- Total plans completed: 10
+- Average duration: ~11 min
+- Total execution time: ~1.9 hours
 
 **By Phase:**
 
@@ -46,12 +46,12 @@ Progress: [██████████] 100%
 | 01-project-scaffold | 1 | ~20min | ~20min |
 | 02-public-portfolio-site | 4/4 complete | ~50min | ~13min |
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
-
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
+| 06-portal-features | 1/5 complete | ~6min | ~6min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (3min), 05-02 (3min), 05-03 (5min), 05-04 (2min)
-- Trend: Accelerating
+- Last 5 plans: 05-02 (3min), 05-03 (5min), 05-04 (2min), 06-01 (6min)
+- Trend: Steady
 
 *Updated after each plan completion*
 
@@ -81,6 +81,9 @@ Recent decisions affecting current work:
 - [05-04]: Redis env vars changed to KV_REST_API_URL/KV_REST_API_TOKEN (Vercel Marketplace standard)
 - [05-04]: Old Redis Cloud integration replaced with Upstash for Redis via Vercel Marketplace
 - [05-04]: INFRA-08 (Resend domain) deferred -- Wix DNS lacks subdomain MX support; revisit at Phase 10 DNS migration
+- [06-01]: USPS regex checked before FedEx to avoid false matches on long numeric USPS tracking numbers
+- [06-01]: GROQ select() for conditional procurement inclusion based on engagement type
+- [06-01]: Procurement savings computed server-side in GROQ -- clientCost never sent to client
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T18:31:06.796Z
-Stopped at: Phase 6 UI-SPEC approved
-Resume file: .planning/phases/06-portal-features/06-UI-SPEC.md
+Last session: 2026-03-16T19:44:15Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: .planning/phases/06-portal-features/06-02-PLAN.md
