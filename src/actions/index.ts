@@ -3,8 +3,15 @@ import { z } from "astro:schema";
 import { contactRatelimit } from "../lib/rateLimit";
 import { redis } from "../lib/redis";
 import { magicLinkRatelimit } from "../lib/rateLimit";
-import { getClientByEmail } from "../sanity/queries";
+import { getClientByEmail, getClientById } from "../sanity/queries";
 import { generatePortalToken } from "../lib/generateToken";
+import { sanityWriteClient } from "../sanity/writeClient";
+import {
+  approveArtifactSchema,
+  requestChangesSchema,
+  milestoneNoteSchema,
+  artifactNoteSchema,
+} from "./portalSchemas";
 
 export const server = {
   submitContact: defineAction({
@@ -318,6 +325,107 @@ export const server = {
       }
 
       // Always return success -- never reveal whether email exists (user enumeration prevention)
+      return { success: true };
+    },
+  }),
+
+  approveArtifact: defineAction({
+    accept: "form",
+    input: approveArtifactSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      await sanityWriteClient
+        .patch(input.projectId)
+        .set({ [`artifacts[_key == "${input.artifactKey}"].currentVersionKey`]: input.versionKey })
+        .insert("after", `artifacts[_key == "${input.artifactKey}"].decisionLog[-1]`, [{
+          _key: generatePortalToken(8),
+          action: "approved",
+          versionKey: input.versionKey,
+          clientId,
+          clientName: client?.name || "Client",
+          feedback: null,
+          timestamp: new Date().toISOString(),
+        }])
+        .commit({ autoGenerateArrayKeys: true });
+
+      return { success: true };
+    },
+  }),
+
+  requestArtifactChanges: defineAction({
+    accept: "form",
+    input: requestChangesSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      await sanityWriteClient
+        .patch(input.projectId)
+        .insert("after", `artifacts[_key == "${input.artifactKey}"].decisionLog[-1]`, [{
+          _key: generatePortalToken(8),
+          action: "changes-requested",
+          versionKey: input.versionKey,
+          clientId,
+          clientName: client?.name || "Client",
+          feedback: input.feedback,
+          timestamp: new Date().toISOString(),
+        }])
+        .commit({ autoGenerateArrayKeys: true });
+
+      return { success: true };
+    },
+  }),
+
+  submitMilestoneNote: defineAction({
+    accept: "form",
+    input: milestoneNoteSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      await sanityWriteClient
+        .patch(input.projectId)
+        .insert("after", `milestones[_key == "${input.milestoneKey}"].notes[-1]`, [{
+          _key: generatePortalToken(8),
+          text: input.text,
+          clientId,
+          clientName: client?.name || "Client",
+          timestamp: new Date().toISOString(),
+        }])
+        .commit({ autoGenerateArrayKeys: true });
+
+      return { success: true };
+    },
+  }),
+
+  submitArtifactNote: defineAction({
+    accept: "form",
+    input: artifactNoteSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      await sanityWriteClient
+        .patch(input.projectId)
+        .insert("after", `artifacts[_key == "${input.artifactKey}"].notes[-1]`, [{
+          _key: generatePortalToken(8),
+          text: input.text,
+          clientId,
+          clientName: client?.name || "Client",
+          timestamp: new Date().toISOString(),
+        }])
+        .commit({ autoGenerateArrayKeys: true });
+
       return { success: true };
     },
   }),
