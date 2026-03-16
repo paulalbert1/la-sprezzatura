@@ -1,0 +1,239 @@
+---
+import type { Artifact } from "../../lib/artifactUtils";
+import {
+  getArtifactLabel,
+  getCurrentVersion,
+  isContractSigned,
+  getArtifactBadgeStyle,
+} from "../../lib/artifactUtils";
+import ArtifactApprovalForm from "./ArtifactApprovalForm.tsx";
+import ClientNoteForm from "./ClientNoteForm.tsx";
+
+interface Props {
+  artifact: Artifact;
+  projectId: string;
+  isCompleted: boolean;
+}
+
+const { artifact, projectId, isCompleted } = Astro.props;
+
+const currentVersion = getCurrentVersion(artifact);
+const label = getArtifactLabel(artifact.artifactType, artifact.customTypeName);
+const badgeStyle = getArtifactBadgeStyle(artifact.artifactType);
+const isSigned =
+  artifact.artifactType === "contract" && isContractSigned(artifact);
+const previousVersions = artifact.versions.filter(
+  (v) => v._key !== currentVersion?._key,
+);
+const hasApproval = artifact.decisionLog?.some((d) => d.action === "approved");
+const hasChangesRequested =
+  artifact.decisionLog?.some((d) => d.action === "changes-requested") &&
+  !hasApproval;
+const needsReview = currentVersion && !hasApproval && !hasChangesRequested;
+---
+
+<div
+  class:list={[
+    "bg-cream-dark border border-stone-light/20 p-6",
+    needsReview && "border-l-4 border-l-terracotta",
+  ]}
+>
+  {/* Header: type badge + status */}
+  <div class="flex items-start justify-between gap-3 mb-3">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span
+        class={`inline-flex px-3 py-1 rounded-full text-xs tracking-wide ${badgeStyle}`}
+      >
+        {label}
+      </span>
+      {
+        isSigned && (
+          <span class="inline-flex px-3 py-1 rounded-full text-xs tracking-wide bg-emerald-50 text-emerald-700">
+            Signed
+          </span>
+        )
+      }
+      {
+        hasApproval && (
+          <span class="inline-flex px-3 py-1 rounded-full text-xs tracking-wide bg-emerald-50 text-emerald-700">
+            Approved
+          </span>
+        )
+      }
+      {
+        hasChangesRequested && (
+          <span class="inline-flex px-3 py-1 rounded-full text-xs tracking-wide bg-stone-light/20 text-stone">
+            Changes Requested
+          </span>
+        )
+      }
+      {
+        needsReview && !isCompleted && (
+          <span class="text-xs text-terracotta font-body">
+            Awaiting Your Review
+          </span>
+        )
+      }
+    </div>
+  </div>
+
+  {/* Current version download */}
+  {
+    currentVersion && (
+      <div class="mb-4">
+        <a
+          href={
+            isSigned && artifact.signedFile?.asset?.url
+              ? `${artifact.signedFile.asset.url}?dl=`
+              : `${currentVersion.file.asset.url}?dl=`
+          }
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 text-sm text-terracotta hover:text-terracotta-light transition-colors font-body"
+        >
+          Download{" "}
+          {currentVersion.file.asset.mimeType?.startsWith("application/pdf")
+            ? "PDF"
+            : "File"}
+        </a>
+        {currentVersion.note && (
+          <p class="text-xs text-stone font-body mt-2">{currentVersion.note}</p>
+        )}
+        <p class="text-xs text-stone-light font-body mt-1">
+          Uploaded{" "}
+          {new Date(currentVersion.uploadedAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
+        </p>
+      </div>
+    )
+  }
+
+  {/* Approval form (only if pending review and not completed) */}
+  {
+    needsReview && !isCompleted && currentVersion && (
+      <ArtifactApprovalForm
+        client:load
+        projectId={projectId}
+        artifactKey={artifact._key}
+        versionKey={currentVersion._key}
+      />
+    )
+  }
+
+  {/* Previous versions (collapsible) */}
+  {
+    previousVersions.length > 0 && (
+      <details class="mt-4">
+        <summary class="text-xs text-stone font-body cursor-pointer hover:text-terracotta transition-colors">
+          Previous versions ({previousVersions.length})
+        </summary>
+        <div class="mt-2 space-y-2 opacity-50">
+          {previousVersions.map((version) => (
+            <div class="px-3 py-2 bg-cream text-xs">
+              <a
+                href={`${version.file.asset.url}?dl=`}
+                target="_blank"
+                rel="noopener"
+                class="text-stone hover:text-terracotta transition-colors"
+              >
+                {version.file.asset.originalFilename || "Download"}
+              </a>
+              <span class="text-stone-light ml-2">
+                {new Date(version.uploadedAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+          ))}
+        </div>
+      </details>
+    )
+  }
+
+  {/* Decision log (collapsible) */}
+  {
+    artifact.decisionLog && artifact.decisionLog.length > 0 && (
+      <details class="mt-4">
+        <summary class="text-xs text-stone font-body cursor-pointer hover:text-terracotta transition-colors">
+          Activity log ({artifact.decisionLog.length})
+        </summary>
+        <div class="mt-2 space-y-2">
+          {artifact.decisionLog.map((entry) => (
+            <div class="text-xs font-body">
+              <span
+                class:list={[
+                  entry.action === "approved" ? "text-emerald-700" : "text-stone",
+                ]}
+              >
+                {entry.clientName || "System"}
+                {entry.action === "approved" && " approved version"}
+                {entry.action === "changes-requested" && " requested changes"}
+                {entry.action === "note-added" && " added a note"}
+                {entry.action === "version-uploaded" && "New version uploaded"}
+                {entry.action === "notification-sent" && "Notification sent"}
+              </span>
+              <span class="text-stone-light ml-1">
+                {new Date(entry.timestamp).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+                {" at "}
+                {new Date(entry.timestamp).toLocaleTimeString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </span>
+              {entry.feedback && (
+                <p class="text-stone mt-1 pl-2 border-l-2 border-stone-light/20">
+                  {entry.feedback}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      </details>
+    )
+  }
+
+  {/* Notes section */}
+  {
+    artifact.notes && artifact.notes.length > 0 && (
+      <div class="mt-3 space-y-2">
+        {artifact.notes.map((note) => (
+          <div class="bg-cream px-3 py-2 text-xs font-body">
+            <span class="text-charcoal tracking-wide">{note.clientName}</span>
+            <span class="text-stone-light mx-1">&middot;</span>
+            <span class="text-stone-light">
+              {new Date(note.timestamp).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+            <p class="text-stone mt-1">{note.text}</p>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {/* Note form (if not completed) */}
+  {
+    !isCompleted && (
+      <div class="mt-3">
+        <ClientNoteForm
+          client:load
+          projectId={projectId}
+          targetKey={artifact._key}
+          targetType="artifact"
+        />
+      </div>
+    )
+  }
+</div>
