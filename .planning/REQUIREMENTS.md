@@ -154,13 +154,13 @@
 
 ### Send Update (SEND)
 
-- [ ] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project -- Phase 9
-- [ ] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz -- Phase 9
-- [ ] **SEND-03**: Every sent update is logged with timestamp and recipient on the project -- Phase 9
+- [x] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project -- Phase 9
+- [x] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz -- Phase 9
+- [x] **SEND-03**: Every sent update is logged with timestamp and recipient on the project -- Phase 9
 
 ### Project Artifacts - Investment Proposals (ARTF)
 
-- [ ] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 9
+- [x] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 9
 - [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 9
 - [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 9
 

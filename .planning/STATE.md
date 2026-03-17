@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: AI Rendering & Go-Live
 status: active
-stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-03-17T17:17:57.000Z"
-last_activity: 2026-03-17 -- Phase 9 Plan 03 complete (hero slideshow + Cal.com cleanup)
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-03-17T17:22:28.000Z"
+last_activity: 2026-03-17 -- Phase 9 Plan 01 complete (Send Update pipeline + investment proposal schema)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
-  percent: 33
+  completed_plans: 2
+  percent: 67
 ---
 
 # Project State
@@ -21,21 +21,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 9 in progress (1/3 plans complete)
+**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 9 in progress (2/3 plans complete)
 
 ## Current Position
 
 Phase: 9 of 12 (Send Update, Investment Proposals, and Public Site Polish)
-Plan: 3 of 3 complete (09-03 hero slideshow + Cal.com cleanup)
+Plan: 2 of 3 complete (09-01 send update pipeline, 09-03 hero slideshow)
 Status: In progress
-Last activity: 2026-03-17 -- Plan 03 complete (hero slideshow, SplitText animation, Cal.com cleanup)
+Last activity: 2026-03-17 -- Plan 01 complete (Send Update pipeline + investment proposal schema)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: ~7 min
-- Total execution time: ~2.7 hours
+- Total execution time: ~2.8 hours
 
 **By Phase:**
 
@@ -50,7 +50,7 @@ Last activity: 2026-03-17 -- Plan 03 complete (hero slideshow, SplitText animati
 | 08-contractor-portal | 3/3 complete | ~15min | ~5min |
 
 **Recent Trend:**
-- Last 5 plans: 07-03 (6min), 08-01 (8min), 08-02 (3min), 08-03 (4min), 09-03 (4min)
+- Last 5 plans: 08-01 (8min), 08-02 (3min), 08-03 (4min), 09-03 (4min), 09-01 (8min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -58,6 +58,7 @@ Last activity: 2026-03-17 -- Plan 03 complete (hero slideshow, SplitText animati
 | Phase 08 P02 | 3min | 2 tasks | 3 files |
 | Phase 08 P03 | 4min | 2 tasks | 11 files |
 | Phase 09 P03 | 4min | 2 tasks | 6 files |
+| Phase 09 P01 | 8min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work:
 - [AI Rendering]: Designer auth via STUDIO_API_SECRET shared secret (adequate for single-tenant v1)
 - [Phase 9-03]: getSiteSettings GROQ query updated to include heroSlideshow with asset metadata (was missing despite plan assumption)
 - [Phase 9-03]: Cal.com fully removed -- CalBooking.tsx, @calcom/embed-react, PUBLIC_CALCOM_LINK all deleted
+- [Phase 9-01]: clientCost only used in GROQ computed savings expression, never in email HTML output
+- [Phase 9-01]: heroSlideshow already existed in getSiteSettings query -- no change needed
 
 ### Pending Todos
 
@@ -91,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-17
-Stopped at: Completed 09-03-PLAN.md
-Resume file: .planning/phases/09-send-update-investment-proposals-and-public-site-polish/09-03-SUMMARY.md
+Stopped at: Completed 09-01-PLAN.md
+Resume file: .planning/phases/09-send-update-investment-proposals-and-public-site-polish/09-01-SUMMARY.md
