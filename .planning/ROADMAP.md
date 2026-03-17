@@ -160,11 +160,12 @@ Plans:
   2. Liz creates a proposal artifact with Good/Better/Best tiers and line items; the client views the tiers on the portal, selects their preferred tier (or mixes items across tiers), and completes a readiness check with eagerness rating and reservations capture before approval
   3. A first-time visitor to the home page sees the hero text animate in with character-level GSAP SplitText animation creating a strong visual first impression
   4. The contact page links to Fantastical Openings for booking with no Cal.com embed or dead code remaining in the codebase
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md -- Schema extensions (updateLog, investmentSummary), GROQ queries, SendUpdateAction Studio dialog, send-update API route, branded email template
+- [ ] 09-02-PLAN.md -- Investment proposal tier cards (InvestmentSummary.astro), tier selection form (TierSelectionForm.tsx), selectTier Astro Action, ArtifactCard wiring
+- [ ] 09-03-PLAN.md -- Hero slideshow with crossfade + Ken Burns + GSAP SplitText animation, siteSettings heroSlideshow schema, Cal.com dead code cleanup
 
 ### Phase 10: AI Rendering Engine
 **Goal**: The server-side rendering pipeline is fully operational -- Sanity schemas for sessions, outputs, and usage tracking are deployed, API routes handle generation, conversational refinement, and polling with Gemini integration, usage is enforced per-designer per-month with hard cap, and generated images are stored in Vercel Blob -- all backend infrastructure ready before building the Studio UI
@@ -226,7 +227,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 6. Portal Features | v2.0 | 0/5 | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
-| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
+| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/3 | Not started | - |
 | 10. AI Rendering Engine | v3.0 | 0/? | Not started | - |
 | 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/? | Not started | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
@@ -241,3 +242,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 *Phase 7 plans created: 2026-03-16*
 *Phase 8 plans created: 2026-03-17*
 *v3.0 roadmap expanded: 2026-03-17 (AI Rendering phases 10-11 added, DNS moved to Phase 12)*
+*Phase 9 plans created: 2026-03-17 (3 plans in 2 waves)*
