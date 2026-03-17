@@ -56,3 +56,87 @@ describe("project schema (Phase 5 extensions)", () => {
     expect(field).toBeUndefined();
   });
 });
+
+describe("project schema (Phase 7 extensions)", () => {
+  // Helper to extract hidden callback from a field
+  function getHiddenCallback(fieldName: string) {
+    const field = project.fields?.find((f) => f.name === fieldName);
+    return field?.hidden as (args: { document?: Record<string, unknown> }) => boolean;
+  }
+
+  it('has "contractors" group in groups array', () => {
+    const groups = (project as { groups?: { name: string }[] }).groups;
+    expect(groups).toBeDefined();
+    const contractorsGroup = groups!.find((g) => g.name === "contractors");
+    expect(contractorsGroup).toBeDefined();
+  });
+
+  it('has field "isCommercial" of type "boolean" in "content" group', () => {
+    const field = project.fields?.find((f) => f.name === "isCommercial");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("boolean");
+    expect(field?.group).toBe("content");
+  });
+
+  it('has field "contractors" in "contractors" group', () => {
+    const field = project.fields?.find((f) => f.name === "contractors");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("array");
+    expect(field?.group).toBe("contractors");
+  });
+
+  it("contractors field hidden when engagementType is styling-refreshing", () => {
+    const hidden = getHiddenCallback("contractors");
+    expect(hidden).toBeDefined();
+    expect(hidden({ document: { engagementType: "styling-refreshing" } })).toBe(true);
+  });
+
+  it("contractors field visible when engagementType is full-interior-design", () => {
+    const hidden = getHiddenCallback("contractors");
+    expect(hidden({ document: { engagementType: "full-interior-design" } })).toBe(false);
+  });
+
+  it("procurementItems field hidden when engagementType is carpet-curating", () => {
+    const hidden = getHiddenCallback("procurementItems");
+    expect(hidden).toBeDefined();
+    expect(hidden({ document: { engagementType: "carpet-curating" } })).toBe(true);
+  });
+
+  it("procurementItems field visible when engagementType is full-interior-design", () => {
+    const hidden = getHiddenCallback("procurementItems");
+    expect(hidden({ document: { engagementType: "full-interior-design" } })).toBe(false);
+  });
+
+  it('has field "buildingManager" with hidden callback gated on isCommercial', () => {
+    const field = project.fields?.find((f) => f.name === "buildingManager");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("object");
+    const hidden = getHiddenCallback("buildingManager");
+    expect(hidden({ document: { isCommercial: false } })).toBe(true);
+    expect(hidden({ document: { isCommercial: true } })).toBe(false);
+  });
+
+  it('has field "cois" with hidden callback gated on isCommercial', () => {
+    const field = project.fields?.find((f) => f.name === "cois");
+    expect(field).toBeDefined();
+    const hidden = getHiddenCallback("cois");
+    expect(hidden({ document: { isCommercial: false } })).toBe(true);
+    expect(hidden({ document: { isCommercial: true } })).toBe(false);
+  });
+
+  it('has field "legalDocs" with hidden callback gated on isCommercial', () => {
+    const field = project.fields?.find((f) => f.name === "legalDocs");
+    expect(field).toBeDefined();
+    const hidden = getHiddenCallback("legalDocs");
+    expect(hidden({ document: { isCommercial: false } })).toBe(true);
+    expect(hidden({ document: { isCommercial: true } })).toBe(false);
+  });
+
+  it('has field "floorPlans" with hidden callback gated on engagementType', () => {
+    const field = project.fields?.find((f) => f.name === "floorPlans");
+    expect(field).toBeDefined();
+    const hidden = getHiddenCallback("floorPlans");
+    expect(hidden({ document: { engagementType: "styling-refreshing" } })).toBe(true);
+    expect(hidden({ document: { engagementType: "full-interior-design" } })).toBe(false);
+  });
+});
