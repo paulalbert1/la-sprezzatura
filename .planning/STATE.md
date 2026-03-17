@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
-status: completed
-stopped_at: Phase 10 context gathered
-last_updated: "2026-03-17T21:28:06.087Z"
-last_activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards and client selection)
+status: in-progress
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-03-17T22:35:53Z"
+last_activity: 2026-03-17 -- Plan 01 complete (Schemas, queries, and dependencies)
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 18
-  completed_plans: 18
+  total_plans: 22
+  completed_plans: 19
 ---
 
 # Project State
@@ -20,21 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 9 complete (3/3 plans complete)
+**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 10 in progress (1/4 plans complete)
 
 ## Current Position
 
-Phase: 9 of 12 (Send Update, Investment Proposals, and Public Site Polish)
-Plan: 3 of 3 complete (09-01 send update pipeline, 09-02 tier cards, 09-03 hero slideshow)
-Status: Phase 9 complete
-Last activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards and client selection)
+Phase: 10 of 12 (AI Rendering Engine)
+Plan: 1 of 4 complete (10-01 schemas + queries + deps)
+Status: Phase 10 in progress
+Last activity: 2026-03-17 -- Plan 01 complete (Schemas, queries, and dependencies)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 25
+- Total plans completed: 26
 - Average duration: ~7 min
-- Total execution time: ~2.85 hours
+- Total execution time: ~2.92 hours
 
 **By Phase:**
 
@@ -49,7 +49,7 @@ Last activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards an
 | 08-contractor-portal | 3/3 complete | ~15min | ~5min |
 
 **Recent Trend:**
-- Last 5 plans: 08-02 (3min), 08-03 (4min), 09-03 (4min), 09-01 (8min), 09-02 (3min)
+- Last 5 plans: 08-03 (4min), 09-03 (4min), 09-01 (8min), 09-02 (3min), 10-01 (4min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -59,6 +59,7 @@ Last activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards an
 | Phase 09 P03 | 4min | 2 tasks | 6 files |
 | Phase 09 P01 | 8min | 3 tasks | 11 files |
 | Phase 09 P02 | 3min | 2 tasks | 5 files |
+| Phase 10 P01 | 4min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 9-01]: heroSlideshow already existed in getSiteSettings query -- no change needed
 - [Phase 9-02]: TierSelectionForm renders select buttons in standalone grid (idle state) to avoid multiple React islands inside Astro cards
 - [Phase 9-02]: Eagerness circles use 44px min tap targets via inline style for WCAG 2.2 compliance
+- [Phase 10-01]: Schema field groups (setup/inputs/renderings/metadata) organize renderingSession for Studio UX
+- [Phase 10-01]: GROQ queries exported as const strings without async wrappers -- API routes use sanityWriteClient.fetch directly
+- [Phase 10-01]: costEstimate validated as integer cents consistent with existing procurement pattern
 
 ### Pending Todos
 
@@ -95,6 +99,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T21:28:06.084Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-ai-rendering-engine/10-CONTEXT.md
+Last session: 2026-03-17T22:35:53Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: .planning/phases/10-ai-rendering-engine/10-02-PLAN.md
