@@ -1,17 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: AI Rendering & Go-Live
+milestone: v2.0
+milestone_name: Client Portal Foundation
 status: active
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-03-17T17:22:28.000Z"
-last_activity: 2026-03-17 -- Phase 9 Plan 01 complete (Send Update pipeline + investment proposal schema)
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-03-17T17:31:15.684Z"
+last_activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards and client selection)
 progress:
-  total_phases: 4
-  completed_phases: 0
-  total_plans: 3
-  completed_plans: 2
-  percent: 67
+  total_phases: 8
+  completed_phases: 5
+  total_plans: 18
+  completed_plans: 18
 ---
 
 # Project State
@@ -21,21 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 9 in progress (2/3 plans complete)
+**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 9 complete (3/3 plans complete)
 
 ## Current Position
 
 Phase: 9 of 12 (Send Update, Investment Proposals, and Public Site Polish)
-Plan: 2 of 3 complete (09-01 send update pipeline, 09-03 hero slideshow)
-Status: In progress
-Last activity: 2026-03-17 -- Plan 01 complete (Send Update pipeline + investment proposal schema)
+Plan: 3 of 3 complete (09-01 send update pipeline, 09-02 tier cards, 09-03 hero slideshow)
+Status: Phase 9 complete
+Last activity: 2026-03-17 -- Plan 02 complete (Investment proposal tier cards and client selection)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 25
 - Average duration: ~7 min
-- Total execution time: ~2.8 hours
+- Total execution time: ~2.85 hours
 
 **By Phase:**
 
@@ -50,7 +49,7 @@ Last activity: 2026-03-17 -- Plan 01 complete (Send Update pipeline + investment
 | 08-contractor-portal | 3/3 complete | ~15min | ~5min |
 
 **Recent Trend:**
-- Last 5 plans: 08-01 (8min), 08-02 (3min), 08-03 (4min), 09-03 (4min), 09-01 (8min)
+- Last 5 plans: 08-02 (3min), 08-03 (4min), 09-03 (4min), 09-01 (8min), 09-02 (3min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -59,6 +58,7 @@ Last activity: 2026-03-17 -- Plan 01 complete (Send Update pipeline + investment
 | Phase 08 P03 | 4min | 2 tasks | 11 files |
 | Phase 09 P03 | 4min | 2 tasks | 6 files |
 | Phase 09 P01 | 8min | 3 tasks | 11 files |
+| Phase 09 P02 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -79,6 +79,8 @@ Recent decisions affecting current work:
 - [Phase 9-03]: Cal.com fully removed -- CalBooking.tsx, @calcom/embed-react, PUBLIC_CALCOM_LINK all deleted
 - [Phase 9-01]: clientCost only used in GROQ computed savings expression, never in email HTML output
 - [Phase 9-01]: heroSlideshow already existed in getSiteSettings query -- no change needed
+- [Phase 9-02]: TierSelectionForm renders select buttons in standalone grid (idle state) to avoid multiple React islands inside Astro cards
+- [Phase 9-02]: Eagerness circles use 44px min tap targets via inline style for WCAG 2.2 compliance
 
 ### Pending Todos
 
@@ -93,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17
-Stopped at: Completed 09-01-PLAN.md
-Resume file: .planning/phases/09-send-update-investment-proposals-and-public-site-polish/09-01-SUMMARY.md
+Last session: 2026-03-17T17:31:14.920Z
+Stopped at: Completed 09-02-PLAN.md
+Resume file: .planning/phases/09-send-update-investment-proposals-and-public-site-polish/09-02-SUMMARY.md

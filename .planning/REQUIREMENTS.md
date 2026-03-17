@@ -161,8 +161,8 @@
 ### Project Artifacts - Investment Proposals (ARTF)
 
 - [x] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 9
-- [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 9
-- [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 9
+- [x] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 9
+- [x] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 9
 
 ### Booking (BOOK)
 
