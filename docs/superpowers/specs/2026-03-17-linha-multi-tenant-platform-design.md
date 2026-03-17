@@ -103,7 +103,7 @@ All routes read `SANITY_DATASET` from the environment. No runtime domain-to-desi
 **Environment variables per designer Vercel project:**
 - `SANITY_DATASET` — designer's dataset name
 - `SANITY_PROJECT_ID` — shared Sanity project
-- `SANITY_API_TOKEN` — dataset-scoped write token
+- `SANITY_API_TOKEN` — project-level write token (dataset isolation enforced by `SANITY_DATASET` on the client, not the token)
 - `GEMINI_API_KEY` — shared or per-designer (cost allocation)
 - `GEMINI_IMAGE_MODEL` — configurable model ID
 - `STUDIO_API_SECRET` — per-designer secret for Studio → API auth
@@ -406,7 +406,7 @@ The admin dashboard's Vercel project has environment variables: `SANITY_DATASET=
 - Each project's root directory is set to their template path (e.g., `templates/la-sprezzatura`)
 - Turborepo's `turbo.json` defines the dependency graph so Vercel rebuilds correctly
 - Vercel's monorepo support detects which projects are affected by a push
-- **Plan requirement:** Vercel Pro plan ($20/month per project) is needed for 60s serverless function timeout (required by AI rendering's `waitUntil` pattern). Designer projects without AI rendering enabled could run on Hobby, but Pro is recommended for consistency. At 5 designers: ~$100/month Vercel cost.
+- **Plan requirement:** Vercel Pro plan ($20/month per team) is needed for 60s serverless function timeout (required by AI rendering's `waitUntil` pattern). All designer projects can run under one Vercel team. Designer projects without AI rendering enabled could run on Hobby, but Pro is recommended for consistency.
 - The manual `.env` parsing in la-sprezzatura's `astro.config.mjs` must be replaced with Vercel's build-time environment variable injection (standard in monorepo setups). This is a migration requirement in Phase 2.
 
 ### Redis (Upstash)
