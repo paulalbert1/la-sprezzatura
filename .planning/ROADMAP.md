@@ -142,11 +142,12 @@ Plans:
   1. A contractor logs in via magic link and sees their assigned project with floor plans (downloadable via signed URL), scope of work, deadline, estimate, and notes -- but sees only the client name and project address with a "contact Liz" notice instead of client email or phone
   2. A building manager logs in via magic link on a commercial project and sees the client name and contact info, a COI section with certificates showing expiration date badges, a legal documents section with downloadable PDFs, and can request contractor info (name and license only, with "contact Liz" for more)
   3. A client viewing their Full Interior Design project on the portal sees a contractor section showing assigned contractor names and on-site schedule dates
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md -- Schema extensions (appointments, contractor notes), GROQ queries with information boundaries, middleware, COI utility, building manager magic link infra, SendBuildingAccessAction
+- [ ] 08-02-PLAN.md -- Contractor work order detail page, dashboard modifications, ContractorNoteForm
+- [ ] 08-03-PLAN.md -- Building manager auth flow and portal (login, verify, dashboard, project detail), ExpirationBadge, ContractorSection (CVIS-01), role selection extension
 
 ### Phase 9: Send Update, Investment Proposals, and Public Site Polish
 **Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered investment proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before go-live
@@ -192,7 +193,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Portal Features | v2.0 | 0/5 | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
-| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |
+| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
 | 10. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
@@ -204,3 +205,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 *Phase 5 plans created: 2026-03-16*
 *Phase 6 plans created: 2026-03-16*
 *Phase 7 plans created: 2026-03-16*
+*Phase 8 plans created: 2026-03-17*
