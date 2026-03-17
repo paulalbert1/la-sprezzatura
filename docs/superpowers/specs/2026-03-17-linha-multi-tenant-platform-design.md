@@ -46,19 +46,13 @@ linha/
 │   │   ├── layouts/        # Portal page layouts (login, dashboard, project detail)
 │   │   └── styles/         # Portal CSS (accepts brand color/logo as CSS variables)
 │   │
-│   ├── rendering/         # AI rendering feature
-│   │   ├── tool/           # Sanity Studio custom tool (wizard, refinement, sessions)
-│   │   ├── api/            # Generate, refine, promote, react, usage routes
-│   │   └── schemas/        # renderingSession, designOption, renderingUsage types
-│   │
-│   └── cli/               # Onboarding & admin CLI (fallback for admin dashboard)
-│       ├── create-designer  # Scaffold new designer
-│       ├── sync-schemas     # Push schema changes to all datasets
-│       ├── usage-report     # Pull usage across all designers
-│       └── list-designers   # List active designers
+│   └── rendering/         # AI rendering feature
+│       ├── tool/           # Sanity Studio custom tool (wizard, refinement, sessions)
+│       ├── api/            # Generate, refine, promote, react, usage routes
+│       └── schemas/        # renderingSession, designOption, renderingUsage types
 │
 ├── templates/
-│   ├── base/              # Shared Astro config, middleware, /studio, portal routes, API routes
+│   ├── base/              # Shared Astro config, middleware, /admin, portal routes, API routes
 │   ├── la-sprezzatura/    # Liz's reserved template (extends base)
 │   ├── template-aria/     # Public template 1
 │   ├── template-forma/    # Public template 2
@@ -84,14 +78,14 @@ linha/
 
 **`packages/rendering`** — The AI rendering feature (as specified in the AI rendering design spec). Sanity Studio custom tool, API route handlers, and rendering-specific schemas.
 
-**`packages/cli`** — Node.js CLI tool for platform operations. Fallback for the admin dashboard wizard. Commands: `create-designer`, `sync-schemas`, `usage-report`, `list-designers`.
+**No separate CLI package.** All operations (designer provisioning, schema sync, usage reports) are implemented as admin dashboard features. The dashboard's API routes can be called programmatically if scripting is needed later.
 
 ## Multi-Tenancy
 
 ### Data Isolation
 
 - One Sanity project, multiple datasets: `liz`, `jane-doe-interiors`, `alex-design`, etc.
-- Each dataset contains identical schemas (deployed via `cli/sync-schemas` or admin dashboard)
+- Each dataset contains identical schemas (deployed via admin dashboard's schema sync feature)
 - All data access is scoped by dataset — the Sanity client is configured with `SANITY_DATASET` from environment variables
 - No cross-dataset queries except from the admin dashboard
 - Cross-tenant data leakage is architecturally impossible — each deployment connects to exactly one dataset
@@ -102,7 +96,7 @@ Each designer = one Vercel project containing:
 - Public-facing site (template pages)
 - Client/contractor/building manager portal (`/portal/*`)
 - API routes (`/api/*`)
-- Sanity Studio (`/studio`)
+- Sanity Studio (`/admin` — existing path, kept for bookmark continuity)
 
 All routes read `SANITY_DATASET` from the environment. No runtime domain-to-designer resolution needed.
 
@@ -127,17 +121,53 @@ The shared foundation that all templates extend. Contains:
 - `astro.config.mjs` — Sanity, Vercel adapter, Tailwind, React plugins pre-configured
 - Middleware — auth, session, rate limiting
 - Portal pages — `/portal/login`, `/portal/dashboard`, `/portal/project/[id]`
-- Studio route — `/studio`
+- Studio route — `/admin`
 - All API routes — `/api/*`
 - Shared layouts — portal layout, studio layout
 
+### Template Composition Mechanism
+
+Astro does not have native template inheritance. The composition works through **Astro integrations** and **package imports**:
+
+1. **`templates/base` is an npm workspace package** (not a standalone Astro app). It exports:
+   - An Astro integration (`linhaBaseIntegration`) that uses Astro's `injectRoute` API to register portal pages, API routes, and the `/admin` Studio route
+   - Middleware as an importable function
+   - Shared layouts as importable Astro components
+
+2. **Each template is a full, deployable Astro app.** Its `astro.config.mjs` imports and registers the base integration:
+
+   ```typescript
+   import { linhaBaseIntegration } from '@linha/base';
+
+   export default defineConfig({
+     integrations: [
+       linhaBaseIntegration(), // injects portal, API, /admin routes
+       sanity({ ... }),
+       react(),
+     ],
+   });
+   ```
+
+3. **Route precedence:** Astro's file-based routing takes precedence over injected routes. If a template defines `src/pages/index.astro`, it overrides any injected `/` route from the base. This means templates can override any base route if needed, but by default they only define public pages — the injected portal/API routes fill in the rest.
+
+4. **Middleware:** Each template's `src/middleware.ts` imports and delegates to the base middleware:
+   ```typescript
+   import { linhaMiddleware } from '@linha/base';
+   export const onRequest = linhaMiddleware;
+   ```
+
+5. **Portal components:** Templates import portal layouts/components from `@linha/portal` — they are regular React/Astro components, not magic. The portal pages injected by the base integration already reference these.
+
+This means each template is a normal Astro project that happens to import shared functionality via workspace packages. No build-time merging, no symlinks, no magic.
+
 ### Template Structure
 
-Each template extends `templates/base` and defines only:
+Each template is a deployable Astro app that defines only:
 - Public pages — home, portfolio, services, about, contact
 - CSS theme — colors, fonts, spacing
 - Template-specific components — hero variants, gallery layouts, navigation style
 - A `brand.config.ts` file
+- An `astro.config.mjs` that registers the base integration
 
 ### brand.config.ts
 
@@ -216,7 +246,7 @@ Hardcoded email allowlist + magic link auth (reusing the same magic link pattern
 
 ## Onboarding Wizard
 
-Web-based guided wizard at `admin.linha.com/onboarding/new`. CLI fallback at `linha create-designer`.
+Web-based guided wizard at `admin.linha.com/onboarding/new`.
 
 ### Step 1 — Designer Info
 
@@ -263,18 +293,20 @@ Runs each step sequentially with live status:
 2. ✓/✗ Deploy schemas to dataset
 3. ✓/✗ Invite designer to Sanity (sends email via Sanity Management API)
 4. ✓/✗ Generate STUDIO_API_SECRET
-5. ✓/✗ Create Vercel project with environment variables
+5. ✓/✗ Create Vercel project with environment variables (via Vercel REST API; requires `VERCEL_API_TOKEN` configured on admin app)
 6. ✓/✗ Configure custom domain on Vercel (if provided)
-7. ✓/✗ Trigger initial deployment
-8. ✓/✗ Send welcome email to designer (via Resend)
-9. ✓/✗ Create designer record in admin dataset
+7. ✓/✗ Create Resend sending domain (`send.designerdomain.com`) via Resend API
+8. ✓/✗ Trigger initial deployment
+9. ✓/✗ Send welcome email to designer (via Resend)
+10. ✓/✗ Create designer record in admin dataset
 
 If a step fails: shows error, offers "retry this step" or "skip and continue." Skipped steps become pending tasks in the admin dashboard.
 
 ### Step 7 — DNS Instructions (if domain provided)
 
 - Shows exact DNS records to configure, formatted for the registrar selected in Step 3
-- "Verify DNS" button — checks if records have propagated
+- Includes both site DNS records (CNAME/A for Vercel) and email DNS records (SPF/DKIM for Resend sending domain)
+- "Verify DNS" button — checks if records have propagated (both site and email)
 - If Paul manages DNS: "Open Cloudflare dashboard for this domain?" (opens browser)
 - If designer manages DNS: "Send DNS instructions to designer?" → sends a clear, non-technical email with exact records and screenshots
 
@@ -302,22 +334,24 @@ La Sprezzatura → Linha monorepo migration, executed in phases.
 
 Move from `la-sprezzatura/src/` into packages:
 
-| Source (la-sprezzatura) | Destination (linha) |
-|------------------------|---------------------|
-| `src/sanity/schemas/*` | `packages/core/schemas/` |
-| `src/lib/session.ts`, `redis.ts`, `rateLimiter.ts` | `packages/core/auth/` |
-| `src/lib/sanity.ts`, `queries.ts` | `packages/core/queries/` |
-| `src/lib/email.ts`, `pdfClose.ts` | `packages/core/utils/` |
-| `src/actions/*` | `packages/core/api/` |
-| `src/pages/api/*` | `packages/core/api/` |
-| `src/components/portal/*` | `packages/portal/components/` |
-| `src/pages/portal/*` | `packages/portal/layouts/` |
+| Source (la-sprezzatura) | Destination (linha) | Notes |
+|------------------------|---------------------|-------|
+| `src/sanity/schemas/*` | `packages/core/schemas/` | |
+| `src/lib/session.ts`, `redis.ts`, `rateLimiter.ts` | `packages/core/auth/` | Refactor `redis.ts` to auto-prefix all keys with `SANITY_DATASET` for tenant isolation |
+| `src/lib/sanity.ts`, `queries.ts` | `packages/core/queries/` | |
+| `src/lib/email.ts`, `pdfClose.ts` | `packages/core/utils/` | |
+| `src/actions/*` (business logic) | `packages/core/api/` | Extract plain TypeScript functions from `defineAction` wrappers |
+| `src/actions/*` (Astro wrappers) | `templates/base/src/actions/` | Thin `defineAction` wrappers that call `packages/core/api` functions |
+| `src/pages/api/*` | `packages/core/api/` | Route handlers as exportable functions |
+| `src/components/portal/*` | `packages/portal/components/` | |
+| `src/pages/portal/*` | `packages/portal/layouts/` | Injected via `linhaBaseIntegration` `injectRoute` |
+| AI rendering code (when built) | `packages/rendering/` | Studio tool, API handlers, schemas |
 
 Each package gets its own `package.json` and `tsconfig.json`.
 
 ### Phase 3 — Create templates/base
 
-- Shared Astro config, middleware, `/studio` route, portal page routes
+- Shared Astro config, middleware, `/admin` route, portal page routes
 - Imports from `packages/core` and `packages/portal`
 - Defines the `brand.config.ts` interface
 
@@ -338,18 +372,32 @@ Each package gets its own `package.json` and `tsconfig.json`.
 
 ### Post-Migration
 
-- The `la-sprezzatura` repo is archived (git history preserved)
+- La Sprezzatura's git history is imported into the monorepo via `git subtree add` at the `templates/la-sprezzatura` path, preserving full commit history for traceability
+- The original `la-sprezzatura` repo is then archived as read-only
 - The monorepo becomes the single source of truth
 - Liz's live site continues working throughout — no downtime during migration
 
 ## Technical Notes
+
+### Admin Data Architecture
+
+The admin dashboard has its own Sanity dataset (`linha-admin`) storing:
+- Designer records (name, email, domain, template, dataset slug, status, onboarding checklist, billing tier)
+- Billing records (subscription status, payment history, setup fee tracking)
+- Platform configuration (available templates, subscription tiers, default allocations)
+
+Cross-dataset queries for usage data: the admin app holds read-only API tokens for every designer dataset. It queries each dataset's `renderingUsage` documents directly. Token management is automated during onboarding (Step 6 generates a read-only token and stores it in the admin dataset's designer record).
+
+The admin dashboard's Vercel project has environment variables: `SANITY_DATASET=linha-admin`, `SANITY_PROJECT_ID`, `VERCEL_API_TOKEN` (for provisioning), `RESEND_API_KEY`, plus the list of designer dataset tokens.
 
 ### Sanity Configuration
 
 - One Sanity project with multiple datasets
 - Sanity project ID is shared across all deployments
 - Each dataset gets a scoped API token (write access to only that dataset)
-- Schema changes deployed via `packages/cli/sync-schemas` which iterates all active datasets
+- Schema changes deployed via the admin dashboard (or `cli/sync-schemas` fallback) which iterates all active datasets
+- Schema changes must be additive only (new fields, new types). Removing or renaming fields requires a deprecation step: mark old field hidden in Studio, deploy, migrate data, then remove in a subsequent release. This prevents data loss across datasets.
+- Partial sync failures (e.g., 3 of 5 datasets updated) are surfaced in the admin dashboard's Platform Health section with per-dataset status and a "retry failed" action
 - Sanity Studio auth is per-project — designers invited to the project are granted access to their specific dataset
 
 ### Vercel Configuration
@@ -358,6 +406,8 @@ Each package gets its own `package.json` and `tsconfig.json`.
 - Each project's root directory is set to their template path (e.g., `templates/la-sprezzatura`)
 - Turborepo's `turbo.json` defines the dependency graph so Vercel rebuilds correctly
 - Vercel's monorepo support detects which projects are affected by a push
+- **Plan requirement:** Vercel Pro plan ($20/month per project) is needed for 60s serverless function timeout (required by AI rendering's `waitUntil` pattern). Designer projects without AI rendering enabled could run on Hobby, but Pro is recommended for consistency. At 5 designers: ~$100/month Vercel cost.
+- The manual `.env` parsing in la-sprezzatura's `astro.config.mjs` must be replaced with Vercel's build-time environment variable injection (standard in monorepo setups). This is a migration requirement in Phase 2.
 
 ### Redis (Upstash)
 
@@ -373,6 +423,10 @@ Each package gets its own `package.json` and `tsconfig.json`.
 - Same BLOB_READ_WRITE_TOKEN for all designer deployments
 - Isolation is at the path prefix level
 
+### AI Rendering Sequencing
+
+The AI rendering feature (see companion spec `2026-03-17-ai-rendering-design.md`) may be built in la-sprezzatura before the monorepo migration. If so, the rendering code is extracted into `packages/rendering` during migration Phase 2. The migration table includes this as a row. If rendering is built after migration, it goes directly into `packages/rendering`.
+
 ### Email (Resend)
 
 - Shared Resend account for V1
@@ -383,5 +437,14 @@ Each package gets its own `package.json` and `tsconfig.json`.
 ### Cost Allocation
 
 - Gemini API costs: tracked per-designer via `renderingUsage` documents in each dataset
-- Vercel costs: one project per designer, costs visible in Vercel dashboard
+- Vercel costs: one project per designer (~$20/month Pro plan), costs visible in Vercel dashboard
 - Redis/Blob: shared infrastructure, costs split proportionally if needed (or absorbed as platform overhead at 2-5 designers)
+
+### Known Risks & Accepted Trade-offs
+
+| Risk | Mitigation | Revisit When |
+|------|-----------|--------------|
+| Redis shared token — key prefix isolation is convention-enforced, not token-enforced | `packages/core/auth` auto-prefixes all keys with `SANITY_DATASET`; code review enforces this | Platform scales beyond white-glove operation; consider per-designer Redis databases |
+| Blob shared token — path prefix isolation is convention-enforced, not token-enforced | `packages/core` auto-prefixes all Blob paths with `SANITY_DATASET`; code review enforces this | Platform scales beyond white-glove operation; consider per-designer Blob stores |
+| Vercel Pro cost scales linearly ($20/designer/month) | Acceptable at 2-5 designers; included in subscription pricing | 10+ designers; evaluate Vercel Teams or alternative deployment |
+| Schema sync is push-based, not guaranteed atomic across datasets | Admin dashboard surfaces partial failures with retry; additive-only schema policy | Need for breaking schema changes; build a migration runner |
