@@ -213,6 +213,14 @@ export const PROJECT_DETAIL_QUERY = `
         retailPrice,
         "savings": retailPrice - clientCost,
         trackingNumber
+      },
+      "contractors": contractors[] {
+        "name": contractor->name,
+        "trades": contractor->trades,
+        "appointments": appointments[] | order(dateTime asc) {
+          dateTime,
+          label
+        }
       }
     }),
     artifacts[] {
@@ -317,6 +325,9 @@ export const PROJECTS_BY_CONTRACTOR_QUERY = `
     title,
     pipelineStage,
     projectStatus,
+    "projectAddress": projectAddress {
+      street, city, state, zip
+    },
     "assignment": contractors[contractor._ref == $contractorId][0] {
       startDate,
       endDate
@@ -326,4 +337,122 @@ export const PROJECTS_BY_CONTRACTOR_QUERY = `
 
 export async function getProjectsByContractorId(contractorId: string) {
   return sanityClient.fetch(PROJECTS_BY_CONTRACTOR_QUERY, { contractorId });
+}
+
+// -- Phase 8: Work Order Detail, Building Manager, Site Settings Queries --
+
+// GROQ: Work order project detail for contractor view
+// INFORMATION BOUNDARY: primaryClientName only (no email, no phone), appointment notes included
+export const WORK_ORDER_DETAIL_QUERY = `
+  *[_type == "project" && _id == $projectId && portalEnabled == true &&
+    engagementType == "full-interior-design" &&
+    count(contractors[contractor._ref == $contractorId]) > 0
+  ][0] {
+    _id,
+    title,
+    "projectAddress": projectAddress {
+      street, city, state, zip
+    },
+    "primaryClientName": clients[isPrimary == true][0].client->name,
+    "assignment": contractors[contractor._ref == $contractorId][0] {
+      _key,
+      startDate,
+      endDate,
+      estimateFile,
+      estimateAmount,
+      scopeOfWork,
+      contractorNotes,
+      appointments[] | order(dateTime asc) {
+        _key,
+        dateTime,
+        label,
+        notes
+      },
+      submissionNotes[] | order(timestamp desc) {
+        _key,
+        text,
+        contractorName,
+        timestamp
+      }
+    },
+    floorPlans[] {
+      _key,
+      planName,
+      file,
+      description
+    }
+  }
+`;
+
+export async function getWorkOrderDetail(projectId: string, contractorId: string) {
+  return sanityClient.fetch(WORK_ORDER_DETAIL_QUERY, { projectId, contractorId });
+}
+
+// GROQ: Building manager project detail
+// INFORMATION BOUNDARY: includes client email+phone, COIs, legal docs, contractor names+trades only
+export const BUILDING_MANAGER_PROJECT_QUERY = `
+  *[_type == "project" && _id == $projectId &&
+    buildingManager.email == $email &&
+    isCommercial == true && portalEnabled == true
+  ][0] {
+    _id,
+    title,
+    "projectAddress": projectAddress {
+      street, city, state, zip
+    },
+    "primaryClient": clients[isPrimary == true][0].client-> {
+      name, email, phone
+    },
+    cois[] {
+      _key,
+      issuerName,
+      file,
+      expirationDate,
+      coverageType,
+      policyNumber
+    },
+    legalDocs[] {
+      _key,
+      documentName,
+      file,
+      description
+    },
+    "contractors": contractors[] {
+      "name": contractor->name,
+      "trades": contractor->trades
+    }
+  }
+`;
+
+export async function getBuildingManagerProject(projectId: string, email: string) {
+  return sanityClient.fetch(BUILDING_MANAGER_PROJECT_QUERY, { projectId, email });
+}
+
+// GROQ: All commercial projects for a building manager email (dashboard)
+export const PROJECTS_BY_BUILDING_MANAGER_QUERY = `
+  *[_type == "project" && buildingManager.email == $email &&
+    isCommercial == true && portalEnabled == true
+  ] | order(title asc) {
+    _id,
+    title,
+    "projectAddress": projectAddress {
+      street, city, state, zip
+    }
+  }
+`;
+
+export async function getProjectsByBuildingManagerEmail(email: string) {
+  return sanityClient.fetch(PROJECTS_BY_BUILDING_MANAGER_QUERY, { email });
+}
+
+// GROQ: Site settings for Contact Liz section
+export const SITE_SETTINGS_QUERY = `
+  *[_type == "siteSettings"][0] {
+    contactEmail,
+    contactPhone
+  }
+`;
+
+export async function getSiteContactInfo() {
+  return sanityClient.fetch(SITE_SETTINGS_QUERY);
 }

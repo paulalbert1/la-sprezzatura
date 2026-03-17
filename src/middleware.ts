@@ -6,6 +6,8 @@ const PUBLIC_PATHS = [
   "/portal/verify",
   "/workorder/login",
   "/workorder/verify",
+  "/building/login",
+  "/building/verify",
 ];
 
 export const onRequest = defineMiddleware(async (context, next) => {
@@ -35,6 +37,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
 
     context.locals.contractorId = session.entityId;
+    context.locals.role = session.role;
+    return next();
+  }
+
+  // Building manager portal routes
+  if (pathname.startsWith("/building")) {
+    if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return next();
+
+    const session = await getSession(context.cookies);
+    if (!session || session.role !== "building_manager") {
+      return context.redirect("/building/login");
+    }
+
+    context.locals.buildingManagerEmail = session.entityId;
     context.locals.role = session.role;
     return next();
   }

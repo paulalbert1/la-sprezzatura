@@ -5,6 +5,7 @@ declare namespace App {
   interface Locals {
     clientId: string | undefined;
     contractorId: string | undefined;
+    buildingManagerEmail: string | undefined;
     role: 'client' | 'contractor' | 'building_manager' | undefined;
   }
 }

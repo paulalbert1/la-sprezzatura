@@ -510,6 +510,69 @@ export const project = defineType({
               rows: 3,
               description: "For Liz only -- never visible to contractor",
             }),
+            defineField({
+              name: "contractorNotes",
+              title: "Notes for Contractor",
+              type: "text",
+              rows: 3,
+              description: 'Informal instructions visible to contractor (e.g., "gate code changed to 5678")',
+            }),
+            defineField({
+              name: "appointments",
+              title: "Appointments",
+              type: "array",
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  fields: [
+                    defineField({
+                      name: "dateTime",
+                      title: "Date & Time",
+                      type: "datetime",
+                      validation: (r) => r.required(),
+                    }),
+                    defineField({
+                      name: "label",
+                      title: "Label",
+                      type: "string",
+                      description: 'e.g., "Measurement", "Install Day 1", "Touch-up"',
+                      validation: (r) => r.required(),
+                    }),
+                    defineField({
+                      name: "notes",
+                      title: "Notes for Contractor",
+                      type: "text",
+                      rows: 2,
+                      description: 'e.g., "Bring 2" molding samples". Visible to contractor only.',
+                    }),
+                  ],
+                  preview: {
+                    select: { title: "label", subtitle: "dateTime" },
+                    prepare: ({ title, subtitle }) => ({
+                      title: title || "Untitled appointment",
+                      subtitle: subtitle ? new Date(subtitle).toLocaleDateString() : "No date",
+                    }),
+                  },
+                }),
+              ],
+            }),
+            defineField({
+              name: "submissionNotes",
+              title: "Contractor Notes",
+              type: "array",
+              readOnly: true,
+              description: "Notes submitted by the contractor via the portal",
+              of: [
+                defineArrayMember({
+                  type: "object",
+                  fields: [
+                    defineField({ name: "text", title: "Note", type: "text" }),
+                    defineField({ name: "contractorName", title: "Contractor Name", type: "string" }),
+                    defineField({ name: "timestamp", title: "Timestamp", type: "datetime" }),
+                  ],
+                }),
+              ],
+            }),
           ],
           preview: {
             select: { title: "contractor.name", subtitle: "contractor.company" },
