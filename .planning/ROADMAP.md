@@ -165,7 +165,7 @@ Plans:
 Plans:
 - [ ] 09-01-PLAN.md -- Schema extensions (updateLog, investmentSummary), GROQ queries, SendUpdateAction Studio dialog, send-update API route, branded email template
 - [ ] 09-02-PLAN.md -- Investment proposal tier cards (InvestmentSummary.astro), tier selection form (TierSelectionForm.tsx), selectTier Astro Action, ArtifactCard wiring
-- [ ] 09-03-PLAN.md -- Hero slideshow with crossfade + Ken Burns + GSAP SplitText animation, siteSettings heroSlideshow schema, Cal.com dead code cleanup
+- [x] 09-03-PLAN.md -- Hero slideshow with crossfade + Ken Burns + GSAP SplitText animation, siteSettings heroSlideshow schema, Cal.com dead code cleanup
 
 ### Phase 10: AI Rendering Engine
 **Goal**: The server-side rendering pipeline is fully operational -- Sanity schemas for sessions, outputs, and usage tracking are deployed, API routes handle generation, conversational refinement, and polling with Gemini integration, usage is enforced per-designer per-month with hard cap, and generated images are stored in Vercel Blob -- all backend infrastructure ready before building the Studio UI
@@ -227,7 +227,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 6. Portal Features | v2.0 | 0/5 | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
-| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/3 | Not started | - |
+| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
 | 10. AI Rendering Engine | v3.0 | 0/? | Not started | - |
 | 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/? | Not started | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |

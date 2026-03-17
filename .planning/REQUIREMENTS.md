@@ -166,11 +166,11 @@
 
 ### Booking (BOOK)
 
-- [ ] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed -- Phase 9
+- [x] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed -- Phase 9
 
 ### Public Site Polish (SITE)
 
-- [ ] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation -- Phase 9
+- [x] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation -- Phase 9
 
 ### Infrastructure (INFRA)
 
@@ -267,8 +267,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | SEND-01, SEND-02, SEND-03 | Phase 9 | Pending |
 | ARTF-05, ARTF-06, ARTF-07 | Phase 9 | Pending |
-| BOOK-01 | Phase 9 | Pending |
-| SITE-08 | Phase 9 | Pending |
+| BOOK-01 | Phase 9 | Complete |
+| SITE-08 | Phase 9 | Complete |
 | RNDR-01, RNDR-02, RNDR-03 | Phase 10 | Pending |
 | RNDR-06, RNDR-07 | Phase 10 | Pending |
 | RNDR-04, RNDR-05 | Phase 11 | Pending |
