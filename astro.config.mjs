@@ -26,7 +26,7 @@ const hasSanity = sanityProjectId && sanityProjectId !== "placeholder";
 export default defineConfig({
   site: "https://lasprezz.com",
   output: "server",
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 60 }),
   integrations: [
     ...(hasSanity
       ? [
