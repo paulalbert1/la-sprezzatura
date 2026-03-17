@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.5
-milestone_name: Contractor & Building Manager Portals
-status: complete
+milestone: v2.0
+milestone_name: Client Portal Foundation
+status: completed
 stopped_at: Completed 08-03-PLAN.md
-last_updated: "2026-03-17T12:06:29Z"
+last_updated: "2026-03-17T12:14:20.844Z"
 last_activity: 2026-03-17 -- completed 08-03 building manager portal and client contractor visibility
 progress:
   total_phases: 6
-  completed_phases: 6
+  completed_phases: 4
   total_plans: 15
   completed_plans: 15
   percent: 100
