@@ -8,6 +8,7 @@ import {
 } from "../../lib/artifactUtils";
 import ArtifactApprovalForm from "./ArtifactApprovalForm.tsx";
 import ClientNoteForm from "./ClientNoteForm.tsx";
+import InvestmentSummary from "./InvestmentSummary.astro";
 
 interface Props {
   artifact: Artifact;
@@ -111,6 +112,22 @@ const needsReview = currentVersion && !hasApproval && !hasChangesRequested;
     )
   }
 
+  {/* Investment Summary (proposals with tiers only) */}
+  {
+    artifact.artifactType === "proposal" &&
+    artifact.investmentSummary?.tiers &&
+    artifact.investmentSummary.tiers.length > 0 && (
+      <InvestmentSummary
+        tiers={artifact.investmentSummary.tiers}
+        selectedTierKey={artifact.investmentSummary.selectedTierKey}
+        eagerness={artifact.investmentSummary.eagerness}
+        projectId={projectId}
+        artifactKey={artifact._key}
+        isCompleted={isCompleted}
+      />
+    )
+  }
+
   {/* Approval form (only if pending review and not completed) */}
   {
     needsReview && !isCompleted && currentVersion && (
@@ -176,6 +193,7 @@ const needsReview = currentVersion && !hasApproval && !hasChangesRequested;
                 {entry.action === "note-added" && " added a note"}
                 {entry.action === "version-uploaded" && "New version uploaded"}
                 {entry.action === "notification-sent" && "Notification sent"}
+                {entry.action === "tier-selected" && " selected investment tier"}
               </span>
               <span class="text-stone-light ml-1">
                 {new Date(entry.timestamp).toLocaleDateString("en-US", {
