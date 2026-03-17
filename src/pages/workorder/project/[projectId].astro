@@ -1,0 +1,319 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../../components/portal/PortalLayout.astro";
+import ConfidentialityBanner from "../../../components/portal/ConfidentialityBanner.astro";
+import ContractorNoteForm from "../../../components/portal/ContractorNoteForm.tsx";
+import {
+  getWorkOrderDetail,
+  getSiteContactInfo,
+  getProjectsByContractorId,
+} from "../../../sanity/queries";
+import { formatCurrency } from "../../../lib/formatCurrency";
+import { PortableText } from "astro-portabletext";
+
+// contractorId injected by middleware (guaranteed by auth guard)
+const contractorId = Astro.locals.contractorId!;
+
+// Get projectId from dynamic route param
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/workorder/dashboard");
+}
+
+// Fetch work order detail (scoped to this contractor)
+const project = await getWorkOrderDetail(projectId, contractorId);
+if (!project) {
+  return Astro.redirect("/workorder/dashboard");
+}
+
+// Fetch site contact info for Contact Liz section
+const siteContact = await getSiteContactInfo();
+
+// Multi-project detection for "Back to Dashboard" link
+const allProjects = await getProjectsByContractorId(contractorId);
+
+// Extract assignment from project data
+const assignment = project.assignment;
+
+// Helpers
+const isAppointmentPast = (dt: string) => new Date(dt) < new Date();
+const formatDateTime = (dt: string) =>
+  new Date(dt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+const isImageFile = (path: string) => /\.(png|jpg|jpeg|webp)$/i.test(path);
+
+// Format project address
+const addressStr = [
+  project.projectAddress?.street,
+  project.projectAddress?.city,
+  project.projectAddress?.state,
+  project.projectAddress?.zip,
+]
+  .filter(Boolean)
+  .join(", ");
+---
+
+<PortalLayout title={`${project.title} | Work Order | La Sprezzatura`}>
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {/* Back to Dashboard link -- only if contractor has multiple projects */}
+      {(allProjects?.length || 0) > 1 && (
+        <a
+          href="/workorder/dashboard"
+          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
+        >
+          &larr; Back to Dashboard
+        </a>
+      )}
+
+      {/* Brand mark */}
+      <p
+        class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"
+      >
+        La Sprezzatura
+      </p>
+
+      {/* Page header */}
+      <h1
+        class="text-3xl md:text-4xl font-heading font-light text-charcoal text-center mb-2"
+      >
+        {project.title}
+      </h1>
+      {addressStr && (
+        <p class="text-sm text-stone font-body text-center mb-1">
+          {addressStr}
+        </p>
+      )}
+      {project.primaryClientName && (
+        <p
+          class="text-xs text-stone uppercase tracking-widest font-body text-center mb-8"
+        >
+          Client: {project.primaryClientName}
+        </p>
+      )}
+
+      <ConfidentialityBanner />
+
+      {/* Section: Appointments */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Appointments
+        </h2>
+        {assignment?.appointments?.length > 0 ? (
+          <div class="space-y-4">
+            {assignment.appointments.map((apt: any) => (
+              <div
+                class:list={[
+                  "bg-cream-dark border border-stone-light/20 p-4",
+                  isAppointmentPast(apt.dateTime) && "opacity-50",
+                ]}
+              >
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="text-sm font-body text-charcoal">
+                    {apt.label}
+                  </span>
+                  <span class="text-xs text-stone font-body">
+                    {formatDateTime(apt.dateTime)}
+                  </span>
+                </div>
+                {apt.notes && (
+                  <p class="text-sm text-stone font-body mt-2">{apt.notes}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No appointments scheduled yet. Liz will add appointments as they're
+            confirmed.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Scope of Work */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Scope of Work
+        </h2>
+        {assignment?.scopeOfWork?.length > 0 ? (
+          <div class="prose prose-sm text-charcoal font-body">
+            <PortableText value={assignment.scopeOfWork} />
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            Scope of work will be shared soon.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Floor Plans */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Floor Plans
+        </h2>
+        {project.floorPlans?.length > 0 ? (
+          <div class="space-y-4">
+            {project.floorPlans.map((fp: any) =>
+              isImageFile(fp.file) ? (
+                <div class="bg-cream-dark border border-stone-light/20 p-4">
+                  <img
+                    src={"/api/blob-serve?path=" + encodeURIComponent(fp.file)}
+                    alt={fp.planName || "Floor plan"}
+                    class="max-h-48 object-contain w-full"
+                  />
+                  <div class="flex items-center justify-between mt-4">
+                    <span class="text-sm text-charcoal">{fp.planName}</span>
+                    <a
+                      href={"/api/blob-serve?path=" +
+                        encodeURIComponent(fp.file)}
+                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
+                    >
+                      Download Plan
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div class="bg-cream-dark border border-stone-light/20 p-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm text-charcoal">{fp.planName}</span>
+                    <a
+                      href={"/api/blob-serve?path=" +
+                        encodeURIComponent(fp.file)}
+                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
+                    >
+                      Download PDF
+                    </a>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No floor plans uploaded yet.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Estimate */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Estimate
+        </h2>
+        {assignment?.estimateAmount || assignment?.estimateFile ? (
+          <div>
+            {assignment.estimateAmount && (
+              <p
+                class:list={[
+                  "text-2xl font-heading font-light text-charcoal",
+                  assignment.estimateFile && "mb-4",
+                ]}
+              >
+                {formatCurrency(assignment.estimateAmount)}
+              </p>
+            )}
+            {assignment.estimateFile && (
+              <a
+                class="inline-flex items-center gap-2 bg-cream-dark border border-stone-light/20 px-6 py-3 text-sm text-charcoal hover:border-terracotta/40 transition-colors"
+                href={"/api/blob-serve?path=" +
+                  encodeURIComponent(assignment.estimateFile)}
+              >
+                Download Estimate
+              </a>
+            )}
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            Estimate details coming soon.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Notes from Liz */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Notes from Liz
+        </h2>
+        {assignment?.contractorNotes ? (
+          <p class="text-sm text-stone font-body whitespace-pre-wrap">
+            {assignment.contractorNotes}
+          </p>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No additional notes at this time.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Your Notes */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Your Notes
+        </h2>
+        {assignment?.submissionNotes?.length > 0 && (
+          <div class="space-y-4 mb-6">
+            {assignment.submissionNotes.map((note: any) => (
+              <div class="border-b border-stone-light/10 pb-3">
+                <p class="text-sm text-charcoal font-body">{note.text}</p>
+                <span class="text-xs text-stone font-body">
+                  {new Date(note.timestamp).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        <ContractorNoteForm
+          client:load
+          projectId={project._id}
+          assignmentKey={assignment._key}
+        />
+      </section>
+
+      {/* Section: Contact Liz */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-4">
+          Contact Liz
+        </h2>
+        <p class="text-sm text-stone font-body mb-4">
+          For questions about this project, contact Liz
+        </p>
+        <div class="space-y-2">
+          <a
+            href={"tel:" + siteContact?.contactPhone}
+            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+          >
+            {siteContact?.contactPhone}
+          </a>
+          <a
+            href={"mailto:" + siteContact?.contactEmail}
+            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+          >
+            {siteContact?.contactEmail}
+          </a>
+        </div>
+      </section>
+
+      {/* Sign Out */}
+      <div class="mt-16 text-center">
+        <a
+          href="/workorder/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>
