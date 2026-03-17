@@ -1,0 +1,41 @@
+---
+export const prerender = false;
+
+import { redis } from "../../lib/redis";
+import { createSession } from "../../lib/session";
+
+const token = Astro.url.searchParams.get("token");
+
+if (!token) {
+  return Astro.redirect("/building/login?error=expired");
+}
+
+// Atomic get-and-delete: single-use token enforcement
+const rawValue = await redis.getdel(`magic:${token}`) as string | null;
+
+if (!rawValue) {
+  return Astro.redirect("/building/login?error=expired");
+}
+
+// Parse token data
+let tokenData: any;
+try {
+  tokenData = JSON.parse(rawValue);
+} catch {
+  return Astro.redirect("/building/login?error=expired");
+}
+
+if (tokenData.dualRole) {
+  // Multi-role: redirect to role selection
+  const params = new URLSearchParams();
+  if (tokenData.clientId) params.set("clientId", tokenData.clientId);
+  if (tokenData.contractorId) params.set("contractorId", tokenData.contractorId);
+  if (tokenData.buildingManagerEmail) params.set("buildingManagerEmail", tokenData.buildingManagerEmail);
+  return Astro.redirect(`/portal/role-select?${params.toString()}`);
+}
+
+// Single role: create session and redirect
+const role = tokenData.role || 'building_manager';
+await createSession(Astro.cookies, tokenData.entityId, role);
+return Astro.redirect("/building/dashboard");
+---

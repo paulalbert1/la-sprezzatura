@@ -1,0 +1,80 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../components/portal/PortalLayout.astro";
+import { getProjectsByBuildingManagerEmail } from "../../sanity/queries";
+
+// buildingManagerEmail injected by middleware (guaranteed by auth guard)
+const email = Astro.locals.buildingManagerEmail!;
+
+// Fetch all building projects for this manager
+const projects = await getProjectsByBuildingManagerEmail(email) || [];
+
+// Auto-redirect for single project
+if (projects.length === 1) {
+  return Astro.redirect("/building/project/" + projects[0]._id);
+}
+
+// Format address helper
+function formatAddress(addr: any): string {
+  if (!addr) return "";
+  const parts = [addr.street, addr.city, addr.state, addr.zip].filter(Boolean);
+  return parts.join(", ");
+}
+---
+
+<PortalLayout title="Building Portal | La Sprezzatura">
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
+        La Sprezzatura
+      </p>
+
+      {/* Greeting */}
+      <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
+        Welcome
+      </h1>
+      <p class="text-base text-stone font-body text-center mb-8">
+        Your building project documents are below.
+      </p>
+
+      {/* Project cards */}
+      {projects.length > 0 && (
+        <div class:list={["grid gap-4", projects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1"]}>
+          {projects.map((project: any) => (
+            <a
+              href={`/building/project/${project._id}`}
+              class="bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors block"
+            >
+              <h3 class="font-heading text-xl font-light text-charcoal mb-2">{project.title}</h3>
+              <p class="text-xs text-stone uppercase tracking-wider font-body">
+                {formatAddress(project.projectAddress)}
+              </p>
+            </a>
+          ))}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {projects.length === 0 && (
+        <div class="text-center py-12">
+          <h2 class="font-heading text-2xl font-light text-charcoal mb-4">No Projects Found</h2>
+          <p class="text-stone font-body leading-relaxed">
+            There are no building projects associated with your email.
+          </p>
+        </div>
+      )}
+
+      {/* Sign out link */}
+      <div class="mt-16 text-center">
+        <a
+          href="/building/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>
