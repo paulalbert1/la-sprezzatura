@@ -35,4 +35,43 @@ describe("session module", () => {
   it("sets sameSite to lax", () => {
     expect(sessionSource).toMatch(/sameSite.*lax/i);
   });
+
+  // --- Multi-role session tests (Plan 07-03 Task 1) ---
+
+  it("exports SessionData interface with entityId and role", () => {
+    expect(sessionSource).toContain("export interface SessionData");
+    expect(sessionSource).toContain("entityId: string");
+    expect(sessionSource).toContain("role:");
+  });
+
+  it("createSession accepts role parameter with default 'client'", () => {
+    // createSession should have a role parameter defaulting to 'client'
+    expect(sessionSource).toMatch(
+      /createSession[\s\S]*?role.*=.*['"]client['"]/,
+    );
+  });
+
+  it("createSession stores JSON with entityId and role in Redis", () => {
+    // Should use JSON.stringify({ entityId, role })
+    expect(sessionSource).toContain("JSON.stringify");
+    expect(sessionSource).toMatch(/JSON\.stringify\(\s*\{\s*entityId/);
+  });
+
+  it("getSession returns SessionData | null", () => {
+    expect(sessionSource).toMatch(
+      /getSession[\s\S]*?:\s*Promise<SessionData\s*\|\s*null>/,
+    );
+  });
+
+  it("getSession handles legacy plain string values (backward compat)", () => {
+    // Should detect legacy sessions and wrap in { entityId, role: 'client' }
+    expect(sessionSource).toContain("role: 'client'");
+    // Should have backward compatibility comment or logic
+    expect(sessionSource).toMatch(/legacy|backward/i);
+  });
+
+  it("SessionData role type includes contractor and building_manager", () => {
+    expect(sessionSource).toContain("'contractor'");
+    expect(sessionSource).toContain("'building_manager'");
+  });
 });

@@ -31,4 +31,36 @@ describe("middleware", () => {
   it("sets context.locals.clientId for authenticated requests", () => {
     expect(middlewareSource).toContain("context.locals.clientId");
   });
+
+  // --- Multi-role middleware tests (Plan 07-03 Task 1) ---
+
+  it("allows /workorder/login without session check", () => {
+    expect(middlewareSource).toContain("/workorder/login");
+  });
+
+  it("allows /workorder/verify without session check", () => {
+    expect(middlewareSource).toContain("/workorder/verify");
+  });
+
+  it("redirects to /workorder/login for unauthenticated workorder requests", () => {
+    expect(middlewareSource).toContain('redirect("/workorder/login")');
+  });
+
+  it("checks session.role for client portal routes", () => {
+    expect(middlewareSource).toMatch(/session\.role\s*!==\s*["']client["']/);
+  });
+
+  it("checks session.role for contractor workorder routes", () => {
+    expect(middlewareSource).toMatch(
+      /session\.role\s*!==\s*["']contractor["']/,
+    );
+  });
+
+  it("sets context.locals.contractorId for workorder routes", () => {
+    expect(middlewareSource).toContain("context.locals.contractorId");
+  });
+
+  it("sets context.locals.role for authenticated routes", () => {
+    expect(middlewareSource).toContain("context.locals.role");
+  });
 });
