@@ -1,0 +1,53 @@
+---
+interface Appointment {
+  dateTime: string;
+  label: string;
+}
+
+interface ContractorData {
+  name: string;
+  trades: string[];
+  appointments?: Appointment[];
+}
+
+interface Props {
+  contractors: ContractorData[];
+}
+
+const { contractors } = Astro.props;
+
+// Hidden entirely if no contractors
+if (!contractors || contractors.length === 0) return;
+
+const isAppointmentPast = (dt: string) => new Date(dt) < new Date();
+const formatDateTime = (dt: string) =>
+  new Date(dt).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit',
+  });
+---
+
+<section class="py-12 border-t border-stone-light/20">
+  <h2 class="font-heading text-xl font-light text-charcoal mb-6">Contractors</h2>
+
+  <div class="space-y-4">
+    {contractors.map((c) => (
+      <div class="bg-cream-dark border border-stone-light/20 p-4">
+        <div class="flex items-baseline justify-between mb-2">
+          <span class="text-sm text-charcoal">{c.name}</span>
+          <span class="text-xs text-stone">{c.trades?.join(', ')}</span>
+        </div>
+        {c.appointments && c.appointments.length > 0 && (
+          <div class="mt-4 space-y-2">
+            {c.appointments.map((apt) => (
+              <div class:list={["flex items-baseline gap-4", isAppointmentPast(apt.dateTime) && "opacity-50"]}>
+                <span class="text-xs text-stone font-body w-28 shrink-0">{formatDateTime(apt.dateTime)}</span>
+                <span class="text-xs text-charcoal font-body">{apt.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</section>

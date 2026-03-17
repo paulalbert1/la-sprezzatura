@@ -6,6 +6,7 @@ import ProjectHeader from "../../../components/portal/ProjectHeader.astro";
 import ConfidentialityBanner from "../../../components/portal/ConfidentialityBanner.astro";
 import PostProjectBanner from "../../../components/portal/PostProjectBanner.astro";
 import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
+import ContractorSection from "../../../components/portal/ContractorSection.astro";
 import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
 import ArtifactSection from "../../../components/portal/ArtifactSection.astro";
 import WarrantyClaimForm from "../../../components/portal/WarrantyClaimForm.tsx";
@@ -78,6 +79,11 @@ const isMultiProject = (allProjects?.length || 0) > 1;
         isCompleted={isCompleted && !isReopened}
         projectId={project._id}
       />
+
+      <!-- Contractors section (Full Interior Design only, CVIS-01) -->
+      {showProcurement && project.contractors && (
+        <ContractorSection contractors={project.contractors} />
+      )}
 
       <!-- Procurement section (Full Interior Design only) -->
       {showProcurement && (

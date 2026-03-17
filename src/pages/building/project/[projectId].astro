@@ -1,0 +1,240 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../../components/portal/PortalLayout.astro";
+import ConfidentialityBanner from "../../../components/portal/ConfidentialityBanner.astro";
+import ExpirationBadge from "../../../components/portal/ExpirationBadge.astro";
+import {
+  getBuildingManagerProject,
+  getSiteContactInfo,
+  getProjectsByBuildingManagerEmail,
+} from "../../../sanity/queries";
+
+// buildingManagerEmail injected by middleware (guaranteed by auth guard)
+const email = Astro.locals.buildingManagerEmail!;
+
+// Get projectId from dynamic route param
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/building/dashboard");
+}
+
+// Fetch building manager project detail (scoped to this email)
+const project = await getBuildingManagerProject(projectId, email);
+if (!project) {
+  return Astro.redirect("/building/dashboard");
+}
+
+// Fetch site contact info for Contact Liz section
+const siteContact = await getSiteContactInfo();
+
+// Multi-project detection for "Back to Dashboard" link
+const allProjects = await getProjectsByBuildingManagerEmail(email);
+
+// Format project address
+const addressStr = [
+  project.projectAddress?.street,
+  project.projectAddress?.city,
+  project.projectAddress?.state,
+  project.projectAddress?.zip,
+]
+  .filter(Boolean)
+  .join(", ");
+---
+
+<PortalLayout title={`${project.title} | Building Portal | La Sprezzatura`}>
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {/* Back to Dashboard link -- only if building manager has multiple projects */}
+      {(allProjects?.length || 0) > 1 && (
+        <a
+          href="/building/dashboard"
+          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
+        >
+          &larr; Back to Dashboard
+        </a>
+      )}
+
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
+        La Sprezzatura
+      </p>
+
+      {/* Page header */}
+      <h1 class="text-3xl md:text-4xl font-heading font-light text-charcoal text-center mb-2">
+        {project.title}
+      </h1>
+      {addressStr && (
+        <p class="text-sm text-stone font-body text-center mb-8">
+          {addressStr}
+        </p>
+      )}
+
+      <ConfidentialityBanner />
+
+      {/* Section: Client Contact */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Client Contact
+        </h2>
+        <div class="bg-cream-dark border border-stone-light/20 p-6">
+          {project.primaryClient?.name && (
+            <p class="text-base text-charcoal font-body mb-2">
+              {project.primaryClient.name}
+            </p>
+          )}
+          {project.primaryClient?.email && (
+            <a
+              href={"mailto:" + project.primaryClient.email}
+              class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body mb-1"
+            >
+              {project.primaryClient.email}
+            </a>
+          )}
+          {project.primaryClient?.phone && (
+            <a
+              href={"tel:" + project.primaryClient.phone}
+              class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+            >
+              {project.primaryClient.phone}
+            </a>
+          )}
+        </div>
+      </section>
+
+      {/* Section: Certificates of Insurance */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Certificates of Insurance
+        </h2>
+        {project.cois?.length > 0 ? (
+          <div class="space-y-4">
+            {project.cois.map((coi: any) => (
+              <div class="bg-cream-dark border border-stone-light/20 p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-charcoal">{coi.issuerName}</span>
+                  <ExpirationBadge expirationDate={coi.expirationDate} />
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    {coi.coverageType && (
+                      <span class="text-xs text-stone mr-3">{coi.coverageType}</span>
+                    )}
+                    {coi.policyNumber && (
+                      <span class="text-xs text-stone">Policy: {coi.policyNumber}</span>
+                    )}
+                  </div>
+                  {coi.file && (
+                    <a
+                      href={"/api/blob-serve?path=" + encodeURIComponent(coi.file)}
+                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
+                    >
+                      Download Certificate
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No certificates of insurance have been uploaded yet.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Legal Documents */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Legal Documents
+        </h2>
+        {project.legalDocs?.length > 0 ? (
+          <div class="space-y-4">
+            {project.legalDocs.map((doc: any) => (
+              <div class="bg-cream-dark border border-stone-light/20 p-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-sm text-charcoal">{doc.documentName}</span>
+                    {doc.description && (
+                      <p class="text-xs text-stone mt-1">{doc.description}</p>
+                    )}
+                  </div>
+                  {doc.file && (
+                    <a
+                      href={"/api/blob-serve?path=" + encodeURIComponent(doc.file)}
+                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors shrink-0 ml-4"
+                    >
+                      Download Document
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No legal documents uploaded yet.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Contractors */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
+          Contractors
+        </h2>
+        {project.contractors?.length > 0 ? (
+          <div class="space-y-4">
+            {project.contractors.map((c: any) => (
+              <div class="flex items-baseline justify-between">
+                <span class="text-sm text-charcoal">{c.name}</span>
+                <span class="text-xs text-stone">{c.trades?.join(", ")}</span>
+              </div>
+            ))}
+            <p class="text-xs text-stone mt-4">
+              Contact Liz for additional contractor details.
+            </p>
+          </div>
+        ) : (
+          <p class="text-sm text-stone font-body">
+            No contractors have been assigned to this project yet.
+          </p>
+        )}
+      </section>
+
+      {/* Section: Contact Liz */}
+      <section class="py-12 border-t border-stone-light/20">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-4">
+          Contact Liz
+        </h2>
+        <p class="text-sm text-stone font-body mb-4">
+          For questions about this building project, contact Liz
+        </p>
+        <div class="space-y-2">
+          <a
+            href={"tel:" + siteContact?.contactPhone}
+            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+          >
+            {siteContact?.contactPhone}
+          </a>
+          <a
+            href={"mailto:" + siteContact?.contactEmail}
+            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+          >
+            {siteContact?.contactEmail}
+          </a>
+        </div>
+      </section>
+
+      {/* Sign Out */}
+      <div class="mt-16 text-center">
+        <a
+          href="/building/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>

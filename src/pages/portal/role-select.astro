@@ -12,19 +12,26 @@ if (Astro.request.method === "POST") {
   const entityId = formData.get("entityId") as string;
 
   if (role && entityId) {
-    const sessionRole = role === "contractor" ? "contractor" : "client";
-    await createSession(Astro.cookies, entityId, sessionRole as any);
-    const dashboard = sessionRole === "contractor" ? "/workorder/dashboard" : "/portal/dashboard";
-    return Astro.redirect(dashboard);
+    let sessionRole: 'client' | 'contractor' | 'building_manager' = 'client';
+    if (role === 'contractor') sessionRole = 'contractor';
+    if (role === 'building_manager') sessionRole = 'building_manager';
+    await createSession(Astro.cookies, entityId, sessionRole);
+    const dashboards: Record<string, string> = {
+      client: '/portal/dashboard',
+      contractor: '/workorder/dashboard',
+      building_manager: '/building/dashboard',
+    };
+    return Astro.redirect(dashboards[sessionRole]);
   }
 }
 
 // GET: render role selection form
 const clientId = Astro.url.searchParams.get("clientId");
 const contractorId = Astro.url.searchParams.get("contractorId");
+const buildingManagerEmail = Astro.url.searchParams.get("buildingManagerEmail");
 
-// If missing params, redirect to login
-if (!clientId || !contractorId) {
+// If no role params at all, redirect to login
+if (!clientId && !contractorId && !buildingManagerEmail) {
   return Astro.redirect("/portal/login");
 }
 ---
@@ -48,7 +55,7 @@ if (!clientId || !contractorId) {
       </p>
 
       {/* Role selection buttons */}
-      <RoleSelectionForm client:load clientId={clientId} contractorId={contractorId} />
+      <RoleSelectionForm client:load clientId={clientId} contractorId={contractorId} buildingManagerEmail={buildingManagerEmail} />
     </div>
   </main>
 </PortalLayout>

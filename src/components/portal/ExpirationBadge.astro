@@ -1,0 +1,29 @@
+---
+import { getExpirationStatus, formatExpirationDate } from "../../lib/coiUtils";
+
+interface Props {
+  expirationDate: string | null | undefined;
+}
+
+const { expirationDate } = Astro.props;
+const status = getExpirationStatus(expirationDate);
+
+const BADGE_STYLES = {
+  valid: "bg-emerald-50 text-emerald-700",
+  expiring: "bg-amber-50 text-amber-700",
+  expired: "bg-red-50 text-red-700",
+};
+
+const BADGE_TEXT = {
+  valid: "Valid",
+  expiring: expirationDate ? `Expires ${formatExpirationDate(expirationDate)}` : "Valid",
+  expired: expirationDate ? `Expired ${formatExpirationDate(expirationDate)}` : "Expired",
+};
+---
+
+<span class:list={[
+  "inline-flex items-center px-3 py-1 rounded-full text-xs font-body tracking-wide",
+  BADGE_STYLES[status],
+]}>
+  {BADGE_TEXT[status]}
+</span>
