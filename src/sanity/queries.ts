@@ -109,7 +109,20 @@ export async function getSiteSettings() {
       contactEmail,
       contactPhone,
       studioLocation,
-      socialLinks
+      socialLinks,
+      heroSlideshow[] {
+        alt,
+        image {
+          ...,
+          asset-> {
+            url,
+            metadata {
+              lqip,
+              dimensions
+            }
+          }
+        }
+      }
     }
   `);
 }

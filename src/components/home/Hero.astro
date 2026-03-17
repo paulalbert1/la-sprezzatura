@@ -2,75 +2,265 @@
 import SanityImage from "../SanityImage.astro";
 
 interface Props {
+  images?: Array<{ image: any; alt: string }>;
   image?: any;
   title?: string;
   tagline?: string;
 }
 
 const {
+  images,
   image,
   title = "La Sprezzatura",
   tagline = "Luxury Interior Design",
 } = Astro.props;
+
+const hasSlideshow = images && images.length >= 2;
+const hasSingleImage = !hasSlideshow && ((images && images.length === 1) || image);
+const singleImage = images && images.length === 1 ? images[0].image : image;
+const singleAlt = images && images.length === 1 ? images[0].alt : `${title} hero image`;
 ---
 
 <section class="hero relative w-full h-screen min-h-[600px] overflow-hidden">
-  {
-    image ? (
-      <div class="absolute inset-0" data-animate="parallax">
-        <SanityImage
-          image={image}
-          alt={`${title} hero image`}
-          loading="eager"
-          fetchpriority="high"
-          sizes="100vw"
-          widths={[640, 1024, 1440, 1920]}
-          class="w-full h-full"
-        />
-      </div>
-    ) : (
-      <div class="absolute inset-0 bg-gradient-to-b from-cream-dark via-stone-light to-stone" />
-    )
-  }
+  {/* Slide container: all slides stacked absolutely */}
+  {hasSlideshow && (
+    <div class="absolute inset-0">
+      {images!.map((slide, i) => (
+        <div
+          class={`hero-slide absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${i === 0 ? "opacity-100" : "opacity-0"}`}
+          data-slide-index={i}
+          data-ken-burns-direction={["push-in", "drift-left", "pull-back", "drift-right"][i % 4]}
+        >
+          <SanityImage
+            image={slide.image}
+            alt={slide.alt}
+            loading={i === 0 ? "eager" : "lazy"}
+            fetchpriority={i === 0 ? "high" : "auto"}
+            sizes="100vw"
+            widths={[640, 1024, 1440, 1920]}
+            class="w-full h-full"
+          />
+        </div>
+      ))}
+    </div>
+  )}
 
-  <!-- Dark gradient overlay for text readability -->
-  <div
-    class="absolute inset-0"
-    style="background: linear-gradient(to top, rgba(44,41,38,0.65) 0%, rgba(44,41,38,0.2) 50%, rgba(44,41,38,0.05) 100%);"
-  >
-  </div>
+  {/* Single image fallback */}
+  {hasSingleImage && (
+    <div class="absolute inset-0">
+      <SanityImage
+        image={singleImage}
+        alt={singleAlt}
+        loading="eager"
+        fetchpriority="high"
+        sizes="100vw"
+        widths={[640, 1024, 1440, 1920]}
+        class="w-full h-full"
+      />
+    </div>
+  )}
 
-  <!-- Text content -->
-  <div
-    class="absolute bottom-0 left-0 right-0 px-8 md:px-16 lg:px-24 pb-20 md:pb-28"
-  >
+  {/* Gradient fallback */}
+  {!hasSlideshow && !hasSingleImage && (
+    <div class="absolute inset-0 bg-gradient-to-b from-cream-dark via-stone-light to-stone" />
+  )}
+
+  {/* Gradient overlay */}
+  <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(44,41,38,0.65) 0%, rgba(44,41,38,0.2) 50%, rgba(44,41,38,0.05) 100%);"></div>
+
+  {/* Text content -- bottom-left anchored */}
+  <div class="absolute bottom-0 left-0 right-0 px-8 md:px-16 lg:px-24 pb-20 md:pb-28">
+    {/* Tagline renders ABOVE title, starts hidden for animation */}
     <p
-      class="text-xs uppercase tracking-[0.35em] text-stone-light mb-5 font-body"
+      class="hero-tagline text-xs uppercase tracking-[0.35em] font-body mb-5"
+      style={`color: rgba(184,176,164,0.65); opacity: ${hasSlideshow || hasSingleImage ? 0 : 1};`}
     >
       {tagline}
     </p>
+    {/* Title -- SplitText target */}
     <h1
-      class="font-heading text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-light text-white leading-none tracking-wide"
+      class="hero-title font-heading text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-light leading-none tracking-wide"
+      style="color: rgba(255,255,255,0.65);"
     >
       {title}
     </h1>
   </div>
 
-  <!-- Scroll indicator -->
-  <div
-    class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 scroll-indicator"
-    aria-hidden="true"
-  >
-    <span class="text-xs uppercase tracking-widest text-white/60 font-body"
-      >Scroll</span
-    >
-    <div class="w-px h-10 bg-white/40 scroll-line"></div>
+  {/* Scroll indicator -- line only, NO text */}
+  <div class="absolute bottom-6 left-1/2 -translate-x-1/2" aria-hidden="true">
+    <div class="w-px h-9 scroll-line" style="background: rgba(255,255,255,0.4);"></div>
   </div>
+
+  {/* Progress bar -- slideshow only */}
+  {hasSlideshow && (
+    <div class="hero-progress absolute bottom-0 left-0 right-0 h-0.5">
+      <div class="h-full" style="background: rgba(255,255,255,0.1);"></div>
+      <div class="hero-progress-fill absolute top-0 left-0 h-full" style="background: rgba(196,131,106,0.4); width: 0%; transition: width 0.1s linear;"></div>
+    </div>
+  )}
 </section>
+
+<script>
+  import gsap from "gsap";
+  import { SplitText } from "gsap/SplitText";
+  gsap.registerPlugin(SplitText);
+
+  let splitInstance: SplitText | null = null;
+  let slideshowInterval: ReturnType<typeof setInterval> | null = null;
+  let progressRaf: number | null = null;
+
+  document.addEventListener("astro:page-load", () => {
+    const heroSection = document.querySelector(".hero");
+    if (!heroSection) return;
+
+    const slides = heroSection.querySelectorAll<HTMLElement>(".hero-slide");
+    const titleEl = heroSection.querySelector<HTMLElement>(".hero-title");
+    const taglineEl = heroSection.querySelector<HTMLElement>(".hero-tagline");
+    const progressFill = heroSection.querySelector<HTMLElement>(".hero-progress-fill");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // SplitText animation
+    if (titleEl && !prefersReducedMotion) {
+      splitInstance = new SplitText(titleEl, { type: "chars" });
+      const tl = gsap.timeline();
+      tl.fromTo(splitInstance.chars, {
+        opacity: 0,
+        y: 12,
+      }, {
+        opacity: 1,
+        y: 0,
+        duration: 0.06,
+        stagger: 0.03,
+        ease: "power2.out",
+      });
+      // Fade in tagline after SplitText completes
+      if (taglineEl) {
+        tl.to(taglineEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
+      }
+    } else if (titleEl && prefersReducedMotion) {
+      // Show everything immediately
+      if (taglineEl) taglineEl.style.opacity = "1";
+    }
+
+    // Slideshow
+    if (slides.length >= 2 && !prefersReducedMotion) {
+      let currentSlide = 0;
+      const holdDuration = 7000; // 7s
+      const totalDuration = 8500; // 7s hold + 1.5s fade
+      let progressStart = Date.now();
+
+      // Ken Burns: apply initial transform and animate
+      const kenBurnsDirections: Record<string, { start: string; end: string }> = {
+        "push-in": {
+          start: "scale(1.0)",
+          end: "scale(1.06)",
+        },
+        "drift-left": {
+          start: "translateX(0%) scale(1.0)",
+          end: "translateX(-2%) scale(1.06)",
+        },
+        "pull-back": {
+          start: "scale(1.06)",
+          end: "scale(1.0)",
+        },
+        "drift-right": {
+          start: "translateX(0%) scale(1.0)",
+          end: "translateX(2%) scale(1.06)",
+        },
+      };
+
+      // Mobile detection for reduced Ken Burns scale
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        kenBurnsDirections["push-in"].end = "scale(1.03)";
+        kenBurnsDirections["drift-left"].end = "translateX(-1%) scale(1.03)";
+        kenBurnsDirections["pull-back"].start = "scale(1.03)";
+        kenBurnsDirections["drift-right"].end = "translateX(1%) scale(1.03)";
+      }
+
+      function applyKenBurns(slide: HTMLElement) {
+        const direction = slide.dataset.kenBurnsDirection || "push-in";
+        const kb = kenBurnsDirections[direction] || kenBurnsDirections["push-in"];
+        const img = slide.querySelector("img");
+        if (img) {
+          img.style.transition = `transform ${totalDuration}ms ease-out`;
+          img.style.transform = kb.start;
+          requestAnimationFrame(() => {
+            img.style.transform = kb.end;
+          });
+        }
+      }
+
+      // Start Ken Burns on first slide
+      applyKenBurns(slides[0]);
+
+      // Progress bar animation
+      function updateProgress() {
+        if (!progressFill) return;
+        const elapsed = Date.now() - progressStart;
+        const progress = Math.min(elapsed / holdDuration, 1);
+        progressFill.style.width = `${progress * 100}%`;
+        if (progress < 1) {
+          progressRaf = requestAnimationFrame(updateProgress);
+        }
+      }
+      updateProgress();
+
+      function advanceSlide() {
+        const nextSlide = (currentSlide + 1) % slides.length;
+        const nextImg = slides[nextSlide].querySelector("img");
+
+        // Image readiness check
+        if (nextImg && !nextImg.complete) {
+          // Hold current slide, retry in 500ms
+          setTimeout(advanceSlide, 500);
+          return;
+        }
+
+        // Crossfade
+        slides[currentSlide].classList.remove("opacity-100");
+        slides[currentSlide].classList.add("opacity-0");
+        slides[nextSlide].classList.remove("opacity-0");
+        slides[nextSlide].classList.add("opacity-100");
+
+        // Ken Burns on new slide
+        applyKenBurns(slides[nextSlide]);
+
+        currentSlide = nextSlide;
+        progressStart = Date.now();
+        if (progressFill) progressFill.style.width = "0%";
+        updateProgress();
+      }
+
+      slideshowInterval = setInterval(advanceSlide, holdDuration);
+    } else if (slides.length >= 2 && prefersReducedMotion) {
+      // Show first slide only, no auto-advance, hide progress bar
+      const progressBar = heroSection.querySelector(".hero-progress") as HTMLElement;
+      if (progressBar) progressBar.style.display = "none";
+      if (taglineEl) taglineEl.style.opacity = "1";
+    }
+  });
+
+  // Cleanup for view transitions
+  document.addEventListener("astro:before-swap", () => {
+    if (splitInstance) {
+      splitInstance.revert();
+      splitInstance = null;
+    }
+    if (slideshowInterval) {
+      clearInterval(slideshowInterval);
+      slideshowInterval = null;
+    }
+    if (progressRaf) {
+      cancelAnimationFrame(progressRaf);
+      progressRaf = null;
+    }
+  });
+</script>
 
 <style>
   .scroll-line {
-    animation: scroll-pulse 2s ease-in-out infinite;
+    animation: scroll-pulse 3s ease-in-out infinite;
     transform-origin: top;
   }
 
@@ -92,5 +282,11 @@ const {
       transform: scaleY(1);
       opacity: 0;
     }
+  }
+
+  /* Ken Burns default transition for img inside slides */
+  .hero-slide img {
+    object-fit: cover;
+    will-change: transform;
   }
 </style>
