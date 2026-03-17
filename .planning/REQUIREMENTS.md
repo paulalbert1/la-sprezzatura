@@ -138,7 +138,7 @@
 
 ### Document Storage (DOCS)
 
-- [ ] **DOCS-01**: COI documents, floor plans, and legal documents stored with private access (Vercel Blob with signed URLs, not public Sanity CDN) -- Phase 7
+- [x] **DOCS-01**: COI documents, floor plans, and legal documents stored with private access (Vercel Blob with signed URLs, not public Sanity CDN) -- Phase 7
 
 ## v3.0 Requirements (Business Operations & Go-Live -- Phases 9-10)
 
@@ -246,7 +246,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENGMT-02, PRJT-01, PRJT-02 | Phase 7 | Pending |
 | CONTR-01, CONTR-02, CONTR-05, CONTR-06, CONTR-07 | Phase 7 | Pending |
 | BLDG-01 | Phase 7 | Complete |
-| DOCS-01 | Phase 7 | Pending |
+| DOCS-01 | Phase 7 | Complete |
 | CONTR-03, CONTR-04 | Phase 8 | Pending |
 | BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Pending |
 | CVIS-01 | Phase 8 | Pending |

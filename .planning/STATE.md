@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-03-17T02:02:40.000Z"
-last_activity: 2026-03-16 -- completed 07-01 contractor schema, project extensions, GROQ queries
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-17T02:09:59.000Z"
+last_activity: 2026-03-17 -- completed 07-02 Vercel Blob storage, BlobFileInput, upload/serve API routes
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 12
-  completed_plans: 10
-  percent: 91
+  completed_plans: 11
+  percent: 92
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.5 Phase 7 (Schema Extensions, Multi-Role Auth, Document Storage) -- executing plan 1 of 3 complete
+**Current focus:** v2.5 Phase 7 (Schema Extensions, Multi-Role Auth, Document Storage) -- executing plan 2 of 3 complete
 
 ## Current Position
 
 Phase: 7 (v2.5 -- Schema Extensions, Multi-Role Auth, Document Storage)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: Executing
-Last activity: 2026-03-16 -- completed 07-01 contractor schema, project extensions, GROQ queries
+Last activity: 2026-03-17 -- completed 07-02 Vercel Blob storage, BlobFileInput, upload/serve API routes
 
 Progress: [█████████░] 91%
 
@@ -48,10 +48,10 @@ Progress: [█████████░] 91%
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
 | 06-portal-features | 5/5 complete | ~24min | ~5min |
-| 07-schema-extensions | 1/3 complete | ~4min | ~4min |
+| 07-schema-extensions | 2/3 complete | ~8min | ~4min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (6min), 06-03 (7min), 06-04 (?min), 06-05 (5min), 07-01 (4min)
+- Last 5 plans: 06-03 (7min), 06-04 (?min), 06-05 (5min), 07-01 (4min), 07-02 (4min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -95,6 +95,7 @@ Recent decisions affecting current work:
 - [07-01]: File string fields store Vercel Blob pathnames (BlobFileInput wired in Plan 02)
 - [07-01]: procurementItems field gated by engagement type hidden callback (previously ungated)
 - [07-01]: Contractor sidebar item placed after Clients in Studio navigation
+- [07-02]: Use @vercel/blob get() stream directly instead of re-fetching via downloadUrl -- cleaner API
 
 ### Pending Todos
 
@@ -111,6 +112,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T02:02:40Z
-Stopped at: Completed 07-01-PLAN.md
-Resume file: .planning/phases/07-schema-extensions-multi-role-auth-and-document-storage/07-02-PLAN.md
+Last session: 2026-03-17T02:09:59Z
+Stopped at: Completed 07-02-PLAN.md
+Resume file: .planning/phases/07-schema-extensions-multi-role-auth-and-document-storage/07-03-PLAN.md
