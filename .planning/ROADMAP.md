@@ -127,11 +127,12 @@ Plans:
   2. Liz can toggle a project between Residential and Commercial; commercial projects show building manager contact fields and a COI section in Sanity Studio, while residential projects hide them entirely
   3. A contractor receives a magic link email, clicks it, and lands on a session-gated page -- the session carries a role that prevents access to client portal routes, and vice versa
   4. COI documents, floor plans, and legal documents uploaded through Sanity Studio are stored in Vercel Blob with signed URLs; direct Blob URLs without a valid signature return an error
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: TBD
-- [ ] 07-02: TBD
+- [ ] 07-01-PLAN.md -- Contractor document type, project schema extensions (contractors[], buildingManager, COIs, legalDocs, floorPlans, isCommercial), engagement type field gating, GROQ queries
+- [ ] 07-02-PLAN.md -- Vercel Blob infrastructure (BlobFileInput Studio component, upload API route, authenticated serve proxy)
+- [ ] 07-03-PLAN.md -- Multi-role session upgrade, contractor magic link flow (login, verify, dashboard), SendWorkOrderAccess Studio action, role selection
 
 ### Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility
 **Goal**: Contractors can view their assigned project scope, floor plans, estimates, and notes through a branded portal; building managers can access COI documents, legal docs, and client contact info for commercial projects; and clients can see which contractors are assigned to their project with on-site schedule dates
@@ -190,7 +191,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 | 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Portal Features | v2.0 | 0/5 | Not started | - |
-| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/? | Not started | - |
+| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/? | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
 | 10. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
@@ -202,3 +203,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 *Restructured into v2.0/v2.5/v3.0: 2026-03-16*
 *Phase 5 plans created: 2026-03-16*
 *Phase 6 plans created: 2026-03-16*
+*Phase 7 plans created: 2026-03-16*
