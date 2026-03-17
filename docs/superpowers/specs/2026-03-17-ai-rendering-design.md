@@ -18,7 +18,7 @@ Built in la-sprezzatura for Liz as the first user, designed to be extractable to
 | API service layer for generation logic | Matches existing patterns (notifyClient, blob upload); keeps API key server-side; extractable to platform |
 | 1K resolution only | Sufficient for screen viewing; keeps cost (~$0.07/image) and storage manageable |
 | Vercel Blob for image storage | Already set up from Phase 7; signed URLs for access control |
-| Nano Banana 2 (gemini-3.1-flash-image-preview) | Pro-level quality at Flash speed; strong spatial/architectural understanding; up to 14 reference images |
+| Nano Banana 2 (Gemini image generation model) | Pro-level quality at Flash speed; strong spatial/architectural understanding; up to 14 reference images. Model ID may change — configured via `GEMINI_IMAGE_MODEL` env var, currently `gemini-3.1-flash-image-preview` |
 | Designer-only tool | Clients never see the generation process — only promoted Design Options |
 | Project-linked by default, scratchpad available | Most renderings are project-scoped; scratchpad for exploratory work |
 | Confidentiality notice adapts to isCommercial | Residential: "household" / Commercial: "organization" |
@@ -32,9 +32,9 @@ Container for a single generation workflow.
 | Field | Type | Description |
 |-------|------|-------------|
 | `project` | reference (project) | Linked project (null for scratchpad sessions) |
-| `designer` | reference (client) | Designer who created the session |
+| `sanityUserId` | string | Sanity user ID of the designer who created the session (from Studio auth context) |
 | `title` | string | User-given name, e.g. "Living Room Exploration" |
-| `status` | string enum | `draft` \| `generating` \| `complete` |
+| `status` | string enum | `draft` \| `generating` \| `complete` \| `error` |
 | `inputs` | object | See Inputs object below |
 | `conversation` | array of objects | `{ role, message, timestamp }` — refinement chat history |
 | `renderings` | array of renderingOutput | Embedded output objects |
@@ -55,8 +55,7 @@ Container for a single generation workflow.
 | Field | Type | Description |
 |-------|------|-------------|
 | `image` | string (Blob pathname) | Generated 1K image |
-| `prompt` | text | Exact prompt that produced this image |
-| `inputImages` | array of strings | Which input Blob pathnames were sent for this generation |
+| `prompt` | text | Exact prompt that produced this image (for reproducibility) |
 | `isPromoted` | boolean | Designer flagged as client-facing option |
 | `generatedAt` | datetime | |
 
@@ -69,7 +68,7 @@ Client-facing document created when a rendering is promoted.
 | `project` | reference (project) | |
 | `image` | string (Blob pathname) | Copied reference from renderingOutput (no image duplication) |
 | `caption` | text | Designer-written description for the client |
-| `reactions` | array of objects | `{ clientId, type: 'favorite', timestamp }` |
+| `favoritedBy` | array of strings | Client IDs who favorited this option |
 | `comments` | array of objects | `{ clientId, text, timestamp }` |
 | `sortOrder` | number | Gallery ordering |
 
@@ -79,14 +78,13 @@ Per-designer per-month usage tracking.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `designer` | reference (client) | |
+| `sanityUserId` | string | Sanity user ID of the designer |
 | `month` | string | e.g. "2026-03" |
 | `count` | number | Total generations this month |
-| `limit` | number | Monthly allocation |
-| `overageCount` | number | Generations beyond the limit |
+| `limit` | number | Monthly allocation (copied from siteSettings at month creation) |
 
-Designer document gets a new field:
-- `renderingAllocation` (number, default: 50) — monthly image generation limit
+The `siteSettings` singleton gets a new field:
+- `renderingAllocation` (number, default: 50) — monthly image generation limit for this instance
 
 ## API Routes
 
@@ -97,7 +95,7 @@ All routes use existing auth middleware. Studio-facing routes validate designer 
 Core generation endpoint.
 
 - **Input:** session ID, prompt text, selected input image IDs
-- **Process:** validate usage quota → fetch input images from Blob → base64 encode → call Gemini API (`gemini-3.1-flash-image-preview`, `responseModalities: ["IMAGE"]`, 1K resolution) → save output to Vercel Blob → update renderingSession document → increment renderingUsage
+- **Process:** validate usage quota → fetch input images from Blob → base64 encode → call Gemini API (`responseModalities: ["TEXT", "IMAGE"]`, 1K resolution) → save output image to Vercel Blob → update renderingSession document → increment renderingUsage
 - **Output:** generated image URL + updated session
 - **Error handling:** failed generations do not increment usage counter
 - **Auth:** designer session required
@@ -124,17 +122,17 @@ Promote a rendering to Design Options.
 
 Client favorites/comments on a design option.
 
-- **Input:** designOption ID, reaction type (`favorite` toggle) or comment text
-- **Process:** validate client session → append to reactions[] or comments[]
+- **Input:** designOption ID, action (`favorite` toggle or comment text)
+- **Process:** validate client session → verify client's `entityId` is linked to the designOption's project → toggle favoritedBy[] or append to comments[]
 - **Output:** updated designOption
-- **Auth:** client session required (existing portal auth)
+- **Auth:** client session required (existing portal auth) + project ownership check
 
 ### GET /api/rendering/usage
 
 Usage counter data for Studio UI.
 
 - **Input:** designer ID (from session)
-- **Output:** `{ count, limit, remaining, overageCount, month }`
+- **Output:** `{ count, limit, remaining, month }`
 - **Auth:** designer session required
 
 ## Sanity Studio Custom Tool
@@ -228,8 +226,7 @@ New section on the project detail page. Only visible when the project has promot
 
 - Persistent badge in rendering tool header: "12 / 50 remaining"
 - Color: green (>50%), amber (10-50%), red (<10%)
-- At 0 remaining: generation still allowed but shows warning: "You've exceeded your monthly allocation. Additional renderings will be billed at the overage rate."
-- Overage count tracked separately
+- At 0 remaining: hard stop, generation blocked. Message: "You've reached your monthly rendering limit. Contact Paul to increase your allocation."
 
 ### Server-Side Enforcement
 
@@ -239,19 +236,59 @@ New section on the project detail page. Only visible when the project has promot
 
 ### Billing
 
-- For now (Liz): allocation and overage rate are numbers in Sanity — billing is manual
-- Designed so a Stripe integration can read the same usage documents when the platform extracts
+- V1: hard cap at monthly limit. Liz's allocation is set in `siteSettings`. No overage billing — just a hard stop.
+- Future (platform extraction): add overage tracking, Stripe integration, per-designer billing against the same `renderingUsage` documents.
 
 ## Technical Notes
 
+### Designer Authentication
+
+Sanity Studio custom tools run in the browser with the designer already authenticated via Sanity's built-in auth. The rendering API routes need to verify these requests come from a legitimate Studio user.
+
+**Approach:** Shared secret between Studio and API routes (same pattern as the existing `blob-upload` and `send-work-order-access` routes, which trust Studio requests).
+
+- Studio tool sends requests to `/api/rendering/*` with a `x-studio-token` header containing a secret shared via environment variable (`STUDIO_API_SECRET`)
+- API routes validate the token before processing
+- The Sanity user ID is passed in the request body (Studio tool reads it from `useCurrentUser()` hook) and stored on documents as `sanityUserId`
+- Client-facing routes (`/api/rendering/react`) use the existing portal session auth — no change needed
+
+This is adequate for V1 (single-tenant, Liz is the only Studio user). For multi-tenant extraction, replace with per-designer API tokens or Sanity's auth token forwarding.
+
+### Schema Registration
+
+Three new document types (`renderingSession`, `designOption`, `renderingUsage`) must be:
+- Added to `src/sanity/schemas/index.ts` in the `schemaTypes` export
+- Hidden from the default document list in `structureTool` configuration (managed exclusively through the custom tool, not browsable in the sidebar)
+
+The custom tool is registered in `sanity.config.ts` via the `tools` array on `defineConfig`, after `structureTool` and `presentationTool`. It appears in the Studio top nav bar.
+
 ### Gemini API Integration
 
-- Model: `gemini-3.1-flash-image-preview`
+- Model: configurable via `GEMINI_IMAGE_MODEL` env var, default `gemini-3.1-flash-image-preview` (Nano Banana 2). If model ID changes or a fallback is needed, only the env var needs updating.
 - Auth: `GEMINI_API_KEY` environment variable, server-side only
-- Request: `generateContent` with `responseModalities: ["TEXT", "IMAGE"]`, `imageConfig: { aspectRatio: "16:9", imageSize: "1K" }`
+- Request: `generateContent` with `responseModalities: ["TEXT", "IMAGE"]`, `imageConfig: { imageSize: "1K" }`
+- Aspect ratio: 16:9 default for V1 (deliberate simplification — interior room views are predominantly landscape). Future enhancement: add aspect ratio selector to wizard.
 - Input images: base64-encoded inline data (PNG/JPEG/WebP)
-- Output: base64-encoded image in response, decoded and uploaded to Vercel Blob
+- Output: response may include both text and image parts. Parser extracts the image part (base64 `inline_data`), decodes it, uploads to Vercel Blob. Text part (if any) is stored in the conversation history for context.
 - Multi-turn: conversation history sent as alternating user/model content parts
+
+### Timeout & Error Handling
+
+Image generation can take 10-30 seconds. Vercel serverless functions have a default 10s timeout (Hobby) or 60s (Pro).
+
+**Approach:** Polling pattern.
+
+1. Client (Studio tool) calls `POST /api/rendering/generate`
+2. API route validates inputs and usage, sets `renderingSession.status` to `generating`, enqueues the Gemini call, and returns immediately with `{ status: "generating", sessionId }`
+3. The Gemini call runs in a background-compatible way (Vercel `waitUntil` from `@vercel/functions` to extend execution after response)
+4. Studio tool polls `GET /api/rendering/status?sessionId=X` every 2 seconds until status flips to `complete` or `error`
+5. On success: status becomes `complete`, new rendering is appended to session
+6. On error: status becomes `error` with message. Usage counter is not incremented.
+
+**Error cases:**
+- Gemini content policy rejection → store error message, surface in Studio UI: "The AI couldn't generate this image. Try adjusting your prompt."
+- Gemini API timeout/5xx → store error, allow retry without counting against usage
+- Rate limit (429) → surface "Generation service is busy. Please try again in a moment."
 
 ### Extractability
 
