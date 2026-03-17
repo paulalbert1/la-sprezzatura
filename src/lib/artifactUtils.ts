@@ -21,12 +21,34 @@ export type DecisionLogEntry = {
     | "changes-requested"
     | "note-added"
     | "version-uploaded"
-    | "notification-sent";
+    | "notification-sent"
+    | "tier-selected";
   versionKey?: string;
   clientId?: string;
   clientName?: string;
   feedback?: string;
   timestamp: string;
+};
+
+// Phase 9: Investment Summary types
+export type InvestmentLineItem = {
+  _key: string;
+  name: string;
+  price: number; // integer cents
+};
+
+export type InvestmentTier = {
+  _key: string;
+  name: string;
+  description?: string;
+  lineItems: InvestmentLineItem[];
+};
+
+export type InvestmentSummary = {
+  tiers: InvestmentTier[];
+  selectedTierKey?: string;
+  eagerness?: number;
+  reservations?: string;
 };
 
 export type Artifact = {
@@ -48,6 +70,7 @@ export type Artifact = {
     sentAt: string;
     recipientEmail: string;
   }>;
+  investmentSummary?: InvestmentSummary;
 };
 
 export const ARTIFACT_TYPES = [

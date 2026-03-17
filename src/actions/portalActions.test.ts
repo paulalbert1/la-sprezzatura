@@ -185,123 +185,124 @@ describe("warrantyClaimSchema", () => {
   });
 });
 
-// TODO: Uncomment after Task 1 adds selectTierSchema export
-// import { selectTierSchema } from "./portalSchemas";
-//
-// describe("selectTier schema (Phase 9)", () => {
-//   it("accepts valid tier selection with all fields", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "4",
-//       reservations: "Some concerns about timeline",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(true);
-//   });
-//
-//   it("coerces eagerness from string to number", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "3",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(true);
-//     if (result.success) {
-//       expect(result.data.eagerness).toBe(3);
-//     }
-//   });
-//
-//   it("rejects eagerness below 1", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "0",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("rejects eagerness above 5", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "6",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("rejects non-integer eagerness", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "3.5",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it('rejects confirmed="false" (only "true" accepted)', () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "4",
-//       confirmed: "false",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("rejects missing confirmed field", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "4",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("rejects empty projectId", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "4",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("rejects empty tierKey", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "",
-//       eagerness: "4",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(false);
-//   });
-//
-//   it("allows reservations to be omitted (optional)", () => {
-//     const result = selectTierSchema.safeParse({
-//       projectId: "proj1",
-//       artifactKey: "art1",
-//       tierKey: "tier1",
-//       eagerness: "5",
-//       confirmed: "true",
-//     });
-//     expect(result.success).toBe(true);
-//     if (result.success) {
-//       expect(result.data.reservations).toBeUndefined();
-//     }
-//   });
-// });
+import {
+  selectTierSchema,
+} from "./portalSchemas";
+
+describe("selectTier schema (Phase 9)", () => {
+  it("accepts valid tier selection with all fields", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "4",
+      reservations: "Some concerns about timeline",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("coerces eagerness from string to number", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "3",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.eagerness).toBe(3);
+    }
+  });
+
+  it("rejects eagerness below 1", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "0",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects eagerness above 5", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "6",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects non-integer eagerness", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "3.5",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects confirmed="false" (only "true" accepted)', () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "4",
+      confirmed: "false",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing confirmed field", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "4",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty projectId", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "4",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty tierKey", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "",
+      eagerness: "4",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("allows reservations to be omitted (optional)", () => {
+    const result = selectTierSchema.safeParse({
+      projectId: "proj1",
+      artifactKey: "art1",
+      tierKey: "tier1",
+      eagerness: "5",
+      confirmed: "true",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.reservations).toBeUndefined();
+    }
+  });
+});

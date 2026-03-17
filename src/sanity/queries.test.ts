@@ -10,6 +10,7 @@ import {
   PROJECTS_BY_BUILDING_MANAGER_QUERY,
   PROJECT_DETAIL_QUERY,
   SITE_SETTINGS_QUERY,
+  SEND_UPDATE_PROJECT_QUERY,
 } from "./queries";
 
 describe("GROQ query strings", () => {
@@ -183,49 +184,48 @@ describe("GROQ query strings", () => {
     });
   });
 
-  // TODO: Uncomment after Task 1 adds SEND_UPDATE_PROJECT_QUERY export
   // Phase 9: Send Update Query
-  // describe("SEND_UPDATE_PROJECT_QUERY", () => {
-  //   it("filters by project type and projectId parameter", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain('_type == "project"');
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("_id == $projectId");
-  //   });
-  //
-  //   it("includes client references with name and email", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("clients[]");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("client->");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("name");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("email");
-  //   });
-  //
-  //   it("includes milestones with name, date, completed", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("milestones[]");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("date");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("completed");
-  //   });
-  //
-  //   it("uses select() for engagement-type-gated procurement", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("select(");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("full-interior-design");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("procurementItems");
-  //   });
-  //
-  //   it("computes savings from retailPrice - clientCost but does NOT expose clientCost directly", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain('"savings"');
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("retailPrice - clientCost");
-  //     const withoutSavings = SEND_UPDATE_PROJECT_QUERY.replace(/retailPrice\s*-\s*clientCost/, "");
-  //     expect(withoutSavings).not.toContain("clientCost");
-  //   });
-  //
-  //   it("includes artifacts with _key, artifactType, hasApproval", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("artifacts[]");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("artifactType");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("hasApproval");
-  //   });
-  //
-  //   it("includes lastUpdateSentAt from updateLog", () => {
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("lastUpdateSentAt");
-  //     expect(SEND_UPDATE_PROJECT_QUERY).toContain("updateLog");
-  //   });
-  // });
+  describe("SEND_UPDATE_PROJECT_QUERY", () => {
+    it("filters by project type and projectId parameter", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain('_type == "project"');
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("_id == $projectId");
+    });
+
+    it("includes client references with name and email", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("clients[]");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("client->");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("name");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("email");
+    });
+
+    it("includes milestones with name, date, completed", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("milestones[]");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("date");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("completed");
+    });
+
+    it("uses select() for engagement-type-gated procurement", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("select(");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("full-interior-design");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("procurementItems");
+    });
+
+    it("computes savings from retailPrice - clientCost but does NOT expose clientCost directly", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain('"savings"');
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("retailPrice - clientCost");
+      const withoutSavings = SEND_UPDATE_PROJECT_QUERY.replace(/retailPrice\s*-\s*clientCost/, "");
+      expect(withoutSavings).not.toContain("clientCost");
+    });
+
+    it("includes artifacts with _key, artifactType, hasApproval", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("artifacts[]");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("artifactType");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("hasApproval");
+    });
+
+    it("includes lastUpdateSentAt from updateLog", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("lastUpdateSentAt");
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("updateLog");
+    });
+  });
 });

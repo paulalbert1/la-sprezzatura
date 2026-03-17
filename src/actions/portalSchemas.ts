@@ -37,3 +37,13 @@ export const contractorNoteSchema = z.object({
   assignmentKey: z.string().min(1),
   text: z.string().min(1, "Please enter a note").max(500, "Note must be 500 characters or less"),
 });
+
+// Phase 9: Tier selection schema for investment proposals
+export const selectTierSchema = z.object({
+  projectId: z.string().min(1),
+  artifactKey: z.string().min(1),
+  tierKey: z.string().min(1),
+  eagerness: z.coerce.number().int().min(1).max(5),
+  reservations: z.string().optional(),
+  confirmed: z.literal("true"),
+});

@@ -14,6 +14,7 @@ export const project = defineType({
     { name: "procurement", title: "Procurement" },
     { name: "contractors", title: "Contractors" },
     { name: "artifacts", title: "Artifacts" },
+    { name: "updates", title: "Updates" },
   ],
   fields: [
     defineField({
@@ -922,6 +923,76 @@ export const project = defineType({
                 }),
               ],
             }),
+            // Phase 9: Investment Summary (proposal artifacts only)
+            defineField({
+              name: "investmentSummary",
+              title: "Investment Summary",
+              type: "object",
+              hidden: ({ parent }) => parent?.artifactType !== "proposal",
+              fields: [
+                defineField({
+                  name: "tiers",
+                  title: "Tiers",
+                  type: "array",
+                  of: [
+                    defineArrayMember({
+                      type: "object",
+                      fields: [
+                        defineField({ name: "name", title: "Tier Name", type: "string", validation: (r) => r.required() }),
+                        defineField({ name: "description", title: "Description", type: "text", rows: 2 }),
+                        defineField({
+                          name: "lineItems",
+                          title: "Line Items",
+                          type: "array",
+                          of: [
+                            defineArrayMember({
+                              type: "object",
+                              fields: [
+                                defineField({ name: "name", title: "Item", type: "string", validation: (r) => r.required() }),
+                                defineField({ name: "price", title: "Price (cents)", type: "number", validation: (r) => r.integer().min(0) }),
+                              ],
+                              preview: {
+                                select: { title: "name", subtitle: "price" },
+                                prepare: ({ title, subtitle }) => ({
+                                  title: title || "Untitled item",
+                                  subtitle: subtitle != null ? `$${(subtitle / 100).toFixed(2)}` : "$0.00",
+                                }),
+                              },
+                            }),
+                          ],
+                        }),
+                      ],
+                      preview: {
+                        select: { title: "name", items: "lineItems" },
+                        prepare: ({ title, items }) => ({
+                          title: title || "Untitled tier",
+                          subtitle: `${items?.length || 0} items`,
+                        }),
+                      },
+                    }),
+                  ],
+                }),
+                defineField({
+                  name: "selectedTierKey",
+                  title: "Selected Tier",
+                  type: "string",
+                  readOnly: true,
+                  description: "Set when client selects a tier. Clear to allow re-selection.",
+                }),
+                defineField({
+                  name: "eagerness",
+                  title: "Eagerness Rating",
+                  type: "number",
+                  readOnly: true,
+                }),
+                defineField({
+                  name: "reservations",
+                  title: "Reservations",
+                  type: "text",
+                  readOnly: true,
+                }),
+              ],
+            }),
           ],
           preview: {
             select: { title: "artifactType", subtitle: "customTypeName" },
@@ -932,6 +1003,38 @@ export const project = defineType({
                   ? title.charAt(0).toUpperCase() +
                     title.slice(1).replace(/-/g, " ")
                   : "Untitled artifact"),
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 9: Update Log
+    defineField({
+      name: "updateLog",
+      title: "Sent Updates",
+      type: "array",
+      group: "updates",
+      readOnly: true,
+      description: "Log of project updates sent to clients",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({ name: "sentAt", title: "Sent At", type: "datetime" }),
+            defineField({ name: "recipientEmails", title: "Recipients", type: "string" }),
+            defineField({ name: "note", title: "Personal Note", type: "text" }),
+            defineField({
+              name: "sectionsIncluded",
+              title: "Sections Included",
+              type: "array",
+              of: [{ type: "string" }],
+            }),
+          ],
+          preview: {
+            select: { subtitle: "sentAt", recipientEmails: "recipientEmails" },
+            prepare: ({ subtitle, recipientEmails }) => ({
+              title: recipientEmails || "Update sent",
+              subtitle: subtitle ? new Date(subtitle).toLocaleString() : "No date",
             }),
           },
         }),

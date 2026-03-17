@@ -469,3 +469,35 @@ export const SITE_SETTINGS_QUERY = `
 export async function getSiteContactInfo() {
   return sanityClient.fetch(SITE_SETTINGS_QUERY);
 }
+
+// -- Phase 9: Send Update Query --
+
+// GROQ: Full project snapshot for Send Update email
+// IMPORTANT: clientCost is NEVER included -- only used to compute savings server-side.
+export const SEND_UPDATE_PROJECT_QUERY = `
+  *[_type == "project" && _id == $projectId][0] {
+    _id,
+    title,
+    engagementType,
+    clients[] { client-> { _id, name, email } },
+    milestones[] | order(date asc) {
+      name, date, completed
+    },
+    select(engagementType == "full-interior-design" => {
+      "procurementItems": procurementItems[] {
+        name, status, installDate, retailPrice,
+        "savings": retailPrice - clientCost
+      }
+    }),
+    artifacts[] {
+      _key, artifactType, customTypeName,
+      currentVersionKey,
+      "hasApproval": count(decisionLog[action == "approved"]) > 0
+    },
+    "lastUpdateSentAt": updateLog | order(sentAt desc) [0].sentAt
+  }
+`;
+
+export async function getProjectForSendUpdate(projectId: string) {
+  return sanityClient.fetch(SEND_UPDATE_PROJECT_QUERY, { projectId });
+}
