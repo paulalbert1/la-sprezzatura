@@ -11,6 +11,7 @@ export const project = defineType({
     { name: "portal", title: "Client Portal" },
     { name: "milestones", title: "Milestones" },
     { name: "procurement", title: "Procurement" },
+    { name: "contractors", title: "Contractors" },
     { name: "artifacts", title: "Artifacts" },
   ],
   fields: [
@@ -167,6 +168,14 @@ export const project = defineType({
       type: "number",
       group: "content",
       description: "Lower numbers appear first",
+    }),
+    // Phase 7: Commercial toggle
+    defineField({
+      name: "isCommercial",
+      title: "Commercial Project",
+      type: "boolean",
+      group: "content",
+      initialValue: false,
     }),
     // Phase 3: Pipeline stage and client portal fields
     defineField({
@@ -377,6 +386,8 @@ export const project = defineType({
       title: "Procurement Items",
       type: "array",
       group: "procurement",
+      hidden: ({ document }) =>
+        document?.engagementType !== "full-interior-design",
       of: [
         defineArrayMember({
           type: "object",
@@ -438,6 +449,217 @@ export const project = defineType({
                 ? subtitle.charAt(0).toUpperCase() + subtitle.slice(1)
                 : "No status",
             }),
+          },
+        }),
+      ],
+    }),
+    // Phase 7: Contractors inline array (Full Interior Design only)
+    defineField({
+      name: "contractors",
+      title: "Contractors",
+      type: "array",
+      group: "contractors",
+      hidden: ({ document }) =>
+        document?.engagementType !== "full-interior-design",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "contractor",
+              title: "Contractor",
+              type: "reference",
+              to: [{ type: "contractor" }],
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "estimateFile",
+              title: "Estimate File",
+              type: "string",
+              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+            }),
+            defineField({
+              name: "estimateAmount",
+              title: "Estimate Amount",
+              type: "number",
+              validation: (r) => r.integer().min(0),
+              description: "Amount in cents (e.g., 150000 = $1,500.00)",
+            }),
+            defineField({
+              name: "scopeOfWork",
+              title: "Scope of Work",
+              type: "array",
+              of: [{ type: "block" }],
+            }),
+            defineField({
+              name: "startDate",
+              title: "Start Date",
+              type: "date",
+            }),
+            defineField({
+              name: "endDate",
+              title: "End Date",
+              type: "date",
+            }),
+            defineField({
+              name: "internalNotes",
+              title: "Internal Notes",
+              type: "text",
+              rows: 3,
+              description: "For Liz only -- never visible to contractor",
+            }),
+          ],
+          preview: {
+            select: { title: "contractor.name", subtitle: "contractor.company" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Select contractor",
+              subtitle: subtitle || "",
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 7: Floor Plans (Full Interior Design only)
+    defineField({
+      name: "floorPlans",
+      title: "Floor Plans",
+      type: "array",
+      group: "contractors",
+      hidden: ({ document }) =>
+        document?.engagementType !== "full-interior-design",
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "planName",
+              title: "Plan Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "file",
+              title: "File",
+              type: "string",
+              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+            }),
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "text",
+              rows: 2,
+            }),
+          ],
+          preview: {
+            select: { title: "planName" },
+          },
+        }),
+      ],
+    }),
+    // Phase 7: Building Manager (Commercial only)
+    defineField({
+      name: "buildingManager",
+      title: "Building Manager",
+      type: "object",
+      group: "portal",
+      hidden: ({ document }) => !document?.isCommercial,
+      fields: [
+        defineField({ name: "name", title: "Name", type: "string" }),
+        defineField({ name: "email", title: "Email", type: "string" }),
+        defineField({ name: "phone", title: "Phone", type: "string" }),
+      ],
+    }),
+    // Phase 7: Certificates of Insurance (Commercial only)
+    defineField({
+      name: "cois",
+      title: "Certificates of Insurance",
+      type: "array",
+      group: "portal",
+      hidden: ({ document }) => !document?.isCommercial,
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "issuerName",
+              title: "Issuer Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "file",
+              title: "File",
+              type: "string",
+              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+            }),
+            defineField({
+              name: "expirationDate",
+              title: "Expiration Date",
+              type: "date",
+            }),
+            defineField({
+              name: "coverageType",
+              title: "Coverage Type",
+              type: "string",
+              options: {
+                list: [
+                  { title: "General Liability", value: "general-liability" },
+                  { title: "Workers Comp", value: "workers-comp" },
+                  { title: "Professional Liability", value: "professional-liability" },
+                  { title: "Other", value: "other" },
+                ],
+              },
+            }),
+            defineField({
+              name: "policyNumber",
+              title: "Policy Number",
+              type: "string",
+            }),
+          ],
+          preview: {
+            select: { title: "issuerName", subtitle: "coverageType" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Untitled COI",
+              subtitle: subtitle
+                ? subtitle.charAt(0).toUpperCase() + subtitle.slice(1).replace(/-/g, " ")
+                : "",
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 7: Legal Documents (Commercial only)
+    defineField({
+      name: "legalDocs",
+      title: "Legal Documents",
+      type: "array",
+      group: "portal",
+      hidden: ({ document }) => !document?.isCommercial,
+      of: [
+        defineArrayMember({
+          type: "object",
+          fields: [
+            defineField({
+              name: "documentName",
+              title: "Document Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "file",
+              title: "File",
+              type: "string",
+              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+            }),
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "text",
+              rows: 2,
+            }),
+          ],
+          preview: {
+            select: { title: "documentName" },
           },
         }),
       ],

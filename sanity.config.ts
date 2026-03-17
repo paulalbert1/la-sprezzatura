@@ -30,6 +30,8 @@ export default defineConfig({
             S.documentTypeListItem("project").title("Portfolio Projects"),
             // Clients
             S.documentTypeListItem("client").title("Clients"),
+            // Contractors
+            S.documentTypeListItem("contractor").title("Contractors"),
             // Services
             S.documentTypeListItem("service").title("Services"),
           ]),
