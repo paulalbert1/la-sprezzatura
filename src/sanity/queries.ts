@@ -512,3 +512,114 @@ export const SEND_UPDATE_PROJECT_QUERY = `
 export async function getProjectForSendUpdate(projectId: string) {
   return sanityClient.fetch(SEND_UPDATE_PROJECT_QUERY, { projectId });
 }
+
+// -- Phase 10: Rendering Queries --
+
+// GROQ: Rendering session by ID (for status polling and API routes)
+export const RENDERING_SESSION_BY_ID_QUERY = `
+  *[_type == "renderingSession" && _id == $sessionId][0] {
+    _id,
+    sessionTitle,
+    project-> { _id, title },
+    aspectRatio,
+    stylePreset,
+    description,
+    status,
+    lastError,
+    createdBy,
+    createdAt,
+    images[] {
+      _key,
+      blobPathname,
+      imageType,
+      location,
+      notes,
+      copyExact
+    },
+    renderings[] {
+      _key,
+      blobPathname,
+      prompt,
+      textResponse,
+      isPromoted,
+      generatedAt,
+      status,
+      errorMessage,
+      modelId,
+      latencyMs,
+      inputTokens,
+      outputTokens,
+      costEstimate,
+      bytesStored
+    },
+    conversation[] {
+      _key,
+      role,
+      text,
+      image,
+      timestamp
+    }
+  }
+`;
+
+// GROQ: Rendering sessions by project (for Studio tool session list)
+export const RENDERING_SESSIONS_BY_PROJECT_QUERY = `
+  *[_type == "renderingSession" && project._ref == $projectId] | order(createdAt desc) {
+    _id,
+    sessionTitle,
+    status,
+    createdAt,
+    "renderingCount": count(renderings)
+  }
+`;
+
+// GROQ: All rendering sessions by creator (for Studio tool -- includes scratchpad)
+export const RENDERING_SESSIONS_BY_CREATOR_QUERY = `
+  *[_type == "renderingSession" && createdBy == $sanityUserId] | order(createdAt desc) {
+    _id,
+    sessionTitle,
+    project-> { _id, title },
+    status,
+    createdAt,
+    "renderingCount": count(renderings)
+  }
+`;
+
+// GROQ: Design options by project (for client portal gallery)
+export const DESIGN_OPTIONS_BY_PROJECT_QUERY = `
+  *[_type == "designOption" && project._ref == $projectId] | order(sortOrder asc) {
+    _id,
+    blobPathname,
+    caption,
+    sortOrder,
+    promotedAt,
+    reactions[] {
+      _key,
+      clientId,
+      type,
+      text,
+      createdAt
+    }
+  }
+`;
+
+// GROQ: Usage by designer and month
+export const RENDERING_USAGE_QUERY = `
+  *[_type == "renderingUsage" && _id == $docId][0] {
+    _id,
+    sanityUserId,
+    month,
+    count,
+    limit,
+    bytesStored
+  }
+`;
+
+// GROQ: Rendering allocation from siteSettings
+export const RENDERING_SETTINGS_QUERY = `
+  *[_type == "siteSettings"][0] {
+    renderingAllocation,
+    renderingImageTypes,
+    renderingExcludedUsers
+  }
+`;
