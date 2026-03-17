@@ -52,9 +52,11 @@ describe("session module", () => {
   });
 
   it("createSession stores JSON with entityId and role in Redis", () => {
-    // Should use JSON.stringify({ entityId, role })
+    // Should use JSON.stringify to store session data
     expect(sessionSource).toContain("JSON.stringify");
-    expect(sessionSource).toMatch(/JSON\.stringify\(\s*\{\s*entityId/);
+    // SessionData must contain entityId and role
+    expect(sessionSource).toContain("sessionData: SessionData");
+    expect(sessionSource).toContain("JSON.stringify(sessionData)");
   });
 
   it("getSession returns SessionData | null", () => {

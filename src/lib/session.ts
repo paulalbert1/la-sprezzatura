@@ -6,16 +6,30 @@ const COOKIE_NAME = "portal_session";
 const SESSION_TTL = 2592000; // 30 days in seconds
 
 /**
- * Create a new session for a client.
- * Generates a random session token, stores clientId in Redis with 30-day TTL,
- * and sets an httpOnly cookie on the response.
+ * Session data stored in Redis for authenticated users.
+ * Supports multiple roles: client, contractor, building_manager.
+ */
+export interface SessionData {
+  entityId: string;
+  role: 'client' | 'contractor' | 'building_manager';
+}
+
+/**
+ * Create a new session for an authenticated user.
+ * Generates a random session token, stores JSON { entityId, role } in Redis
+ * with 30-day TTL, and sets an httpOnly cookie on the response.
+ *
+ * The role parameter defaults to 'client' for backward compatibility with
+ * existing call sites (e.g., portal/verify.astro).
  */
 export async function createSession(
   cookies: AstroCookies,
-  clientId: string,
+  entityId: string,
+  role: SessionData['role'] = 'client',
 ): Promise<string> {
   const sessionToken = generatePortalToken(32);
-  await redis.set(`session:${sessionToken}`, clientId, { ex: SESSION_TTL });
+  const sessionData: SessionData = { entityId, role };
+  await redis.set(`session:${sessionToken}`, JSON.stringify(sessionData), { ex: SESSION_TTL });
 
   cookies.set(COOKIE_NAME, sessionToken, {
     path: "/",
@@ -30,22 +44,37 @@ export async function createSession(
 
 /**
  * Validate the current session cookie.
- * Returns the clientId if session is valid, null otherwise.
+ * Returns SessionData if session is valid, null otherwise.
+ *
+ * Backward compatibility: if Redis value is a plain string (legacy format
+ * from before multi-role upgrade), treat as a client session with
+ * { entityId: value, role: 'client' }.
  */
 export async function getSession(
   cookies: AstroCookies,
-): Promise<string | null> {
+): Promise<SessionData | null> {
   const sessionToken = cookies.get(COOKIE_NAME)?.value;
   if (!sessionToken) return null;
 
-  const clientId = await redis.get<string>(`session:${sessionToken}`);
-  if (!clientId) {
+  const raw = await redis.get<string>(`session:${sessionToken}`);
+  if (!raw) {
     // Session expired or invalid -- clean up cookie
     cookies.delete(COOKIE_NAME, { path: "/" });
     return null;
   }
 
-  return clientId;
+  // Try parsing as JSON (new format)
+  try {
+    if (typeof raw === 'string' && raw.startsWith('{')) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.entityId && parsed?.role) return parsed as SessionData;
+    }
+  } catch {
+    /* fall through to legacy handling */
+  }
+
+  // Legacy session: plain string is a clientId -- backward compat
+  return { entityId: raw as string, role: 'client' };
 }
 
 /**
