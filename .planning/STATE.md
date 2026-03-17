@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.5
-milestone_name: Contractor & Building Manager Portals
-status: in-progress
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-03-17T11:58:36.000Z"
-last_activity: 2026-03-17 -- completed 08-01 data layer, auth, and actions
+milestone: v2.0
+milestone_name: Client Portal Foundation
+status: executing
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-03-17T12:06:02.532Z"
+last_activity: 2026-03-17 -- completed 08-02 contractor work order detail page, dashboard, and ContractorNoteForm
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
   percent: 93
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.5 Phase 8 (Contractor Portal, Building Manager Portal, Client Visibility) -- executing plan 1 of 3 complete
+**Current focus:** v2.5 Phase 8 (Contractor Portal, Building Manager Portal, Client Visibility) -- executing plan 2 of 3 complete
 
 ## Current Position
 
 Phase: 8 (v2.5 -- Contractor Portal, Building Manager Portal, Client Visibility)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In Progress
-Last activity: 2026-03-17 -- completed 08-01 data layer, auth, and actions
+Last activity: 2026-03-17 -- completed 08-02 contractor work order detail page, dashboard, and ContractorNoteForm
 
 Progress: [█████████░] 93%
 
@@ -57,6 +57,7 @@ Progress: [█████████░] 93%
 
 *Updated after each plan completion*
 | Phase 08 P01 | 8min | 2 tasks | 14 files |
+| Phase 08 P02 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,7 @@ Recent decisions affecting current work:
 - [08-01]: CVIS-01 contractor appointments exclude notes field -- clients see date/label only (information boundary)
 - [08-01]: submitContractorNote uses patch insert after submissionNotes[-1] pattern (matches milestone/artifact note patterns)
 - [08-01]: Building manager magic link stores email as entityId for session creation
+- [Phase 08]: Removed StatusBadge/STAGE_META from contractor dashboard -- pipeline stage not shown to contractors per information boundary
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:58:36.000Z
-Stopped at: Completed 08-01-PLAN.md
-Resume file: .planning/phases/08-contractor-portal-building-manager-and-client-visibility/08-02-PLAN.md
+Last session: 2026-03-17T12:06:02.530Z
+Stopped at: Completed 08-02-PLAN.md
+Resume file: None
