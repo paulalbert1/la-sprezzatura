@@ -4,6 +4,9 @@ export const siteSettings = defineType({
   name: "siteSettings",
   title: "Site Settings",
   type: "document",
+  groups: [
+    { name: "rendering", title: "Rendering" },
+  ],
   fields: [
     defineField({
       name: "siteTitle",
@@ -71,6 +74,42 @@ export const siteSettings = defineType({
           },
         }),
       ],
+    }),
+    // Phase 10: Rendering configuration
+    defineField({
+      name: "renderingAllocation",
+      title: "Monthly Rendering Limit",
+      type: "number",
+      group: "rendering",
+      description: "Maximum AI renderings per designer per month",
+      initialValue: 50,
+      validation: (r) => r.integer().min(1),
+    }),
+    defineField({
+      name: "renderingImageTypes",
+      title: "Image Types",
+      type: "array",
+      group: "rendering",
+      description:
+        "Configurable dropdown options for rendering input image classification",
+      initialValue: [
+        "Floor Plan",
+        "Existing Space Photo",
+        "Inspiration",
+        "Material/Finish Sample",
+        "Furniture Reference",
+        "Fixture Reference",
+        "Custom",
+      ],
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "renderingExcludedUsers",
+      title: "Excluded Users",
+      type: "array",
+      group: "rendering",
+      description: "Sanity user IDs excluded from rendering access",
+      of: [{ type: "string" }],
     }),
   ],
 });

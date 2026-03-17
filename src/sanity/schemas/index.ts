@@ -1,7 +1,10 @@
 import { client } from "./client";
 import { contractor } from "./contractor";
+import { designOption } from "./designOption";
 import { project } from "./project";
+import { renderingSession } from "./renderingSession";
+import { renderingUsage } from "./renderingUsage";
 import { service } from "./service";
 import { siteSettings } from "./siteSettings";
 
-export const schemaTypes = [client, contractor, project, service, siteSettings];
+export const schemaTypes = [client, contractor, designOption, project, renderingSession, renderingUsage, service, siteSettings];
