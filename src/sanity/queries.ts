@@ -280,6 +280,17 @@ export const PROJECT_DETAIL_QUERY = `
         _key,
         sentAt,
         recipientEmail
+      },
+      investmentSummary {
+        tiers[] {
+          _key, name, description,
+          lineItems[] {
+            _key, name, price
+          }
+        },
+        selectedTierKey,
+        eagerness,
+        reservations
       }
     }
   }

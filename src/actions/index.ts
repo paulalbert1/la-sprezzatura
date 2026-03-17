@@ -13,6 +13,7 @@ import {
   artifactNoteSchema,
   warrantyClaimSchema,
   contractorNoteSchema,
+  selectTierSchema,
 } from "./portalSchemas";
 
 export { warrantyClaimSchema };
@@ -509,6 +510,43 @@ export const server = {
       await sanityWriteClient
         .patch(input.projectId)
         .insert("after", "artifacts[-1]", [artifactData])
+        .commit({ autoGenerateArrayKeys: true });
+
+      return { success: true };
+    },
+  }),
+
+  selectTier: defineAction({
+    accept: "form",
+    input: selectTierSchema,
+    handler: async (input, context) => {
+      const clientId = context.locals.clientId;
+      if (!clientId) throw new ActionError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+
+      const client = await getClientById(clientId);
+
+      // Fetch the tier name for the decision log
+      const resolvedTierName = await sanityWriteClient.fetch(
+        `*[_type == "project" && _id == $projectId][0].artifacts[_key == $artifactKey][0].investmentSummary.tiers[_key == $tierKey][0].name`,
+        { projectId: input.projectId, artifactKey: input.artifactKey, tierKey: input.tierKey },
+      ) || "Selected tier";
+
+      // Set selectedTierKey, eagerness, reservations on the artifact's investmentSummary
+      await sanityWriteClient
+        .patch(input.projectId)
+        .set({
+          [`artifacts[_key == "${input.artifactKey}"].investmentSummary.selectedTierKey`]: input.tierKey,
+          [`artifacts[_key == "${input.artifactKey}"].investmentSummary.eagerness`]: input.eagerness,
+          [`artifacts[_key == "${input.artifactKey}"].investmentSummary.reservations`]: input.reservations || "",
+        })
+        .insert("after", `artifacts[_key == "${input.artifactKey}"].decisionLog[-1]`, [{
+          _key: generatePortalToken(8),
+          action: "tier-selected",
+          clientId,
+          clientName: client?.name || "Client",
+          feedback: `Selected tier: ${resolvedTierName}. Eagerness: ${input.eagerness}/5.${input.reservations ? ` Reservations: ${input.reservations}` : ""}`,
+          timestamp: new Date().toISOString(),
+        }])
         .commit({ autoGenerateArrayKeys: true });
 
       return { success: true };

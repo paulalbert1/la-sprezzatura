@@ -1,0 +1,88 @@
+---
+import type { InvestmentTier } from "../../lib/artifactUtils";
+import { formatCurrency } from "../../lib/formatCurrency";
+import TierSelectionForm from "./TierSelectionForm.tsx";
+
+interface Props {
+  tiers: InvestmentTier[];
+  selectedTierKey?: string;
+  eagerness?: number;
+  projectId: string;
+  artifactKey: string;
+  isCompleted: boolean;
+}
+
+const { tiers, selectedTierKey, eagerness, projectId, artifactKey, isCompleted } = Astro.props;
+
+const tierCount = tiers.length;
+const gridCols = tierCount <= 3 ? tierCount : 2;
+const selectedTierName = selectedTierKey
+  ? tiers.find((t) => t._key === selectedTierKey)?.name || "Selected tier"
+  : undefined;
+---
+
+<section class="mt-6">
+  <h3 class="font-heading text-xl font-light text-charcoal mb-6">Investment Summary</h3>
+
+  {tiers.length === 0 && (
+    <p class="text-sm text-stone font-body">Investment options are being prepared for your review.</p>
+  )}
+
+  {tiers.length > 0 && (
+    <div class:list={[
+      "grid gap-4 grid-cols-1",
+      gridCols === 2 && "md:grid-cols-2",
+      gridCols === 3 && "md:grid-cols-3",
+    ]}>
+      {tiers.map((tier) => {
+        const isSelected = selectedTierKey === tier._key;
+        const otherSelected = selectedTierKey && !isSelected;
+        const total = tier.lineItems.reduce((sum, item) => sum + (item.price || 0), 0);
+
+        return (
+          <div
+            class:list={[
+              "bg-cream-dark border border-stone-light/20 p-6",
+              isSelected && "border-l-4 border-l-terracotta",
+              otherSelected && "opacity-50",
+            ]}
+          >
+            <h4 class="font-heading text-lg font-light text-charcoal mb-2">{tier.name}</h4>
+            {tier.description && (
+              <p class="text-xs text-stone font-body mb-4">{tier.description}</p>
+            )}
+
+            <div class="space-y-2 mb-4">
+              {tier.lineItems.map((item) => (
+                <div class="flex items-baseline justify-between">
+                  <span class="text-xs text-charcoal font-body">{item.name}</span>
+                  <span class="text-xs text-charcoal font-body">{formatCurrency(item.price)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div class="border-t border-stone-light/20 pt-3 mt-3">
+              <div class="flex items-baseline justify-between">
+                <span class="text-xs text-stone uppercase tracking-widest font-body">Total</span>
+                <span class="text-lg font-heading font-light text-charcoal">{formatCurrency(total)}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+
+  {!selectedTierKey && !isCompleted && tiers.length > 0 && (
+    <TierSelectionForm
+      client:load
+      tiers={tiers.map((t) => ({ _key: t._key, name: t.name }))}
+      projectId={projectId}
+      artifactKey={artifactKey}
+    />
+  )}
+
+  {selectedTierKey && (
+    <p class="text-xs text-emerald-700 font-body mt-4">Tier selected: {selectedTierName}</p>
+  )}
+</section>
