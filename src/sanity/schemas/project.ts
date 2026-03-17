@@ -1,5 +1,6 @@
 import { defineType, defineField, defineArrayMember } from "sanity";
 import { generatePortalToken } from "../../lib/generateToken";
+import { BlobFileInput } from "../components/BlobFileInput";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 
 export const project = defineType({
@@ -476,7 +477,8 @@ export const project = defineType({
               name: "estimateFile",
               title: "Estimate File",
               type: "string",
-              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+              description: "Vercel Blob pathname",
+              components: { input: BlobFileInput },
             }),
             defineField({
               name: "estimateAmount",
@@ -541,7 +543,8 @@ export const project = defineType({
               name: "file",
               title: "File",
               type: "string",
-              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+              description: "Vercel Blob pathname",
+              components: { input: BlobFileInput },
             }),
             defineField({
               name: "description",
@@ -590,7 +593,8 @@ export const project = defineType({
               name: "file",
               title: "File",
               type: "string",
-              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+              description: "Vercel Blob pathname",
+              components: { input: BlobFileInput },
             }),
             defineField({
               name: "expirationDate",
@@ -649,7 +653,8 @@ export const project = defineType({
               name: "file",
               title: "File",
               type: "string",
-              description: "Vercel Blob pathname (BlobFileInput wired in Plan 02)",
+              description: "Vercel Blob pathname",
+              components: { input: BlobFileInput },
             }),
             defineField({
               name: "description",

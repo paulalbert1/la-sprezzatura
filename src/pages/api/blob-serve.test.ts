@@ -45,4 +45,8 @@ describe("blob-serve API route", () => {
   it("sets prerender to false", () => {
     expect(blobServeSource).toContain("export const prerender = false");
   });
+
+  it("passes access: private to blob get()", () => {
+    expect(blobServeSource).toContain('access: "private"');
+  });
 });

@@ -18,21 +18,18 @@ export const GET: APIRoute = async (context) => {
   try {
     // Fetch private blob using server-side token (BLOB_READ_WRITE_TOKEN env var)
     const { get } = await import("@vercel/blob");
-    const blob = await get(pathname);
+    const result = await get(pathname, { access: "private" });
 
-    if (!blob) {
+    if (!result) {
       return new Response("Not found", { status: 404 });
     }
 
-    // Stream the blob content to the client
-    const blobResponse = await fetch(blob.downloadUrl);
-    if (!blobResponse.ok) {
-      return new Response("Failed to fetch blob", { status: 502 });
-    }
+    // Use the stream directly from the get() result
+    const contentType = result.blob.contentType || "application/octet-stream";
 
-    return new Response(blobResponse.body, {
+    return new Response(result.stream, {
       headers: {
-        "Content-Type": blob.contentType || "application/octet-stream",
+        "Content-Type": contentType,
         "Content-Disposition": `inline; filename="${pathname.split("/").pop()}"`,
         "Cache-Control": "private, no-cache",
         "X-Content-Type-Options": "nosniff",
