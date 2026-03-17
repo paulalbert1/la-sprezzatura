@@ -109,23 +109,23 @@
 
 ### Engagement Type & Classification (ENGMT/PRJT)
 
-- [ ] **ENGMT-02**: Engagement type controls which Sanity Studio fields and portal features are visible per project -- Phase 7
-- [ ] **PRJT-01**: Liz can toggle a project between Residential and Commercial -- Phase 7
-- [ ] **PRJT-02**: Commercial projects show building manager fields and COI section in Sanity Studio; residential projects hide them -- Phase 7
+- [x] **ENGMT-02**: Engagement type controls which Sanity Studio fields and portal features are visible per project -- Phase 7
+- [x] **PRJT-01**: Liz can toggle a project between Residential and Commercial -- Phase 7
+- [x] **PRJT-02**: Commercial projects show building manager fields and COI section in Sanity Studio; residential projects hide them -- Phase 7
 
 ### Contractor Portal (CONTR)
 
-- [ ] **CONTR-01**: Liz can create contractor records in Sanity with name, email, phone, company, and trade -- Phase 7
+- [x] **CONTR-01**: Liz can create contractor records in Sanity with name, email, phone, company, and trade -- Phase 7
 - [ ] **CONTR-02**: Contractor receives a magic link email to access their portal view -- no password or account creation -- Phase 7
 - [ ] **CONTR-03**: Contractor portal shows floor plans, scope of work, deadline, notes, and next steps for assigned projects -- Phase 8
 - [ ] **CONTR-04**: Contractor sees client name and project address only -- no client email, phone, or contact info ("contact Liz" shown instead) -- Phase 8
-- [ ] **CONTR-05**: Liz uploads final estimate as PDF or inputs the dollar amount per contractor per project -- Phase 7
-- [ ] **CONTR-06**: Contractor portal is only available for Full Interior Design projects -- Phase 7
-- [ ] **CONTR-07**: Contractor can be assigned to multiple projects; a project can have multiple contractors -- Phase 7
+- [x] **CONTR-05**: Liz uploads final estimate as PDF or inputs the dollar amount per contractor per project -- Phase 7
+- [x] **CONTR-06**: Contractor portal is only available for Full Interior Design projects -- Phase 7
+- [x] **CONTR-07**: Contractor can be assigned to multiple projects; a project can have multiple contractors -- Phase 7
 
 ### Building Manager Portal (BLDG)
 
-- [ ] **BLDG-01**: Liz can add building manager contact info (name, email, phone) to commercial projects -- Phase 7
+- [x] **BLDG-01**: Liz can add building manager contact info (name, email, phone) to commercial projects -- Phase 7
 - [ ] **BLDG-02**: Building manager receives a magic link email to access their portal view -- Phase 8
 - [ ] **BLDG-03**: Building manager sees client name and contact info for the project -- Phase 8
 - [ ] **BLDG-04**: Building manager has a COI section showing certificates of insurance with expiration dates -- Phase 8
@@ -245,7 +245,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | ENGMT-02, PRJT-01, PRJT-02 | Phase 7 | Pending |
 | CONTR-01, CONTR-02, CONTR-05, CONTR-06, CONTR-07 | Phase 7 | Pending |
-| BLDG-01 | Phase 7 | Pending |
+| BLDG-01 | Phase 7 | Complete |
 | DOCS-01 | Phase 7 | Pending |
 | CONTR-03, CONTR-04 | Phase 8 | Pending |
 | BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Pending |

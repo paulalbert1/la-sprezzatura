@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Phase 7 UI-SPEC approved
-last_updated: "2026-03-17T01:12:53.336Z"
-last_activity: 2026-03-16 -- completed 06-05 post-project features (close document PDF, warranty claims with photo upload)
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-03-17T02:02:40.000Z"
+last_activity: 2026-03-16 -- completed 07-01 contractor schema, project extensions, GROQ queries
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
-  percent: 89
+  total_plans: 12
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.0 Phase 6 (Portal Features) -- executing plan 5 of 5
+**Current focus:** v2.5 Phase 7 (Schema Extensions, Multi-Role Auth, Document Storage) -- executing plan 1 of 3 complete
 
 ## Current Position
 
-Phase: 6 (v2.0 -- Portal Features)
-Plan: 5 of 5 complete
+Phase: 7 (v2.5 -- Schema Extensions, Multi-Role Auth, Document Storage)
+Plan: 1 of 3 complete
 Status: Executing
-Last activity: 2026-03-16 -- completed 06-05 post-project features (close document PDF, warranty claims with photo upload)
+Last activity: 2026-03-16 -- completed 07-01 contractor schema, project extensions, GROQ queries
 
-Progress: [█████████░] 89%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: ~10 min
-- Total execution time: ~2.1 hours
+- Total execution time: ~2.2 hours
 
 **By Phase:**
 
@@ -48,9 +48,10 @@ Progress: [█████████░] 89%
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
 | 06-portal-features | 5/5 complete | ~24min | ~5min |
+| 07-schema-extensions | 1/3 complete | ~4min | ~4min |
 
 **Recent Trend:**
-- Last 5 plans: 06-01 (6min), 06-02 (6min), 06-03 (7min), 06-04 (?min), 06-05 (5min)
+- Last 5 plans: 06-02 (6min), 06-03 (7min), 06-04 (?min), 06-05 (5min), 07-01 (4min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -91,6 +92,9 @@ Recent decisions affecting current work:
 - [06-05]: Photo upload to Sanity CDN via sanityWriteClient.assets.upload in warranty claim action
 - [Phase 06]: [06-04]: API route for notify-artifact instead of Astro Action -- Sanity Studio runs in browser context
 - [Phase 06]: [06-04]: Document actions appended to prev to preserve built-in Sanity actions (Publish, Delete, etc.)
+- [07-01]: File string fields store Vercel Blob pathnames (BlobFileInput wired in Plan 02)
+- [07-01]: procurementItems field gated by engagement type hidden callback (previously ungated)
+- [07-01]: Contractor sidebar item placed after Clients in Studio navigation
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T01:12:53.334Z
-Stopped at: Phase 7 UI-SPEC approved
-Resume file: .planning/phases/07-schema-extensions-multi-role-auth-and-document-storage/07-UI-SPEC.md
+Last session: 2026-03-17T02:02:40Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: .planning/phases/07-schema-extensions-multi-role-auth-and-document-storage/07-02-PLAN.md
