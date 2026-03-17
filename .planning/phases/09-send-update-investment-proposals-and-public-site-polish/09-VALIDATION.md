@@ -38,14 +38,14 @@ created: 2026-03-17
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 09-01-01 | 01 | 1 | SEND-01 | unit | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | ❌ W0 | ⬜ pending |
-| 09-01-02 | 01 | 1 | SEND-02 | unit | `npx vitest run src/sanity/queries.test.ts -t "send-update"` | ❌ W0 | ⬜ pending |
-| 09-01-03 | 01 | 1 | SEND-03 | unit | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | ❌ W0 | ⬜ pending |
-| 09-02-01 | 02 | 2 | ARTF-05 | unit | `npx vitest run src/lib/artifactUtils.test.ts -t "investment"` | ❌ W0 | ⬜ pending |
-| 09-02-02 | 02 | 2 | ARTF-06 | unit | `npx vitest run src/actions/portalActions.test.ts -t "selectTier"` | ❌ W0 | ⬜ pending |
-| 09-02-03 | 02 | 2 | ARTF-07 | unit | `npx vitest run src/actions/portalActions.test.ts -t "eagerness"` | ❌ W0 | ⬜ pending |
-| 09-03-01 | 03 | 3 | BOOK-01 | unit | `npx vitest run` (build passes without CalBooking) | N/A | ⬜ pending |
-| 09-03-02 | 03 | 3 | SITE-08 | manual | Manual: visit home page, observe character animation | N/A | ⬜ pending |
+| 09-01-01 | 01 | 1 | SEND-01 | unit (schema) | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | Extend existing | ⬜ pending |
+| 09-01-02 | 01 | 1 | SEND-02 | unit (query, HTML) | `npx vitest run src/sanity/queries.test.ts -t "send-update"` | Extend existing | ⬜ pending |
+| 09-01-03 | 01 | 1 | SEND-03 | unit (log entry) | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | Extend existing | ⬜ pending |
+| 09-02-01 | 02 | 1 | ARTF-05 | unit (schema, types) | `npx vitest run src/lib/artifactUtils.test.ts -t "investment"` | Extend existing | ⬜ pending |
+| 09-02-02 | 02 | 1 | ARTF-06 | unit (schema, action) | `npx vitest run src/actions/portalActions.test.ts -t "selectTier"` | Extend existing | ⬜ pending |
+| 09-02-03 | 02 | 1 | ARTF-07 | unit (schema) | `npx vitest run src/actions/portalActions.test.ts -t "eagerness"` | Extend existing | ⬜ pending |
+| 09-03-01 | 03 | 2 | BOOK-01 | unit (deletion) | `npx vitest run` (build passes without CalBooking) | N/A — deletion | ⬜ pending |
+| 09-03-02 | 03 | 2 | SITE-08 | manual-only | Manual: visit home page, observe character animation | N/A — visual | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -67,7 +67,7 @@ created: 2026-03-17
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Hero SplitText character animation plays on load | SITE-08 | Visual/animation behavior cannot be automated | Visit home page, observe "La Sprezzatura" text animates with character-level reveal ~0.8s, verify `prefers-reduced-motion: reduce` disables it |
+| Hero SplitText animation | SITE-08 | Visual/animation behavior cannot be asserted in unit tests | 1. Visit home page 2. Observe hero text animates in character-by-character with GSAP SplitText 3. Verify animation creates strong visual impression |
 
 ---
 
