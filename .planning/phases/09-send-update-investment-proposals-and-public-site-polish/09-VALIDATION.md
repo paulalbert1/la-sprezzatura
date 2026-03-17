@@ -2,12 +2,12 @@
 phase: 9
 slug: send-update-investment-proposals-and-public-site-polish
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-03-17
 ---
 
-# Phase 9 — Validation Strategy
+# Phase 9 -- Validation Strategy
 
 > Per-phase validation contract for feedback sampling during execution.
 
@@ -38,28 +38,29 @@ created: 2026-03-17
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 09-01-01 | 01 | 1 | SEND-01 | unit (schema) | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | Extend existing | ⬜ pending |
-| 09-01-02 | 01 | 1 | SEND-02 | unit (query, HTML) | `npx vitest run src/sanity/queries.test.ts -t "send-update"` | Extend existing | ⬜ pending |
+| 09-01-00 | 01 | 1 | ALL | test scaffold | `npx vitest run src/sanity/schemas/project.test.ts src/lib/artifactUtils.test.ts src/actions/portalActions.test.ts src/sanity/queries.test.ts` | Extend existing | ⬜ pending |
+| 09-01-01 | 01 | 1 | SEND-01 | unit (schema) | `npx vitest run src/sanity/schemas/project.test.ts -t "Phase 9"` | Extend existing | ⬜ pending |
+| 09-01-02 | 01 | 1 | SEND-02 | unit (query, HTML) | `npx vitest run src/sanity/queries.test.ts -t "SEND_UPDATE_PROJECT_QUERY"` | Extend existing | ⬜ pending |
 | 09-01-03 | 01 | 1 | SEND-03 | unit (log entry) | `npx vitest run src/sanity/schemas/project.test.ts -t "updateLog"` | Extend existing | ⬜ pending |
-| 09-02-01 | 02 | 1 | ARTF-05 | unit (schema, types) | `npx vitest run src/lib/artifactUtils.test.ts -t "investment"` | Extend existing | ⬜ pending |
+| 09-02-01 | 02 | 1 | ARTF-05 | unit (schema, types) | `npx vitest run src/lib/artifactUtils.test.ts -t "Investment Summary"` | Extend existing | ⬜ pending |
 | 09-02-02 | 02 | 1 | ARTF-06 | unit (schema, action) | `npx vitest run src/actions/portalActions.test.ts -t "selectTier"` | Extend existing | ⬜ pending |
 | 09-02-03 | 02 | 1 | ARTF-07 | unit (schema) | `npx vitest run src/actions/portalActions.test.ts -t "eagerness"` | Extend existing | ⬜ pending |
-| 09-03-01 | 03 | 2 | BOOK-01 | unit (deletion) | `npx vitest run` (build passes without CalBooking) | N/A — deletion | ⬜ pending |
-| 09-03-02 | 03 | 2 | SITE-08 | manual-only | Manual: visit home page, observe character animation | N/A — visual | ⬜ pending |
+| 09-03-01 | 03 | 2 | BOOK-01 | unit (deletion) | `npx vitest run` (build passes without CalBooking) | N/A -- deletion | ⬜ pending |
+| 09-03-02 | 03 | 2 | SITE-08 | manual-only | Manual: visit home page, observe character animation | N/A -- visual | ⬜ pending |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ⬜ pending / ✅ green / ❌ red / ⚠️ flaky*
 
 ---
 
 ## Wave 0 Requirements
 
-- [ ] Extend `src/sanity/schemas/project.test.ts` — cover updateLog[] field and investmentSummary nested schema
-- [ ] Extend `src/lib/artifactUtils.test.ts` — cover investment summary type extensions
-- [ ] Extend `src/actions/portalActions.test.ts` — cover selectTier action validation
-- [ ] Extend `src/sanity/queries.test.ts` — cover send-update snapshot query string
-- [ ] Add `src/actions/portalSchemas.ts` selectTierSchema — validation tests
+- [x] Extend `src/sanity/schemas/project.test.ts` -- cover updateLog[] field and investmentSummary nested schema **(Plan 09-01, Task 0)**
+- [x] Extend `src/lib/artifactUtils.test.ts` -- cover investment summary type extensions **(Plan 09-01, Task 0)**
+- [x] Extend `src/actions/portalActions.test.ts` -- cover selectTier action validation **(Plan 09-01, Task 0)**
+- [x] Extend `src/sanity/queries.test.ts` -- cover send-update snapshot query string **(Plan 09-01, Task 0)**
+- [x] Add `src/actions/portalSchemas.ts` selectTierSchema -- validation tests **(Plan 09-01, Task 0 via portalActions.test.ts)**
 
-*Existing test infrastructure covers all framework needs — no new config or fixtures required.*
+*All Wave 0 test scaffolds are authored in Plan 09-01 Task 0 before any production code changes.*
 
 ---
 
@@ -73,11 +74,11 @@ created: 2026-03-17
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved (Wave 0 task added to Plan 09-01)
