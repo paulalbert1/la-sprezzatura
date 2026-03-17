@@ -1,0 +1,54 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../components/portal/PortalLayout.astro";
+import RoleSelectionForm from "../../components/portal/RoleSelectionForm.tsx";
+import { createSession } from "../../lib/session";
+
+// Handle POST: create session with selected role
+if (Astro.request.method === "POST") {
+  const formData = await Astro.request.formData();
+  const role = formData.get("role") as string;
+  const entityId = formData.get("entityId") as string;
+
+  if (role && entityId) {
+    const sessionRole = role === "contractor" ? "contractor" : "client";
+    await createSession(Astro.cookies, entityId, sessionRole as any);
+    const dashboard = sessionRole === "contractor" ? "/workorder/dashboard" : "/portal/dashboard";
+    return Astro.redirect(dashboard);
+  }
+}
+
+// GET: render role selection form
+const clientId = Astro.url.searchParams.get("clientId");
+const contractorId = Astro.url.searchParams.get("contractorId");
+
+// If missing params, redirect to login
+if (!clientId || !contractorId) {
+  return Astro.redirect("/portal/login");
+}
+---
+
+<PortalLayout title="Choose Your Portal | La Sprezzatura">
+  <main class="flex-1 flex items-center justify-center px-6">
+    <div class="w-full max-w-sm text-center">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
+        La Sprezzatura
+      </p>
+
+      {/* Heading */}
+      <h2 class="font-heading text-2xl font-light text-charcoal mb-3">
+        Choose Your Portal
+      </h2>
+
+      {/* Body */}
+      <p class="text-base text-stone font-body mb-8">
+        Your email is associated with multiple accounts.
+      </p>
+
+      {/* Role selection buttons */}
+      <RoleSelectionForm client:load clientId={clientId} contractorId={contractorId} />
+    </div>
+  </main>
+</PortalLayout>

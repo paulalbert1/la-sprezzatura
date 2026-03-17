@@ -4,6 +4,7 @@ import { schemaTypes } from "./src/sanity/schemas";
 import { NotifyClientAction } from "./src/sanity/actions/notifyClient";
 import { CompleteProjectAction } from "./src/sanity/actions/completeProject";
 import { ReopenProjectAction } from "./src/sanity/actions/reopenProject";
+import { SendWorkOrderAccessAction } from "./src/sanity/actions/sendWorkOrderAccess";
 
 export default defineConfig({
   name: "la-sprezzatura",
@@ -49,6 +50,9 @@ export default defineConfig({
           CompleteProjectAction,
           ReopenProjectAction,
         ];
+      }
+      if (context.schemaType === "contractor") {
+        return [...prev, SendWorkOrderAccessAction];
       }
       return prev;
     },

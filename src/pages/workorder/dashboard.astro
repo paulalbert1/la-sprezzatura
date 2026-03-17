@@ -1,0 +1,78 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../components/portal/PortalLayout.astro";
+import StatusBadge from "../../components/portal/StatusBadge.astro";
+import { getContractorById, getProjectsByContractorId } from "../../sanity/queries";
+import { STAGE_META, type StageKey } from "../../lib/portalStages";
+
+// contractorId injected by middleware (guaranteed by auth guard)
+const contractorId = Astro.locals.contractorId!;
+
+// Fetch contractor name for greeting
+const contractor = await getContractorById(contractorId);
+const firstName = contractor?.name?.split(" ")[0] || "there";
+
+// Fetch all assigned projects for this contractor
+const projects = await getProjectsByContractorId(contractorId) || [];
+---
+
+<PortalLayout title="Work Orders | La Sprezzatura">
+  <main class="flex-1">
+    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {/* Brand mark */}
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
+        La Sprezzatura
+      </p>
+
+      {/* Greeting */}
+      <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
+        Welcome, {firstName}
+      </h1>
+      <p class="text-lg text-stone font-body text-center mb-8">
+        Your work orders will appear here.
+      </p>
+
+      {/* Project cards */}
+      {projects.length > 0 && (
+        <div class:list={["grid gap-4", projects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1"]}>
+          {projects.map((project: any) => {
+            const stage = project.pipelineStage as StageKey;
+            const stageMeta = STAGE_META[stage] || { title: stage };
+            const assignment = project.assignment;
+            const dateRange = assignment?.startDate && assignment?.endDate
+              ? `${new Date(assignment.startDate).toLocaleDateString()} - ${new Date(assignment.endDate).toLocaleDateString()}`
+              : "Dates pending";
+            return (
+              <div class="bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors">
+                <h3 class="font-heading text-xl font-light text-charcoal mb-2">{project.title}</h3>
+                <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">{dateRange}</p>
+                <StatusBadge stage={stageMeta.title} isComplete={stage === "closeout"} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Empty state */}
+      {projects.length === 0 && (
+        <div class="text-center py-12">
+          <h2 class="font-heading text-2xl font-light text-charcoal mb-4">No Work Orders Yet</h2>
+          <p class="text-stone font-body leading-relaxed">
+            You'll be notified when new work orders are assigned.
+          </p>
+        </div>
+      )}
+
+      {/* Sign out link */}
+      <div class="mt-16 text-center">
+        <a
+          href="/workorder/logout"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+        >
+          Sign Out
+        </a>
+      </div>
+    </div>
+  </main>
+</PortalLayout>

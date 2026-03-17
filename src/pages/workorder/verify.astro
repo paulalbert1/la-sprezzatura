@@ -7,14 +7,14 @@ import { createSession } from "../../lib/session";
 const token = Astro.url.searchParams.get("token");
 
 if (!token) {
-  return Astro.redirect("/portal/login?error=expired");
+  return Astro.redirect("/workorder/login?error=expired");
 }
 
 // Atomic get-and-delete: single-use token enforcement
 const rawValue = await redis.getdel(`magic:${token}`) as string | null;
 
 if (!rawValue) {
-  return Astro.redirect("/portal/login?error=expired");
+  return Astro.redirect("/workorder/login?error=expired");
 }
 
 // Parse token data -- handle legacy plain string and new JSON format
@@ -22,8 +22,8 @@ let tokenData: any;
 try {
   tokenData = JSON.parse(rawValue);
 } catch {
-  // Legacy format: plain clientId string (backward compat)
-  tokenData = { entityId: rawValue, role: 'client' };
+  // Legacy format: plain string is a contractor ID
+  tokenData = { entityId: rawValue, role: 'contractor' };
 }
 
 if (tokenData.dualRole) {
@@ -34,8 +34,8 @@ if (tokenData.dualRole) {
 }
 
 // Single role: create session and redirect to appropriate dashboard
-const role = tokenData.role || 'client';
+const role = tokenData.role || 'contractor';
 await createSession(Astro.cookies, tokenData.entityId, role);
-const dashboard = role === 'contractor' ? '/workorder/dashboard' : '/portal/dashboard';
+const dashboard = role === 'client' ? '/portal/dashboard' : '/workorder/dashboard';
 return Astro.redirect(dashboard);
 ---
