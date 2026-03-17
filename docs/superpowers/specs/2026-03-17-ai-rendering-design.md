@@ -213,7 +213,7 @@ New section on the project detail page. Only visible when the project has promot
 ### Privacy
 
 - Only promoted renderings are visible — clients never see the rendering session, wizard, iteration history, or unpromoted outputs
-- Signed Blob URLs for images (same pattern as Phase 7 documents)
+- Session-authenticated Blob proxy for images (same `blob-serve` pattern as Phase 7 documents)
 
 ## Usage Tracking & Cost Control
 
@@ -260,7 +260,7 @@ Three new document types (`renderingSession`, `designOption`, `renderingUsage`) 
 - Added to `src/sanity/schemas/index.ts` in the `schemaTypes` export
 - Hidden from the default document list in `structureTool` configuration (managed exclusively through the custom tool, not browsable in the sidebar)
 
-The custom tool is registered in `sanity.config.ts` via the `tools` array on `defineConfig`, after `structureTool` and `presentationTool`. It appears in the Studio top nav bar.
+The custom tool is registered in `sanity.config.ts` via the `plugins` array on `defineConfig`, after `structureTool`. It appears in the Studio top nav bar.
 
 ### Gemini API Integration
 
