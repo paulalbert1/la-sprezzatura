@@ -140,45 +140,45 @@
 
 - [x] **DOCS-01**: COI documents, floor plans, and legal documents stored with private access (Vercel Blob with signed URLs, not public Sanity CDN) -- Phase 7
 
-## v3.0 Requirements (AI Rendering & Go-Live -- Phases 9+)
+## v3.0 Requirements (AI Rendering & Go-Live -- Phases 9-12)
 
 ### AI Rendering (RNDR)
 
-- [ ] **RNDR-01**: Liz can create a rendering session in Sanity Studio linked to a project (or as scratchpad), uploading floor plan, space photos, and inspiration images through a guided 4-step wizard
-- [ ] **RNDR-02**: Liz generates a photorealistic 1K room rendering by describing her design vision -- the AI uses uploaded inputs to produce the image
-- [ ] **RNDR-03**: Liz refines a rendering through a conversational chat interface -- each refinement produces a new version while preserving the full session history
-- [ ] **RNDR-04**: Liz promotes a rendering to a "Design Option" with a caption, making it visible to clients on the portal
-- [ ] **RNDR-05**: Client sees promoted design options in a gallery on their project portal, can favorite options and leave comments
-- [ ] **RNDR-06**: Studio shows a persistent usage counter and blocks generation at the monthly limit
-- [ ] **RNDR-07**: Per-designer monthly generation counts are tracked for billing and cost control
+- [ ] **RNDR-01**: Liz can create a rendering session in Sanity Studio linked to a project (or as scratchpad), uploading floor plan, space photos, and inspiration images through a guided 4-step wizard -- Phase 10
+- [ ] **RNDR-02**: Liz generates a photorealistic 1K room rendering by describing her design vision -- the AI uses uploaded inputs to produce the image -- Phase 10
+- [ ] **RNDR-03**: Liz refines a rendering through a conversational chat interface -- each refinement produces a new version while preserving the full session history -- Phase 10
+- [ ] **RNDR-04**: Liz promotes a rendering to a "Design Option" with a caption, making it visible to clients on the portal -- Phase 11
+- [ ] **RNDR-05**: Client sees promoted design options in a gallery on their project portal, can favorite options and leave comments -- Phase 11
+- [ ] **RNDR-06**: Studio shows a persistent usage counter and blocks generation at the monthly limit -- Phase 10
+- [ ] **RNDR-07**: Per-designer monthly generation counts are tracked for billing and cost control -- Phase 10
 
 ### Send Update (SEND)
 
-- [ ] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project
-- [ ] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz
-- [ ] **SEND-03**: Every sent update is logged with timestamp and recipient on the project
+- [ ] **SEND-01**: Liz can trigger "Send Update" from Sanity Studio via a document action on the project -- Phase 9
+- [ ] **SEND-02**: Email includes current milestones, procurement status, pending artifact reviews, and an optional personal note from Liz -- Phase 9
+- [ ] **SEND-03**: Every sent update is logged with timestamp and recipient on the project -- Phase 9
 
 ### Project Artifacts - Investment Proposals (ARTF)
 
-- [ ] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items
-- [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers)
-- [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture
+- [ ] **ARTF-05**: Proposal artifacts include an Investment Summary with designer-defined pricing tiers and line items -- Phase 9
+- [ ] **ARTF-06**: Client selects their preferred investment tier; selections can evolve (mix items across tiers) -- Phase 9
+- [ ] **ARTF-07**: Proposal approval includes a readiness check -- eagerness rating (1-5) and "any reservations?" capture -- Phase 9
 
 ### Booking (BOOK)
 
-- [ ] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed
+- [ ] **BOOK-01**: Contact page links to Fantastical Openings for booking, replacing Cal.com embed -- Phase 9
 
 ### Public Site Polish (SITE)
 
-- [ ] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation
+- [ ] **SITE-08**: Home page hero has enhanced visual impact with GSAP SplitText animation -- Phase 9
 
 ### Infrastructure (INFRA)
 
-- [ ] **INFRA-01**: DNS consolidation -- all 4 domains (lasprezz.com, lasprezzaturany.com, lasprezzny.com, casadeolivier.com) to Cloudflare
-- [ ] **INFRA-02**: Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
-- [ ] **INFRA-03**: Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com
-- [ ] **INFRA-04**: Redirect consolidation -- secondary domains redirect to lasprezz.com
-- [ ] **INFRA-06**: Cloudflare DNS with SSL for all domains
+- [ ] **INFRA-01**: DNS consolidation -- all 4 domains (lasprezz.com, lasprezzaturany.com, lasprezzny.com, casadeolivier.com) to Cloudflare -- Phase 12
+- [ ] **INFRA-02**: Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC -- Phase 12
+- [ ] **INFRA-03**: Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com -- Phase 12
+- [ ] **INFRA-04**: Redirect consolidation -- secondary domains redirect to lasprezz.com -- Phase 12
+- [ ] **INFRA-06**: Cloudflare DNS with SSL for all domains -- Phase 12
 
 ## Future Requirements
 
@@ -241,7 +241,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ENGMT-01 | Phase 5 | Complete |
 | PROC-03 | Phase 5 | Complete |
 | INFRA-07 | Phase 5 | Complete |
-| INFRA-08 | Phase 5 | Deferred (Wix DNS limitation -- revisit at Phase 10) |
+| INFRA-08 | Phase 5 | Deferred (Wix DNS limitation -- revisit at Phase 12) |
 | CLNT-06, CLNT-07 | Phase 6 | Pending |
 | MILE-01, MILE-02, MILE-03 | Phase 6 | Pending |
 | PROC-01, PROC-02 | Phase 6 | Pending |
@@ -265,20 +265,23 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RNDR-01 through RNDR-07 | TBD | Pending |
-| SEND-01, SEND-02, SEND-03 | TBD | Pending |
-| ARTF-05, ARTF-06, ARTF-07 | TBD | Pending |
-| BOOK-01, SITE-08 | TBD | Pending |
-| INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06 | TBD | Pending |
+| SEND-01, SEND-02, SEND-03 | Phase 9 | Pending |
+| ARTF-05, ARTF-06, ARTF-07 | Phase 9 | Pending |
+| BOOK-01 | Phase 9 | Pending |
+| SITE-08 | Phase 9 | Pending |
+| RNDR-01, RNDR-02, RNDR-03 | Phase 10 | Pending |
+| RNDR-06, RNDR-07 | Phase 10 | Pending |
+| RNDR-04, RNDR-05 | Phase 11 | Pending |
+| INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06 | Phase 12 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total (all complete)
-- v2.0 requirements: 31 total (Phases 5-6, all complete)
-- v2.5 requirements: 18 total (Phases 7-8, all complete)
-- v3.0 requirements: 20 total (Phases TBD)
+- v2.0 requirements: 31 total (Phases 5-6)
+- v2.5 requirements: 18 total (Phases 7-8)
+- v3.0 requirements: 20 total (Phases 9-12)
 - Total: 90
-- Unmapped: 20 (v3.0 — awaiting roadmap)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-17 after v3.0 redefined as AI Rendering & Go-Live (+7 RNDR requirements, old v3.0 carried forward)*
+*Last updated: 2026-03-17 after v3.0 roadmap created (20 requirements mapped to Phases 9-12)*

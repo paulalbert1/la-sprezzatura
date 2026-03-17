@@ -5,7 +5,7 @@
 - ✅ **v1.0 MVP** - Phases 1-3 (shipped 2026-03-15)
 - 🚧 **v2.0 Client Portal Foundation** - Phases 5-6 (in progress)
 - 📋 **v2.5 Contractor & Commercial Workflows** - Phases 7-8 (planned)
-- 📋 **v3.0 Business Operations & Go-Live** - Phases 9-10 (planned)
+- 📋 **v3.0 AI Rendering & Go-Live** - Phases 9-12 (planned)
 
 ## Phases
 
@@ -53,7 +53,7 @@ Plans:
 
 </details>
 
-**Note:** v1.0 Phase 4 (DNS Cutover) was planned but not executed. Its requirements (INFRA-01 through INFRA-04, INFRA-06) are carried forward into v3.0 Phase 10.
+**Note:** v1.0 Phase 4 (DNS Cutover) was planned but not executed. Its requirements (INFRA-01 through INFRA-04, INFRA-06) are carried forward into v3.0 Phase 12.
 
 ### v2.0 Client Portal Foundation (In Progress)
 
@@ -73,12 +73,14 @@ Plans:
 - [ ] **Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage** - Contractor and building manager data models, residential/commercial toggle, engagement type feature gating, multi-role session model, and Vercel Blob document storage foundation
 - [ ] **Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility** - Contractor portal UI (scope, floor plans, estimates), building manager portal UI (COIs, legal docs), and client-facing contractor schedule
 
-### v3.0 Business Operations & Go-Live (Planned)
+### v3.0 AI Rendering & Go-Live (Planned)
 
-**Milestone Goal:** Complete the business operations tooling -- ad hoc client update emails, tiered investment proposals, public site polish -- then consolidate DNS and go live, replacing the Wix site.
+**Milestone Goal:** Equip Liz with an AI rendering tool for photorealistic room visualizations, complete business operations (send update, investment proposals), polish the public site, and consolidate DNS -- the final milestone before extracting to the Linha multi-tenant platform.
 
 - [ ] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap
-- [ ] **Phase 10: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
+- [ ] **Phase 10: AI Rendering Engine** - Rendering schemas, Gemini API integration, generate/refine/status API routes, usage tracking, and Vercel Blob image storage
+- [ ] **Phase 11: Rendering Studio Tool and Design Options Gallery** - Sanity Studio custom tool (wizard, refinement, session management), promote-to-Design-Option workflow, and client portal Design Options gallery with favorites and comments
+- [ ] **Phase 12: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
 
 ## Phase Details
 
@@ -150,7 +152,7 @@ Plans:
 - [ ] 08-03-PLAN.md -- Building manager auth flow and portal (login, verify, dashboard, project detail), ExpirationBadge, ContractorSection (CVIS-01), role selection extension
 
 ### Phase 9: Send Update, Investment Proposals, and Public Site Polish
-**Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered investment proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before go-live
+**Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered investment proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before AI rendering
 **Depends on**: Phase 8
 **Requirements**: SEND-01, SEND-02, SEND-03, ARTF-05, ARTF-06, ARTF-07, BOOK-01, SITE-08
 **Success Criteria** (what must be TRUE):
@@ -164,9 +166,39 @@ Plans:
 - [ ] 09-01: TBD
 - [ ] 09-02: TBD
 
-### Phase 10: DNS Cutover and Go-Live
-**Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
+### Phase 10: AI Rendering Engine
+**Goal**: The server-side rendering pipeline is fully operational -- Sanity schemas for sessions, outputs, and usage tracking are deployed, API routes handle generation, conversational refinement, and polling with Gemini integration, usage is enforced per-designer per-month with hard cap, and generated images are stored in Vercel Blob -- all backend infrastructure ready before building the Studio UI
 **Depends on**: Phase 9
+**Requirements**: RNDR-01, RNDR-02, RNDR-03, RNDR-06, RNDR-07
+**Success Criteria** (what must be TRUE):
+  1. A POST to /api/rendering/generate with a valid session ID, prompt, and input images creates a renderingSession document in Sanity, calls Gemini to produce a photorealistic 1K room rendering, stores the output image in Vercel Blob, and returns the session with the new rendering appended
+  2. A POST to /api/rendering/refine with a session ID and refinement text sends the full conversation history (previous prompt + refinement instruction) to Gemini, produces a new rendering version, and preserves the complete multi-turn context on the session
+  3. GET /api/rendering/usage returns the current designer's monthly generation count, limit, and remaining quota; POST to /api/rendering/generate returns a 403 with a clear message when the monthly limit is reached; failed generations do not increment the usage counter
+  4. GET /api/rendering/status polls a session and returns its current status (generating/complete/error); the generate endpoint uses Vercel waitUntil to process the Gemini call after returning an immediate response
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+- [ ] 10-02: TBD
+
+### Phase 11: Rendering Studio Tool and Design Options Gallery
+**Goal**: Liz can create rendering sessions, upload inputs through a guided wizard, generate and refine renderings, and promote favorites as Design Options visible to clients -- the complete AI rendering workflow from designer creation to client consumption
+**Depends on**: Phase 10
+**Requirements**: RNDR-04, RNDR-05
+**Success Criteria** (what must be TRUE):
+  1. Liz opens the Rendering tool in Sanity Studio, creates a new session linked to a project, uploads a floor plan and inspiration images through a 4-step wizard, describes her vision, and generates a rendering -- the session list shows all her sessions filterable by project with a persistent usage counter badge
+  2. After generating a rendering, Liz clicks "Promote to Design Options" on her preferred rendering, adds a caption, and a designOption document is created linking to the same Blob image -- the rendering shows a star icon indicating it has been promoted
+  3. A client viewing their project on the portal sees a Design Options gallery with promoted renderings displayed in a grid (2-up mobile, 3-up desktop), can click to expand in a lightbox, favorite options with a heart toggle, and leave comments -- with a confidentiality notice adapted to residential/commercial
+  4. Only promoted renderings are visible to clients -- the rendering session, wizard inputs, iteration history, and unpromoted outputs are never exposed on the portal
+**Plans**: TBD
+
+Plans:
+- [ ] 11-01: TBD
+- [ ] 11-02: TBD
+
+### Phase 12: DNS Cutover and Go-Live
+**Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
+**Depends on**: Phase 11
 **Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06
 **Success Criteria** (what must be TRUE):
   1. Visiting lasprezz.com in a browser shows the new site (not Wix) with a valid HTTPS certificate
@@ -177,25 +209,27 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 12-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
+Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Project Scaffold and Staging Deploy | v1.0 | 1/1 | Complete | 2026-03-14 |
 | 2. Public Portfolio Site | v1.0 | 4/4 | Complete | 2026-03-14 |
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
-| 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 10) | - |
+| 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 12) | - |
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
 | 6. Portal Features | v2.0 | 0/5 | Not started | - |
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 0/? | Not started | - |
-| 10. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
+| 10. AI Rendering Engine | v3.0 | 0/? | Not started | - |
+| 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/? | Not started | - |
+| 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
@@ -206,3 +240,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10
 *Phase 6 plans created: 2026-03-16*
 *Phase 7 plans created: 2026-03-16*
 *Phase 8 plans created: 2026-03-17*
+*v3.0 roadmap expanded: 2026-03-17 (AI Rendering phases 10-11 added, DNS moved to Phase 12)*
