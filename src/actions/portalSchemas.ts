@@ -31,3 +31,9 @@ export const warrantyClaimSchema = z.object({
   description: z.string().min(10, "Please describe the issue in at least 10 characters"),
   photo: z.instanceof(File).optional(),
 });
+
+export const contractorNoteSchema = z.object({
+  projectId: z.string().min(1),
+  assignmentKey: z.string().min(1),
+  text: z.string().min(1, "Please enter a note").max(500, "Note must be 500 characters or less"),
+});
