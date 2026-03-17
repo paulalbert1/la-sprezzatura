@@ -2,9 +2,7 @@
 export const prerender = false;
 
 import PortalLayout from "../../components/portal/PortalLayout.astro";
-import StatusBadge from "../../components/portal/StatusBadge.astro";
 import { getContractorById, getProjectsByContractorId } from "../../sanity/queries";
-import { STAGE_META, type StageKey } from "../../lib/portalStages";
 
 // contractorId injected by middleware (guaranteed by auth guard)
 const contractorId = Astro.locals.contractorId!;
@@ -15,6 +13,11 @@ const firstName = contractor?.name?.split(" ")[0] || "there";
 
 // Fetch all assigned projects for this contractor
 const projects = await getProjectsByContractorId(contractorId) || [];
+
+// Auto-redirect single-project contractors to project detail
+if (projects.length === 1) {
+  return Astro.redirect(`/workorder/project/${projects[0]._id}`);
+}
 ---
 
 <PortalLayout title="Work Orders | La Sprezzatura">
@@ -37,18 +40,18 @@ const projects = await getProjectsByContractorId(contractorId) || [];
       {projects.length > 0 && (
         <div class:list={["grid gap-4", projects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1"]}>
           {projects.map((project: any) => {
-            const stage = project.pipelineStage as StageKey;
-            const stageMeta = STAGE_META[stage] || { title: stage };
             const assignment = project.assignment;
             const dateRange = assignment?.startDate && assignment?.endDate
               ? `${new Date(assignment.startDate).toLocaleDateString()} - ${new Date(assignment.endDate).toLocaleDateString()}`
               : "Dates pending";
             return (
-              <div class="bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors">
+              <a href={`/workorder/project/${project._id}`} class="block bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors">
                 <h3 class="font-heading text-xl font-light text-charcoal mb-2">{project.title}</h3>
-                <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">{dateRange}</p>
-                <StatusBadge stage={stageMeta.title} isComplete={stage === "closeout"} />
-              </div>
+                <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
+                  {[project.projectAddress?.street, project.projectAddress?.city, project.projectAddress?.state].filter(Boolean).join(', ') || "Address pending"}
+                </p>
+                <p class="text-xs text-stone uppercase tracking-wider font-body">{dateRange}</p>
+              </a>
             );
           })}
         </div>
