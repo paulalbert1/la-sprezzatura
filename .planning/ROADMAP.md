@@ -176,11 +176,13 @@ Plans:
   2. A POST to /api/rendering/refine with a session ID and refinement text sends the full conversation history (previous prompt + refinement instruction) to Gemini, produces a new rendering version, and preserves the complete multi-turn context on the session
   3. GET /api/rendering/usage returns the current designer's monthly generation count, limit, and remaining quota; POST to /api/rendering/generate returns a 403 with a clear message when the monthly limit is reached; failed generations do not increment the usage counter
   4. GET /api/rendering/status polls a session and returns its current status (generating/complete/error); the generate endpoint uses Vercel waitUntil to process the Gemini call after returning an immediate response
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
+- [ ] 10-01-PLAN.md -- Sanity schemas (renderingSession, designOption, renderingUsage), siteSettings extensions, GROQ queries, schema tests, npm deps, maxDuration config
+- [ ] 10-02-PLAN.md -- Library modules (promptBuilder, geminiClient, renderingAuth) with unit tests
+- [ ] 10-03-PLAN.md -- Core API routes (generate with waitUntil, refine with multi-turn, status polling)
+- [ ] 10-04-PLAN.md -- Supporting API routes (usage quota, promote/unpromote Design Options, client reactions)
 
 ### Phase 11: Rendering Studio Tool and Design Options Gallery
 **Goal**: Liz can create rendering sessions, upload inputs through a guided wizard, generate and refine renderings, and promote favorites as Design Options visible to clients -- the complete AI rendering workflow from designer creation to client consumption
@@ -228,7 +230,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
-| 10. AI Rendering Engine | v3.0 | 0/? | Not started | - |
+| 10. AI Rendering Engine | v3.0 | 0/4 | Not started | - |
 | 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/? | Not started | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
@@ -243,3 +245,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 *Phase 8 plans created: 2026-03-17*
 *v3.0 roadmap expanded: 2026-03-17 (AI Rendering phases 10-11 added, DNS moved to Phase 12)*
 *Phase 9 plans created: 2026-03-17 (3 plans in 2 waves)*
+*Phase 10 plans created: 2026-03-17 (4 plans in 2 waves)*
