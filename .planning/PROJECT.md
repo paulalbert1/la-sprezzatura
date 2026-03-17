@@ -12,23 +12,25 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 
 | Milestone | Focus | Phases |
 |-----------|-------|--------|
+| v1.0 MVP | Public site, portfolio, CMS, basic portal | 1-3 |
 | v2.0 Client Portal Foundation | Auth, client data, engagement types, core portal features | 5-6 |
 | v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 |
-| v3.0 Business Operations & Go-Live | Send Update emails, investment proposals, public site polish, DNS cutover | 9-10 |
+| v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish, DNS cutover | 9-? |
+| v4.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
 
-## Current Milestone: v2.0 Client Portal Foundation
+## Current Milestone: v3.0 AI Rendering & Go-Live
 
-**Goal:** Secure portal access via magic link auth, client data model with engagement types, core portal features (milestones, procurement, artifacts) — the foundation every subsequent milestone builds on.
+**Goal:** Equip Liz with an AI rendering tool for photorealistic room visualizations, complete business operations (send update, investment proposals), polish the public site, and consolidate DNS — the final milestone before extracting to the Linha multi-tenant platform.
 
 **Target features:**
-- Magic link auth (replacing raw PURL access)
-- Client data model (contact info, address, preferred contact method)
-- Engagement type per project (Full Interior Design / Styling & Refreshing / Carpet Curating)
-- Custom per-project milestones with dates (replacing generic 6-stage pipeline)
-- Line-item procurement tracker (status, cost, retail, savings — managed in Sanity)
-- Project artifacts with versioning and approval workflow
-- Post-project workflow (close document, warranty)
-- Rate limiter upgrade + Resend domain verification
+- AI rendering tool in Sanity Studio (guided wizard, conversational refinement, Gemini image generation)
+- Design Options gallery on client portal (favorites, comments)
+- Usage tracking with monthly allocation and hard cap
+- Send Update email from Sanity Studio with portal state snapshot
+- Tiered investment proposals (Best/Better/Good) with client tier selection
+- Hero animation refresh (GSAP SplitText)
+- Fantastical Openings booking (replace Cal.com)
+- DNS consolidation to Cloudflare, email to @lasprezz.com
 
 ## Requirements
 
@@ -43,25 +45,14 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - ✓ Basic client portal with PURL access, pipeline status, milestone timeline — v1.0
 - ✓ SEO foundations (meta, OG, structured data, sitemap) — v1.0
 
-### Active (v2.0)
+### Active (v3.0)
 
-- [ ] Magic link auth — cookie-based sessions, no passwords
-- [ ] Client data model in Sanity — phone, email, preferred contact, address per client
-- [ ] Engagement type toggle — Full Interior Design / Styling & Refreshing / Carpet Curating
-- [ ] Custom per-project milestones with dates (not generic pipeline stages)
-- [ ] Procurement tracker — line items with status/cost/retail/savings, managed in Sanity
-- [ ] Project artifacts with versioning, approval workflow, and decision log
-- [ ] Post-project workflow — close document, warranty, reopen
-
-### Planned (v2.5)
-
-- [ ] Contractor portal — magic link, floor plans, scope, estimate, minimal client info
-- [ ] Residential vs Commercial toggle
-- [ ] Building manager portal — magic link, commercial only, COIs, legal docs
-- [ ] Client sees contractor name + on-site schedule
-
-### Planned (v3.0)
-
+- [ ] AI rendering tool in Sanity Studio — guided wizard with floor plans, space photos, inspiration, and text prompt
+- [ ] Gemini-powered image generation — photorealistic 1K room renderings
+- [ ] Conversational refinement — iterate on renderings with multi-turn context
+- [ ] Design Options — promote renderings as client-facing gallery items with captions
+- [ ] Client portal Design Options gallery — favorites, comments, confidentiality notice
+- [ ] Usage tracking — per-designer monthly allocation with hard cap
 - [ ] Send Update — templated email to client with current portal state + optional note + delivery log
 - [ ] Budget proposals — tiered pricing artifacts (Best/Better/Good) per project
 - [ ] Fantastical Openings booking — replace Cal.com embed on contact page
@@ -69,6 +60,15 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] DNS consolidation — all 4 domains to Cloudflare
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
 - [ ] Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com
+
+### Planned (v4.0 — Linha Platform)
+
+- [ ] Turborepo monorepo — packages/core, packages/portal, packages/rendering, templates/
+- [ ] La Sprezzatura migrated as reserved template
+- [ ] 3-5 public designer templates (Aria, Forma, Verra)
+- [ ] Admin dashboard at admin.linha.com — designer management, usage, billing, health
+- [ ] Onboarding wizard — guided provisioning (Sanity dataset, Vercel project, domain, billing)
+- [ ] Per-designer Vercel deployments with Sanity multi-dataset isolation
 
 ### Out of Scope
 
@@ -112,9 +112,13 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | Astro 6 over Next.js | Content-first site with islands architecture; better performance for portfolio-heavy site; Sanity integration mature | ✓ Good |
 | Fantastical over Cal.com | Liz already uses Fantastical as daily calendar; avoids dual availability management | — Pending |
 | PURL over account-based portal access | Zero friction for clients, faster to build, appropriate security for interior design data | ⚠️ Revisit — upgrading to magic link in v2.0 |
-| Restructure v2.0 into v2.0/v2.5/v3.0 | v2.0 had 43 requirements across 4 phases — scope creep. Split into foundation (v2.0), contractor/commercial (v2.5), operations + go-live (v3.0) | — Pending |
-| Engagement type on project schema | Full Interior Design / Styling & Refreshing / Carpet Curating controls available features. Added to v2.0 data foundation so schema is right from day one | — Pending |
+| Restructure v2.0 into v2.0/v2.5/v3.0 | v2.0 had 43 requirements across 4 phases — scope creep. Split into foundation (v2.0), contractor/commercial (v2.5), operations + go-live (v3.0) | ✓ Good |
+| Engagement type on project schema | Full Interior Design / Styling & Refreshing / Carpet Curating controls available features. Added to v2.0 data foundation so schema is right from day one | ✓ Good |
 | Cloudflare for DNS | At-cost pricing, fastest authoritative DNS, consolidates 4 domains under one registrar | — Pending |
+| AI rendering via Sanity Studio custom tool | Keeps designer in existing workspace; API service layer matches existing patterns; extractable to Linha | — Pending |
+| Gemini (Nano Banana 2) for image generation | Pro-level quality at Flash speed; strong spatial understanding; ~$0.07/image at 1K; model configurable via env var | — Pending |
+| Build AI rendering in la-sprezzatura first | Liz gets value immediately; all features exist before Linha extraction = cleaner migration | — Pending |
+| v3.0 absorbs old v3.0 + AI rendering | Combined milestone avoids a thin v3.0; rendering is the marquee feature for go-live | — Pending |
 
 ---
-*Last updated: 2026-03-16 after v2.0 restructure into v2.0/v2.5/v3.0*
+*Last updated: 2026-03-17 after v3.0 redefined as AI Rendering & Go-Live (absorbed old v3.0 + AI rendering spec)*
