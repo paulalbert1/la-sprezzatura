@@ -248,7 +248,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BLDG-01 | Phase 7 | Complete |
 | DOCS-01 | Phase 7 | Complete |
 | CONTR-03, CONTR-04 | Phase 8 | Pending |
-| BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Pending |
+| BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Complete |
 | CVIS-01 | Phase 8 | Complete |
 
 ### v3.0 Requirements (Business Operations & Go-Live)

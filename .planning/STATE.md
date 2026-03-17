@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Client Portal Foundation
-status: executing
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-03-17T12:06:02.532Z"
-last_activity: 2026-03-17 -- completed 08-02 contractor work order detail page, dashboard, and ContractorNoteForm
+milestone: v2.5
+milestone_name: Contractor & Building Manager Portals
+status: complete
+stopped_at: Completed 08-03-PLAN.md
+last_updated: "2026-03-17T12:06:29Z"
+last_activity: 2026-03-17 -- completed 08-03 building manager portal and client contractor visibility
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 6
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.5 Phase 8 (Contractor Portal, Building Manager Portal, Client Visibility) -- executing plan 2 of 3 complete
+**Current focus:** v2.5 Phase 8 (Contractor Portal, Building Manager Portal, Client Visibility) -- all 3 plans complete
 
 ## Current Position
 
 Phase: 8 (v2.5 -- Contractor Portal, Building Manager Portal, Client Visibility)
-Plan: 2 of 3 complete
-Status: In Progress
-Last activity: 2026-03-17 -- completed 08-02 contractor work order detail page, dashboard, and ContractorNoteForm
+Plan: 3 of 3 complete
+Status: Complete
+Last activity: 2026-03-17 -- completed 08-03 building manager portal and client contractor visibility
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 15
 - Average duration: ~10 min
-- Total execution time: ~2.3 hours
+- Total execution time: ~2.4 hours
 
 **By Phase:**
 
@@ -49,15 +49,16 @@ Progress: [█████████░] 93%
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
 | 06-portal-features | 5/5 complete | ~24min | ~5min |
 | 07-schema-extensions | 3/3 complete | ~14min | ~5min |
-| 08-contractor-portal | 1/3 complete | ~8min | ~8min |
+| 08-contractor-portal | 3/3 complete | ~15min | ~5min |
 
 **Recent Trend:**
-- Last 5 plans: 06-05 (5min), 07-01 (4min), 07-02 (4min), 07-03 (6min), 08-01 (8min)
+- Last 5 plans: 07-02 (4min), 07-03 (6min), 08-01 (8min), 08-02 (3min), 08-03 (4min)
 - Trend: Steady
 
 *Updated after each plan completion*
 | Phase 08 P01 | 8min | 2 tasks | 14 files |
 | Phase 08 P02 | 3min | 2 tasks | 3 files |
+| Phase 08 P03 | 4min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,9 @@ Recent decisions affecting current work:
 - [08-01]: submitContractorNote uses patch insert after submissionNotes[-1] pattern (matches milestone/artifact note patterns)
 - [08-01]: Building manager magic link stores email as entityId for session creation
 - [Phase 08]: Removed StatusBadge/STAGE_META from contractor dashboard -- pipeline stage not shown to contractors per information boundary
+- [Phase 08]: [08-03]: Building manager dashboard cards are links (not static divs) for clickable navigation
+- [Phase 08]: [08-03]: RoleSelectionForm conditionally renders each role button based on prop presence (supports 1-3 roles)
+- [Phase 08]: [08-03]: Role-select redirect guard requires at least one of clientId/contractorId/buildingManagerEmail (not all)
 
 ### Pending Todos
 
@@ -123,6 +127,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T12:06:02.530Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-03-17T12:08:08.262Z
+Stopped at: Completed 08-03-PLAN.md
 Resume file: None
