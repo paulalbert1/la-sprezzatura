@@ -130,3 +130,68 @@ describe("getArtifactBadgeStyle", () => {
     );
   });
 });
+
+// TODO: Uncomment after Task 1 adds InvestmentTier, InvestmentSummary, InvestmentLineItem exports
+// import type { InvestmentTier, InvestmentSummary, InvestmentLineItem } from "./artifactUtils";
+//
+// describe("Investment Summary types (Phase 9)", () => {
+//   it("InvestmentLineItem has _key, name, price fields", () => {
+//     const item: InvestmentLineItem = { _key: "li1", name: "Sofa", price: 250000 };
+//     expect(item._key).toBe("li1");
+//     expect(item.name).toBe("Sofa");
+//     expect(item.price).toBe(250000);
+//   });
+//
+//   it("InvestmentTier has _key, name, optional description, lineItems", () => {
+//     const tier: InvestmentTier = {
+//       _key: "t1",
+//       name: "Essential",
+//       lineItems: [{ _key: "li1", name: "Consultation", price: 50000 }],
+//     };
+//     expect(tier._key).toBe("t1");
+//     expect(tier.name).toBe("Essential");
+//     expect(tier.description).toBeUndefined();
+//     expect(tier.lineItems).toHaveLength(1);
+//   });
+//
+//   it("InvestmentSummary has tiers array and optional selectedTierKey, eagerness, reservations", () => {
+//     const summary: InvestmentSummary = {
+//       tiers: [
+//         { _key: "t1", name: "Basic", lineItems: [] },
+//         { _key: "t2", name: "Premium", lineItems: [] },
+//       ],
+//     };
+//     expect(summary.tiers).toHaveLength(2);
+//     expect(summary.selectedTierKey).toBeUndefined();
+//     expect(summary.eagerness).toBeUndefined();
+//     expect(summary.reservations).toBeUndefined();
+//   });
+//
+//   it("Artifact type accepts investmentSummary field", () => {
+//     const artifact: Artifact = {
+//       _key: "a1",
+//       artifactType: "proposal",
+//       versions: [],
+//       decisionLog: [],
+//       notes: [],
+//       investmentSummary: {
+//         tiers: [{ _key: "t1", name: "Standard", lineItems: [{ _key: "li1", name: "Design", price: 100000 }] }],
+//         selectedTierKey: "t1",
+//         eagerness: 4,
+//         reservations: "Timeline concern",
+//       },
+//     };
+//     expect(artifact.investmentSummary).toBeDefined();
+//     expect(artifact.investmentSummary!.selectedTierKey).toBe("t1");
+//     expect(artifact.investmentSummary!.eagerness).toBe(4);
+//   });
+//
+//   it('DecisionLogEntry action union includes "tier-selected"', () => {
+//     const entry: import("./artifactUtils").DecisionLogEntry = {
+//       _key: "d1",
+//       action: "tier-selected",
+//       timestamp: "2026-03-17T00:00:00Z",
+//     };
+//     expect(entry.action).toBe("tier-selected");
+//   });
+// });

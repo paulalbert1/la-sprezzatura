@@ -200,3 +200,93 @@ describe("project schema (Phase 8 extensions)", () => {
     expect(names).toContain("timestamp");
   });
 });
+
+describe("project schema (Phase 9 extensions)", () => {
+  it('has "updates" group in groups array', () => {
+    const groups = (project as { groups?: { name: string }[] }).groups;
+    expect(groups).toBeDefined();
+    const updatesGroup = groups!.find((g) => g.name === "updates");
+    expect(updatesGroup).toBeDefined();
+  });
+
+  it('has field "updateLog" of type "array" in group "updates" with readOnly', () => {
+    const field = project.fields?.find((f) => f.name === "updateLog");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("array");
+    expect(field?.group).toBe("updates");
+    expect((field as any).readOnly).toBe(true);
+  });
+
+  it("updateLog array members have sentAt, recipientEmails, note, sectionsIncluded fields", () => {
+    const field = project.fields?.find((f) => f.name === "updateLog");
+    const ofArray = (field as any)?.of;
+    expect(ofArray).toBeDefined();
+    expect(ofArray!.length).toBeGreaterThan(0);
+    const memberFields = ofArray![0].fields as { name: string; type: string }[];
+    expect(memberFields).toBeDefined();
+    const names = memberFields.map((f) => f.name);
+    expect(names).toContain("sentAt");
+    expect(names).toContain("recipientEmails");
+    expect(names).toContain("note");
+    expect(names).toContain("sectionsIncluded");
+  });
+
+  // Helper: dig into artifacts array member fields
+  function getArtifactMemberFields() {
+    const field = project.fields?.find((f) => f.name === "artifacts");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as { name: string; type: string; hidden?: unknown }[] | undefined;
+  }
+
+  it('artifact inline object contains "investmentSummary" object field', () => {
+    const fields = getArtifactMemberFields();
+    expect(fields).toBeDefined();
+    const investmentSummary = fields!.find((f) => f.name === "investmentSummary");
+    expect(investmentSummary).toBeDefined();
+    expect(investmentSummary!.type).toBe("object");
+  });
+
+  it("investmentSummary is hidden when artifactType is not proposal", () => {
+    const fields = getArtifactMemberFields();
+    const investmentSummary = fields!.find((f) => f.name === "investmentSummary");
+    const hidden = investmentSummary?.hidden as (args: { parent?: Record<string, unknown> }) => boolean;
+    expect(hidden).toBeDefined();
+    expect(hidden({ parent: { artifactType: "contract" } })).toBe(true);
+    expect(hidden({ parent: { artifactType: "proposal" } })).toBe(false);
+  });
+
+  it("investmentSummary has tiers, selectedTierKey, eagerness, reservations subfields", () => {
+    const fields = getArtifactMemberFields();
+    const investmentSummary = fields!.find((f) => f.name === "investmentSummary");
+    const subfields = (investmentSummary as any)?.fields as { name: string; type: string }[];
+    expect(subfields).toBeDefined();
+    const names = subfields.map((f) => f.name);
+    expect(names).toContain("tiers");
+    expect(names).toContain("selectedTierKey");
+    expect(names).toContain("eagerness");
+    expect(names).toContain("reservations");
+  });
+
+  it("selectedTierKey is readOnly", () => {
+    const fields = getArtifactMemberFields();
+    const investmentSummary = fields!.find((f) => f.name === "investmentSummary");
+    const subfields = (investmentSummary as any)?.fields as { name: string; readOnly?: boolean }[];
+    const selectedTierKey = subfields.find((f) => f.name === "selectedTierKey");
+    expect(selectedTierKey).toBeDefined();
+    expect((selectedTierKey as any).readOnly).toBe(true);
+  });
+
+  it("tiers array members have name, description, lineItems subfields", () => {
+    const fields = getArtifactMemberFields();
+    const investmentSummary = fields!.find((f) => f.name === "investmentSummary");
+    const subfields = (investmentSummary as any)?.fields as { name: string; type: string }[];
+    const tiersField = subfields.find((f) => f.name === "tiers");
+    expect(tiersField).toBeDefined();
+    const tierMembers = (tiersField as any)?.of?.[0]?.fields as { name: string }[];
+    expect(tierMembers).toBeDefined();
+    const tierFieldNames = tierMembers.map((f) => f.name);
+    expect(tierFieldNames).toContain("name");
+    expect(tierFieldNames).toContain("description");
+    expect(tierFieldNames).toContain("lineItems");
+  });
+});
