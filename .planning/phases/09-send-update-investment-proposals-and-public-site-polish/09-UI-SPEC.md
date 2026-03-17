@@ -44,7 +44,7 @@ Declared values (must be multiples of 4):
 Exceptions:
 - 12px (`space-y-3`, `pb-3`, `gap-3`, `mb-3`): Compact list item spacing for tier line items and milestone rows. Established codebase pattern (MilestoneSection, ProcurementTable). Multiples-of-4 compliant (12 = 3 x 4).
 - 80px (`md:py-20`): Desktop page-level vertical padding on portal main content. Established pattern from Phase 5 onward. Multiples-of-4 compliant (80 = 20 x 4).
-- 44px minimum touch target height on all portal buttons (Select Tier, Confirm Selection) and email CTA -- WCAG 2.2 Target Size.
+- 44px minimum touch target height on all portal buttons (Select This Tier, Confirm Selection) and email CTA -- WCAG 2.2 Target Size.
 - 40px (`py-10`): Email content card top/bottom padding. Matches existing `notify-artifact.ts` email template exactly (`padding: 40px 32px`).
 - Sanity Studio dialog components use `@sanity/ui` spacing tokens, not Tailwind tokens.
 
@@ -52,17 +52,20 @@ Exceptions:
 
 ## Typography
 
+Portal / web typography (4 tiers):
+
 | Role | Size | Weight | Line Height | Font | Usage |
 |------|------|--------|-------------|------|-------|
-| Body | 14px-16px (`text-sm` / `text-base`) | 400 (regular) | 1.5-1.7 | DM Sans | Paragraph text at 16px (1.7 line-height); help text, tier descriptions, readiness labels at 14px (1.5 line-height) |
-| Label | 12px (`text-xs`) | 400 (regular) | 1.5 | DM Sans | Uppercase tracking-widest labels, email section headings, tier line item names, badge text, timestamps |
+| Label | 12px (`text-xs`) | 400 (regular) | 1.5 | DM Sans | Uppercase tracking-widest labels, help text, tier descriptions, readiness labels, email section headings, tier line item names, badge text, timestamps |
+| Body | 16px (`text-base`) | 400 (regular) | 1.7 | DM Sans | Paragraph text, personal note textarea, reservation textarea, form body copy |
 | Heading | 20px (`text-xl`) | 300 (light) | 1.2 | Cormorant Garamond | Section headings (Investment Summary, Readiness Check) |
-| Display | 40px mobile / 48px desktop (`text-4xl md:text-5xl`) | 300 (light) | 1.2 | Cormorant Garamond | Tier names on desktop |
-| Hero Display | Responsive (`text-6xl md:text-7xl lg:text-8xl xl:text-9xl`) | 300 (light) | none (`leading-none`) | Cormorant Garamond | "La Sprezzatura" hero title with SplitText animation |
+| Display | 40px mobile / 48px desktop (`text-4xl md:text-5xl`) | 300 (light) | 1.2 | Cormorant Garamond | Tier names on desktop, hero title (responsive: `text-6xl md:text-7xl lg:text-8xl xl:text-9xl`, `leading-none`) |
 
-Weights used: 300 (light, headings/display) and 400 (normal, body). Two weights only. Emphasis achieved through `text-charcoal` color (against `text-stone` for secondary text) and uppercase tracking-widest for labels.
+Weights used: 300 (light, headings/display) and 400 (normal, body/label). Two weights only. Emphasis achieved through `text-charcoal` color (against `text-stone` for secondary text) and uppercase tracking-widest for labels.
 
-### Email Typography (inline, no custom fonts)
+Note: Hero Display uses the Display tier at responsive sizes (`text-6xl` through `text-9xl`) with `leading-none` -- this is a responsive variant of Display, not a separate tier.
+
+### Email Typography (separate inline-style system for email-client compatibility)
 
 | Role | Size | Font | Color | Notes |
 |------|------|------|-------|-------|
@@ -74,7 +77,7 @@ Weights used: 300 (light, headings/display) and 400 (normal, body). Two weights 
 | Email CTA | 14px | system-ui, sans-serif | `#FFFFFF` | Uppercase, letter-spacing 0.1em |
 | Email footer | 12px | system-ui, sans-serif | `#B8B0A4` | Line-height 1.6 |
 
-Source: Matches existing `notify-artifact.ts` email template. Georgia is the email-safe serif fallback for Cormorant Garamond.
+Source: Matches existing `notify-artifact.ts` email template. Georgia is the email-safe serif fallback for Cormorant Garamond. Email sizes are not counted against the portal type scale -- email uses inline styles for email-client compatibility and operates as a separate rendering context.
 
 ---
 
@@ -212,13 +215,19 @@ Dialog (header: "Send Project Update")
             "{N} pending reviews"
           [View in Your Portal -- terracotta text]
 
+    [Send Error Message -- conditional, shown on API failure]
+      Card (tone: "critical", padding: 3)
+        Text (size: 1):
+          "Unable to send update. Please check your connection and try again."
+
     [Action Buttons]
       Flex (gap: 2)
         Button (tone: "primary", text: "Send Update")
           idle: "Send Update" (bg: #C4836A via tone)
           sending: "Sending..." (disabled)
           success: dialog auto-closes, props.onComplete() called
-        Button (tone: "default", text: "Cancel", mode: "ghost")
+          error: re-enables button for retry, shows error card above
+        Button (tone: "default", text: "Discard", mode: "ghost")
           onClick: close dialog
 ```
 
@@ -346,14 +355,14 @@ section.mt-6
         [Tier header]
           h4: "{tierName}" -- font-heading text-lg font-light text-charcoal mb-2
           [if description]
-            p: "{description}" -- text-sm text-stone font-body mb-4
+            p: "{description}" -- text-xs text-stone font-body mb-4
 
         [Line items]
           div.space-y-2.mb-4
             Each line item:
               div.flex.items-baseline.justify-between
-                span: "{itemName}" -- text-sm text-charcoal font-body
-                span: "{formattedPrice}" -- text-sm text-charcoal font-body
+                span: "{itemName}" -- text-xs text-charcoal font-body
+                span: "{formattedPrice}" -- text-xs text-charcoal font-body
 
         [Divider]
           div.border-t.border-stone-light/20.pt-3.mt-3
@@ -377,7 +386,7 @@ When a tier has been selected (`investmentSummary.selectedTierKey` is set):
 - Selected tier card: `border-l-4 border-l-terracotta` (green-ish highlight avoided; matches existing "awaiting review" terracotta accent pattern)
 - Non-selected tier cards: `opacity-50` (same muting pattern as previous artifact versions)
 - "Select This Tier" buttons removed from all cards
-- Below the grid: status line `"Tier selected: {tierName}" -- text-sm text-emerald-700 font-body mt-4`
+- Below the grid: status line `"Tier selected: {tierName}" -- text-xs text-emerald-700 font-body mt-4`
 
 ---
 
@@ -408,7 +417,7 @@ The selected tier's card expands to show the readiness check inline below the ti
               Active (selected + all below): bg-terracotta border-terracotta
               Inactive: border-stone-light bg-transparent hover:border-terracotta/40
         [Current label]
-          span: "{label}" -- text-sm text-stone font-body
+          span: "{label}" -- text-xs text-stone font-body
 
       Eagerness labels:
         1: "Just exploring"
@@ -421,7 +430,7 @@ The selected tier's card expands to show the readiness check inline below the ti
       label: "Any reservations?" -- text-xs uppercase tracking-widest text-stone mb-2 block font-body mt-4
       textarea
         rows=3
-        bg-white text-charcoal border border-stone-light px-4 py-3 font-body text-sm w-full
+        bg-white text-charcoal border border-stone-light px-4 py-3 font-body text-base w-full
         focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-terracotta
         placeholder="Share any thoughts or concerns... (optional)"
 
@@ -448,14 +457,14 @@ Same as selection dialog with "Confirm Selection" replaced by "Submitting..." (d
 **Success:**
 ```
 div.mt-4.pt-4.border-t.border-stone-light/20
-  p: "Selection recorded" -- text-sm text-stone font-body
+  p: "Selection recorded" -- text-xs text-stone font-body
 ```
 Page reloads after 2 seconds to show the updated selected state from server.
 
 **Error:**
 ```
 div.mt-4.pt-4.border-t.border-stone-light/20
-  div.border.border-terracotta/30.bg-terracotta/5.px-5.py-4.text-sm.text-charcoal.font-body [role="alert"]
+  div.border.border-terracotta/30.bg-terracotta/5.px-5.py-4.text-xs.text-charcoal.font-body [role="alert"]
     "Something went wrong. Please try again or contact liz@lasprezz.com."
   button: "Try again" -- text-xs text-terracotta hover:text-terracotta-light transition-colors font-body mt-2
 ```
@@ -592,7 +601,8 @@ heroSlideshow (empty/null) -->  gradient fallback (current behavior)
 | Preview CTA | View in Your Portal |
 | Send CTA (idle) | Send Update |
 | Send CTA (sending) | Sending... |
-| Cancel button | Cancel |
+| Send error message | Unable to send update. Please check your connection and try again. |
+| Dismiss button | Discard |
 
 ### Send Update Email
 
@@ -667,7 +677,9 @@ heroSlideshow (empty/null) -->  gradient fallback (current behavior)
           --> [API: send via Resend to all project clients]
           --> [API: log updateLog entry on project document]
         --> [Success: dialog auto-closes, props.onComplete()]
-        --> [Error: console.error, dialog stays open for retry]
+        --> [Error: show "Unable to send update. Please check your connection and try again." in Card (tone: "critical") above action buttons, re-enable Send Update button for retry]
+    --> [Click "Discard"]
+      --> [Dialog closes, no action taken]
 ```
 
 ### Tier Selection Flow
