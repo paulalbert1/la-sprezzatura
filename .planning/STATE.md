@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Client Portal Foundation
-status: completed
-stopped_at: Phase 8 context gathered
-last_updated: "2026-03-17T03:38:10.220Z"
-last_activity: 2026-03-17 -- completed 07-03 multi-role auth, contractor magic link flow
+milestone: v2.5
+milestone_name: Contractor & Building Manager Portals
+status: in-progress
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-03-17T11:58:36.000Z"
+last_activity: 2026-03-17 -- completed 08-01 data layer, auth, and actions
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
-  percent: 91
+  total_plans: 15
+  completed_plans: 13
+  percent: 93
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-16)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v2.5 Phase 7 (Schema Extensions, Multi-Role Auth, Document Storage) -- executing plan 2 of 3 complete
+**Current focus:** v2.5 Phase 8 (Contractor Portal, Building Manager Portal, Client Visibility) -- executing plan 1 of 3 complete
 
 ## Current Position
 
-Phase: 7 (v2.5 -- Schema Extensions, Multi-Role Auth, Document Storage)
-Plan: 3 of 3 complete
-Status: Phase Complete
-Last activity: 2026-03-17 -- completed 07-03 multi-role auth, contractor magic link flow
+Phase: 8 (v2.5 -- Contractor Portal, Building Manager Portal, Client Visibility)
+Plan: 1 of 3 complete
+Status: In Progress
+Last activity: 2026-03-17 -- completed 08-01 data layer, auth, and actions
 
-Progress: [█████████░] 91%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: ~10 min
-- Total execution time: ~2.2 hours
+- Total execution time: ~2.3 hours
 
 **By Phase:**
 
@@ -48,14 +48,15 @@ Progress: [█████████░] 91%
 | 03-client-operations-portal | 2/2 complete | ~19min | ~10min |
 | 05-data-foundation-auth | 4/4 complete | ~13min | ~3min |
 | 06-portal-features | 5/5 complete | ~24min | ~5min |
-| 07-schema-extensions | 2/3 complete | ~8min | ~4min |
+| 07-schema-extensions | 3/3 complete | ~14min | ~5min |
+| 08-contractor-portal | 1/3 complete | ~8min | ~8min |
 
 **Recent Trend:**
-- Last 5 plans: 06-03 (7min), 06-04 (?min), 06-05 (5min), 07-01 (4min), 07-02 (4min)
+- Last 5 plans: 06-05 (5min), 07-01 (4min), 07-02 (4min), 07-03 (6min), 08-01 (8min)
 - Trend: Steady
 
 *Updated after each plan completion*
-| Phase 07 P03 | 6min | 2 tasks | 17 files |
+| Phase 08 P01 | 8min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,10 @@ Recent decisions affecting current work:
 - [Phase 07]: SessionData stores JSON { entityId, role } in Redis; getSession backward-compat for legacy plain strings as client sessions
 - [Phase 07]: Dual-role detected at magic link generation time (in action handlers), not at verify time
 - [Phase 07]: SendWorkOrderAccess delegates to API route following notifyClient pattern (Studio runs in browser context)
+- [08-01]: Building manager identified by email not Sanity doc ID -- buildingManager is inline object on project
+- [08-01]: CVIS-01 contractor appointments exclude notes field -- clients see date/label only (information boundary)
+- [08-01]: submitContractorNote uses patch insert after submissionNotes[-1] pattern (matches milestone/artifact note patterns)
+- [08-01]: Building manager magic link stores email as entityId for session creation
 
 ### Pending Todos
 
@@ -116,6 +121,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T03:38:10.217Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-contractor-portal-building-manager-and-client-visibility/08-CONTEXT.md
+Last session: 2026-03-17T11:58:36.000Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: .planning/phases/08-contractor-portal-building-manager-and-client-visibility/08-02-PLAN.md

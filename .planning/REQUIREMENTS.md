@@ -117,8 +117,8 @@
 
 - [x] **CONTR-01**: Liz can create contractor records in Sanity with name, email, phone, company, and trade -- Phase 7
 - [x] **CONTR-02**: Contractor receives a magic link email to access their portal view -- no password or account creation -- Phase 7
-- [ ] **CONTR-03**: Contractor portal shows floor plans, scope of work, deadline, notes, and next steps for assigned projects -- Phase 8
-- [ ] **CONTR-04**: Contractor sees client name and project address only -- no client email, phone, or contact info ("contact Liz" shown instead) -- Phase 8
+- [x] **CONTR-03**: Contractor portal shows floor plans, scope of work, deadline, notes, and next steps for assigned projects -- Phase 8
+- [x] **CONTR-04**: Contractor sees client name and project address only -- no client email, phone, or contact info ("contact Liz" shown instead) -- Phase 8
 - [x] **CONTR-05**: Liz uploads final estimate as PDF or inputs the dollar amount per contractor per project -- Phase 7
 - [x] **CONTR-06**: Contractor portal is only available for Full Interior Design projects -- Phase 7
 - [x] **CONTR-07**: Contractor can be assigned to multiple projects; a project can have multiple contractors -- Phase 7
@@ -126,15 +126,15 @@
 ### Building Manager Portal (BLDG)
 
 - [x] **BLDG-01**: Liz can add building manager contact info (name, email, phone) to commercial projects -- Phase 7
-- [ ] **BLDG-02**: Building manager receives a magic link email to access their portal view -- Phase 8
-- [ ] **BLDG-03**: Building manager sees client name and contact info for the project -- Phase 8
-- [ ] **BLDG-04**: Building manager has a COI section showing certificates of insurance with expiration dates -- Phase 8
-- [ ] **BLDG-05**: Building manager has a legal documents section for building requirements and PDFs -- Phase 8
-- [ ] **BLDG-06**: Building manager can request contractor info (name, license -- not direct contact, "contact Liz" for more) -- Phase 8
+- [x] **BLDG-02**: Building manager receives a magic link email to access their portal view -- Phase 8
+- [x] **BLDG-03**: Building manager sees client name and contact info for the project -- Phase 8
+- [x] **BLDG-04**: Building manager has a COI section showing certificates of insurance with expiration dates -- Phase 8
+- [x] **BLDG-05**: Building manager has a legal documents section for building requirements and PDFs -- Phase 8
+- [x] **BLDG-06**: Building manager can request contractor info (name, license -- not direct contact, "contact Liz" for more) -- Phase 8
 
 ### Client Contractor Visibility (CVIS)
 
-- [ ] **CVIS-01**: Client sees contractor name and on-site schedule dates on their project portal -- Phase 8
+- [x] **CVIS-01**: Client sees contractor name and on-site schedule dates on their project portal -- Phase 8
 
 ### Document Storage (DOCS)
 
@@ -249,7 +249,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOCS-01 | Phase 7 | Complete |
 | CONTR-03, CONTR-04 | Phase 8 | Pending |
 | BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06 | Phase 8 | Pending |
-| CVIS-01 | Phase 8 | Pending |
+| CVIS-01 | Phase 8 | Complete |
 
 ### v3.0 Requirements (Business Operations & Go-Live)
 
