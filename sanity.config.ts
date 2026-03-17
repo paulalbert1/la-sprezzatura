@@ -6,6 +6,7 @@ import { CompleteProjectAction } from "./src/sanity/actions/completeProject";
 import { ReopenProjectAction } from "./src/sanity/actions/reopenProject";
 import { SendWorkOrderAccessAction } from "./src/sanity/actions/sendWorkOrderAccess";
 import { SendBuildingAccessAction } from "./src/sanity/actions/sendBuildingAccess";
+import { SendUpdateAction } from "./src/sanity/actions/sendUpdate";
 
 export default defineConfig({
   name: "la-sprezzatura",
@@ -51,6 +52,7 @@ export default defineConfig({
           CompleteProjectAction,
           ReopenProjectAction,
           SendBuildingAccessAction,
+          SendUpdateAction,
         ];
       }
       if (context.schemaType === "contractor") {
