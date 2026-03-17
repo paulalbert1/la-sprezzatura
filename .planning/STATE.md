@@ -96,7 +96,9 @@ Recent decisions affecting current work:
 - [Phase 10-03]: Error renderings appended to session for visibility -- failed attempts visible in session history
 - [Phase 10-03]: Content policy detection via message substring match (content policy, SAFETY)
 - [Phase 10-03]: Cost estimate hardcoded at 7 integer cents per generation for v1 billing tracking
-- [Phase 10]: [Phase 10-03]: Status endpoint uses minimal inline GROQ query for efficient polling
+- [Phase 10-04]: React endpoint uses portal session auth (cookie-based getSession), not STUDIO_API_SECRET -- matches blob-serve.ts pattern for client-facing routes
+- [Phase 10-04]: Promote uses _key-based Sanity array selectors for atomic isPromoted updates on renderings[]
+- [Phase 10-04]: Favorites are idempotent -- duplicate favorite calls are no-ops, not errors
 
 ### Pending Todos
 
@@ -111,6 +113,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:52:32.921Z
-Stopped at: Completed 10-03-PLAN.md
-Resume file: None
+Last session: 2026-03-17T22:52:38Z
+Stopped at: Completed 10-04-PLAN.md
+Resume file: None (Phase 10 complete)

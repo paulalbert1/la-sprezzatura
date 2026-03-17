@@ -269,8 +269,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ARTF-05, ARTF-06, ARTF-07 | Phase 9 | Pending |
 | BOOK-01 | Phase 9 | Complete |
 | SITE-08 | Phase 9 | Complete |
-| RNDR-01, RNDR-02, RNDR-03 | Phase 10 | Pending |
-| RNDR-06, RNDR-07 | Phase 10 | Pending |
+| RNDR-01, RNDR-02, RNDR-03 | Phase 10 | Complete |
+| RNDR-06, RNDR-07 | Phase 10 | Complete |
 | RNDR-04, RNDR-05 | Phase 11 | Pending |
 | INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06 | Phase 12 | Pending |
 
