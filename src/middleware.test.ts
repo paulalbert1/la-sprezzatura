@@ -63,4 +63,32 @@ describe("middleware", () => {
   it("sets context.locals.role for authenticated routes", () => {
     expect(middlewareSource).toContain("context.locals.role");
   });
+
+  // --- Building manager middleware tests (Plan 08-01 Task 1) ---
+
+  it("allows /building/login without session check", () => {
+    expect(middlewareSource).toContain("/building/login");
+  });
+
+  it("allows /building/verify without session check", () => {
+    expect(middlewareSource).toContain("/building/verify");
+  });
+
+  it("routes /building/* to building_manager role check", () => {
+    expect(middlewareSource).toContain('"/building"');
+  });
+
+  it("checks session.role for building manager routes", () => {
+    expect(middlewareSource).toMatch(
+      /session\.role\s*!==\s*["']building_manager["']/,
+    );
+  });
+
+  it("redirects to /building/login for unauthenticated building manager requests", () => {
+    expect(middlewareSource).toContain('redirect("/building/login")');
+  });
+
+  it("sets context.locals.buildingManagerEmail for building manager routes", () => {
+    expect(middlewareSource).toContain("context.locals.buildingManagerEmail");
+  });
 });

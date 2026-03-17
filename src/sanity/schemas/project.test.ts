@@ -140,3 +140,63 @@ describe("project schema (Phase 7 extensions)", () => {
     expect(hidden({ document: { engagementType: "full-interior-design" } })).toBe(false);
   });
 });
+
+describe("project schema (Phase 8 extensions)", () => {
+  // Helper: get contractor inline object fields
+  function getContractorMemberFields() {
+    const field = project.fields?.find((f) => f.name === "contractors");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as { name: string; type: string; readOnly?: boolean }[] | undefined;
+  }
+
+  it('contractors inline object contains "appointments" array field', () => {
+    const fields = getContractorMemberFields();
+    expect(fields).toBeDefined();
+    const appointments = fields!.find((f) => f.name === "appointments");
+    expect(appointments).toBeDefined();
+    expect(appointments!.type).toBe("array");
+  });
+
+  it("appointments sub-fields include dateTime (required), label (required), notes", () => {
+    const fields = getContractorMemberFields();
+    const appointments = fields!.find((f) => f.name === "appointments");
+    const ofArray = (appointments as any)?.of;
+    expect(ofArray).toBeDefined();
+    const subFields = ofArray[0]?.fields as { name: string; type: string }[];
+    expect(subFields).toBeDefined();
+    const names = subFields.map((f) => f.name);
+    expect(names).toContain("dateTime");
+    expect(names).toContain("label");
+    expect(names).toContain("notes");
+  });
+
+  it('contractors inline object contains "contractorNotes" text field', () => {
+    const fields = getContractorMemberFields();
+    expect(fields).toBeDefined();
+    const contractorNotes = fields!.find((f) => f.name === "contractorNotes");
+    expect(contractorNotes).toBeDefined();
+    expect(contractorNotes!.type).toBe("text");
+  });
+
+  it('contractors inline object contains "submissionNotes" array field with readOnly', () => {
+    const fields = getContractorMemberFields();
+    expect(fields).toBeDefined();
+    const submissionNotes = fields!.find((f) => f.name === "submissionNotes");
+    expect(submissionNotes).toBeDefined();
+    expect(submissionNotes!.type).toBe("array");
+    expect((submissionNotes as any).readOnly).toBe(true);
+  });
+
+  it("submissionNotes sub-fields include text, contractorName, timestamp", () => {
+    const fields = getContractorMemberFields();
+    const submissionNotes = fields!.find((f) => f.name === "submissionNotes");
+    const ofArray = (submissionNotes as any)?.of;
+    expect(ofArray).toBeDefined();
+    const subFields = ofArray[0]?.fields as { name: string }[];
+    expect(subFields).toBeDefined();
+    const names = subFields.map((f) => f.name);
+    expect(names).toContain("text");
+    expect(names).toContain("contractorName");
+    expect(names).toContain("timestamp");
+  });
+});
