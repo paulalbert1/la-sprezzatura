@@ -116,7 +116,7 @@
 ### Contractor Portal (CONTR)
 
 - [x] **CONTR-01**: Liz can create contractor records in Sanity with name, email, phone, company, and trade -- Phase 7
-- [ ] **CONTR-02**: Contractor receives a magic link email to access their portal view -- no password or account creation -- Phase 7
+- [x] **CONTR-02**: Contractor receives a magic link email to access their portal view -- no password or account creation -- Phase 7
 - [ ] **CONTR-03**: Contractor portal shows floor plans, scope of work, deadline, notes, and next steps for assigned projects -- Phase 8
 - [ ] **CONTR-04**: Contractor sees client name and project address only -- no client email, phone, or contact info ("contact Liz" shown instead) -- Phase 8
 - [x] **CONTR-05**: Liz uploads final estimate as PDF or inputs the dollar amount per contractor per project -- Phase 7
