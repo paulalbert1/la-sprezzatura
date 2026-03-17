@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 ## Current Position
 
 Phase: 10 of 12 (AI Rendering Engine)
-Plan: 1 of 4 complete (10-01 schemas + queries + deps)
+Plan: 2 of 4 complete (10-02 core library modules)
 Status: Phase 10 in progress
-Last activity: 2026-03-17 -- Plan 01 complete (Schemas, queries, and dependencies)
+Last activity: 2026-03-17 -- Plan 02 complete (promptBuilder, geminiClient, renderingAuth library modules)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Last activity: 2026-03-17 -- Plan 01 complete (Schemas, queries, and dependencie
 | Phase 09 P03 | 4min | 2 tasks | 6 files |
 | Phase 09 P01 | 8min | 3 tasks | 11 files |
 | Phase 09 P02 | 3min | 2 tasks | 5 files |
+| Phase 10 P02 | 6min | 2 tasks | 6 files |
 | Phase 10 P01 | 4min | 3 tasks | 11 files |
 
 ## Accumulated Context
@@ -85,6 +86,10 @@ Recent decisions affecting current work:
 - [Phase 10-01]: Schema field groups (setup/inputs/renderings/metadata) organize renderingSession for Studio UX
 - [Phase 10-01]: GROQ queries exported as const strings without async wrappers -- API routes use sanityWriteClient.fetch directly
 - [Phase 10-01]: costEstimate validated as integer cents consistent with existing procurement pattern
+- [Phase 10-02]: Prompt template hardcoded in TypeScript (not siteSettings configurable) -- simplest v1 approach
+- [Phase 10-02]: Copy vs. interpret determined solely by copyExact boolean per image, not inferred from type
+- [Phase 10-02]: Gemini thought parts filtered from text extraction to avoid exposing internal reasoning
+- [Phase 10-02]: Usage doc ID format: usage-{sanityUserId}-{month} for deterministic lookups
 
 ### Pending Todos
 
@@ -99,6 +104,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:35:53Z
-Stopped at: Completed 10-01-PLAN.md
-Resume file: .planning/phases/10-ai-rendering-engine/10-02-PLAN.md
+Last session: 2026-03-17T22:37:07Z
+Stopped at: Completed 10-02-PLAN.md
+Resume file: .planning/phases/10-ai-rendering-engine/10-03-PLAN.md
