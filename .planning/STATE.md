@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
-status: in-progress
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-03-17T22:35:53Z"
-last_activity: 2026-03-17 -- Plan 01 complete (Schemas, queries, and dependencies)
+status: completed
+stopped_at: Completed 10-04-PLAN.md
+last_updated: "2026-03-17T22:52:38.299Z"
+last_activity: 2026-03-17 -- Plan 04 complete (usage, promote, react API routes)
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 22
-  completed_plans: 19
+  completed_plans: 22
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 10 in progress (1/4 plans complete)
+**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 10 complete (4/4 plans)
 
 ## Current Position
 
 Phase: 10 of 12 (AI Rendering Engine)
-Plan: 2 of 4 complete (10-02 core library modules)
-Status: Phase 10 in progress
-Last activity: 2026-03-17 -- Plan 02 complete (promptBuilder, geminiClient, renderingAuth library modules)
+Plan: 4 of 4 complete (10-04 supporting API routes)
+Status: Phase 10 complete
+Last activity: 2026-03-17 -- Plan 04 complete (usage, promote, react API routes)
 
 ## Performance Metrics
 
@@ -61,6 +61,8 @@ Last activity: 2026-03-17 -- Plan 02 complete (promptBuilder, geminiClient, rend
 | Phase 09 P02 | 3min | 2 tasks | 5 files |
 | Phase 10 P02 | 6min | 2 tasks | 6 files |
 | Phase 10 P01 | 4min | 3 tasks | 11 files |
+| Phase 10 P03 | 8min | 3 tasks | 4 files |
+| Phase 10 P04 | 9min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -90,6 +92,11 @@ Recent decisions affecting current work:
 - [Phase 10-02]: Copy vs. interpret determined solely by copyExact boolean per image, not inferred from type
 - [Phase 10-02]: Gemini thought parts filtered from text extraction to avoid exposing internal reasoning
 - [Phase 10-02]: Usage doc ID format: usage-{sanityUserId}-{month} for deterministic lookups
+- [Phase 10-03]: Status endpoint uses minimal inline GROQ query (not full RENDERING_SESSION_BY_ID_QUERY) for efficient polling
+- [Phase 10-03]: Error renderings appended to session for visibility -- failed attempts visible in session history
+- [Phase 10-03]: Content policy detection via message substring match (content policy, SAFETY)
+- [Phase 10-03]: Cost estimate hardcoded at 7 integer cents per generation for v1 billing tracking
+- [Phase 10]: [Phase 10-03]: Status endpoint uses minimal inline GROQ query for efficient polling
 
 ### Pending Todos
 
@@ -104,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:37:07Z
-Stopped at: Completed 10-02-PLAN.md
-Resume file: .planning/phases/10-ai-rendering-engine/10-03-PLAN.md
+Last session: 2026-03-17T22:52:32.921Z
+Stopped at: Completed 10-03-PLAN.md
+Resume file: None
