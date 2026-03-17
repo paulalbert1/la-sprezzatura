@@ -276,3 +276,54 @@ export async function getProjectDetail(
 // Example: validation: (r) => r.integer().min(0)
 // This prevents floating-point rounding errors (e.g., $19.99 stored as 1999).
 // Procurement schema fields added in Phase 6 following this pattern.
+
+// -- Phase 7: Contractor Queries --
+
+// GROQ: Look up contractor by email (magic link request)
+export const CONTRACTOR_BY_EMAIL_QUERY = `
+  *[_type == "contractor" && email == $email][0] {
+    _id,
+    name,
+    email
+  }
+`;
+
+export async function getContractorByEmail(email: string) {
+  return sanityClient.fetch(CONTRACTOR_BY_EMAIL_QUERY, { email });
+}
+
+// GROQ: Get contractor by ID (for dashboard greeting)
+export const CONTRACTOR_BY_ID_QUERY = `
+  *[_type == "contractor" && _id == $contractorId][0] {
+    _id,
+    name,
+    email,
+    company
+  }
+`;
+
+export async function getContractorById(contractorId: string) {
+  return sanityClient.fetch(CONTRACTOR_BY_ID_QUERY, { contractorId });
+}
+
+// GROQ: Projects assigned to a contractor (for work order dashboard)
+// Only returns Full Interior Design projects with portal enabled
+export const PROJECTS_BY_CONTRACTOR_QUERY = `
+  *[_type == "project" && portalEnabled == true &&
+    engagementType == "full-interior-design" &&
+    count(contractors[contractor._ref == $contractorId]) > 0
+  ] | order(projectStatus asc) {
+    _id,
+    title,
+    pipelineStage,
+    projectStatus,
+    "assignment": contractors[contractor._ref == $contractorId][0] {
+      startDate,
+      endDate
+    }
+  }
+`;
+
+export async function getProjectsByContractorId(contractorId: string) {
+  return sanityClient.fetch(PROJECTS_BY_CONTRACTOR_QUERY, { contractorId });
+}
