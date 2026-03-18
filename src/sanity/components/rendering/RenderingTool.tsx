@@ -1,8 +1,10 @@
 import { createContext, useContext, useReducer, useState, useEffect, useCallback } from "react";
 import { useCurrentUser } from "sanity";
-import { Card, Tab, TabList, Flex, Stack, Text, Button, Spinner } from "@sanity/ui";
-import { SparklesIcon, AddIcon, ImageIcon } from "@sanity/icons";
-import { UsageBadge } from "./UsageBadge";
+import { Card, Tab, TabList, Spinner } from "@sanity/ui";
+import { SessionList } from "./SessionList";
+import { WizardContainer } from "./Wizard/WizardContainer";
+import { ChatView } from "./ChatView";
+import { DesignOptionsTab } from "./DesignOptionsTab";
 import {
   INITIAL_WIZARD_DATA,
   getStudioHeaders,
@@ -64,7 +66,7 @@ export function RenderingTool() {
   const currentUser = useCurrentUser();
   const [state, dispatch] = useReducer(toolReducer, initialState);
   const [usage, setUsage] = useState<UsageData | null>(null);
-  const [usageLoading, setUsageLoading] = useState(true);
+  const [usageLoading, setUsageLoading] = useState(true); // used by child components via context future
 
   const sanityUserId = currentUser?.id || "";
 
@@ -125,77 +127,19 @@ export function RenderingTool() {
         )}
 
         {/* Sessions tab - list view */}
-        {state.activeTab === "sessions" && state.activeView === "list" && (
-          <Card padding={4}>
-            <Flex align="center" justify="space-between">
-              <Button
-                icon={AddIcon}
-                text="New Session"
-                tone="primary"
-                onClick={() => dispatch({ type: "OPEN_WIZARD" })}
-              />
-              {usage && <UsageBadge count={usage.count} limit={usage.limit} />}
-              {usageLoading && <Spinner muted />}
-            </Flex>
-            <Card padding={5} tone="transparent" style={{ marginTop: 16 }}>
-              <Stack space={3} style={{ alignItems: "center", textAlign: "center" }}>
-                <SparklesIcon style={{ fontSize: 48, opacity: 0.3 }} />
-                <Text size={2} align="center">No rendering sessions yet</Text>
-                <Text size={1} muted align="center">
-                  Create your first session to start generating design renderings.
-                </Text>
-                <Button
-                  text="Create Session"
-                  tone="primary"
-                  onClick={() => dispatch({ type: "OPEN_WIZARD" })}
-                />
-              </Stack>
-            </Card>
-          </Card>
+        {state.activeTab === "sessions" && state.activeView === "list" && <SessionList />}
+
+        {/* Sessions tab - wizard view */}
+        {state.activeTab === "sessions" && state.activeView === "wizard" && <WizardContainer />}
+
+        {/* Sessions tab - session detail (chat view) */}
+        {state.activeTab === "sessions" && state.activeView === "session-detail" && state.activeSessionId && (
+          <ChatView sessionId={state.activeSessionId} />
         )}
 
-        {/* Sessions tab - wizard view (placeholder for Plan 02) */}
-        {state.activeTab === "sessions" && state.activeView === "wizard" && (
-          <Card padding={4}>
-            <Text size={2}>Wizard placeholder -- implemented in Plan 02</Text>
-            <Button
-              text="Back"
-              mode="ghost"
-              onClick={() => dispatch({ type: "CLOSE_WIZARD" })}
-              style={{ marginTop: 16 }}
-            />
-          </Card>
-        )}
-
-        {/* Sessions tab - session detail view (placeholder for Plan 03) */}
-        {state.activeTab === "sessions" && state.activeView === "session-detail" && (
-          <Card padding={4}>
-            <Text size={2}>Chat view placeholder -- implemented in Plan 03</Text>
-            <Button
-              text="Back"
-              mode="ghost"
-              onClick={() => dispatch({ type: "BACK_TO_LIST" })}
-              style={{ marginTop: 16 }}
-            />
-          </Card>
-        )}
-
-        {/* Design Options tab (placeholder for Plan 03) */}
+        {/* Design Options tab */}
         {state.activeTab === "design-options" && state.activeView === "list" && (
-          <Card padding={4}>
-            <Flex align="center" justify="space-between">
-              <Text size={3} weight="semibold">Design Options</Text>
-            </Flex>
-            <Card padding={5} tone="transparent" style={{ marginTop: 16 }}>
-              <Stack space={3} style={{ alignItems: "center", textAlign: "center" }}>
-                <ImageIcon style={{ fontSize: 48, opacity: 0.3 }} />
-                <Text size={2} align="center">No design options yet</Text>
-                <Text size={1} muted align="center">
-                  Promote renderings from your sessions to make them visible to clients.
-                </Text>
-              </Stack>
-            </Card>
-          </Card>
+          <DesignOptionsTab />
         )}
       </Card>
     </ToolContext.Provider>
