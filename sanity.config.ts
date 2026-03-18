@@ -7,6 +7,7 @@ import { ReopenProjectAction } from "./src/sanity/actions/reopenProject";
 import { SendWorkOrderAccessAction } from "./src/sanity/actions/sendWorkOrderAccess";
 import { SendBuildingAccessAction } from "./src/sanity/actions/sendBuildingAccess";
 import { SendUpdateAction } from "./src/sanity/actions/sendUpdate";
+import { renderingTool } from "./src/sanity/components/rendering/RenderingToolPlugin";
 
 export default defineConfig({
   name: "la-sprezzatura",
@@ -40,6 +41,7 @@ export default defineConfig({
           ]),
     }),
   ],
+  tools: [renderingTool()],
   schema: {
     types: schemaTypes,
   },
