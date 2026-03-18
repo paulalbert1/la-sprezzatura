@@ -211,10 +211,12 @@ Plans:
   3. Visiting lasprezzaturany.com, lasprezzny.com, and casadeolivier.com in a browser redirects to lasprezz.com with HTTPS
   4. All 4 domains show Cloudflare as the authoritative nameserver (verified via dig or whois)
   5. Liz confirms she can send and receive email at liz@lasprezz.com, info@lasprezz.com, and paul@lasprezz.com within 1 hour of cutover
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md -- Pre-cutover DNS audit and M365 email migration (GoDaddy to Microsoft direct)
+- [ ] 12-02-PLAN.md -- Domain transfers to Cloudflare, DNS configuration for Vercel + email, Resend verification
+- [ ] 12-03-PLAN.md -- Secondary domain redirects, email aliases, go-live verification, and service teardown
 
 ## Progress
 
@@ -234,7 +236,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
 | 10. AI Rendering Engine | 4/4 | Complete    | 2026-03-17 | - |
 | 11. Rendering Studio Tool and Design Options Gallery | 4/4 | Complete    | 2026-03-18 | - |
-| 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
+| 12. DNS Cutover and Go-Live | v3.0 | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
@@ -249,3 +251,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 *Phase 9 plans created: 2026-03-17 (3 plans in 2 waves)*
 *Phase 10 plans created: 2026-03-17 (4 plans in 2 waves)*
 *Phase 11 plans created: 2026-03-18 (4 plans in 2 waves)*
+*Phase 12 plans created: 2026-03-18 (3 plans in 3 waves -- operations runbook, no code changes)*
