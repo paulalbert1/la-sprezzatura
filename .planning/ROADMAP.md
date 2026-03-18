@@ -79,7 +79,7 @@ Plans:
 
 - [ ] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap
 - [x] **Phase 10: AI Rendering Engine** - Rendering schemas, Gemini API integration, generate/refine/status API routes, usage tracking, and Vercel Blob image storage (completed 2026-03-17)
-- [ ] **Phase 11: Rendering Studio Tool and Design Options Gallery** - Sanity Studio custom tool (wizard, refinement, session management), promote-to-Design-Option workflow, and client portal Design Options gallery with favorites and comments
+- [x] **Phase 11: Rendering Studio Tool and Design Options Gallery** - Sanity Studio custom tool (wizard, refinement, session management), promote-to-Design-Option workflow, and client portal Design Options gallery with favorites and comments (completed 2026-03-18)
 - [ ] **Phase 12: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
 
 ## Phase Details
@@ -196,10 +196,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 11-01-PLAN.md -- Foundation: shared types, tool plugin registration, UsageBadge, HEIC upload support, dual-auth blob serving, env vars
-- [ ] 11-02-PLAN.md -- Studio Session List and 4-Step Wizard (Setup, Upload, Classify, Describe + Generate)
-- [ ] 11-03-PLAN.md -- Studio Chat View (refinement), RenderingCard actions, PromoteDialog, DesignOptionsTab
-- [ ] 11-04-PLAN.md -- Portal Design Options gallery (responsive grid, lightbox with favorites and comments), visual verification
+- [x] 11-01-PLAN.md -- Foundation: shared types, tool plugin registration, UsageBadge, HEIC upload support, dual-auth blob serving, env vars
+- [x] 11-02-PLAN.md -- Studio Session List and 4-Step Wizard (Setup, Upload, Classify, Describe + Generate)
+- [x] 11-03-PLAN.md -- Studio Chat View (refinement), RenderingCard actions, PromoteDialog, DesignOptionsTab
+- [x] 11-04-PLAN.md -- Portal Design Options gallery (responsive grid, lightbox with favorites and comments), visual verification
 
 ### Phase 12: DNS Cutover and Go-Live
 **Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
@@ -233,7 +233,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
 | 10. AI Rendering Engine | 4/4 | Complete    | 2026-03-17 | - |
-| 11. Rendering Studio Tool and Design Options Gallery | 3/4 | In Progress|  | - |
+| 11. Rendering Studio Tool and Design Options Gallery | 4/4 | Complete   | 2026-03-18 | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
 ---

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Completed 11-03-PLAN.md
-last_updated: "2026-03-18T05:18:03Z"
-last_activity: 2026-03-18 -- Plan 11-03 complete (chat view, promote workflow, design options tab)
+stopped_at: Completed 11-04-PLAN.md
+last_updated: "2026-03-18T05:21:39Z"
+last_activity: 2026-03-18 -- Plan 11-04 complete (portal Design Options gallery with lightbox, favorites, comments)
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 26
-  completed_plans: 26
+  completed_phases: 7
+  total_plans: 27
+  completed_plans: 27
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 11 in progress (3/4 plans)
+**Current focus:** v3.0 AI Rendering & Go-Live -- Phase 11 complete (4/4 plans), ready for Phase 12
 
 ## Current Position
 
 Phase: 11 of 12 (Rendering Studio Tool & Design Options Gallery)
-Plan: 3 of 4 complete (11-03 chat view & design options)
-Status: Executing Phase 11
-Last activity: 2026-03-18 -- Plan 11-03 complete (chat view, promote workflow, design options tab)
+Plan: 4 of 4 complete (11-04 portal Design Options gallery)
+Status: Phase 11 Complete
+Last activity: 2026-03-18 -- Plan 11-04 complete (portal Design Options gallery with lightbox, favorites, comments)
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Last activity: 2026-03-18 -- Plan 11-03 complete (chat view, promote workflow, d
 | Phase 11 P01 | 4min | 3 tasks | 12 files |
 | Phase 11 P02 | 6min | 2 tasks | 9 files |
 | Phase 11 P03 | 7min | 2 tasks | 7 files |
+| Phase 11 P04 | 5min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,10 @@ Recent decisions affecting current work:
 - [Phase 11-03]: Lightbox filters to successful renderings only for navigation
 - [Phase 11-03]: DesignOptionsTab uses inline GROQ with sourceSession/sourceRenderingIndex for unpromote
 - [Phase 11-03]: Chat thread built by walking conversation[] and pairing with renderings[] by index
+- [Phase 11-04]: ConfidentialityBanner extended with optional message prop (not a new component) -- backward-compatible
+- [Phase 11-04]: Astro-to-React island bridge uses window CustomEvent (open-design-lightbox) for card click -> lightbox open
+- [Phase 11-04]: Heart toggle uses optimistic UI with silent revert on API failure (no toast)
+- [Phase 11-04]: Gallery placed after ContractorSection and before ProcurementTable in project page layout
 
 ### Pending Todos
 
@@ -126,6 +131,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-18T05:18:03Z
-Stopped at: Completed 11-03-PLAN.md
-Resume file: .planning/phases/11-rendering-studio-tool-and-design-options-gallery/11-04-PLAN.md
+Last session: 2026-03-18T05:21:39Z
+Stopped at: Completed 11-04-PLAN.md (Phase 11 complete)
+Resume file: Phase 12 planning needed
