@@ -193,11 +193,13 @@ Plans:
   2. After generating a rendering, Liz clicks "Promote to Design Options" on her preferred rendering, adds a caption, and a designOption document is created linking to the same Blob image -- the rendering shows a star icon indicating it has been promoted
   3. A client viewing their project on the portal sees a Design Options gallery with promoted renderings displayed in a grid (2-up mobile, 3-up desktop), can click to expand in a lightbox, favorite options with a heart toggle, and leave comments -- with a confidentiality notice adapted to residential/commercial
   4. Only promoted renderings are visible to clients -- the rendering session, wizard inputs, iteration history, and unpromoted outputs are never exposed on the portal
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md -- Foundation: shared types, tool plugin registration, UsageBadge, HEIC upload support, dual-auth blob serving, env vars
+- [ ] 11-02-PLAN.md -- Studio Session List and 4-Step Wizard (Setup, Upload, Classify, Describe + Generate)
+- [ ] 11-03-PLAN.md -- Studio Chat View (refinement), RenderingCard actions, PromoteDialog, DesignOptionsTab
+- [ ] 11-04-PLAN.md -- Portal Design Options gallery (responsive grid, lightbox with favorites and comments), visual verification
 
 ### Phase 12: DNS Cutover and Go-Live
 **Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
@@ -231,7 +233,7 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
 | 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
 | 10. AI Rendering Engine | 4/4 | Complete    | 2026-03-17 | - |
-| 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/? | Not started | - |
+| 11. Rendering Studio Tool and Design Options Gallery | v3.0 | 0/4 | Not started | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/? | Not started | - |
 
 ---
@@ -246,3 +248,4 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 *v3.0 roadmap expanded: 2026-03-17 (AI Rendering phases 10-11 added, DNS moved to Phase 12)*
 *Phase 9 plans created: 2026-03-17 (3 plans in 2 waves)*
 *Phase 10 plans created: 2026-03-17 (4 plans in 2 waves)*
+*Phase 11 plans created: 2026-03-18 (4 plans in 2 waves)*
