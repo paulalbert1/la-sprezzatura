@@ -1,5 +1,14 @@
+---
+interface Props {
+  message?: string;
+}
+
+const { message } = Astro.props;
+const defaultMessage = "This portal is private to you. Please don't share your access link.";
+---
+
 <div class="border border-stone-light/20 bg-cream-dark px-5 py-3 text-center mb-8">
   <p class="text-xs text-stone font-body tracking-wide">
-    This portal is private to you. Please don't share your access link.
+    {message || defaultMessage}
   </p>
 </div>

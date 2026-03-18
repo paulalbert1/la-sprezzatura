@@ -5,6 +5,7 @@ import PortalLayout from "../../../components/portal/PortalLayout.astro";
 import ProjectHeader from "../../../components/portal/ProjectHeader.astro";
 import ConfidentialityBanner from "../../../components/portal/ConfidentialityBanner.astro";
 import PostProjectBanner from "../../../components/portal/PostProjectBanner.astro";
+import DesignOptionsSection from "../../../components/portal/DesignOptionsSection.astro";
 import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
 import ContractorSection from "../../../components/portal/ContractorSection.astro";
 import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
@@ -13,7 +14,9 @@ import WarrantyClaimForm from "../../../components/portal/WarrantyClaimForm.tsx"
 import {
   getProjectDetail,
   getProjectsByClientId,
+  DESIGN_OPTIONS_BY_PROJECT_QUERY,
 } from "../../../sanity/queries";
+import { sanityClient } from "sanity:client";
 import {
   isProjectCompleted,
   isProjectReopened,
@@ -41,6 +44,10 @@ const isReopened = isProjectReopened(project);
 // Engagement type gating
 const showProcurement = project.engagementType === "full-interior-design";
 const showCloseDocument = project.engagementType === "full-interior-design";
+
+// Fetch design options for this project
+const designOptions =
+  (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
 
 // Multi-project detection for "Back to Dashboard" link
 const allProjects = await getProjectsByClientId(clientId);
@@ -83,6 +90,16 @@ const isMultiProject = (allProjects?.length || 0) > 1;
       <!-- Contractors section (Full Interior Design only, CVIS-01) -->
       {showProcurement && project.contractors && (
         <ContractorSection contractors={project.contractors} />
+      )}
+
+      <!-- Design Options gallery (only if promoted options exist) -->
+      {designOptions.length > 0 && (
+        <DesignOptionsSection
+          options={designOptions}
+          clientId={clientId}
+          projectId={project._id}
+          isCommercial={project.isCommercial}
+        />
       )}
 
       <!-- Procurement section (Full Interior Design only) -->

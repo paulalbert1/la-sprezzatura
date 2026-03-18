@@ -1,0 +1,63 @@
+---
+import ConfidentialityBanner from "./ConfidentialityBanner.astro";
+import DesignOptionCard from "./DesignOptionCard.astro";
+import DesignOptionLightbox from "./DesignOptionLightbox.tsx";
+
+interface Props {
+  options: Array<{
+    _id: string;
+    blobPathname: string;
+    caption: string;
+    sortOrder: number;
+    promotedAt: string;
+    reactions: Array<{
+      _key: string;
+      clientId: string;
+      type: string;
+      text?: string;
+      createdAt: string;
+    }>;
+  }>;
+  clientId: string;
+  projectId: string;
+  isCommercial?: boolean;
+}
+
+const { options, clientId, projectId, isCommercial } = Astro.props;
+
+const enrichedOptions = options.map((opt) => ({
+  ...opt,
+  favoriteCount: (opt.reactions || []).filter((r) => r.type === "favorite").length,
+  commentCount: (opt.reactions || []).filter((r) => r.type === "comment").length,
+  isFavorited: (opt.reactions || []).some(
+    (r) => r.type === "favorite" && r.clientId === clientId,
+  ),
+}));
+
+const confidentialityMessage = isCommercial
+  ? "These design concepts are confidential to your building project. Please do not share."
+  : "These design concepts are confidential. Please do not share.";
+---
+
+<section class="py-12 border-t border-stone-light/20" aria-label="Design Options">
+  <!-- Confidentiality notice -- reuse ConfidentialityBanner with rendering-specific copy -->
+  <ConfidentialityBanner message={confidentialityMessage} />
+
+  <!-- Section heading -->
+  <h2 class="font-heading text-xl font-light text-charcoal mb-6">Design Options</h2>
+
+  <!-- Gallery grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {enrichedOptions.map((opt, index) => (
+      <DesignOptionCard option={opt} index={index} />
+    ))}
+  </div>
+
+  <!-- Lightbox React island -->
+  <DesignOptionLightbox
+    client:load
+    options={enrichedOptions}
+    clientId={clientId}
+    projectId={projectId}
+  />
+</section>

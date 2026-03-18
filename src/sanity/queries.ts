@@ -202,6 +202,7 @@ export const PROJECT_DETAIL_QUERY = `
     engagementType,
     projectStatus,
     completedAt,
+    isCommercial,
     "isPrimary": clients[client._ref == $clientId][0].isPrimary,
     milestones[] | order(date asc) {
       _key,
