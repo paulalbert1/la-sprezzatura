@@ -4,9 +4,12 @@ import { getSession } from "../../lib/session";
 export const prerender = false;
 
 export const GET: APIRoute = async (context) => {
-  // Auth check: require a valid session (any role)
+  // Auth check: require a valid portal session OR studio token
   const session = await getSession(context.cookies);
-  if (!session) {
+  const studioToken = context.request.headers.get("x-studio-token");
+  const isStudioAuth = studioToken && studioToken === import.meta.env.STUDIO_API_SECRET;
+
+  if (!session && !isStudioAuth) {
     return new Response("Unauthorized", { status: 401 });
   }
 

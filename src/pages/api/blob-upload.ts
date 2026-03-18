@@ -19,6 +19,8 @@ export const POST: APIRoute = async ({ request }) => {
             "image/jpeg",
             "image/png",
             "image/webp",
+            "image/heic",
+            "image/heif",
           ],
           addRandomSuffix: true,
         };
