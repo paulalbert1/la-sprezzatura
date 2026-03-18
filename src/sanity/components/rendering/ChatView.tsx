@@ -5,8 +5,11 @@ import {
   ArrowLeftIcon,
   SparklesIcon,
   CloseIcon,
+  UploadIcon,
 } from "@sanity/icons";
-import { PaperclipIcon } from "@sanity/icons";
+
+// @sanity/icons has no PaperclipIcon -- UploadIcon is the closest match
+const PaperclipIcon = UploadIcon;
 import { UsageBadge } from "./UsageBadge";
 import { ChatMessage } from "./ChatMessage";
 import { RenderingCard } from "./RenderingCard";
