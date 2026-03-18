@@ -147,7 +147,7 @@
 - [x] **RNDR-01**: Liz can create a rendering session in Sanity Studio linked to a project (or as scratchpad), uploading floor plan, space photos, and inspiration images through a guided 4-step wizard -- Phase 10
 - [x] **RNDR-02**: Liz generates a photorealistic 1K room rendering by describing her design vision -- the AI uses uploaded inputs to produce the image -- Phase 10
 - [x] **RNDR-03**: Liz refines a rendering through a conversational chat interface -- each refinement produces a new version while preserving the full session history -- Phase 10
-- [ ] **RNDR-04**: Liz promotes a rendering to a "Design Option" with a caption, making it visible to clients on the portal -- Phase 11
+- [x] **RNDR-04**: Liz promotes a rendering to a "Design Option" with a caption, making it visible to clients on the portal -- Phase 11
 - [ ] **RNDR-05**: Client sees promoted design options in a gallery on their project portal, can favorite options and leave comments -- Phase 11
 - [x] **RNDR-06**: Studio shows a persistent usage counter and blocks generation at the monthly limit -- Phase 10
 - [x] **RNDR-07**: Per-designer monthly generation counts are tracked for billing and cost control -- Phase 10
