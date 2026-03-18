@@ -110,7 +110,7 @@ Studio typography uses `@sanity/ui` `Text` and `Label` components with `size` pr
 
 Accent reserved for (Phase 11 portal additions):
 - Heart icon filled state (favorited)
-- "Submit" button fill on comment form
+- "Post Comment" button fill on comment form
 - Gallery card image hover overlay border (subtle `border-terracotta/20`)
 - Focus ring on comment text input (`ring-terracotta`)
 - Link hover states (`hover:text-terracotta`)
@@ -140,7 +140,7 @@ Studio colors are managed by `@sanity/ui` and respect dark/light mode. Phase 11 
 | `caution` | Soft warnings (no floor plan, 7+ images, usage at 80-95%) |
 | `critical` | Error cards, failed rendering badges, usage at 95%+ |
 | `positive` | Success states (promoted badge, generation complete) |
-| transparent | Ghost-mode buttons (Back, Cancel, View prompt) |
+| transparent | Ghost-mode buttons (Back, Discard Session, Cancel Generation, Keep Rendering, View prompt) |
 
 ### Usage Badge Color Coding (Studio)
 
@@ -329,7 +329,7 @@ Card (height="fill", overflow="auto")
   [Navigation buttons -- bottom]
     Flex (justify="space-between", padding={4})
       [Left]
-        Step 1: Button (text="Cancel", mode="ghost")
+        Step 1: Button (text="Discard Session", mode="ghost")
           Shows abandon confirmation if data entered
         Steps 2-4: Button (text="Back", mode="ghost")
       [Right]
@@ -463,7 +463,7 @@ Stack (space={4})
           "Composing vision..."
           "Generating rendering..."
           "Almost there..."
-        Cancel button appears (mode="ghost")
+        Cancel Generation button appears (mode="ghost")
         Polls /api/rendering/status every 2 seconds
 ```
 
@@ -473,7 +473,7 @@ Stack (space={4})
 [Step 4 during generation]
   All inputs disabled (title, description, navigation)
   Generate button: Spinner + rotating text
-  Cancel button: visible, mode="ghost", text="Cancel"
+  Cancel button: visible, mode="ghost", text="Cancel Generation"
     onClick: abort controller signal, return to editable state
 
   Status text rotation:
@@ -507,7 +507,7 @@ Card (height="fill", display="flex", flexDirection="column")
 
   [Header bar]
     Flex (align="center", padding={3}, borderBottom)
-      Button (icon=ArrowLeftIcon, mode="ghost")
+      Button (icon=ArrowLeftIcon, mode="ghost", aria-label="Back to sessions")
         onClick: return to session list (stack navigation)
       Stack (space={1}, flex={1}, paddingX={3})
         Text (size={2}, weight="semibold"): "{sessionTitle}" (editable inline on click)
@@ -657,7 +657,7 @@ Card (radius={2}, border, tone="critical", padding={4})
           Flex (gap={2})
             Button (text="Promote", tone="primary")
               Loading: "Promoting..." with Spinner
-            Button (text="Cancel", mode="ghost")
+            Button (text="Keep Rendering", mode="ghost")
 
   [For scratchpad sessions -- project picker added]
     Dialog (header="Promote to Design Options")
@@ -674,7 +674,7 @@ Card (radius={2}, border, tone="critical", padding={4})
           Flex (gap={2})
             Button (text="Promote", tone="primary")
               Disabled when: no project selected (scratchpad only)
-            Button (text="Cancel", mode="ghost")
+            Button (text="Keep Rendering", mode="ghost")
 ```
 
 ### Studio Lightbox (Full-Size View)
@@ -907,9 +907,9 @@ article.group.cursor-pointer (data-option-index={index})
                   placeholder="Leave a comment..."
                   maxLength={500}
                 button.bg-terracotta.text-white.text-xs.uppercase.tracking-widest.font-body.px-6.py-3.hover:bg-terracotta-light.transition-colors.min-h-[44px]
-                  "Submit"
+                  "Post Comment"
                   Disabled when input empty or submitting
-                  Loading: "..." (disabled)
+                  Loading: "Posting..." (disabled)
 
         [Counter]
           div.absolute.bottom-4.left-1/2.-translate-x-1/2.text-white/60.text-xs.font-body.tracking-widest
@@ -1021,7 +1021,7 @@ article.group.cursor-pointer (data-option-index={index})
 | Description placeholder | Describe the room you envision... |
 | Description help text | Describe the style, mood, colors, materials, and any specific elements you want. |
 | Generate button | Generate |
-| Cancel button | Cancel |
+| Wizard abandon button (Step 1) | Discard Session |
 | Back button | Back |
 | Next button | Next |
 
@@ -1070,7 +1070,7 @@ article.group.cursor-pointer (data-option-index={index})
 | Caption placeholder | e.g., Contemporary living room with walnut accents |
 | Promote CTA (idle) | Promote |
 | Promote CTA (loading) | Promoting... |
-| Cancel button | Cancel |
+| Promote dialog dismiss button | Keep Rendering |
 | Scratchpad project label | Link to Project |
 | Scratchpad project help | Scratchpad renderings must be linked to a project to become Design Options. |
 | Scratchpad placeholder option | Select a project... |
@@ -1096,8 +1096,8 @@ article.group.cursor-pointer (data-option-index={index})
 | Heart aria-label (not favorited) | Add to favorites |
 | Heart aria-label (favorited) | Remove from favorites |
 | Comment input placeholder | Leave a comment... |
-| Comment submit button | Submit |
-| Comment submit loading | ... |
+| Comment submit button | Post Comment |
+| Comment submit loading | Posting... |
 | Comment error | Failed to post comment. Try again. |
 | Lightbox close aria-label | Close |
 | Lightbox prev aria-label | Previous |
@@ -1134,7 +1134,7 @@ The Design Options section does NOT render when there are 0 design options. No e
       --> [Polls /api/rendering/status every 2s]
         --> [Complete: wizard closes, ChatView opens with new session]
         --> [Error: error card shown, Generate re-enabled]
-    --> [Click "Cancel"]
+    --> [Click "Cancel Generation"]
       --> [Generation aborted, return to editable Step 4]
 ```
 
@@ -1180,7 +1180,7 @@ The Design Options section does NOT render when there are 0 design options. No e
     --> [Full uncropped image displayed]
     --> [Heart toggle visible: click to favorite/unfavorite]
     --> [Comment thread visible: existing comments + input field]
-    --> [Client types comment, clicks "Submit"]
+    --> [Client types comment, clicks "Post Comment"]
       --> [POST /api/rendering/react]
       --> [Comment appears in thread (optimistic)]
     --> [Client clicks heart]
@@ -1202,7 +1202,7 @@ The Design Options section does NOT render when there are 0 design options. No e
 | Lightbox keyboard | ArrowLeft (prev), ArrowRight (next), Escape (close). |
 | Heart toggle a11y | `role="button"`, `aria-label` changes with state ("Add to favorites" / "Remove from favorites"), `aria-pressed={isFavorited}` |
 | Gallery cards | `role="button"`, `aria-label="View {caption}"` (or "View design option"), keyboard-accessible via Tab + Enter/Space. |
-| Comment form | `<label>` visually hidden for input (`aria-label="Leave a comment"`). Submit button has text content. Error has `role="alert"`. |
+| Comment form | `<label>` visually hidden for input (`aria-label="Leave a comment"`). "Post Comment" button has text content. Error has `role="alert"`. |
 | Image alt text | Gallery card: `alt={caption \|\| "Design option"}`. Lightbox: same alt. Studio tool: thumbnails use `alt={fileName}`. |
 | Reduced motion | Lightbox open/close transition respects `prefers-reduced-motion: reduce` (instant show/hide). Heart scale animation disabled. Gallery hover zoom disabled. |
 | Color contrast | Charcoal on cream = 12.5:1 (AAA). Stone on cream = 3.6:1 (AA large). Terracotta on white = 4.5:1 (AA). White/80 on charcoal/90 = 12:1 (AAA). White/60 on charcoal/90 = 7.5:1 (AAA). |
