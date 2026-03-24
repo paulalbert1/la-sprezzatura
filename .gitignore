@@ -18,3 +18,4 @@ dist/
 
 # Generated/runtime
 .superpowers/
+.planning/
