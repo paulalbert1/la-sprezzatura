@@ -17,6 +17,7 @@ export function WizardContainer() {
   const { wizardData } = state;
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [maxVisitedStep, setMaxVisitedStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
@@ -61,12 +62,15 @@ export function WizardContainer() {
 
   const handleNext = () => {
     if (currentStep < 4) {
+      let nextStep: number;
       // Skip Classify if no images
       if (currentStep === 2 && wizardData.images.length === 0) {
-        setCurrentStep(4);
+        nextStep = 4;
       } else {
-        setCurrentStep(currentStep + 1);
+        nextStep = currentStep + 1;
       }
+      setCurrentStep(nextStep);
+      setMaxVisitedStep((prev) => Math.max(prev, nextStep));
     }
   };
 
@@ -189,71 +193,91 @@ export function WizardContainer() {
   };
 
   // -- Stepper --
-  const renderStepper = () => (
-    <Flex align="center" justify="center" padding={4} gap={1}>
-      {STEP_LABELS.map((label, i) => {
-        const stepNum = i + 1;
-        const isActive = stepNum === currentStep;
-        const isCompleted = stepNum < currentStep;
-        const isFuture = stepNum > currentStep;
+  const renderStepper = () => {
+    const hasImages = wizardData.images.length > 0;
 
-        return (
-          <Flex key={label} align="center" gap={1}>
-            {i > 0 && (
-              <div
+    return (
+      <Flex align="center" justify="center" padding={4} gap={1}>
+        {STEP_LABELS.map((label, i) => {
+          const stepNum = i + 1;
+          const isActive = stepNum === currentStep;
+          const isCompleted = stepNum < currentStep;
+          const isVisited = stepNum <= maxVisitedStep;
+          const isClassifyDisabled = stepNum === 3 && !hasImages;
+          const isClickable = isVisited && !isActive && !isClassifyDisabled;
+
+          return (
+            <Flex key={label} align="center" gap={1}>
+              {i > 0 && (
+                <div
+                  style={{
+                    width: 24,
+                    height: 2,
+                    background: isClassifyDisabled && stepNum === 3
+                      ? "#ddd"
+                      : (isCompleted || isActive)
+                        ? "#2276fc"
+                        : "#ccc",
+                    margin: "0 4px",
+                  }}
+                />
+              )}
+              <Flex
+                align="center"
+                gap={2}
                 style={{
-                  width: 24,
-                  height: 2,
-                  background: isCompleted || isActive ? "#2276fc" : "#ccc",
-                  margin: "0 4px",
+                  cursor: isClickable ? "pointer" : "default",
+                  opacity: isClassifyDisabled ? 0.4 : 1,
                 }}
-              />
-            )}
-            <Flex
-              align="center"
-              gap={2}
-              style={{ cursor: isCompleted ? "pointer" : "default" }}
-              onClick={isCompleted ? () => setCurrentStep(stepNum) : undefined}
-            >
-              <div
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  background: isActive
-                    ? "#2276fc"
-                    : isCompleted
-                      ? "#059669"
-                      : "transparent",
-                  color:
-                    isActive || isCompleted ? "#fff" : "#999",
-                  border: isFuture ? "2px solid #ccc" : "none",
-                }}
+                onClick={isClickable ? () => setCurrentStep(stepNum) : undefined}
               >
-                {isCompleted ? (
-                  <CheckmarkIcon style={{ fontSize: 14 }} />
-                ) : (
-                  stepNum
-                )}
-              </div>
-              <Text
-                size={1}
-                muted={isFuture}
-                weight={isActive ? "semibold" : "regular"}
-              >
-                {label}
-              </Text>
+                <div
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    background: isActive
+                      ? "#2276fc"
+                      : isCompleted
+                        ? "#059669"
+                        : isClassifyDisabled
+                          ? "#eee"
+                          : "transparent",
+                    color: isActive || isCompleted
+                      ? "#fff"
+                      : isClassifyDisabled
+                        ? "#bbb"
+                        : "#999",
+                    border: !isActive && !isCompleted && !isClassifyDisabled
+                      ? "2px solid #ccc"
+                      : "none",
+                  }}
+                >
+                  {isCompleted ? (
+                    <CheckmarkIcon style={{ fontSize: 14 }} />
+                  ) : (
+                    stepNum
+                  )}
+                </div>
+                <Text
+                  size={1}
+                  muted={!isActive && !isClickable}
+                  weight={isActive ? "semibold" : "regular"}
+                >
+                  {label}
+                </Text>
+              </Flex>
             </Flex>
-          </Flex>
-        );
-      })}
-    </Flex>
-  );
+          );
+        })}
+      </Flex>
+    );
+  };
 
   // -- Step content --
   const renderStep = () => {
