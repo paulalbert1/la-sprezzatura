@@ -281,11 +281,9 @@ async function processGeneration(
   } catch (error: any) {
     console.error("[Rendering:Generate] Error:", error);
 
-    // Determine user-friendly error message — include raw error for debugging
-    const rawError = error.message || String(error);
-    console.error("[Rendering:Generate] Raw error:", rawError);
+    // Determine user-friendly error message
     let errorMessage =
-      `Generation failed: ${rawError.substring(0, 200)}`;
+      "Generation failed due to a server error. Tap to retry -- you will not be charged for the failed attempt.";
     if (
       error.message?.includes("content policy") ||
       error.message?.includes("SAFETY")
@@ -297,29 +295,36 @@ async function processGeneration(
         "The AI returned text but no image. This can happen with certain prompts. Try rephrasing your description.";
     }
 
-    // Append error rendering + update session status
+    // Save error rendering + update session status (use set, not append — Sanity null array issue)
     const errorKey = generatePortalToken(8);
+    const currentDoc = await sanityWriteClient.getDocument(sessionId).catch(() => null);
+    const currentRenderings = Array.isArray(currentDoc?.renderings) ? currentDoc.renderings : [];
     await sanityWriteClient
       .patch(sessionId)
-      .set({ status: "error", lastError: errorMessage })
-      .append("renderings", [
-        {
-          _key: errorKey,
-          blobPathname: "",
-          prompt: "",
-          textResponse: "",
-          isPromoted: false,
-          generatedAt: new Date().toISOString(),
-          status: "error",
-          errorMessage,
-          modelId: "",
-          latencyMs: Date.now() - startTime,
-          inputTokens: 0,
-          outputTokens: 0,
-          costEstimate: 0,
-          bytesStored: 0,
-        },
-      ])
+      .set({
+        status: "error",
+        lastError: errorMessage,
+        renderings: [
+          ...currentRenderings,
+          {
+            _key: errorKey,
+            _type: "renderingOutput",
+            blobPathname: "",
+            prompt: "",
+            textResponse: "",
+            isPromoted: false,
+            generatedAt: new Date().toISOString(),
+            status: "error",
+            errorMessage,
+            modelId: "",
+            latencyMs: Date.now() - startTime,
+            inputTokens: 0,
+            outputTokens: 0,
+            costEstimate: 0,
+            bytesStored: 0,
+          },
+        ],
+      })
       .commit()
       .catch((e: any) =>
         console.error(
