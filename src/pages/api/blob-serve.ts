@@ -20,9 +20,9 @@ export const GET: APIRoute = async (context) => {
   }
 
   try {
-    // Fetch private blob using server-side token (BLOB_READ_WRITE_TOKEN env var)
+    // Fetch blob using server-side token (BLOB_READ_WRITE_TOKEN env var)
     const { get } = await import("@vercel/blob");
-    const result = await get(pathname, { access: "private" });
+    const result = await get(pathname, { access: "public" });
 
     if (!result) {
       return new Response("Not found", { status: 404 });

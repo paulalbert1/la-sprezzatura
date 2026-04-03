@@ -100,7 +100,7 @@ export async function fetchAndEncodeImage(
   blobPathname: string,
 ): Promise<{ base64: string; mimeType: string }> {
   console.log("[fetchAndEncodeImage] Fetching:", blobPathname);
-  const result = await get(blobPathname, { access: "private" });
+  const result = await get(blobPathname, { access: "public" });
   if (!result) {
     throw new Error(`Image not found: ${blobPathname}`);
   }
