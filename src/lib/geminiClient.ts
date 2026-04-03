@@ -99,13 +99,14 @@ function extractFromResponse(response: {
 export async function fetchAndEncodeImage(
   blobPathname: string,
 ): Promise<{ base64: string; mimeType: string }> {
-  const result = await get(blobPathname, { access: "public" });
+  console.log("[fetchAndEncodeImage] Fetching:", blobPathname);
+  const result = await get(blobPathname, { access: "private" });
   if (!result) {
     throw new Error(`Image not found: ${blobPathname}`);
   }
 
   if (!result.stream) {
-    throw new Error(`Image not found: ${blobPathname}`);
+    throw new Error(`Image stream empty: ${blobPathname} (status: ${result.statusCode})`);
   }
   const chunks: Uint8Array[] = [];
   const reader = result.stream.getReader();
@@ -116,6 +117,7 @@ export async function fetchAndEncodeImage(
   }
   const buffer = Buffer.concat(chunks);
   const base64 = buffer.toString("base64");
+  console.log("[fetchAndEncodeImage] OK:", blobPathname, buffer.length, "bytes");
 
   return {
     base64,
