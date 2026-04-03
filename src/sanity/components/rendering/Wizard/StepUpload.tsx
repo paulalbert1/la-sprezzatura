@@ -1,6 +1,6 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { Stack, Card, Grid, Text, Spinner } from "@sanity/ui";
-import { UploadIcon, CloseIcon, ErrorOutlineIcon } from "@sanity/icons";
+import { UploadIcon, CloseIcon, ErrorOutlineIcon, DocumentPdfIcon } from "@sanity/icons";
 import { upload } from "@vercel/blob/client";
 import type { WizardImage } from "../types";
 import { getImageServeUrl } from "../types";
@@ -14,12 +14,47 @@ const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/heic,image/heif,ap
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const SERVER_UPLOAD_LIMIT = 4.5 * 1024 * 1024; // 4.5MB -- Vercel Functions body limit
 
+const UPLOAD_CONCURRENCY = 3;
+
+async function runWithConcurrency<T>(
+  tasks: (() => Promise<T>)[],
+  limit: number,
+): Promise<T[]> {
+  const results: T[] = [];
+  let index = 0;
+
+  async function runNext(): Promise<void> {
+    while (index < tasks.length) {
+      const currentIndex = index++;
+      results[currentIndex] = await tasks[currentIndex]();
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(limit, tasks.length) },
+    () => runNext(),
+  );
+  await Promise.all(workers);
+  return results;
+}
+
 export function StepUpload({ images, onImagesChange }: StepUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   // Mutable ref to track latest images state across async upload iterations
   const imagesRef = useRef(images);
   imagesRef.current = images;
+
+  // Revoke all remaining object URLs on unmount (Memory Management Contract)
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach((img) => {
+        if (img.localPreviewUrl) {
+          URL.revokeObjectURL(img.localPreviewUrl);
+        }
+      });
+    };
+  }, []);
 
   const uploadFile = useCallback(async (file: File): Promise<{ pathname: string }> => {
     if (file.size <= SERVER_UPLOAD_LIMIT) {
@@ -47,63 +82,73 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
       const fileArray = Array.from(files);
       const currentCount = imagesRef.current.length;
 
-      // Create placeholders
+      // Create placeholders with instant local preview URLs (per D-01)
       const placeholders: WizardImage[] = fileArray.map((f, i) => {
         const idx = currentCount + i;
+        const isPdf = f.type === "application/pdf";
         return {
           blobPathname: "",
           fileName: f.name,
-          file: f,  // Retain File object for retry capability
+          file: f,
           imageType: idx === 0 && currentCount === 0 ? "Floor Plan" : "Existing Space Photo",
           location: "",
           notes: "",
           copyExact: idx === 0 && currentCount === 0,
           uploading: true,
           error: undefined,
+          localPreviewUrl: isPdf ? undefined : URL.createObjectURL(f),
         };
       });
 
       const updatedImages = [...imagesRef.current, ...placeholders];
       onImagesChange(updatedImages);
 
-      // Upload each file sequentially, reading latest state via ref
-      for (let i = 0; i < fileArray.length; i++) {
-        const file = fileArray[i];
+      // Build upload tasks for concurrency pool (per D-04, limit=3)
+      const uploadTasks = fileArray.map((file, i) => {
         const placeholderIndex = currentCount + i;
 
-        // File size check
-        if (file.size > MAX_FILE_SIZE) {
-          const latest = [...imagesRef.current];
-          latest[placeholderIndex] = {
-            ...latest[placeholderIndex],
-            uploading: false,
-            error: "File exceeds 20MB limit",
-          };
-          onImagesChange(latest);
-          continue;
-        }
+        return async () => {
+          // File size check
+          if (file.size > MAX_FILE_SIZE) {
+            const latest = [...imagesRef.current];
+            latest[placeholderIndex] = {
+              ...latest[placeholderIndex],
+              uploading: false,
+              error: "File exceeds 20MB limit",
+            };
+            onImagesChange(latest);
+            return;
+          }
 
-        try {
-          const result = await uploadFile(file);
-          const latest = [...imagesRef.current];
-          latest[placeholderIndex] = {
-            ...latest[placeholderIndex],
-            blobPathname: result.pathname,
-            uploading: false,
-            error: undefined,
-            file: undefined,  // Clear File reference after successful upload
-          };
-          onImagesChange(latest);
-        } catch {
-          const latest = [...imagesRef.current];
-          latest[placeholderIndex] = {
-            ...latest[placeholderIndex],
-            uploading: false,
-            error: "Upload failed",
-          };
-          onImagesChange(latest);
-        }
-      }
+          try {
+            const result = await uploadFile(file);
+            const latest = [...imagesRef.current];
+            // Revoke local preview URL before clearing (Memory Management Contract)
+            if (latest[placeholderIndex].localPreviewUrl) {
+              URL.revokeObjectURL(latest[placeholderIndex].localPreviewUrl!);
+            }
+            latest[placeholderIndex] = {
+              ...latest[placeholderIndex],
+              blobPathname: result.pathname,
+              uploading: false,
+              error: undefined,
+              file: undefined,
+              localPreviewUrl: undefined,
+            };
+            onImagesChange(latest);
+          } catch {
+            const latest = [...imagesRef.current];
+            latest[placeholderIndex] = {
+              ...latest[placeholderIndex],
+              uploading: false,
+              error: "Upload failed",
+            };
+            onImagesChange(latest);
+          }
+        };
+      });
+
+      await runWithConcurrency(uploadTasks, UPLOAD_CONCURRENCY);
     },
     [onImagesChange, uploadFile],
   );
@@ -113,20 +158,36 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
       const img = imagesRef.current[index];
       if (!img?.file) return;
 
-      // Mark as uploading
+      const isPdf = img.file.type === "application/pdf";
+      const newPreviewUrl = isPdf ? undefined : URL.createObjectURL(img.file);
+
+      // Mark as uploading with fresh preview URL
       const latest = [...imagesRef.current];
-      latest[index] = { ...latest[index], uploading: true, error: undefined };
+      // Revoke old preview URL if exists
+      if (latest[index].localPreviewUrl) {
+        URL.revokeObjectURL(latest[index].localPreviewUrl!);
+      }
+      latest[index] = {
+        ...latest[index],
+        uploading: true,
+        error: undefined,
+        localPreviewUrl: newPreviewUrl,
+      };
       onImagesChange(latest);
 
       try {
         const result = await uploadFile(img.file);
         const updated = [...imagesRef.current];
+        if (updated[index].localPreviewUrl) {
+          URL.revokeObjectURL(updated[index].localPreviewUrl!);
+        }
         updated[index] = {
           ...updated[index],
           blobPathname: result.pathname,
           uploading: false,
           error: undefined,
-          file: undefined,  // Clear File reference after success
+          file: undefined,
+          localPreviewUrl: undefined,
         };
         onImagesChange(updated);
       } catch {
@@ -176,6 +237,10 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
 
   const removeImage = useCallback(
     (index: number) => {
+      const img = images[index];
+      if (img?.localPreviewUrl) {
+        URL.revokeObjectURL(img.localPreviewUrl);
+      }
       onImagesChange(images.filter((_, i) => i !== index));
     },
     [images, onImagesChange],
@@ -229,64 +294,107 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
         <Grid columns={[2, 3, 4]} gap={3}>
           {images.map((img, idx) => (
             <Card key={`${img.fileName}-${idx}`} padding={2} radius={2} border>
-              <div style={{ position: "relative", width: 80, height: 80, margin: "0 auto" }}>
-                {img.uploading ? (
-                  <div
-                    style={{
-                      width: 80,
-                      height: 80,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Spinner muted />
-                  </div>
-                ) : img.error ? (
-                  <div
-                    style={{
-                      width: 80,
-                      height: 80,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <ErrorOutlineIcon style={{ fontSize: 24, color: "#dc3545" }} />
-                    <Text size={0} style={{ color: "#dc3545", marginTop: 4 }}>
-                      {img.error}
-                    </Text>
-                    {img.file && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); retryUpload(idx); }}
-                        style={{
-                          marginTop: 4,
-                          padding: "2px 8px",
-                          fontSize: 11,
-                          border: "1px solid #dc3545",
-                          borderRadius: 4,
-                          background: "transparent",
-                          color: "#dc3545",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Retry
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <img
-                    src={getImageServeUrl(img.blobPathname, "studio")}
-                    alt={img.fileName}
-                    style={{
-                      width: 80,
-                      height: 80,
-                      objectFit: "cover",
-                      borderRadius: 4,
-                    }}
-                  />
-                )}
+              <div style={{ position: "relative", width: 120, height: 120, margin: "0 auto" }}>
+                {(() => {
+                  const previewSrc = img.blobPathname
+                    ? getImageServeUrl(img.blobPathname, "studio")
+                    : img.localPreviewUrl || null;
+
+                  return (
+                    <>
+                      {/* Image preview or PDF/empty placeholder */}
+                      {previewSrc ? (
+                        <img
+                          src={previewSrc}
+                          alt={img.fileName}
+                          style={{
+                            width: 120,
+                            height: 120,
+                            objectFit: "cover",
+                            borderRadius: 4,
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: 120,
+                            height: 120,
+                            background: "#f0f0f0",
+                            borderRadius: 4,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 4,
+                          }}
+                        >
+                          {img.uploading ? (
+                            <Spinner muted />
+                          ) : (
+                            <DocumentPdfIcon style={{ fontSize: 32, opacity: 0.5 }} />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Spinner overlay during upload (per D-01, D-05) */}
+                      {img.uploading && previewSrc && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "rgba(255, 255, 255, 0.6)",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <Spinner muted />
+                        </div>
+                      )}
+
+                      {/* Error overlay with retry */}
+                      {img.error && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: previewSrc ? "rgba(255, 255, 255, 0.85)" : "transparent",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <ErrorOutlineIcon style={{ fontSize: 24, color: "#dc3545" }} />
+                          <Text size={0} style={{ color: "#dc3545", marginTop: 4 }}>
+                            {img.error}
+                          </Text>
+                          {img.file && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); retryUpload(idx); }}
+                              style={{
+                                marginTop: 4,
+                                padding: "2px 8px",
+                                fontSize: 11,
+                                border: "1px solid #dc3545",
+                                borderRadius: 4,
+                                background: "transparent",
+                                color: "#dc3545",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Retry
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+
+                {/* Remove button (visible when not uploading) */}
                 {!img.uploading && (
                   <button
                     onClick={(e) => {
