@@ -21,7 +21,7 @@ const singleImage = images && images.length === 1 ? images[0].image : image;
 const singleAlt = images && images.length === 1 ? images[0].alt : `${title} hero image`;
 ---
 
-<section class="hero relative w-full h-screen min-h-[600px] overflow-hidden">
+<section class="hero relative w-full h-[70vh] md:h-screen min-h-[400px] overflow-hidden">
   {/* Slide container: all slides stacked absolutely */}
   {hasSlideshow && (
     <div class="absolute inset-0">
