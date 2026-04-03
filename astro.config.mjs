@@ -63,6 +63,7 @@ export default defineConfig({
     },
   ],
   vite: {
+    envPrefix: ["PUBLIC_", "SANITY_STUDIO_"],
     plugins: [tailwindcss()],
   },
 });
