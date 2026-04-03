@@ -242,6 +242,7 @@ async function processGeneration(
 
     const patchResult = await sanityWriteClient
       .patch(sessionId)
+      .setIfMissing({ renderings: [], conversation: [] })
       .set({ status: "complete", lastError: "" })
       .append("renderings", [renderingObj])
       .append("conversation", [
