@@ -1,4 +1,4 @@
-import { Card, Flex, Stack, Text } from "@sanity/ui";
+import { Card, Flex, Stack, Text, Spinner } from "@sanity/ui";
 import type { WizardImage } from "../types";
 import { getImageServeUrl } from "../types";
 
@@ -41,7 +41,7 @@ export function StepClassify({ images, onImagesChange }: StepClassifyProps) {
         <Card key={`${img.fileName}-${idx}`} padding={4} radius={2} border>
           <Flex gap={4}>
             {/* Left: thumbnail */}
-            <div style={{ flexShrink: 0 }}>
+            <div style={{ flexShrink: 0, position: "relative" }}>
               {img.blobPathname ? (
                 <img
                   src={getImageServeUrl(img.blobPathname, "studio")}
@@ -53,6 +53,34 @@ export function StepClassify({ images, onImagesChange }: StepClassifyProps) {
                     borderRadius: 4,
                   }}
                 />
+              ) : img.localPreviewUrl ? (
+                <div style={{ position: "relative", width: 80, height: 80 }}>
+                  <img
+                    src={img.localPreviewUrl}
+                    alt={img.fileName}
+                    style={{
+                      width: 80,
+                      height: 80,
+                      objectFit: "cover",
+                      borderRadius: 4,
+                    }}
+                  />
+                  {img.uploading && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(255, 255, 255, 0.6)",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <Spinner muted />
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div
                   style={{
