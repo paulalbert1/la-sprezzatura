@@ -218,36 +218,43 @@ async function processGeneration(
     const userConvKey = generatePortalToken(8);
     const modelConvKey = generatePortalToken(8);
 
-    await sanityWriteClient
+    console.log("[Rendering:Generate] Blob put OK:", blob.pathname, bytesStored, "bytes");
+
+    const renderingObj = {
+      _key: renderingKey,
+      _type: "renderingOutput",
+      blobPathname: blob.pathname,
+      prompt,
+      textResponse: result.textResponse || "",
+      isPromoted: false,
+      generatedAt: new Date().toISOString(),
+      status: "complete" as const,
+      errorMessage: "",
+      modelId: result.modelId,
+      latencyMs,
+      inputTokens: result.inputTokens,
+      outputTokens: result.outputTokens,
+      costEstimate,
+      bytesStored,
+    };
+
+    console.log("[Rendering:Generate] Patching session:", sessionId, "renderingKey:", renderingKey);
+
+    const patchResult = await sanityWriteClient
       .patch(sessionId)
       .set({ status: "complete", lastError: "" })
-      .append("renderings", [
-        {
-          _key: renderingKey,
-          blobPathname: blob.pathname,
-          prompt,
-          textResponse: result.textResponse || "",
-          isPromoted: false,
-          generatedAt: new Date().toISOString(),
-          status: "complete",
-          errorMessage: "",
-          modelId: result.modelId,
-          latencyMs,
-          inputTokens: result.inputTokens,
-          outputTokens: result.outputTokens,
-          costEstimate,
-          bytesStored,
-        },
-      ])
+      .append("renderings", [renderingObj])
       .append("conversation", [
         {
           _key: userConvKey,
+          _type: "conversationEntry",
           role: "user",
           text: description,
           timestamp: new Date().toISOString(),
         },
         {
           _key: modelConvKey,
+          _type: "conversationEntry",
           role: "model",
           text: result.textResponse || "",
           image: blob.pathname,
@@ -255,6 +262,8 @@ async function processGeneration(
         },
       ])
       .commit();
+
+    console.log("[Rendering:Generate] Patch OK. Renderings:", patchResult.renderings?.length, "Conv:", patchResult.conversation?.length);
 
     // 6. Increment usage ONLY after successful generation + upload
     // Do NOT increment usage on failure
