@@ -8,6 +8,10 @@ import { PortableText } from "astro-portabletext";
 import { getProjects, getProjectBySlug } from "../../sanity/queries";
 import { urlFor } from "../../sanity/image";
 
+function formatLabel(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 // Prerender as static HTML -- required when using Vercel adapter with hybrid output
 export const prerender = true;
 
@@ -94,7 +98,7 @@ const ogImageUrl = heroImageUrl ?? undefined;
       {
         (project.roomType || project.style) && (
           <p class="text-xs uppercase tracking-widest text-stone-light mb-3 font-body">
-            {[project.roomType, project.style].filter(Boolean).join(" · ")}
+            {[project.roomType, project.style].filter(Boolean).map(formatLabel).join(" · ")}
           </p>
         )
       }

@@ -6,9 +6,14 @@ interface Props {
 
 const { roomTypes, styles } = Astro.props;
 
+/** Convert slug to display label: "full-home" → "Full Home" */
+function formatLabel(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const allFilters = [
-  ...roomTypes.map((t) => ({ label: t, type: "room" as const })),
-  ...styles.map((s) => ({ label: s, type: "style" as const })),
+  ...roomTypes.map((t) => ({ label: formatLabel(t), value: t, type: "room" as const })),
+  ...styles.map((s) => ({ label: formatLabel(s), value: s, type: "style" as const })),
 ];
 ---
 
@@ -25,11 +30,11 @@ const allFilters = [
   </button>
 
   {
-    allFilters.map(({ label, type }) => (
+    allFilters.map(({ label, value, type }) => (
       <button
         class="filter-pill px-5 py-2 rounded-full text-xs uppercase tracking-widest font-body transition-colors duration-200 cursor-pointer border bg-cream-dark text-charcoal border-stone-light hover:bg-charcoal hover:text-white hover:border-charcoal"
         data-filter={type}
-        data-value={label}
+        data-value={value}
       >
         {label}
       </button>

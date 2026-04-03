@@ -14,6 +14,10 @@ interface Props {
 }
 
 const { project } = Astro.props;
+
+function formatLabel(slug: string): string {
+  return slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 ---
 
 <article
@@ -47,7 +51,7 @@ const { project } = Astro.props;
       {
         project.roomType && (
           <p class="text-xs uppercase tracking-widest text-stone mb-2 font-body">
-            {project.roomType}
+            {formatLabel(project.roomType)}
           </p>
         )
       }
