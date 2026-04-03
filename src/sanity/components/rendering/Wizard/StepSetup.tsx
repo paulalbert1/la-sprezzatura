@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useClient } from "sanity";
 import { Stack, Text, Button, Flex } from "@sanity/ui";
 import type { WizardData, ProjectOption } from "../types";
+import { STYLE_PRESETS } from "../types";
 
 interface StepSetupProps {
   wizardData: WizardData;
@@ -11,6 +12,7 @@ interface StepSetupProps {
 export function StepSetup({ wizardData, onChange }: StepSetupProps) {
   const client = useClient({ apiVersion: "2025-12-15" });
   const [projects, setProjects] = useState<ProjectOption[]>([]);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
 
   useEffect(() => {
     client
@@ -93,16 +95,23 @@ export function StepSetup({ wizardData, onChange }: StepSetupProps) {
         </Flex>
       </Stack>
 
-      {/* Style Preset -- optional */}
+      {/* Style Preset -- optional, per D-06 */}
       <Stack space={2}>
         <Text size={1} weight="semibold">
           Style Preset
         </Text>
-        <input
-          type="text"
-          value={wizardData.stylePreset}
-          onChange={(e) => onChange({ stylePreset: e.target.value })}
-          placeholder="e.g., Scandinavian minimalist, Art Deco warm"
+        <select
+          value={isOtherSelected ? "__other__" : wizardData.stylePreset}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === "__other__") {
+              setIsOtherSelected(true);
+              onChange({ stylePreset: "" });
+            } else {
+              setIsOtherSelected(false);
+              onChange({ stylePreset: val });
+            }
+          }}
           style={{
             width: "100%",
             padding: "8px 12px",
@@ -113,7 +122,31 @@ export function StepSetup({ wizardData, onChange }: StepSetupProps) {
             fontSize: 14,
             boxSizing: "border-box",
           }}
-        />
+        >
+          {STYLE_PRESETS.map((p) => (
+            <option key={p.value} value={p.value}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+        {isOtherSelected && (
+          <input
+            type="text"
+            value={wizardData.stylePreset}
+            onChange={(e) => onChange({ stylePreset: e.target.value })}
+            placeholder="Describe your style..."
+            style={{
+              width: "100%",
+              padding: "8px 12px",
+              borderRadius: 4,
+              border: "1px solid var(--card-border-color, #ccc)",
+              background: "var(--card-bg-color, #fff)",
+              color: "var(--card-fg-color, #333)",
+              fontSize: 14,
+              boxSizing: "border-box",
+            }}
+          />
+        )}
       </Stack>
     </Stack>
   );
