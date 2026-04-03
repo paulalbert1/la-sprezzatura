@@ -20,3 +20,4 @@ dist/
 .superpowers/
 .planning/
 .vercel
+.env*.local

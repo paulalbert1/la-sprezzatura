@@ -17,19 +17,12 @@ const PROJECT_TYPES = [
   "Living Space Redesign",
   "Office / Study",
   "Outdoor Living",
+  "Commercial",
   "Carpet Curation",
   "Refresh & Styling",
   "Other",
 ];
 
-const BUDGET_RANGES = [
-  "Under $25,000",
-  "$25,000 \u2013 $50,000",
-  "$50,000 \u2013 $100,000",
-  "$100,000 \u2013 $250,000",
-  "$250,000+",
-  "Not sure yet",
-];
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -87,6 +80,8 @@ export default function ContactForm({ bookingLink = "https://fantastical.app/des
           : "Valid email required";
       case "projectType":
         return value ? undefined : "Please select a project type";
+      case "phone":
+        return value.trim() ? undefined : "Phone number is required";
       case "description":
         return value.trim().length >= 10
           ? undefined
@@ -112,7 +107,7 @@ export default function ContactForm({ bookingLink = "https://fantastical.app/des
 
     // Full validation
     const data = new FormData(form);
-    const fields = ["name", "email", "projectType", "description"] as const;
+    const fields = ["name", "email", "phone", "projectType", "description"] as const;
     const errors: FormErrors = {};
     let hasErrors = false;
 
@@ -217,7 +212,8 @@ export default function ContactForm({ bookingLink = "https://fantastical.app/des
           label="Phone"
           name="phone"
           type="tel"
-          placeholder="(Optional)"
+          placeholder="(555) 555-1234"
+          required
           error={state.errors.phone}
           onBlur={handleBlur}
           autoComplete="tel"
@@ -255,8 +251,8 @@ export default function ContactForm({ bookingLink = "https://fantastical.app/des
         <FieldError message={state.errors.projectType} />
       </div>
 
-      {/* Location / Budget / Timeline row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* Location / Timeline row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field
           label="Location"
           name="location"
@@ -265,26 +261,6 @@ export default function ContactForm({ bookingLink = "https://fantastical.app/des
           error={state.errors.location}
           onBlur={handleBlur}
         />
-        <div>
-          <label
-            htmlFor="budgetRange"
-            className="block text-xs uppercase tracking-widest text-stone mb-2 font-body"
-          >
-            Budget Range
-          </label>
-          <select
-            id="budgetRange"
-            name="budgetRange"
-            className="w-full bg-cream-dark text-charcoal border border-stone-light px-4 py-3 font-body text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-terracotta focus:border-terracotta appearance-none cursor-pointer"
-          >
-            <option value="">Not sure yet</option>
-            {BUDGET_RANGES.map((range) => (
-              <option key={range} value={range}>
-                {range}
-              </option>
-            ))}
-          </select>
-        </div>
         <Field
           label="Timeline"
           name="timeline"

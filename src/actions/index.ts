@@ -24,10 +24,9 @@ export const server = {
     input: z.object({
       name: z.string().min(1, "Name is required"),
       email: z.string().email("Valid email required"),
-      phone: z.string().optional(),
+      phone: z.string().min(1, "Phone number is required"),
       projectType: z.string().min(1, "Please select a project type"),
       location: z.string().optional(),
-      budgetRange: z.string().optional(),
       timeline: z.string().optional(),
       description: z.string().min(10, "Please describe your project briefly"),
     }),
@@ -57,7 +56,6 @@ export const server = {
           phone: input.phone || "(not provided)",
           projectType: input.projectType,
           location: input.location || "(not provided)",
-          budgetRange: input.budgetRange || "(not provided)",
           timeline: input.timeline || "(not provided)",
           description: input.description,
         });
@@ -104,13 +102,12 @@ export const server = {
                       <span style="font-size:16px;color:#2C2926;"><a href="mailto:${input.email}" style="color:#C4836A;">${input.email}</a></span>
                     </td>
                   </tr>
-                  ${input.phone ? `
                   <tr>
                     <td style="padding:10px 0;border-bottom:1px solid #E8E3DD;">
                       <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#8A8478;">Phone</span><br>
                       <span style="font-size:16px;color:#2C2926;">${input.phone}</span>
                     </td>
-                  </tr>` : ""}
+                  </tr>
                   <tr>
                     <td style="padding:10px 0;border-bottom:1px solid #E8E3DD;">
                       <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#8A8478;">Project Type</span><br>
@@ -122,13 +119,6 @@ export const server = {
                     <td style="padding:10px 0;border-bottom:1px solid #E8E3DD;">
                       <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#8A8478;">Location</span><br>
                       <span style="font-size:16px;color:#2C2926;">${input.location}</span>
-                    </td>
-                  </tr>` : ""}
-                  ${input.budgetRange ? `
-                  <tr>
-                    <td style="padding:10px 0;border-bottom:1px solid #E8E3DD;">
-                      <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#8A8478;">Budget Range</span><br>
-                      <span style="font-size:16px;color:#2C2926;">${input.budgetRange}</span>
                     </td>
                   </tr>` : ""}
                   ${input.timeline ? `

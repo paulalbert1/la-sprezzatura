@@ -54,12 +54,15 @@ import Navigation from "./Navigation.astro";
 </div>
 
 <script>
+  let menuInitialized = false;
   function initMobileMenu() {
+    if (menuInitialized) return;
     const menu = document.getElementById("mobile-menu");
     const closeBtn = document.getElementById("mobile-menu-close");
     const hamburger = document.getElementById("hamburger-btn");
 
     if (!menu || !closeBtn || !hamburger) return;
+    menuInitialized = true;
 
     function openMenu() {
       menu.style.display = "flex";
@@ -89,5 +92,11 @@ import Navigation from "./Navigation.astro";
     });
   }
 
+  // astro:page-load for view transitions, DOMContentLoaded as fallback
   document.addEventListener("astro:page-load", initMobileMenu);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initMobileMenu, { once: true });
+  } else {
+    initMobileMenu();
+  }
 </script>
