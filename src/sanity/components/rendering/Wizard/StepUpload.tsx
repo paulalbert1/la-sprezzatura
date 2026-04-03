@@ -12,6 +12,7 @@ interface StepUploadProps {
 
 const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const SERVER_UPLOAD_LIMIT = 4.5 * 1024 * 1024; // 4.5MB -- Vercel Functions body limit
 
 export function StepUpload({ images, onImagesChange }: StepUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -20,17 +21,39 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
   const imagesRef = useRef(images);
   imagesRef.current = images;
 
+  const uploadFile = useCallback(async (file: File): Promise<{ pathname: string }> => {
+    if (file.size <= SERVER_UPLOAD_LIMIT) {
+      // Server-side upload -- reliable on localhost and production, no CORS issues
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/blob-upload", { method: "PUT", body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: "Upload failed" }));
+        throw new Error(errData.error || "Upload failed");
+      }
+      return res.json();
+    } else {
+      // Client-side upload for large files (>4.5MB) -- direct to Vercel Blob
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/blob-upload",
+      });
+      return { pathname: blob.pathname };
+    }
+  }, []);
+
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
       const fileArray = Array.from(files);
       const currentCount = imagesRef.current.length;
 
       // Create placeholders
-      const placeholders: WizardImage[] = fileArray.map((file, i) => {
+      const placeholders: WizardImage[] = fileArray.map((f, i) => {
         const idx = currentCount + i;
         return {
           blobPathname: "",
-          fileName: file.name,
+          fileName: f.name,
+          file: f,  // Retain File object for retry capability
           imageType: idx === 0 && currentCount === 0 ? "Floor Plan" : "Existing Space Photo",
           location: "",
           notes: "",
@@ -61,16 +84,14 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
         }
 
         try {
-          const blob = await upload(file.name, file, {
-            access: "public",
-            handleUploadUrl: "/api/blob-upload",
-          });
+          const result = await uploadFile(file);
           const latest = [...imagesRef.current];
           latest[placeholderIndex] = {
             ...latest[placeholderIndex],
-            blobPathname: blob.pathname,
+            blobPathname: result.pathname,
             uploading: false,
             error: undefined,
+            file: undefined,  // Clear File reference after successful upload
           };
           onImagesChange(latest);
         } catch {
@@ -84,7 +105,41 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
         }
       }
     },
-    [onImagesChange],
+    [onImagesChange, uploadFile],
+  );
+
+  const retryUpload = useCallback(
+    async (index: number) => {
+      const img = imagesRef.current[index];
+      if (!img?.file) return;
+
+      // Mark as uploading
+      const latest = [...imagesRef.current];
+      latest[index] = { ...latest[index], uploading: true, error: undefined };
+      onImagesChange(latest);
+
+      try {
+        const result = await uploadFile(img.file);
+        const updated = [...imagesRef.current];
+        updated[index] = {
+          ...updated[index],
+          blobPathname: result.pathname,
+          uploading: false,
+          error: undefined,
+          file: undefined,  // Clear File reference after success
+        };
+        onImagesChange(updated);
+      } catch {
+        const updated = [...imagesRef.current];
+        updated[index] = {
+          ...updated[index],
+          uploading: false,
+          error: "Upload failed",
+        };
+        onImagesChange(updated);
+      }
+    },
+    [onImagesChange, uploadFile],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -202,6 +257,23 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
                     <Text size={0} style={{ color: "#dc3545", marginTop: 4 }}>
                       {img.error}
                     </Text>
+                    {img.file && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); retryUpload(idx); }}
+                        style={{
+                          marginTop: 4,
+                          padding: "2px 8px",
+                          fontSize: 11,
+                          border: "1px solid #dc3545",
+                          borderRadius: 4,
+                          background: "transparent",
+                          color: "#dc3545",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Retry
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <img
@@ -244,11 +316,22 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
                   </button>
                 )}
               </div>
-              <Text size={0} muted style={{ marginTop: 4, textAlign: "center" }}>
-                {img.fileName.length > 16
-                  ? `${img.fileName.slice(0, 13)}...`
-                  : img.fileName}
-              </Text>
+              <div
+                title={img.fileName}
+                style={{
+                  marginTop: 4,
+                  textAlign: "center",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  maxWidth: 120,
+                  margin: "4px auto 0",
+                }}
+              >
+                <Text size={0} muted>
+                  {img.fileName}
+                </Text>
+              </div>
             </Card>
           ))}
         </Grid>
