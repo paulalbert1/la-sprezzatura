@@ -36,7 +36,7 @@ export function StepClassify({ images, onImagesChange }: StepClassifyProps) {
   }
 
   return (
-    <Stack space={4}>
+    <Stack space={4} style={{ maxWidth: 800, margin: "0 auto" }}>
       {images.map((img, idx) => (
         <Card key={`${img.fileName}-${idx}`} padding={4} radius={2} border>
           <Flex gap={4}>
@@ -73,7 +73,21 @@ export function StepClassify({ images, onImagesChange }: StepClassifyProps) {
             </div>
 
             {/* Right: classification fields */}
-            <Stack space={3} style={{ flex: 1 }}>
+            <Stack space={3} style={{ flex: 1, minWidth: 0 }}>
+              {/* Filename header with CSS truncation */}
+              <div
+                title={img.fileName}
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Text size={1} weight="semibold">
+                  {img.fileName}
+                </Text>
+              </div>
+
               {/* Image type dropdown */}
               <Stack space={1}>
                 <Text size={1} weight="semibold">
@@ -100,6 +114,7 @@ export function StepClassify({ images, onImagesChange }: StepClassifyProps) {
                     background: "var(--card-bg-color, #fff)",
                     color: "var(--card-fg-color, #333)",
                     fontSize: 13,
+                    boxSizing: "border-box",
                   }}
                 >
                   {IMAGE_TYPES.map((type) => (
