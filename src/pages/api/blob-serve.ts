@@ -6,7 +6,8 @@ export const prerender = false;
 export const GET: APIRoute = async (context) => {
   // Auth check: require a valid portal session OR studio token
   const session = await getSession(context.cookies);
-  const studioToken = context.request.headers.get("x-studio-token");
+  const studioToken = context.request.headers.get("x-studio-token")
+    || context.url.searchParams.get("token");
   const isStudioAuth = studioToken && studioToken === import.meta.env.STUDIO_API_SECRET;
 
   if (!session && !isStudioAuth) {

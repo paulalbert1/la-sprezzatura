@@ -148,7 +148,8 @@ export function getStudioHeaders(): Record<string, string> {
 
 export function getImageServeUrl(blobPathname: string, source: "studio" | "portal" = "portal"): string {
   if (source === "studio") {
-    return `/api/blob-serve?path=${encodeURIComponent(blobPathname)}&source=studio`;
+    const token = getStudioToken();
+    return `/api/blob-serve?path=${encodeURIComponent(blobPathname)}&source=studio&token=${encodeURIComponent(token)}`;
   }
   return `/api/blob-serve?path=${encodeURIComponent(blobPathname)}`;
 }
