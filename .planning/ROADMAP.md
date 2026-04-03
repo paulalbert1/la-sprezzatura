@@ -65,20 +65,20 @@ Plans:
 - Decimal phases (5.1, 6.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, engagement type toggle, magic-link auth, rate limiter upgrade, and Resend domain verification
-- [ ] **Phase 6: Portal Features** - Milestones, procurement, artifacts, post-project workflow, and portal UX on the authenticated portal
+- [x] **Phase 6: Portal Features** - Milestones, procurement, artifacts, post-project workflow, and portal UX on the authenticated portal (completed 2026-04-03)
 
 ### v2.5 Contractor & Commercial Workflows (Planned)
 
 **Milestone Goal:** Extend the portal platform to contractors and building managers -- residential/commercial project classification, engagement type gating of portal features, contractor portal with scoped project access, building manager portal for commercial compliance documents, and private document storage via Vercel Blob.
 
-- [ ] **Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage** - Contractor and building manager data models, residential/commercial toggle, engagement type feature gating, multi-role session model, and Vercel Blob document storage foundation
-- [ ] **Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility** - Contractor portal UI (scope, floor plans, estimates), building manager portal UI (COIs, legal docs), and client-facing contractor schedule
+- [x] **Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage** - Contractor and building manager data models, residential/commercial toggle, engagement type feature gating, multi-role session model, and Vercel Blob document storage foundation (completed 2026-04-03)
+- [x] **Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility** - Contractor portal UI (scope, floor plans, estimates), building manager portal UI (COIs, legal docs), and client-facing contractor schedule (completed 2026-04-03)
 
 ### v3.0 AI Rendering & Go-Live (Planned)
 
 **Milestone Goal:** Equip Liz with an AI rendering tool for photorealistic room visualizations, complete business operations (send update, investment proposals), polish the public site, and consolidate DNS -- the final milestone before extracting to the Linha multi-tenant platform.
 
-- [ ] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap
+- [x] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap (completed 2026-04-03)
 - [x] **Phase 10: AI Rendering Engine** - Rendering schemas, Gemini API integration, generate/refine/status API routes, usage tracking, and Vercel Blob image storage (completed 2026-03-17)
 - [x] **Phase 11: Rendering Studio Tool and Design Options Gallery** - Sanity Studio custom tool (wizard, refinement, session management), promote-to-Design-Option workflow, and client portal Design Options gallery with favorites and comments (completed 2026-03-18)
 - [ ] **Phase 12: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
@@ -231,11 +231,11 @@ Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
 | 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
 | 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 12) | - |
 | 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
-| 6. Portal Features | v2.0 | 0/5 | Not started | - |
-| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Not started | - |
-| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Not started | - |
-| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | In Progress | - |
-| 10. AI Rendering Engine | 4/4 | Complete    | 2026-03-17 | - |
+| 6. Portal Features | v2.0 | 0/5 | Complete    | 2026-04-03 |
+| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Complete    | 2026-04-03 |
+| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Complete    | 2026-04-03 |
+| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | Complete    | 2026-04-03 |
+| 10. AI Rendering Engine | 4/4 | Complete    | Complete    | 2026-04-03 |
 | 11. Rendering Studio Tool and Design Options Gallery | 4/4 | Complete    | 2026-03-18 | - |
 | 12. DNS Cutover and Go-Live | v3.0 | 0/3 | Not started | - |
 
