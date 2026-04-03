@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /portal
+Disallow: /workorder
+Disallow: /building
+Disallow: /api/
+
+Sitemap: https://lasprezz.com/sitemap-index.xml

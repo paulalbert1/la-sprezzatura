@@ -2,18 +2,39 @@
 const schema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://lasprezz.com/#business",
   name: "La Sprezzatura Interior Design",
   description:
     "Luxury interior design studio serving Long Island and New York City. Full-service residential interior design with meticulous attention to detail.",
   url: "https://lasprezz.com",
+  telephone: "(516) 445-0756",
+  email: "liz@lasprezz.com",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Northport",
+    addressRegion: "NY",
+    addressCountry: "US",
+  },
+  founder: {
+    "@type": "Person",
+    name: "Elizabeth Olivier",
+    jobTitle: "Principal Designer",
+    url: "https://lasprezz.com/about",
+  },
   areaServed: [
     { "@type": "City", name: "New York" },
     { "@type": "AdministrativeArea", name: "Long Island" },
     { "@type": "AdministrativeArea", name: "Nassau County" },
     { "@type": "AdministrativeArea", name: "Suffolk County" },
+    { "@type": "City", name: "Cold Spring Harbor" },
+    { "@type": "City", name: "Huntington" },
+    { "@type": "City", name: "Oyster Bay" },
+    { "@type": "City", name: "Manhasset" },
   ],
   priceRange: "$$$",
-  sameAs: [],
+  sameAs: [
+    "https://www.instagram.com/la_sprezzny/",
+  ],
 };
 ---
 
