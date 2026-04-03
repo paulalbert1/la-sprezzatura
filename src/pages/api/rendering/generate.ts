@@ -240,28 +240,37 @@ async function processGeneration(
 
     console.log("[Rendering:Generate] Patching session:", sessionId, "renderingKey:", renderingKey);
 
+    // Fetch current document to merge arrays (Sanity stores empty arrays as null,
+    // and append() silently fails on null fields)
+    const current = await sanityWriteClient.getDocument(sessionId);
+    const existingRenderings = Array.isArray(current?.renderings) ? current.renderings : [];
+    const existingConversation = Array.isArray(current?.conversation) ? current.conversation : [];
+
     const patchResult = await sanityWriteClient
       .patch(sessionId)
-      .setIfMissing({ renderings: [], conversation: [] })
-      .set({ status: "complete", lastError: "" })
-      .append("renderings", [renderingObj])
-      .append("conversation", [
-        {
-          _key: userConvKey,
-          _type: "conversationEntry",
-          role: "user",
-          text: description,
-          timestamp: new Date().toISOString(),
-        },
-        {
-          _key: modelConvKey,
-          _type: "conversationEntry",
-          role: "model",
-          text: result.textResponse || "",
-          image: blob.pathname,
-          timestamp: new Date().toISOString(),
-        },
-      ])
+      .set({
+        status: "complete",
+        lastError: "",
+        renderings: [...existingRenderings, renderingObj],
+        conversation: [
+          ...existingConversation,
+          {
+            _key: userConvKey,
+            _type: "conversationEntry",
+            role: "user",
+            text: description,
+            timestamp: new Date().toISOString(),
+          },
+          {
+            _key: modelConvKey,
+            _type: "conversationEntry",
+            role: "model",
+            text: result.textResponse || "",
+            image: blob.pathname,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      })
       .commit();
 
     console.log("[Rendering:Generate] Patch OK. Renderings:", patchResult.renderings?.length, "Conv:", patchResult.conversation?.length);
