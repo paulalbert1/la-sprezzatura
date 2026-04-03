@@ -262,9 +262,11 @@ async function processGeneration(
   } catch (error: any) {
     console.error("[Rendering:Generate] Error:", error);
 
-    // Determine user-friendly error message
+    // Determine user-friendly error message — include raw error for debugging
+    const rawError = error.message || String(error);
+    console.error("[Rendering:Generate] Raw error:", rawError);
     let errorMessage =
-      "Generation failed due to a server error. Tap to retry -- you will not be charged for the failed attempt.";
+      `Generation failed: ${rawError.substring(0, 200)}`;
     if (
       error.message?.includes("content policy") ||
       error.message?.includes("SAFETY")
