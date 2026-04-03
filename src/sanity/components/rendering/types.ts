@@ -97,6 +97,7 @@ export interface WizardData {
 export interface WizardImage {
   blobPathname: string;
   fileName: string;
+  file?: File;        // Retained for retry; cleared after successful upload
   imageType: string;
   location: string;
   notes: string;
