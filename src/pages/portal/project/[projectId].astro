@@ -13,7 +13,6 @@ import ArtifactSection from "../../../components/portal/ArtifactSection.astro";
 import WarrantyClaimForm from "../../../components/portal/WarrantyClaimForm.tsx";
 import {
   getProjectDetail,
-  getProjectsByClientId,
   DESIGN_OPTIONS_BY_PROJECT_QUERY,
 } from "../../../sanity/queries";
 import { sanityClient } from "sanity:client";
@@ -49,22 +48,14 @@ const showCloseDocument = project.engagementType === "full-interior-design";
 const designOptions =
   (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
 
-// Multi-project detection for "Back to Dashboard" link
-const allProjects = await getProjectsByClientId(clientId);
-const isMultiProject = (allProjects?.length || 0) > 1;
 ---
 
 <PortalLayout title={`${project.title} | La Sprezzatura`}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {isMultiProject && (
-        <a
-          href="/portal/dashboard"
-          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
-        >
-          &larr; Back to Dashboard
-        </a>
-      )}
+      <a href="/portal/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
+        <span>&larr;</span> Back to Dashboard
+      </a>
 
       <p
         class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"

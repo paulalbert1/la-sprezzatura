@@ -27,6 +27,7 @@ if (projects.length === 1) {
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
         La Sprezzatura
       </p>
+      <p class="text-xs text-stone/60 font-body text-center mb-4 -mt-6">Contractor Portal</p>
 
       {/* Greeting */}
       <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
@@ -45,7 +46,7 @@ if (projects.length === 1) {
               ? `${new Date(assignment.startDate).toLocaleDateString()} - ${new Date(assignment.endDate).toLocaleDateString()}`
               : "Dates pending";
             return (
-              <a href={`/workorder/project/${project._id}`} class="block bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors">
+              <a href={`/workorder/project/${project._id}`} class="block bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors rounded-lg focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none">
                 <h3 class="font-heading text-xl font-light text-charcoal mb-2">{project.title}</h3>
                 <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
                   {[project.projectAddress?.street, project.projectAddress?.city, project.projectAddress?.state].filter(Boolean).join(', ') || "Address pending"}
@@ -62,7 +63,7 @@ if (projects.length === 1) {
         <div class="text-center py-12">
           <h2 class="font-heading text-2xl font-light text-charcoal mb-4">No Work Orders Yet</h2>
           <p class="text-stone font-body leading-relaxed">
-            You'll be notified when new work orders are assigned.
+            You'll be notified via email when new work orders are assigned.
           </p>
         </div>
       )}
@@ -71,7 +72,7 @@ if (projects.length === 1) {
       <div class="mt-16 text-center">
         <a
           href="/workorder/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body py-2 px-4 border border-stone-light/30 rounded"
         >
           Sign Out
         </a>

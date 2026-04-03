@@ -7,7 +7,6 @@ import ExpirationBadge from "../../../components/portal/ExpirationBadge.astro";
 import {
   getBuildingManagerProject,
   getSiteContactInfo,
-  getProjectsByBuildingManagerEmail,
 } from "../../../sanity/queries";
 
 // buildingManagerEmail injected by middleware (guaranteed by auth guard)
@@ -28,8 +27,6 @@ if (!project) {
 // Fetch site contact info for Contact Liz section
 const siteContact = await getSiteContactInfo();
 
-// Multi-project detection for "Back to Dashboard" link
-const allProjects = await getProjectsByBuildingManagerEmail(email);
 
 // Format project address
 const addressStr = [
@@ -45,15 +42,9 @@ const addressStr = [
 <PortalLayout title={`${project.title} | Building Portal | La Sprezzatura`}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {/* Back to Dashboard link -- only if building manager has multiple projects */}
-      {(allProjects?.length || 0) > 1 && (
-        <a
-          href="/building/dashboard"
-          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
-        >
-          &larr; Back to Dashboard
-        </a>
-      )}
+      <a href="/building/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
+        <span>&larr;</span> Back to Dashboard
+      </a>
 
       {/* Brand mark */}
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">

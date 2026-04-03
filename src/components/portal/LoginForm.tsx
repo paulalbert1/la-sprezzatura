@@ -81,7 +81,7 @@ export default function LoginForm({ initialError }: { initialError?: string }) {
       {/* Error banner */}
       {state.status === "error" && state.errorMessage && (
         <div
-          className="border border-terracotta/30 bg-terracotta/5 px-5 py-4 text-sm text-charcoal font-body mb-6"
+          className="border border-terracotta/30 bg-terracotta/5 px-5 py-4 text-sm text-charcoal font-body mb-6 rounded-lg"
           role="alert"
         >
           {state.errorMessage}
@@ -91,7 +91,7 @@ export default function LoginForm({ initialError }: { initialError?: string }) {
       {/* Expired link error from query param */}
       {state.status === "idle" && state.errorMessage && (
         <div
-          className="border border-terracotta/30 bg-terracotta/5 px-5 py-4 text-sm text-charcoal font-body mb-6"
+          className="border border-terracotta/30 bg-terracotta/5 px-5 py-4 text-sm text-charcoal font-body mb-6 rounded-lg"
           role="alert"
         >
           {state.errorMessage}
@@ -122,7 +122,7 @@ export default function LoginForm({ initialError }: { initialError?: string }) {
               if (err) setState((prev) => ({ ...prev, emailError: err }));
             }
           }}
-          className={`w-full bg-cream-dark text-charcoal border px-4 py-3 font-body text-sm transition-colors placeholder:text-stone-light focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-0 ${
+          className={`w-full bg-cream-dark text-charcoal border px-4 py-3 font-body text-sm transition-colors placeholder:text-stone-light focus:outline-none focus:ring-2 focus:ring-terracotta focus:ring-offset-0 rounded ${
             state.emailError
               ? "border-terracotta"
               : "border-stone-light focus:border-terracotta"
@@ -140,7 +140,7 @@ export default function LoginForm({ initialError }: { initialError?: string }) {
       <button
         type="submit"
         disabled={state.status === "submitting"}
-        className="bg-terracotta text-white text-xs uppercase tracking-widest font-body px-10 py-4 w-full hover:bg-terracotta-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        className="bg-terracotta text-white text-xs uppercase tracking-widest font-body px-10 py-4 w-full hover:bg-terracotta-light transition-colors disabled:opacity-60 disabled:cursor-not-allowed rounded-lg"
       >
         {state.status === "submitting" ? "Sending\u2026" : "Send Access Link"}
       </button>

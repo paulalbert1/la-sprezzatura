@@ -7,7 +7,6 @@ import ContractorNoteForm from "../../../components/portal/ContractorNoteForm.ts
 import {
   getWorkOrderDetail,
   getSiteContactInfo,
-  getProjectsByContractorId,
 } from "../../../sanity/queries";
 import { formatCurrency } from "../../../lib/formatCurrency";
 import { PortableText } from "astro-portabletext";
@@ -30,8 +29,6 @@ if (!project) {
 // Fetch site contact info for Contact Liz section
 const siteContact = await getSiteContactInfo();
 
-// Multi-project detection for "Back to Dashboard" link
-const allProjects = await getProjectsByContractorId(contractorId);
 
 // Extract assignment from project data
 const assignment = project.assignment;
@@ -62,15 +59,9 @@ const addressStr = [
 <PortalLayout title={`${project.title} | Work Order | La Sprezzatura`}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {/* Back to Dashboard link -- only if contractor has multiple projects */}
-      {(allProjects?.length || 0) > 1 && (
-        <a
-          href="/workorder/dashboard"
-          class="inline-flex items-center text-xs text-stone uppercase tracking-widest font-body hover:text-terracotta transition-colors mb-8"
-        >
-          &larr; Back to Dashboard
-        </a>
-      )}
+      <a href="/workorder/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
+        <span>&larr;</span> Back to Dashboard
+      </a>
 
       {/* Brand mark */}
       <p

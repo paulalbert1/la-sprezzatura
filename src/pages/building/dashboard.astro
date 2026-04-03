@@ -30,13 +30,14 @@ function formatAddress(addr: any): string {
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
         La Sprezzatura
       </p>
+      <p class="text-xs text-stone/60 font-body text-center mb-4 -mt-6">Building Manager Portal</p>
 
       {/* Greeting */}
       <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
         Welcome
       </h1>
       <p class="text-base text-stone font-body text-center mb-8">
-        Your building project documents are below.
+        Building compliance documents and project details.
       </p>
 
       {/* Project cards */}
@@ -45,7 +46,7 @@ function formatAddress(addr: any): string {
           {projects.map((project: any) => (
             <a
               href={`/building/project/${project._id}`}
-              class="bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors block"
+              class="bg-cream-dark border border-stone-light/20 p-6 hover:border-terracotta/40 transition-colors block rounded-lg focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none"
             >
               <h3 class="font-heading text-xl font-light text-charcoal mb-2">{project.title}</h3>
               <p class="text-xs text-stone uppercase tracking-wider font-body">
@@ -70,7 +71,7 @@ function formatAddress(addr: any): string {
       <div class="mt-16 text-center">
         <a
           href="/building/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body py-2 px-4 border border-stone-light/30 rounded"
         >
           Sign Out
         </a>
