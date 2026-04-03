@@ -104,6 +104,7 @@ export interface WizardImage {
   copyExact: boolean;
   uploading: boolean;
   error?: string;
+  localPreviewUrl?: string;  // Temporary object URL for instant preview; revoked after upload
 }
 
 export interface ProjectOption {
@@ -151,6 +152,16 @@ export function getImageServeUrl(blobPathname: string, source: "studio" | "porta
   }
   return `/api/blob-serve?path=${encodeURIComponent(blobPathname)}`;
 }
+
+export const STYLE_PRESETS = [
+  { value: "", label: "Select a style..." },
+  { value: "Modern / Contemporary", label: "Modern / Contemporary" },
+  { value: "Traditional / Classic", label: "Traditional / Classic" },
+  { value: "Transitional", label: "Transitional" },
+  { value: "Scandinavian / Minimalist", label: "Scandinavian / Minimalist" },
+  { value: "Frank Lloyd Wright", label: "Frank Lloyd Wright" },
+  { value: "__other__", label: "Other (custom)" },
+] as const;
 
 export const INITIAL_WIZARD_DATA: WizardData = {
   sessionTitle: "",
