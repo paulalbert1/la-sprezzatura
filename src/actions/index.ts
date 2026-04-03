@@ -47,7 +47,7 @@ export const server = {
 
       const apiKey = import.meta.env.RESEND_API_KEY;
       const notifyEmail =
-        import.meta.env.CONTACT_NOTIFY_EMAIL || "liz@lasprezz.com";
+        import.meta.env.CONTACT_NOTIFY_EMAIL || "office@lasprezz.com";
 
       // If no API key, log to console and return success (dev mode)
       if (!apiKey) {
