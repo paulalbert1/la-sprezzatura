@@ -62,7 +62,7 @@ export function StepUpload({ images, onImagesChange }: StepUploadProps) {
 
         try {
           const blob = await upload(file.name, file, {
-            access: "private",
+            access: "public",
             handleUploadUrl: "/api/blob-upload",
           });
           const latest = [...imagesRef.current];
