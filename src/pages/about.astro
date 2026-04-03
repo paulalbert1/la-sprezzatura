@@ -14,28 +14,20 @@ import Button from "../components/ui/Button.astro";
     data-animate="fade-up"
   >
     <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-16 items-end">
-      <!-- Photo placeholder -->
+      <!-- Elizabeth portrait -->
       <div class="order-1 md:order-none">
         <div
-          class="relative w-full aspect-[3/4] bg-gradient-to-b from-cream-dark to-stone-light/40 flex items-end justify-start overflow-hidden"
+          class="relative w-full aspect-[3/4] overflow-hidden"
           aria-label="Photo of Elizabeth Olivier, founder of La Sprezzatura"
         >
-          <!-- Decorative corner element -->
-          <div
-            class="absolute top-6 left-6 w-12 h-12 border-l border-t border-terracotta/40"
-            aria-hidden="true"
-          >
-          </div>
-          <div
-            class="absolute bottom-6 right-6 w-12 h-12 border-r border-b border-terracotta/40"
-            aria-hidden="true"
-          >
-          </div>
-          <div class="p-8 text-stone-dark/40">
-            <p class="font-body text-xs uppercase tracking-widest">
-              Photo coming soon
-            </p>
-          </div>
+          <img
+            src="https://cdn.sanity.io/images/e9tpu2os/production/dac5e9586287d906adbc2bb2b8f52a4c17eae00c-534x732.jpg?w=800&h=1067&fit=crop&auto=format"
+            alt="Elizabeth Olivier, founder and principal designer of La Sprezzatura"
+            class="w-full h-full object-cover object-top"
+            loading="eager"
+            width="534"
+            height="732"
+          />
         </div>
       </div>
 

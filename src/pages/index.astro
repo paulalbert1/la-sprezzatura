@@ -1,20 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Hero from "../components/home/Hero.astro";
-import FeaturedProjects from "../components/home/FeaturedProjects.astro";
 import SectionHeading from "../components/ui/SectionHeading.astro";
 import ProcessStep from "../components/ui/ProcessStep.astro";
 import Button from "../components/ui/Button.astro";
-import { getFeaturedProjects, getSiteSettings } from "../sanity/queries";
+import { getSiteSettings } from "../sanity/queries";
 
-let featuredProjects = [];
 let settings = null;
-
-try {
-  featuredProjects = await getFeaturedProjects();
-} catch (_e) {
-  // Sanity not configured yet -- render gracefully
-}
 
 try {
   settings = await getSiteSettings();
@@ -38,22 +30,36 @@ const heroTagline = settings?.tagline ?? "Luxury Interior Design · Long Island 
     tagline={heroTagline}
   />
 
-  <!-- 2. Featured Projects -->
-  {
-    featuredProjects && featuredProjects.length > 0 && (
-      <section class="px-6 md:px-16 lg:px-24 py-24 md:py-32" data-animate="fade-up">
-        <SectionHeading tagline="Portfolio">
-          Our Work
-        </SectionHeading>
-        <FeaturedProjects projects={featuredProjects} />
-        <div class="mt-14 flex justify-center md:justify-start">
-          <Button href="/portfolio" variant="outline" size="lg">
-            View All Projects
-          </Button>
+  <!-- 2. Portfolio Teaser -->
+  <section class="px-6 md:px-16 lg:px-24 py-24 md:py-32" data-animate="fade-up">
+    <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+          Portfolio
+        </p>
+        <h2 class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight mb-8">
+          Spaces that tell<br />your story.
+        </h2>
+        <p class="text-base md:text-lg text-stone font-body leading-relaxed mb-10">
+          From whole-home renovations to single-room transformations, every
+          project is a collaboration between your vision and our eye for what
+          a space can become.
+        </p>
+        <Button href="/portfolio" variant="outline" size="lg">View Our Work</Button>
+      </div>
+      <a href="/portfolio" class="group block">
+        <div class="relative overflow-hidden aspect-[4/5]">
+          <img
+            src="https://cdn.sanity.io/images/e9tpu2os/production/ed14f099e6f65765e32e080cdec175ac61b61c06-1497x1042.webp?w=800&h=1000&fit=crop&auto=format"
+            alt="Gramercy Park apartment — collected living room with brass and velvet accents"
+            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition-colors duration-500"></div>
         </div>
-      </section>
-    )
-  }
+      </a>
+    </div>
+  </section>
 
   <!-- 3. About Teaser -->
   <section
@@ -63,11 +69,15 @@ const heroTagline = settings?.tagline ?? "Luxury Interior Design · Long Island 
     <div
       class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center"
     >
-      <!-- Image placeholder -->
+      <!-- Elizabeth portrait -->
       <div class="order-2 md:order-1">
-        <div
-          class="aspect-[4/5] bg-gradient-to-br from-stone-light/30 to-stone/20 w-full max-w-sm md:max-w-none"
-        >
+        <div class="aspect-[4/5] w-full max-w-sm md:max-w-none overflow-hidden">
+          <img
+            src="https://cdn.sanity.io/images/e9tpu2os/production/dac5e9586287d906adbc2bb2b8f52a4c17eae00c-534x732.jpg?w=600&h=750&fit=crop&auto=format"
+            alt="Elizabeth Olivier, founder of La Sprezzatura"
+            class="w-full h-full object-cover object-top"
+            loading="lazy"
+          />
         </div>
       </div>
       <!-- Text -->
@@ -155,25 +165,37 @@ const heroTagline = settings?.tagline ?? "Luxury Interior Design · Long Island 
 
   <!-- 6. CTA -->
   <section
-    class="px-6 md:px-16 lg:px-24 py-24 md:py-32 text-center"
+    class="px-6 md:px-16 lg:px-24 py-24 md:py-32"
     data-animate="fade-up"
   >
-    <div class="max-w-2xl mx-auto">
-      <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
-        Let's Connect
-      </p>
-      <h2
-        class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight mb-8"
-      >
-        Ready to transform<br />your space?
-      </h2>
-      <p
-        class="text-base md:text-lg text-stone font-body leading-relaxed mb-10"
-      >
-        Every beautiful room begins with a conversation. Tell us about your
-        project and let's start envisioning what's possible.
-      </p>
-      <Button href="/contact" size="lg">Start the Conversation</Button>
+    <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-stone mb-6 font-body">
+          Let's Connect
+        </p>
+        <h2
+          class="font-heading text-4xl md:text-5xl lg:text-6xl font-light text-charcoal leading-tight mb-8"
+        >
+          Ready to transform<br />your space?
+        </h2>
+        <p
+          class="text-base md:text-lg text-stone font-body leading-relaxed mb-10"
+        >
+          Every beautiful room begins with a conversation. Tell us about your
+          project and let's start envisioning what's possible.
+        </p>
+        <Button href="/contact" size="lg">Start the Conversation</Button>
+      </div>
+      <div class="hidden md:block">
+        <div class="aspect-[3/4] overflow-hidden">
+          <img
+            src="https://cdn.sanity.io/images/e9tpu2os/production/2986c6b2c9c06973e5bc5d83ddb430d77af7d48b-730x990.jpg?w=600&h=800&fit=crop&auto=format"
+            alt="Elizabeth Olivier"
+            class="w-full h-full object-cover object-top"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </div>
   </section>
 </BaseLayout>

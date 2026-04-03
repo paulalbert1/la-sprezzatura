@@ -19,3 +19,4 @@ dist/
 # Generated/runtime
 .superpowers/
 .planning/
+.vercel
