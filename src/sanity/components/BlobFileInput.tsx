@@ -21,7 +21,7 @@ export function BlobFileInput(props: StringInputProps) {
 
       try {
         const blob = await upload(file.name, file, {
-          access: "private",
+          access: "public",
           handleUploadUrl: "/api/blob-upload",
         });
         onChange(set(blob.pathname));

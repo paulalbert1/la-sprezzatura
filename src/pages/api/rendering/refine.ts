@@ -200,7 +200,7 @@ async function processRefinement(
     const blob = await put(
       `rendering/${sessionId}/${Date.now()}.png`,
       imageBuffer,
-      { access: "private", contentType: "image/png" },
+      { access: "public", contentType: "image/png" },
     );
 
     const latencyMs = Date.now() - startTime;
