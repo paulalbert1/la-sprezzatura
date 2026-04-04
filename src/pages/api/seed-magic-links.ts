@@ -24,12 +24,16 @@ export const GET: APIRoute = async ({ request }) => {
   const TTL = 86400; // 24 hours
   const results: string[] = [];
 
-  for (const link of links) {
-    await redis.set(`magic:${link.token}`, JSON.stringify(link.data), { ex: TTL });
-    results.push(`${link.label}\n  ${BASE}/${link.portal}/verify?token=${link.token}\n`);
-  }
+  try {
+    for (const link of links) {
+      await redis.set(`magic:${link.token}`, JSON.stringify(link.data), { ex: TTL });
+      results.push(`${link.label}\n  ${BASE}/${link.portal}/verify?token=${link.token}\n`);
+    }
 
-  return new Response(results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
-    headers: { "Content-Type": "text/plain" },
-  });
+    return new Response(results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
+      headers: { "Content-Type": "text/plain" },
+    });
+  } catch (err: any) {
+    return new Response(`Error: ${err.message}\n${err.stack}`, { status: 500 });
+  }
 };
