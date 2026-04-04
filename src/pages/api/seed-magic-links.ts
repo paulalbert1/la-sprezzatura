@@ -36,8 +36,8 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   try {
-    const kvUrl = import.meta.env.KV_REST_API_URL || process.env.KV_REST_API_URL;
-    const kvToken = import.meta.env.KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN;
+    const kvUrl = process.env.KV_REST_API_URL;
+    const kvToken = process.env.KV_REST_API_TOKEN;
 
     if (!kvUrl || !kvToken) {
       return new Response(`KV not configured.\nURL: ${kvUrl ? "set" : "missing"}\nToken: ${kvToken ? "set" : "missing"}`, { status: 500 });
