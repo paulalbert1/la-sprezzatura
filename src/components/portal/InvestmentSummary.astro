@@ -30,7 +30,7 @@ const selectedTierName = selectedTierKey
 
   {tiers.length > 0 && (
     <div class:list={[
-      "grid gap-4 grid-cols-1",
+      "grid gap-5 grid-cols-1",
       gridCols === 2 && "md:grid-cols-2",
       gridCols === 3 && "md:grid-cols-3",
     ]}>
@@ -42,30 +42,39 @@ const selectedTierName = selectedTierKey
         return (
           <div
             class:list={[
-              "bg-cream-dark border border-stone-light/20 p-6",
-              isSelected && "border-l-4 border-l-terracotta",
-              otherSelected && "opacity-50",
+              "bg-cream-dark border p-6 min-w-0",
+              isSelected
+                ? "border-emerald-400 border-2 ring-1 ring-emerald-100"
+                : "border-stone-light/20",
+              otherSelected && "opacity-40",
             ]}
           >
-            <h4 class="font-heading text-lg font-light text-charcoal mb-2">{tier.name}</h4>
-            {tier.description && (
-              <p class="text-xs text-stone font-body mb-4">{tier.description}</p>
-            )}
-
-            <div class="space-y-2 mb-4">
-              {tier.lineItems.map((item) => (
-                <div class="flex items-baseline justify-between">
-                  <span class="text-xs text-charcoal font-body">{item.name}</span>
-                  <span class="text-xs text-charcoal font-body">{formatCurrency(item.price)}</span>
-                </div>
-              ))}
+            {/* Tier header with name and total */}
+            <div class="mb-4 pb-4 border-b border-stone-light/20">
+              <div class="flex items-baseline justify-between gap-3">
+                <h4 class="font-heading text-lg font-light text-charcoal">{tier.name}</h4>
+                {isSelected && (
+                  <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs tracking-wide bg-emerald-50 text-emerald-700 font-body shrink-0">
+                    Selected
+                  </span>
+                )}
+              </div>
+              <p class="font-heading text-2xl text-charcoal mt-1">{formatCurrency(total)}</p>
             </div>
 
-            <div class="border-t border-stone-light/20 pt-3 mt-3">
-              <div class="flex items-baseline justify-between">
-                <span class="text-xs text-stone uppercase tracking-widest font-body">Total</span>
-                <span class="text-lg font-heading font-light text-charcoal">{formatCurrency(total)}</span>
-              </div>
+            {/* Description */}
+            {tier.description && (
+              <p class="text-xs text-stone font-body leading-relaxed mb-4">{tier.description}</p>
+            )}
+
+            {/* Line items */}
+            <div class="space-y-2">
+              {tier.lineItems.map((item) => (
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="text-sm text-charcoal font-body">{item.name}</span>
+                  <span class="text-sm text-charcoal font-body tabular-nums shrink-0">{formatCurrency(item.price)}</span>
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -83,6 +92,9 @@ const selectedTierName = selectedTierKey
   )}
 
   {selectedTierKey && (
-    <p class="text-xs text-emerald-700 font-body mt-4">Tier selected: {selectedTierName}</p>
+    <p class="text-xs text-emerald-700 font-body mt-4 flex items-center gap-1.5">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><polyline points="20 6 9 17 4 12" /></svg>
+      Tier selected: {selectedTierName}
+    </p>
   )}
 </section>

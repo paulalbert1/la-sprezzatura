@@ -78,9 +78,9 @@ const needsReview = currentVersion && !hasApproval && !hasChangesRequested;
     </div>
   </div>
 
-  {/* Current version download */}
+  {/* Current version download — only show if there's a valid file */}
   {
-    currentVersion && (
+    currentVersion && currentVersion.file?.asset?.url && (
       <div class="mb-4">
         <a
           href={

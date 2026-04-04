@@ -215,10 +215,10 @@ export default function TierSelectionForm({
             setSelectedTierKey(tier._key);
             setState("selecting");
           }}
-          className="bg-terracotta text-white text-xs uppercase tracking-widest font-body px-6 py-3 w-full hover:bg-terracotta-light transition-colors"
+          className="border border-stone-light/40 text-charcoal text-xs uppercase tracking-widest font-body px-6 py-3 w-full hover:border-terracotta hover:text-terracotta transition-colors bg-transparent"
         >
           Select This Tier
-          <span className="block text-[10px] normal-case tracking-normal opacity-80 mt-1">
+          <span className="block text-[10px] normal-case tracking-normal opacity-60 mt-1">
             {tier.name}
           </span>
         </button>

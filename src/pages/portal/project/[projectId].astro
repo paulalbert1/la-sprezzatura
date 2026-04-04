@@ -36,31 +36,17 @@ if (!project) {
   return Astro.redirect("/portal/dashboard");
 }
 
-let isCompleted = false;
-let isReopened = false;
-let showProcurement = false;
-let showCloseDocument = false;
-let designOptions: any[] = [];
-let renderError = "";
-
-try {
-  isCompleted = isProjectCompleted(project);
-  isReopened = isProjectReopened(project);
-  showProcurement = project.engagementType === "full-interior-design";
-  showCloseDocument = project.engagementType === "full-interior-design";
-  designOptions = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
-} catch (e: any) {
-  renderError = e.message + "\n" + e.stack;
-  console.error("[ProjectDetail] Error:", renderError);
-}
+const isCompleted = isProjectCompleted(project);
+const isReopened = isProjectReopened(project);
+const showProcurement = project.engagementType === "full-interior-design";
+const showCloseDocument = project.engagementType === "full-interior-design";
+const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
 
 ---
 
 <PortalLayout title={`${project.title} | La Sprezzatura`}>
   <main class="flex-1">
-    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {renderError && <pre class="text-xs text-red-500 mb-4 whitespace-pre-wrap">ERROR: {renderError}</pre>}
-
+    <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
       <a href="/portal/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
         <span>&larr;</span> Back to Dashboard
       </a>
@@ -73,9 +59,6 @@ try {
 
       <ProjectHeader project={project} />
       <ConfidentialityBanner />
-
-      <!-- DEBUG: Minimal render to isolate 500 -->
-      <p class="text-sm text-stone">Milestones: {(project.milestones || []).length} | Contractors: {(project.contractors || []).length} | Artifacts: {(project.artifacts || []).length} | Procurement: {(project.procurementItems || []).length}</p>
 
       <MilestoneSection
         milestones={project.milestones || []}

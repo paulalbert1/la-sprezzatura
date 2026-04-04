@@ -133,8 +133,8 @@ const BADGE_STYLES: Record<string, string> = {
   "close-document": "bg-emerald-50 text-emerald-700",
   warranty: "bg-stone-light/20 text-stone",
   proposal: "bg-terracotta/10 text-terracotta",
-  "floor-plan": "bg-terracotta/10 text-terracotta",
-  "design-board": "bg-terracotta/10 text-terracotta",
+  "floor-plan": "bg-blue-50 text-blue-700",
+  "design-board": "bg-amber-50 text-amber-700",
 };
 
 /**

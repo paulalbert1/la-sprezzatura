@@ -20,29 +20,38 @@ const formattedDate = milestone.date
   ? new Date(milestone.date + "T00:00:00").toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      year: "numeric",
     })
   : null;
 const relativeDate = milestone.date
   ? formatRelativeDate(milestone.date)
   : null;
 const isOverdue = status === "overdue";
+const isCurrent = status === "current";
+const isCompleted_ = status === "completed";
+const isUpcoming = status === "upcoming";
 ---
 
-<div class="flex gap-4 py-4">
+<div
+  class:list={[
+    "flex gap-4 py-4",
+    isCurrent && "border-l-4 border-l-terracotta pl-4 -ml-4 bg-terracotta/[0.03]",
+  ]}
+>
   <!-- Status dot -->
   <div class="flex flex-col items-center">
     <div
       class:list={[
         "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
-        status === "completed" && "bg-terracotta text-white",
-        status === "current" &&
+        isCompleted_ && "bg-emerald-600 text-white",
+        isCurrent &&
           "bg-cream ring-4 ring-terracotta/20 border-2 border-terracotta",
-        status === "overdue" && "bg-cream border-2 border-stone-light",
-        status === "upcoming" &&
+        isOverdue && "bg-cream border-2 border-amber-400",
+        isUpcoming &&
           "bg-cream-dark border-2 border-stone-light/40",
       ]}
     >
-      {status === "completed" && (
+      {isCompleted_ && (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -65,7 +74,10 @@ const isOverdue = status === "overdue";
       <h3
         class:list={[
           "font-body text-sm",
-          status === "completed" ? "text-stone" : "text-charcoal",
+          isCompleted_ && "text-stone",
+          isCurrent && "text-charcoal font-medium",
+          isOverdue && "text-charcoal",
+          isUpcoming && "text-stone",
         ]}
       >
         {milestone.name}
@@ -74,8 +86,8 @@ const isOverdue = status === "overdue";
         <div class="flex items-center gap-2 shrink-0">
           <span
             class:list={[
-              "text-xs font-body",
-              isOverdue ? "text-[#D4A08A]" : "text-stone",
+              "text-xs font-body tabular-nums",
+              isOverdue ? "text-amber-600" : isCompleted_ ? "text-stone-light" : "text-stone",
             ]}
           >
             {formattedDate}
@@ -85,7 +97,7 @@ const isOverdue = status === "overdue";
               class:list={[
                 "text-xs font-body",
                 isOverdue
-                  ? "text-[#D4A08A] bg-stone-light/10 px-2 py-0.5 rounded"
+                  ? "text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full"
                   : "text-stone-light",
               ]}
             >
@@ -97,7 +109,12 @@ const isOverdue = status === "overdue";
     </div>
 
     {milestone.description && (
-      <p class="text-xs text-stone font-body mt-1 leading-relaxed">
+      <p
+        class:list={[
+          "text-xs font-body mt-1 leading-relaxed",
+          isCompleted_ ? "text-stone-light" : "text-stone",
+        ]}
+      >
         {milestone.description}
       </p>
     )}
@@ -123,14 +140,19 @@ const isOverdue = status === "overdue";
     )}
 
     {!isCompleted && (
-      <div class="mt-2">
-        <ClientNoteForm
-          client:load
-          projectId={projectId}
-          targetKey={milestone._key}
-          targetType="milestone"
-        />
-      </div>
+      <details class="mt-2 group">
+        <summary class="text-xs text-stone hover:text-terracotta transition-colors font-body cursor-pointer select-none">
+          Add a note
+        </summary>
+        <div class="mt-2">
+          <ClientNoteForm
+            client:load
+            projectId={projectId}
+            targetKey={milestone._key}
+            targetType="milestone"
+          />
+        </div>
+      </details>
     )}
   </div>
 </div>

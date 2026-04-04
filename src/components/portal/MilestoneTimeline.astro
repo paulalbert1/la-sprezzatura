@@ -23,26 +23,30 @@ const currentDescription = STAGE_META[currentStage]?.description ?? "";
               : "future";
 
         return (
-          <div class="flex md:flex-col items-center relative flex-1">
+          <div class="flex md:flex-col items-center relative flex-1 md:px-1">
             {/* Connector line - vertical on mobile, horizontal on desktop */}
             {i > 0 && (
               <>
                 {/* Mobile connector (vertical) */}
                 <div
                   class:list={[
-                    "absolute left-3.5 bottom-full w-0.5 h-full md:hidden",
+                    "absolute left-4 bottom-full w-0.5 h-full md:hidden",
                     status === "future"
                       ? "bg-stone-light/30"
-                      : "bg-terracotta/40",
+                      : status === "completed"
+                        ? "bg-emerald-300/60"
+                        : "bg-terracotta/40",
                   ]}
                 />
                 {/* Desktop connector (horizontal) */}
                 <div
                   class:list={[
-                    "absolute top-3.5 right-1/2 h-0.5 w-full hidden md:block",
+                    "absolute top-4 right-1/2 h-0.5 w-full hidden md:block",
                     status === "future"
                       ? "bg-stone-light/30"
-                      : "bg-terracotta/40",
+                      : status === "completed"
+                        ? "bg-emerald-300/60"
+                        : "bg-terracotta/40",
                   ]}
                 />
               </>
@@ -51,8 +55,8 @@ const currentDescription = STAGE_META[currentStage]?.description ?? "";
             {/* Stage dot */}
             <div
               class:list={[
-                "w-7 h-7 rounded-full flex items-center justify-center shrink-0 relative z-10",
-                status === "completed" && "bg-terracotta text-white",
+                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 relative z-10",
+                status === "completed" && "bg-emerald-600 text-white",
                 status === "current" &&
                   "bg-terracotta text-white ring-4 ring-terracotta/20",
                 status === "future" &&
@@ -68,24 +72,26 @@ const currentDescription = STAGE_META[currentStage]?.description ?? "";
                   stroke-width="3"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  class="w-3.5 h-3.5"
+                  class="w-4 h-4"
                 >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
               {status === "current" && (
-                <div class="w-2 h-2 rounded-full bg-white" />
+                <div class="w-2.5 h-2.5 rounded-full bg-white" />
               )}
             </div>
 
             {/* Stage label */}
             <span
               class:list={[
-                "text-xs tracking-wide font-body",
+                "text-xs tracking-wide font-body whitespace-nowrap",
                 status === "current"
-                  ? "text-charcoal font-medium"
-                  : "text-stone",
-                "ml-3 py-3 md:ml-0 md:py-0 md:text-center md:mt-2",
+                  ? "text-terracotta font-semibold"
+                  : status === "completed"
+                    ? "text-emerald-700 font-medium"
+                    : "text-stone",
+                "ml-3 py-3 md:ml-0 md:py-0 md:text-center md:mt-2.5",
               ]}
             >
               {stage.title}
