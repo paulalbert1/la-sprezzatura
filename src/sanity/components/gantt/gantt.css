@@ -1,0 +1,34 @@
+/**
+ * SVAR Gantt CSS variable overrides, scoped under .gantt-container.
+ * This prevents CSS bleed into Sanity Studio UI (Pitfall 3).
+ *
+ * Only SVAR-specific overrides live here. All chrome (toolbar, legend, empty state)
+ * uses inline styles and @sanity/ui components per codebase convention.
+ */
+
+.gantt-container {
+  /* Today marker color */
+  --wx-gantt-marker-color: #EF4444;
+
+  /* Milestone diamond styling */
+  --wx-gantt-milestone-color: #8B5CF6;
+  --wx-gantt-milestone-border-radius: 1px;
+
+  /* Summary row (swim lane header) styling */
+  --wx-gantt-summary-color: #e5e7eb;
+  --wx-gantt-summary-fill-color: #e5e7eb;
+  --wx-gantt-summary-font-color: #374151;
+
+  /* Default task bar styling (overridden per-contractor via taskTemplate) */
+  --wx-gantt-task-color: #3B82F6;
+  --wx-gantt-task-fill-color: #93c5fd;
+
+  /* Bar appearance */
+  --wx-gantt-bar-border-radius: 4px;
+}
+
+/* Ensure the Gantt chart fills the available space */
+.gantt-container {
+  width: 100%;
+  min-height: 400px;
+}
