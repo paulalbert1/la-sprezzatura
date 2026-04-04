@@ -68,47 +68,25 @@ const hasAnyTracking = items.some((item) => item.trackingNumber);
     </div>
   ) : (
     <div class="overflow-x-auto -mx-6 px-6">
-      <table class="w-full text-sm font-body border-collapse">
+      <table class="w-full text-sm font-body border-collapse table-fixed">
         <caption class="sr-only">Procurement items for this project</caption>
+        <colgroup>
+          <col />
+          <col class="w-24" />
+          <col class="w-20 hidden md:table-column" />
+          <col class="w-28" />
+          <col class="w-28" />
+          {hasAnyTracking && <col class="w-20 hidden md:table-column" />}
+        </colgroup>
         <thead>
           <tr class="border-b-2 border-stone-light/30">
-            <th
-              scope="col"
-              class="text-left text-xs uppercase tracking-widest text-stone font-normal pb-3 pr-4"
-            >
-              Item
-            </th>
-            <th
-              scope="col"
-              class="text-center text-xs uppercase tracking-widest text-stone font-normal pb-3 px-2 w-[110px]"
-            >
-              Status
-            </th>
-            <th
-              scope="col"
-              class="text-left text-xs uppercase tracking-widest text-stone font-normal pb-3 px-2 w-[90px] hidden md:table-cell"
-            >
-              Install
-            </th>
-            <th
-              scope="col"
-              class="text-right text-xs uppercase tracking-widest text-stone font-normal pb-3 px-2 w-[100px]"
-            >
-              MSRP
-            </th>
-            <th
-              scope="col"
-              class="text-right text-xs uppercase tracking-widest text-stone font-normal pb-3 pl-2 w-[100px]"
-            >
-              Savings
-            </th>
+            <th scope="col" class="text-left text-xs uppercase tracking-widest text-stone font-normal pb-3">Item</th>
+            <th scope="col" class="text-center text-xs uppercase tracking-widest text-stone font-normal pb-3">Status</th>
+            <th scope="col" class="text-right text-xs uppercase tracking-widest text-stone font-normal pb-3 hidden md:table-cell">Install</th>
+            <th scope="col" class="text-right text-xs uppercase tracking-widest text-stone font-normal pb-3">MSRP</th>
+            <th scope="col" class="text-right text-xs uppercase tracking-widest text-stone font-normal pb-3">Savings</th>
             {hasAnyTracking && (
-              <th
-                scope="col"
-                class="text-left text-xs uppercase tracking-widest text-stone font-normal pb-3 pl-3 w-[90px] hidden md:table-cell"
-              >
-                Tracking
-              </th>
+              <th scope="col" class="text-center text-xs uppercase tracking-widest text-stone font-normal pb-3 hidden md:table-cell">Track</th>
             )}
           </tr>
         </thead>
@@ -122,50 +100,30 @@ const hasAnyTracking = items.some((item) => item.trackingNumber);
                 "border-b border-stone-light/10",
                 index % 2 === 1 && "bg-cream-dark/50",
               ]}>
-                <td class="py-3 pr-4 text-charcoal">{item.name}</td>
-                <td class="py-3 px-2 text-center">
+                <td class="py-3 pr-3 text-charcoal">{item.name}</td>
+                <td class="py-3 text-center">
                   <span
-                    class={`inline-flex px-2.5 py-0.5 rounded-full text-xs tracking-wide whitespace-nowrap ${STATUS_STYLES[item.status] || "bg-stone-light/20 text-stone"}`}
+                    class={`inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitespace-nowrap ${STATUS_STYLES[item.status] || "bg-stone-light/20 text-stone"}`}
                   >
                     {STATUS_LABELS[item.status] || item.status}
                   </span>
                 </td>
-                <td class="py-3 px-2 text-stone text-xs hidden md:table-cell">
+                <td class="py-3 text-right text-stone text-xs hidden md:table-cell">
                   {item.installDate
-                    ? new Date(
-                        item.installDate + "T00:00:00",
-                      ).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
+                    ? new Date(item.installDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
                     : "\u2014"}
                 </td>
-                <td class="py-3 px-2 text-right text-charcoal tabular-nums">
-                  {item.retailPrice ? formatCurrency(item.retailPrice) : "\u2014"}
-                </td>
-                <td class="py-3 pl-2 text-right text-emerald-700 tabular-nums">
-                  {item.savings && item.savings > 0
-                    ? formatCurrency(item.savings)
-                    : "\u2014"}
+                <td class="py-3 text-right text-charcoal tabular-nums">{item.retailPrice ? formatCurrency(item.retailPrice) : "\u2014"}</td>
+                <td class="py-3 text-right text-emerald-700 tabular-nums font-medium">
+                  {item.savings && item.savings > 0 ? formatCurrency(item.savings) : "\u2014"}
                 </td>
                 {hasAnyTracking && (
-                  <td class="py-3 pl-3 hidden md:table-cell">
+                  <td class="py-3 text-center hidden md:table-cell">
                     {tracking?.url ? (
-                      <a
-                        href={tracking.url}
-                        target="_blank"
-                        rel="noopener"
-                        class="text-xs text-terracotta hover:text-terracotta-light transition-colors underline underline-offset-2"
-                      >
-                        {tracking.carrier.toUpperCase()}
-                      </a>
+                      <a href={tracking.url} target="_blank" rel="noopener" class="text-xs text-terracotta hover:text-terracotta-light transition-colors underline underline-offset-2">{tracking.carrier.toUpperCase()}</a>
                     ) : item.trackingNumber ? (
-                      <span class="text-xs text-stone">
-                        {item.trackingNumber.slice(0, 10)}...
-                      </span>
-                    ) : (
-                      "\u2014"
-                    )}
+                      <span class="text-xs text-stone">{item.trackingNumber.slice(0, 10)}...</span>
+                    ) : "\u2014"}
                   </td>
                 )}
               </tr>

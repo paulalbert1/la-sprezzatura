@@ -27,14 +27,34 @@ const { artifacts, projectId, isCompleted } = Astro.props;
         </p>
       </div>
     ) : (
-      <div class="grid gap-4 md:grid-cols-2">
-        {artifacts.map((artifact) => (
-          <ArtifactCard
-            artifact={artifact}
-            projectId={projectId}
-            isCompleted={isCompleted}
-          />
-        ))}
+      <div class="space-y-4">
+        {/* Proposals get full width (investment summary needs room). Others go in a 2-col grid. */}
+        {(() => {
+          const proposals = artifacts.filter((a) => a.artifactType === "proposal");
+          const others = artifacts.filter((a) => a.artifactType !== "proposal");
+          return (
+            <>
+              {proposals.map((artifact) => (
+                <ArtifactCard
+                  artifact={artifact}
+                  projectId={projectId}
+                  isCompleted={isCompleted}
+                />
+              ))}
+              {others.length > 0 && (
+                <div class="grid gap-4 md:grid-cols-2">
+                  {others.map((artifact) => (
+                    <ArtifactCard
+                      artifact={artifact}
+                      projectId={projectId}
+                      isCompleted={isCompleted}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     )
   }
