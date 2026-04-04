@@ -21,17 +21,16 @@ export const GET: APIRoute = async ({ request }) => {
   ];
 
   const BASE = new URL(request.url).origin;
-  const TTL = 86400; // 24 hours
+  const TTL = 86400 * 365; // 1 year
   const results: string[] = [];
 
-  // Debug: check if query param "debug" is present — return env info only
+  // Debug: test Sanity data availability
   if (new URL(request.url).searchParams.has("debug")) {
-    const kvUrl = import.meta.env.KV_REST_API_URL || "UNSET_META";
-    const kvToken = import.meta.env.KV_REST_API_TOKEN ? "SET" : "UNSET_META";
-    const pUrl = process.env.KV_REST_API_URL || "UNSET_PROC";
-    const pToken = process.env.KV_REST_API_TOKEN ? "SET" : "UNSET_PROC";
-    return new Response(`import.meta.env.KV_REST_API_URL: ${kvUrl}\nimport.meta.env token: ${kvToken}\nprocess.env.KV_REST_API_URL: ${pUrl}\nprocess.env token: ${pToken}\n`, {
-      headers: { "Content-Type": "text/plain" },
+    const { sanityClient } = await import("sanity:client");
+    const client = await sanityClient.fetch('*[_id == "seed-client-thornton"][0]{_id, name}');
+    const projects = await sanityClient.fetch('*[_type == "project" && portalEnabled == true && references("seed-client-thornton")]{_id, title}');
+    return new Response(JSON.stringify({ client, projects, sanityConfig: sanityClient.config() }, null, 2), {
+      headers: { "Content-Type": "application/json" },
     });
   }
 

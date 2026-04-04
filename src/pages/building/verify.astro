@@ -10,8 +10,11 @@ if (!token) {
   return Astro.redirect("/building/login?error=expired");
 }
 
-// Atomic get-and-delete: single-use token enforcement
-const rawValue = await redis.getdel(`magic:${token}`) as string | null;
+// Demo tokens (prefixed "demo-") are reusable; real tokens are single-use
+const isDemo = token.startsWith("demo-");
+const rawValue = isDemo
+  ? await redis.get(`magic:${token}`) as string | null
+  : await redis.getdel(`magic:${token}`) as string | null;
 
 if (!rawValue) {
   return Astro.redirect("/building/login?error=expired");
