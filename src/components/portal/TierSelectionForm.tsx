@@ -7,6 +7,7 @@ interface Props {
   tiers: Array<{ _key: string; name: string }>;
   projectId: string;
   artifactKey: string;
+  columns?: number;
 }
 
 const EAGERNESS_LABELS = [
@@ -21,6 +22,7 @@ export default function TierSelectionForm({
   tiers,
   projectId,
   artifactKey,
+  columns = 2,
 }: Props) {
   const [state, setState] = useState<FormState>("idle");
   const [selectedTierKey, setSelectedTierKey] = useState("");
@@ -204,9 +206,14 @@ export default function TierSelectionForm({
     );
   }
 
-  // Idle state: show select buttons for each tier
+  // Idle state: show select buttons matching the tier card grid
+  const gridClass =
+    columns === 3
+      ? "grid gap-5 grid-cols-1 md:grid-cols-3"
+      : "grid gap-5 grid-cols-1 md:grid-cols-2";
+
   return (
-    <div className="mt-4 grid gap-3 grid-cols-1 md:grid-cols-2">
+    <div className={`mt-5 ${gridClass}`}>
       {tiers.map((tier) => (
         <button
           key={tier._key}
@@ -215,12 +222,9 @@ export default function TierSelectionForm({
             setSelectedTierKey(tier._key);
             setState("selecting");
           }}
-          className="border border-stone-light/40 text-charcoal text-xs uppercase tracking-widest font-body px-6 py-3 w-full hover:border-terracotta hover:text-terracotta transition-colors bg-transparent"
+          className="border border-stone-light/40 text-charcoal text-xs uppercase tracking-widest font-body px-4 py-3 w-full hover:border-terracotta hover:text-terracotta transition-colors bg-transparent cursor-pointer"
         >
-          Select This Tier
-          <span className="block text-[10px] normal-case tracking-normal opacity-60 mt-1">
-            {tier.name}
-          </span>
+          Select {tier.name}
         </button>
       ))}
     </div>

@@ -73,7 +73,7 @@ const isUpcoming = status === "upcoming";
     <div class="flex items-baseline justify-between gap-2">
       <h3
         class:list={[
-          "font-body text-sm",
+          "font-body text-base",
           isCompleted_ && "text-stone",
           isCurrent && "text-charcoal font-medium",
           isOverdue && "text-charcoal",
@@ -111,7 +111,7 @@ const isUpcoming = status === "upcoming";
     {milestone.description && (
       <p
         class:list={[
-          "text-xs font-body mt-1 leading-relaxed",
+          "text-sm font-body mt-1 leading-relaxed",
           isCompleted_ ? "text-stone-light" : "text-stone",
         ]}
       >

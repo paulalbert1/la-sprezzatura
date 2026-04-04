@@ -34,7 +34,7 @@ const selectedTierName = selectedTierKey
       gridCols === 2 && "md:grid-cols-2",
       gridCols === 3 && "md:grid-cols-3",
     ]}>
-      {tiers.map((tier) => {
+      {tiers.map((tier, tierIndex) => {
         const isSelected = selectedTierKey === tier._key;
         const otherSelected = selectedTierKey && !isSelected;
         const total = tier.lineItems.reduce((sum, item) => sum + (item.price || 0), 0);
@@ -42,7 +42,7 @@ const selectedTierName = selectedTierKey
         return (
           <div
             class:list={[
-              "bg-cream-dark border p-6 min-w-0",
+              "bg-cream-dark border flex flex-col min-w-0",
               isSelected
                 ? "border-emerald-400 border-2 ring-1 ring-emerald-100"
                 : "border-stone-light/20",
@@ -50,7 +50,7 @@ const selectedTierName = selectedTierKey
             ]}
           >
             {/* Tier header with name and total */}
-            <div class="mb-4 pb-4 border-b border-stone-light/20">
+            <div class="p-5 pb-4 border-b border-stone-light/20">
               <div class="flex items-baseline justify-between gap-3">
                 <h4 class="font-heading text-lg font-light text-charcoal">{tier.name}</h4>
                 {isSelected && (
@@ -62,20 +62,24 @@ const selectedTierName = selectedTierKey
               <p class="font-heading text-2xl text-charcoal mt-1">{formatCurrency(total)}</p>
             </div>
 
-            {/* Description */}
-            {tier.description && (
-              <p class="text-xs text-stone font-body leading-relaxed mb-4">{tier.description}</p>
-            )}
+            {/* Body: description + line items */}
+            <div class="p-5 flex-1">
+              {/* Description */}
+              {tier.description && (
+                <p class="text-sm text-stone font-body leading-relaxed mb-5">{tier.description}</p>
+              )}
 
-            {/* Line items */}
-            <div class="space-y-2">
-              {tier.lineItems.map((item) => (
-                <div class="flex items-baseline justify-between gap-4">
-                  <span class="text-sm text-charcoal font-body">{item.name}</span>
-                  <span class="text-sm text-charcoal font-body tabular-nums shrink-0">{formatCurrency(item.price)}</span>
-                </div>
-              ))}
+              {/* Line items */}
+              <table class="w-full text-sm font-body">
+                {tier.lineItems.map((item) => (
+                  <tr>
+                    <td class="py-1.5 text-charcoal pr-4">{item.name}</td>
+                    <td class="py-1.5 text-charcoal tabular-nums text-right whitespace-nowrap">{formatCurrency(item.price)}</td>
+                  </tr>
+                ))}
+              </table>
             </div>
+
           </div>
         );
       })}
@@ -88,6 +92,7 @@ const selectedTierName = selectedTierKey
       tiers={tiers.map((t) => ({ _key: t._key, name: t.name }))}
       projectId={projectId}
       artifactKey={artifactKey}
+      columns={gridCols}
     />
   )}
 
