@@ -15,6 +15,7 @@ export const project = defineType({
     { name: "contractors", title: "Contractors" },
     { name: "artifacts", title: "Artifacts" },
     { name: "updates", title: "Updates" },
+    { name: "schedule", title: "Schedule" },
   ],
   fields: [
     defineField({
@@ -416,6 +417,16 @@ export const project = defineType({
                 ],
               },
               initialValue: "pending",
+            }),
+            defineField({
+              name: "orderDate",
+              title: "Order Date",
+              type: "date",
+            }),
+            defineField({
+              name: "expectedDeliveryDate",
+              title: "Expected Delivery Date",
+              type: "date",
             }),
             defineField({
               name: "installDate",
@@ -1035,6 +1046,73 @@ export const project = defineType({
             prepare: ({ subtitle, recipientEmails }) => ({
               title: recipientEmails || "Update sent",
               subtitle: subtitle ? new Date(subtitle).toLocaleString() : "No date",
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 15: Custom schedule events (Full Interior Design only)
+    defineField({
+      name: "customEvents",
+      title: "Custom Events",
+      type: "array",
+      group: "schedule",
+      hidden: ({ document }) =>
+        document?.engagementType !== "full-interior-design",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "scheduleEvent",
+          fields: [
+            defineField({
+              name: "name",
+              title: "Event Name",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "date",
+              title: "Date",
+              type: "date",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "endDate",
+              title: "End Date",
+              type: "date",
+              description: "Leave empty for single-day events",
+            }),
+            defineField({
+              name: "category",
+              title: "Category",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Walkthrough", value: "walkthrough" },
+                  { title: "Inspection", value: "inspection" },
+                  { title: "Punch List", value: "punch-list" },
+                  { title: "Move", value: "move" },
+                  { title: "Permit / Approval", value: "permit" },
+                  { title: "Delivery Window", value: "delivery-window" },
+                  { title: "Client Presentation", value: "presentation" },
+                  { title: "Deadline", value: "deadline" },
+                  { title: "Site Access", value: "access" },
+                  { title: "Other", value: "other" },
+                ],
+              },
+            }),
+            defineField({
+              name: "notes",
+              title: "Notes",
+              type: "text",
+              rows: 2,
+            }),
+          ],
+          preview: {
+            select: { title: "name", subtitle: "date" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Untitled event",
+              subtitle: subtitle || "No date",
             }),
           },
         }),
