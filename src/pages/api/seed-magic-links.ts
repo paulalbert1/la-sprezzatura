@@ -24,10 +24,24 @@ export const GET: APIRoute = async ({ request }) => {
   const TTL = 86400; // 24 hours
   const results: string[] = [];
 
+  // Debug: check if query param "debug" is present — return env info only
+  if (new URL(request.url).searchParams.has("debug")) {
+    const kvUrl = import.meta.env.KV_REST_API_URL || "UNSET_META";
+    const kvToken = import.meta.env.KV_REST_API_TOKEN ? "SET" : "UNSET_META";
+    const pUrl = process.env.KV_REST_API_URL || "UNSET_PROC";
+    const pToken = process.env.KV_REST_API_TOKEN ? "SET" : "UNSET_PROC";
+    return new Response(`import.meta.env.KV_REST_API_URL: ${kvUrl}\nimport.meta.env token: ${kvToken}\nprocess.env.KV_REST_API_URL: ${pUrl}\nprocess.env token: ${pToken}\n`, {
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
   try {
-    const kvUrl = import.meta.env.KV_REST_API_URL;
-    const kvToken = import.meta.env.KV_REST_API_TOKEN;
-    const debugInfo = `KV URL: ${kvUrl ? new URL(kvUrl).hostname : "NOT SET"}\nHas token: ${!!kvToken}\n\n`;
+    const kvUrl = import.meta.env.KV_REST_API_URL || process.env.KV_REST_API_URL;
+    const kvToken = import.meta.env.KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN;
+
+    if (!kvUrl || !kvToken) {
+      return new Response(`KV not configured.\nURL: ${kvUrl ? "set" : "missing"}\nToken: ${kvToken ? "set" : "missing"}`, { status: 500 });
+    }
 
     const redis = new Redis({ url: kvUrl, token: kvToken });
 
