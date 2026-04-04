@@ -218,7 +218,7 @@ export const PROJECT_DETAIL_QUERY = `
         timestamp
       }
     },
-    select(engagementType == "full-interior-design" => {
+    ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {
         _key,
         name,
