@@ -8,6 +8,7 @@ import { SendWorkOrderAccessAction } from "./src/sanity/actions/sendWorkOrderAcc
 import { SendBuildingAccessAction } from "./src/sanity/actions/sendBuildingAccess";
 import { SendUpdateAction } from "./src/sanity/actions/sendUpdate";
 import { renderingTool } from "./src/sanity/components/rendering/RenderingToolPlugin";
+import { getDefaultDocumentNode } from "./src/sanity/structure";
 
 export default defineConfig({
   name: "la-sprezzatura",
@@ -39,6 +40,7 @@ export default defineConfig({
             // Services
             S.documentTypeListItem("service").title("Services"),
           ]),
+      defaultDocumentNode: getDefaultDocumentNode,
     }),
   ],
   tools: [renderingTool()],
