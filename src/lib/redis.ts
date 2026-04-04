@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis";
 
 export const redis = new Redis({
-  url: import.meta.env.KV_REST_API_URL,
-  token: import.meta.env.KV_REST_API_TOKEN,
+  url: process.env.KV_REST_API_URL || import.meta.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN || import.meta.env.KV_REST_API_TOKEN,
 });
