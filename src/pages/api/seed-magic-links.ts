@@ -24,14 +24,24 @@ export const GET: APIRoute = async ({ request }) => {
   const TTL = 86400 * 365; // 1 year
   const results: string[] = [];
 
-  // Debug: test Sanity data availability
+  // Debug: test Sanity data availability and project detail query
   if (new URL(request.url).searchParams.has("debug")) {
     const { sanityClient } = await import("sanity:client");
-    const client = await sanityClient.fetch('*[_id == "seed-client-thornton"][0]{_id, name}');
-    const projects = await sanityClient.fetch('*[_type == "project" && portalEnabled == true && references("seed-client-thornton")]{_id, title}');
-    return new Response(JSON.stringify({ client, projects, sanityConfig: sanityClient.config() }, null, 2), {
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const { getProjectDetail } = await import("../../sanity/queries");
+      const detail = await getProjectDetail("seed-project-gramercy", "seed-client-thornton");
+      return new Response(JSON.stringify({
+        found: !!detail,
+        title: detail?.title,
+        milestones: detail?.milestones?.length,
+        artifacts: detail?.artifacts?.length,
+        contractors: detail?.contractors?.length,
+        procurementItems: detail?.procurementItems?.length,
+        apiVersion: sanityClient.config().apiVersion,
+      }, null, 2), { headers: { "Content-Type": "application/json" } });
+    } catch (e: any) {
+      return new Response(`Query error: ${e.message}`, { status: 500 });
+    }
   }
 
   try {
