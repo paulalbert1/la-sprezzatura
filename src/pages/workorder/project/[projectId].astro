@@ -29,7 +29,6 @@ if (!project) {
 // Fetch site contact info for Contact Liz section
 const siteContact = await getSiteContactInfo();
 
-
 // Extract assignment from project data
 const assignment = project.assignment;
 
@@ -40,6 +39,8 @@ const formatDateTime = (dt: string) =>
     month: "short",
     day: "numeric",
     year: "numeric",
+  }) + " at " +
+  new Date(dt).toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -58,7 +59,7 @@ const addressStr = [
 
 <PortalLayout title={`${project.title} | Work Order | La Sprezzatura`}>
   <main class="flex-1">
-    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+    <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
       <a href="/workorder/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
         <span>&larr;</span> Back to Dashboard
       </a>
@@ -96,28 +97,37 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Appointments
         </h2>
-        {assignment?.appointments?.length > 0 ? (
+        {(assignment?.appointments || []).length > 0 ? (
           <div class="space-y-4">
-            {assignment.appointments.map((apt: any) => (
-              <div
-                class:list={[
-                  "bg-cream-dark border border-stone-light/20 p-4",
-                  isAppointmentPast(apt.dateTime) && "opacity-50",
-                ]}
-              >
-                <div class="flex items-baseline justify-between mb-1">
-                  <span class="text-sm font-body text-charcoal">
-                    {apt.label}
-                  </span>
-                  <span class="text-xs text-stone font-body">
-                    {formatDateTime(apt.dateTime)}
-                  </span>
+            {assignment.appointments.map((apt: any) => {
+              const past = isAppointmentPast(apt.dateTime);
+              return (
+                <div
+                  class:list={[
+                    "bg-cream-dark border border-stone-light/20 rounded-lg p-4",
+                    past && "opacity-50",
+                  ]}
+                >
+                  <div class="flex items-baseline justify-between mb-1">
+                    <span class:list={[
+                      "text-sm font-body text-charcoal",
+                      past && "line-through",
+                    ]}>
+                      {apt.label}
+                    </span>
+                    <span class:list={[
+                      "text-xs font-body tabular-nums",
+                      past ? "text-stone-light" : "text-stone",
+                    ]}>
+                      {formatDateTime(apt.dateTime)}
+                    </span>
+                  </div>
+                  {apt.notes && (
+                    <p class="text-sm text-stone font-body mt-2">{apt.notes}</p>
+                  )}
                 </div>
-                {apt.notes && (
-                  <p class="text-sm text-stone font-body mt-2">{apt.notes}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p class="text-sm text-stone font-body">
@@ -132,8 +142,8 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Scope of Work
         </h2>
-        {assignment?.scopeOfWork?.length > 0 ? (
-          <div class="prose prose-sm text-charcoal font-body">
+        {(assignment?.scopeOfWork || []).length > 0 ? (
+          <div class="prose prose-sm text-charcoal font-body leading-relaxed">
             <PortableText value={assignment.scopeOfWork} />
           </div>
         ) : (
@@ -148,35 +158,35 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Floor Plans
         </h2>
-        {project.floorPlans?.length > 0 ? (
+        {(project.floorPlans || []).length > 0 ? (
           <div class="space-y-4">
             {project.floorPlans.map((fp: any) =>
               isImageFile(fp.file) ? (
-                <div class="bg-cream-dark border border-stone-light/20 p-4">
+                <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-4">
                   <img
                     src={"/api/blob-serve?path=" + encodeURIComponent(fp.file)}
                     alt={fp.planName || "Floor plan"}
                     class="max-h-48 object-contain w-full"
                   />
                   <div class="flex items-center justify-between mt-4">
-                    <span class="text-sm text-charcoal">{fp.planName}</span>
+                    <span class="text-sm text-charcoal font-body">{fp.planName}</span>
                     <a
                       href={"/api/blob-serve?path=" +
                         encodeURIComponent(fp.file)}
-                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
+                      class="text-sm text-terracotta underline hover:text-terracotta-light transition-colors font-body"
                     >
                       Download Plan
                     </a>
                   </div>
                 </div>
               ) : (
-                <div class="bg-cream-dark border border-stone-light/20 p-4">
+                <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-4">
                   <div class="flex items-center justify-between">
-                    <span class="text-sm text-charcoal">{fp.planName}</span>
+                    <span class="text-sm text-charcoal font-body">{fp.planName}</span>
                     <a
                       href={"/api/blob-serve?path=" +
                         encodeURIComponent(fp.file)}
-                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
+                      class="text-sm text-terracotta underline hover:text-terracotta-light transition-colors font-body"
                     >
                       Download PDF
                     </a>
@@ -211,7 +221,7 @@ const addressStr = [
             )}
             {assignment.estimateFile && (
               <a
-                class="inline-flex items-center gap-2 bg-cream-dark border border-stone-light/20 px-6 py-3 text-sm text-charcoal hover:border-terracotta/40 transition-colors"
+                class="inline-flex items-center gap-2 bg-cream-dark border border-stone-light/20 rounded-lg px-6 py-3 text-sm text-charcoal font-body hover:border-terracotta/40 transition-colors"
                 href={"/api/blob-serve?path=" +
                   encodeURIComponent(assignment.estimateFile)}
               >
@@ -232,7 +242,7 @@ const addressStr = [
           Notes from Liz
         </h2>
         {assignment?.contractorNotes ? (
-          <p class="text-sm text-stone font-body whitespace-pre-wrap">
+          <p class="text-sm text-charcoal font-body leading-relaxed whitespace-pre-wrap">
             {assignment.contractorNotes}
           </p>
         ) : (
@@ -247,16 +257,18 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Your Notes
         </h2>
-        {assignment?.submissionNotes?.length > 0 && (
+        {(assignment?.submissionNotes || []).length > 0 && (
           <div class="space-y-4 mb-6">
             {assignment.submissionNotes.map((note: any) => (
-              <div class="border-b border-stone-light/10 pb-3">
+              <div class="bg-cream-dark rounded-lg px-4 py-3">
                 <p class="text-sm text-charcoal font-body">{note.text}</p>
                 <span class="text-xs text-stone font-body">
                   {new Date(note.timestamp).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",
                     year: "numeric",
+                  }) + " at " +
+                  new Date(note.timestamp).toLocaleTimeString("en-US", {
                     hour: "numeric",
                     minute: "2-digit",
                   })}
@@ -265,34 +277,47 @@ const addressStr = [
             ))}
           </div>
         )}
-        <ContractorNoteForm
-          client:load
-          projectId={project._id}
-          assignmentKey={assignment._key}
-        />
+        <details class="group">
+          <summary class="text-xs text-stone hover:text-terracotta transition-colors font-body cursor-pointer select-none uppercase tracking-widest">
+            Add a note
+          </summary>
+          <div class="mt-2">
+            <ContractorNoteForm
+              client:load
+              projectId={project._id}
+              assignmentKey={assignment?._key}
+            />
+          </div>
+        </details>
       </section>
 
       {/* Section: Contact Liz */}
       <section class="py-12 border-t border-stone-light/20">
-        <h2 class="font-heading text-xl font-light text-charcoal mb-4">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Contact Liz
         </h2>
-        <p class="text-sm text-stone font-body mb-4">
-          For questions about this project, contact Liz
-        </p>
-        <div class="space-y-2">
-          <a
-            href={"tel:" + siteContact?.contactPhone}
-            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
-          >
-            {siteContact?.contactPhone}
-          </a>
-          <a
-            href={"mailto:" + siteContact?.contactEmail}
-            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
-          >
-            {siteContact?.contactEmail}
-          </a>
+        <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-6">
+          <p class="text-sm text-stone font-body mb-4">
+            For questions about this project, contact Liz
+          </p>
+          <div class="space-y-2">
+            {siteContact?.contactPhone && (
+              <a
+                href={"tel:" + siteContact.contactPhone}
+                class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+              >
+                {siteContact.contactPhone}
+              </a>
+            )}
+            {siteContact?.contactEmail && (
+              <a
+                href={"mailto:" + siteContact.contactEmail}
+                class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+              >
+                {siteContact.contactEmail}
+              </a>
+            )}
+          </div>
         </div>
       </section>
 

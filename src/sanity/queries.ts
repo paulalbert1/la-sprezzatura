@@ -495,7 +495,7 @@ export const SEND_UPDATE_PROJECT_QUERY = `
     milestones[] | order(date asc) {
       name, date, completed
     },
-    select(engagementType == "full-interior-design" => {
+    ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {
         name, status, installDate, retailPrice,
         "savings": retailPrice - clientCost

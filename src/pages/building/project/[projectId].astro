@@ -27,7 +27,6 @@ if (!project) {
 // Fetch site contact info for Contact Liz section
 const siteContact = await getSiteContactInfo();
 
-
 // Format project address
 const addressStr = [
   project.projectAddress?.street,
@@ -41,7 +40,7 @@ const addressStr = [
 
 <PortalLayout title={`${project.title} | Building Portal | La Sprezzatura`}>
   <main class="flex-1">
-    <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+    <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
       <a href="/building/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
         <span>&larr;</span> Back to Dashboard
       </a>
@@ -68,9 +67,9 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Client Contact
         </h2>
-        <div class="bg-cream-dark border border-stone-light/20 p-6">
+        <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-6">
           {project.primaryClient?.name && (
-            <p class="text-base text-charcoal font-body mb-2">
+            <p class="text-base text-charcoal font-body font-medium mb-2">
               {project.primaryClient.name}
             </p>
           )}
@@ -98,32 +97,35 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Certificates of Insurance
         </h2>
-        {project.cois?.length > 0 ? (
+        {(project.cois || []).length > 0 ? (
           <div class="space-y-4">
             {project.cois.map((coi: any) => (
-              <div class="bg-cream-dark border border-stone-light/20 p-4">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm text-charcoal">{coi.issuerName}</span>
+              <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-sm text-charcoal font-body font-medium">{coi.issuerName}</span>
                   <ExpirationBadge expirationDate={coi.expirationDate} />
                 </div>
-                <div class="flex items-center justify-between">
-                  <div>
-                    {coi.coverageType && (
-                      <span class="text-xs text-stone mr-3">{coi.coverageType}</span>
-                    )}
-                    {coi.policyNumber && (
-                      <span class="text-xs text-stone">Policy: {coi.policyNumber}</span>
-                    )}
-                  </div>
-                  {coi.file && (
-                    <a
-                      href={"/api/blob-serve?path=" + encodeURIComponent(coi.file)}
-                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors"
-                    >
-                      Download Certificate
-                    </a>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3">
+                  {coi.coverageType && (
+                    <span class="text-sm text-stone font-body">{coi.coverageType}</span>
+                  )}
+                  {coi.policyNumber && (
+                    <span class="text-sm text-stone font-body">Policy: {coi.policyNumber}</span>
                   )}
                 </div>
+                {coi.expirationDate && (
+                  <p class="text-sm text-stone font-body mb-3">
+                    Expires {new Date(coi.expirationDate + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </p>
+                )}
+                {coi.file && (
+                  <a
+                    href={"/api/blob-serve?path=" + encodeURIComponent(coi.file)}
+                    class="text-sm text-terracotta underline hover:text-terracotta-light transition-colors font-body"
+                  >
+                    Download Certificate
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -139,21 +141,21 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Legal Documents
         </h2>
-        {project.legalDocs?.length > 0 ? (
+        {(project.legalDocs || []).length > 0 ? (
           <div class="space-y-4">
             {project.legalDocs.map((doc: any) => (
-              <div class="bg-cream-dark border border-stone-light/20 p-4">
+              <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-5">
                 <div class="flex items-center justify-between">
                   <div>
-                    <span class="text-sm text-charcoal">{doc.documentName}</span>
+                    <span class="text-sm text-charcoal font-body font-medium">{doc.documentName}</span>
                     {doc.description && (
-                      <p class="text-xs text-stone mt-1">{doc.description}</p>
+                      <p class="text-sm text-stone font-body mt-1">{doc.description}</p>
                     )}
                   </div>
                   {doc.file && (
                     <a
                       href={"/api/blob-serve?path=" + encodeURIComponent(doc.file)}
-                      class="text-xs text-terracotta hover:text-terracotta-light transition-colors shrink-0 ml-4"
+                      class="text-sm text-terracotta underline hover:text-terracotta-light transition-colors font-body shrink-0 ml-4"
                     >
                       Download Document
                     </a>
@@ -174,15 +176,25 @@ const addressStr = [
         <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Contractors
         </h2>
-        {project.contractors?.length > 0 ? (
+        {(project.contractors || []).length > 0 ? (
           <div class="space-y-4">
             {project.contractors.map((c: any) => (
-              <div class="flex items-baseline justify-between">
-                <span class="text-sm text-charcoal">{c.name}</span>
-                <span class="text-xs text-stone">{c.trades?.join(", ")}</span>
+              <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-5">
+                <div class="flex flex-wrap items-center gap-3">
+                  <span class="text-sm text-charcoal font-body font-medium">{c.name}</span>
+                  {(c.trades || []).length > 0 && (
+                    <div class="flex flex-wrap gap-1.5">
+                      {c.trades.map((trade: string) => (
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide bg-stone-light/15 text-stone font-body">
+                          {trade}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
-            <p class="text-xs text-stone mt-4">
+            <p class="text-sm text-stone font-body mt-4">
               Contact Liz for additional contractor details.
             </p>
           </div>
@@ -195,25 +207,31 @@ const addressStr = [
 
       {/* Section: Contact Liz */}
       <section class="py-12 border-t border-stone-light/20">
-        <h2 class="font-heading text-xl font-light text-charcoal mb-4">
+        <h2 class="font-heading text-xl font-light text-charcoal mb-6">
           Contact Liz
         </h2>
-        <p class="text-sm text-stone font-body mb-4">
-          For questions about this building project, contact Liz
-        </p>
-        <div class="space-y-2">
-          <a
-            href={"tel:" + siteContact?.contactPhone}
-            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
-          >
-            {siteContact?.contactPhone}
-          </a>
-          <a
-            href={"mailto:" + siteContact?.contactEmail}
-            class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
-          >
-            {siteContact?.contactEmail}
-          </a>
+        <div class="bg-cream-dark border border-stone-light/20 rounded-lg p-6">
+          <p class="text-sm text-stone font-body mb-4">
+            For questions about this building project, contact Liz
+          </p>
+          <div class="space-y-2">
+            {siteContact?.contactPhone && (
+              <a
+                href={"tel:" + siteContact.contactPhone}
+                class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+              >
+                {siteContact.contactPhone}
+              </a>
+            )}
+            {siteContact?.contactEmail && (
+              <a
+                href={"mailto:" + siteContact.contactEmail}
+                class="block text-sm text-charcoal hover:text-terracotta transition-colors font-body"
+              >
+                {siteContact.contactEmail}
+              </a>
+            )}
+          </div>
         </div>
       </section>
 
