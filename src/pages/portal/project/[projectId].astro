@@ -36,23 +36,31 @@ if (!project) {
   return Astro.redirect("/portal/dashboard");
 }
 
-// Determine project state
-const isCompleted = isProjectCompleted(project);
-const isReopened = isProjectReopened(project);
+let isCompleted = false;
+let isReopened = false;
+let showProcurement = false;
+let showCloseDocument = false;
+let designOptions: any[] = [];
+let renderError = "";
 
-// Engagement type gating
-const showProcurement = project.engagementType === "full-interior-design";
-const showCloseDocument = project.engagementType === "full-interior-design";
-
-// Fetch design options for this project
-const designOptions =
-  (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
+try {
+  isCompleted = isProjectCompleted(project);
+  isReopened = isProjectReopened(project);
+  showProcurement = project.engagementType === "full-interior-design";
+  showCloseDocument = project.engagementType === "full-interior-design";
+  designOptions = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT_QUERY, { projectId })) || [];
+} catch (e: any) {
+  renderError = e.message + "\n" + e.stack;
+  console.error("[ProjectDetail] Error:", renderError);
+}
 
 ---
 
 <PortalLayout title={`${project.title} | La Sprezzatura`}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+      {renderError && <pre class="text-xs text-red-500 mb-4 whitespace-pre-wrap">ERROR: {renderError}</pre>}
+
       <a href="/portal/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
         <span>&larr;</span> Back to Dashboard
       </a>
