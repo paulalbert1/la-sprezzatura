@@ -25,12 +25,17 @@ export const GET: APIRoute = async ({ request }) => {
   const results: string[] = [];
 
   try {
+    // Debug: check what URL redis is using
+    const kvUrl = import.meta.env.KV_REST_API_URL || process.env.KV_REST_API_URL || "NOT SET";
+    const hasToken = !!(import.meta.env.KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN);
+    const debugInfo = `KV URL hostname: ${new URL(kvUrl).hostname}\nHas token: ${hasToken}\n\n`;
+
     for (const link of links) {
       await redis.set(`magic:${link.token}`, JSON.stringify(link.data), { ex: TTL });
       results.push(`${link.label}\n  ${BASE}/${link.portal}/verify?token=${link.token}\n`);
     }
 
-    return new Response(results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
+    return new Response(debugInfo + results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
       headers: { "Content-Type": "text/plain" },
     });
   } catch (err: any) {
