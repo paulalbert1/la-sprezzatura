@@ -218,8 +218,6 @@ async function processGeneration(
     const userConvKey = generatePortalToken(8);
     const modelConvKey = generatePortalToken(8);
 
-    console.log("[Rendering:Generate] Blob put OK:", blob.pathname, bytesStored, "bytes");
-
     const renderingObj = {
       _key: renderingKey,
       _type: "renderingOutput",
@@ -237,8 +235,6 @@ async function processGeneration(
       costEstimate,
       bytesStored,
     };
-
-    console.log("[Rendering:Generate] Patching session:", sessionId, "renderingKey:", renderingKey);
 
     // Fetch current document to merge arrays (Sanity stores empty arrays as null,
     // and append() silently fails on null fields)
@@ -272,8 +268,6 @@ async function processGeneration(
         ],
       })
       .commit();
-
-    console.log("[Rendering:Generate] Patch OK. Renderings:", patchResult.renderings?.length, "Conv:", patchResult.conversation?.length);
 
     // 6. Increment usage ONLY after successful generation + upload
     // Do NOT increment usage on failure

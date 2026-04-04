@@ -99,7 +99,6 @@ function extractFromResponse(response: {
 export async function fetchAndEncodeImage(
   blobPathname: string,
 ): Promise<{ base64: string; mimeType: string }> {
-  console.log("[fetchAndEncodeImage] Fetching:", blobPathname);
   const result = await get(blobPathname, { access: "public" });
   if (!result) {
     throw new Error(`Image not found: ${blobPathname}`);
@@ -117,7 +116,6 @@ export async function fetchAndEncodeImage(
   }
   const buffer = Buffer.concat(chunks);
   const base64 = buffer.toString("base64");
-  console.log("[fetchAndEncodeImage] OK:", blobPathname, buffer.length, "bytes");
 
   return {
     base64,
