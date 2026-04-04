@@ -20,13 +20,18 @@ if (!rawValue) {
   return Astro.redirect("/workorder/login?error=expired");
 }
 
-// Parse token data -- handle legacy plain string and new JSON format
+// Parse token data -- handle Upstash auto-parsed objects, JSON strings, and legacy plain strings
 let tokenData: any;
-try {
-  tokenData = JSON.parse(rawValue);
-} catch {
-  // Legacy format: plain string is a contractor ID
-  tokenData = { entityId: rawValue, role: 'contractor' };
+if (typeof rawValue === 'object' && rawValue !== null) {
+  tokenData = rawValue;
+} else if (typeof rawValue === 'string') {
+  try {
+    tokenData = JSON.parse(rawValue);
+  } catch {
+    tokenData = { entityId: rawValue, role: 'contractor' };
+  }
+} else {
+  return Astro.redirect("/workorder/login?error=expired");
 }
 
 if (tokenData.dualRole) {

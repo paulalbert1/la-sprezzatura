@@ -20,13 +20,18 @@ if (!rawValue) {
   return Astro.redirect("/portal/login?error=expired");
 }
 
-// Parse token data -- handle legacy plain string and new JSON format
+// Parse token data -- handle Upstash auto-parsed objects, JSON strings, and legacy plain strings
 let tokenData: any;
-try {
-  tokenData = JSON.parse(rawValue);
-} catch {
-  // Legacy format: plain clientId string (backward compat)
-  tokenData = { entityId: rawValue, role: 'client' };
+if (typeof rawValue === 'object' && rawValue !== null) {
+  tokenData = rawValue;
+} else if (typeof rawValue === 'string') {
+  try {
+    tokenData = JSON.parse(rawValue);
+  } catch {
+    tokenData = { entityId: rawValue, role: 'client' };
+  }
+} else {
+  return Astro.redirect("/portal/login?error=expired");
 }
 
 if (tokenData.dualRole) {

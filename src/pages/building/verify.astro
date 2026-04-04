@@ -20,11 +20,17 @@ if (!rawValue) {
   return Astro.redirect("/building/login?error=expired");
 }
 
-// Parse token data
+// Parse token data -- handle Upstash auto-parsed objects, JSON strings, and legacy plain strings
 let tokenData: any;
-try {
-  tokenData = JSON.parse(rawValue);
-} catch {
+if (typeof rawValue === 'object' && rawValue !== null) {
+  tokenData = rawValue;
+} else if (typeof rawValue === 'string') {
+  try {
+    tokenData = JSON.parse(rawValue);
+  } catch {
+    return Astro.redirect("/building/login?error=expired");
+  }
+} else {
   return Astro.redirect("/building/login?error=expired");
 }
 
