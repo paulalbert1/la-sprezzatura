@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Card, Flex, Stack, Text, Spinner } from "@sanity/ui";
 import { useGanttData } from "./hooks/useGanttData";
-import { GanttChart } from "./GanttChart";
 import { ScaleToggle } from "./ScaleToggle";
 import { GanttLegend } from "./GanttLegend";
 import { GanttEmptyState } from "./GanttEmptyState";
 import type { GanttScale } from "./lib/ganttTypes";
+
+// Lazy-load GanttChart to prevent SVAR's CSS/browser-API imports from
+// crashing the Studio structure module at load time.
+const GanttChart = lazy(() =>
+  import("./GanttChart").then((m) => ({ default: m.GanttChart })),
+);
 
 /**
  * GanttScheduleView - Document view for the Schedule tab.
@@ -132,7 +137,9 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
           <ScaleToggle view={view} onViewChange={setView} />
           <GanttLegend contractors={contractors} />
         </Flex>
-        <GanttChart tasks={tasks} scales={scales} cellWidth={cellWidth} />
+        <Suspense fallback={<Flex justify="center" padding={4}><Spinner muted /></Flex>}>
+          <GanttChart tasks={tasks} scales={scales} cellWidth={cellWidth} />
+        </Suspense>
       </Stack>
     </Card>
   );
