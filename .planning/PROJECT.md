@@ -17,19 +17,20 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 |
 | v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish, DNS cutover | 9-12 |
 | v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability, step navigation | 13-? |
-| v4.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
+| v4.0 Project Schedule | Interactive Gantt chart in Sanity Studio for project sequencing | 15-? |
+| v5.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
 
-## Current Milestone: v3.1 Rendering Tool Polish
+## Current Milestone: v4.0 Project Schedule (Gantt Chart)
 
-**Goal:** Make the AI rendering wizard intuitive and reliable so Liz can use it with real clients without hand-holding. Purely frontend/UX work on the existing rendering infrastructure.
+**Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects.
 
 **Target features:**
-- Clickable wizard step navigation (free movement between completed steps)
-- Image preview thumbnails after upload
-- Multi-image upload in a single action
-- Reliable blob upload (server-side fallback for CORS issues)
-- Simplified setup fields (clarify style preset vs design vision)
-- Filename truncation and general UX polish
+- Gantt chart tab on the project document in Sanity Studio
+- Rows for: contractor assignments, procurement items, milestones, and custom ad-hoc events
+- Interactive drag-and-drop to reschedule items (dates sync back to Sanity)
+- Timeline scale control (week/month view)
+- Color-coded by category
+- Custom events schema (vacate office, walkthrough, punch list, etc.)
 
 ## Requirements
 
@@ -60,7 +61,17 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
 - [ ] Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com
 
-### Planned (v4.0 — Linha Platform)
+### Active (v4.0 — Project Schedule)
+
+- [ ] Interactive Gantt chart tab on project document in Sanity Studio
+- [ ] Contractor assignment timeline bars (start/end dates, appointments)
+- [ ] Procurement item timeline (order → delivery → install)
+- [ ] Milestone markers on timeline
+- [ ] Custom events schema and timeline display (vacate, walkthrough, punch list, etc.)
+- [ ] Drag-and-drop rescheduling with Sanity field sync
+- [ ] Week/month view toggle
+
+### Planned (v5.0 — Linha Platform)
 
 - [ ] Turborepo monorepo — packages/core, packages/portal, packages/rendering, templates/
 - [ ] La Sprezzatura migrated as reserved template
@@ -137,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-03 — Phase 14 (Image Experience and Field Clarity) complete: style preset dropdown, instant image previews, parallel upload, PDF icon fallback*
+*Last updated: 2026-04-04 — Milestone v4.0 (Project Schedule) started*
