@@ -10,17 +10,12 @@ import { isProjectVisible } from "../../lib/projectVisibility";
 // clientId injected by middleware (guaranteed by auth guard)
 const clientId = Astro.locals.clientId!;
 
-// DEBUG: log what we're querying
-console.log("[Dashboard] clientId:", clientId, "type:", typeof clientId);
-
 // Fetch client name for greeting
 const client = await getClientById(clientId);
-console.log("[Dashboard] client result:", JSON.stringify(client));
 const firstName = client?.name?.split(" ")[0] || "there";
 
 // Fetch all portal-enabled projects for this client
 const projects = await getProjectsByClientId(clientId) || [];
-console.log("[Dashboard] projects count:", projects.length);
 
 // Auto-redirect: if exactly 1 project, skip dashboard
 if (projects.length === 1) {
@@ -44,9 +39,6 @@ const ENGAGEMENT_LABELS: Record<string, string> = {
 <PortalLayout title="Dashboard | La Sprezzatura">
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {/* DEBUG: remove after testing */}
-      <pre class="text-xs text-red-500 mb-4">DEBUG: clientId={clientId} client={JSON.stringify(client)} projects={projects.length}</pre>
-
       {/* Brand mark */}
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
         La Sprezzatura

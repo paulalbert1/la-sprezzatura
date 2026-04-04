@@ -56,25 +56,33 @@ export async function getSession(
   const sessionToken = cookies.get(COOKIE_NAME)?.value;
   if (!sessionToken) return null;
 
-  const raw = await redis.get<string>(`session:${sessionToken}`);
+  const raw = await redis.get(`session:${sessionToken}`);
   if (!raw) {
     // Session expired or invalid -- clean up cookie
     cookies.delete(COOKIE_NAME, { path: "/" });
     return null;
   }
 
-  // Try parsing as JSON (new format)
-  try {
-    if (typeof raw === 'string' && raw.startsWith('{')) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.entityId && parsed?.role) return parsed as SessionData;
-    }
-  } catch {
-    /* fall through to legacy handling */
+  // Upstash auto-parses JSON, so raw may already be an object
+  if (typeof raw === 'object' && raw !== null) {
+    const obj = raw as Record<string, unknown>;
+    if (obj.entityId && obj.role) return obj as unknown as SessionData;
   }
 
-  // Legacy session: plain string is a clientId -- backward compat
-  return { entityId: raw as string, role: 'client' };
+  // String format: try JSON parse
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed?.entityId && parsed?.role) return parsed as SessionData;
+    } catch {
+      // Legacy format: plain clientId string
+      return { entityId: raw, role: 'client' };
+    }
+  }
+
+  // Unrecognized format
+  cookies.delete(COOKIE_NAME, { path: "/" });
+  return null;
 }
 
 /**
