@@ -290,3 +290,147 @@ describe("project schema (Phase 9 extensions)", () => {
     expect(tierFieldNames).toContain("lineItems");
   });
 });
+
+describe("project schema (Phase 15 schedule extensions)", () => {
+  // Helper to extract hidden callback from a field
+  function getHiddenCallback(fieldName: string) {
+    const field = project.fields?.find((f) => f.name === fieldName);
+    return field?.hidden as
+      | ((args: { document?: Record<string, unknown> }) => boolean)
+      | undefined;
+  }
+
+  // Helper: get procurementItem inline object fields
+  function getProcurementItemFields() {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as
+      | { name: string; type: string }[]
+      | undefined;
+  }
+
+  // SCHED-02: Schedule group exists
+  it('has "schedule" group in groups array with title "Schedule"', () => {
+    const groups = (project as { groups?: { name: string; title: string }[] })
+      .groups;
+    expect(groups).toBeDefined();
+    const scheduleGroup = groups!.find((g) => g.name === "schedule");
+    expect(scheduleGroup).toBeDefined();
+    expect(scheduleGroup!.title).toBe("Schedule");
+  });
+
+  // SCHED-01: customEvents field exists with correct type and group
+  it('has field "customEvents" of type "array" in group "schedule"', () => {
+    const field = project.fields?.find((f) => f.name === "customEvents");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("array");
+    expect(field?.group).toBe("schedule");
+  });
+
+  // SCHED-01 / D-02: customEvents hidden when not full-interior-design
+  it("customEvents field hidden when engagementType is not full-interior-design", () => {
+    const hidden = getHiddenCallback("customEvents");
+    expect(hidden).toBeDefined();
+    expect(
+      hidden!({ document: { engagementType: "styling-refreshing" } })
+    ).toBe(true);
+    expect(
+      hidden!({ document: { engagementType: "carpet-curating" } })
+    ).toBe(true);
+    expect(
+      hidden!({ document: { engagementType: "full-interior-design" } })
+    ).toBe(false);
+  });
+
+  // SCHED-01: customEvents array member fields
+  it("customEvents array members have name (string), date (date), endDate (date), category (string), notes (text)", () => {
+    const field = project.fields?.find((f) => f.name === "customEvents");
+    const ofArray = (field as any)?.of;
+    expect(ofArray).toBeDefined();
+    expect(ofArray.length).toBeGreaterThan(0);
+    const memberFields = ofArray[0].fields as {
+      name: string;
+      type: string;
+    }[];
+    expect(memberFields).toBeDefined();
+
+    const nameField = memberFields.find((f) => f.name === "name");
+    expect(nameField).toBeDefined();
+    expect(nameField!.type).toBe("string");
+
+    const dateField = memberFields.find((f) => f.name === "date");
+    expect(dateField).toBeDefined();
+    expect(dateField!.type).toBe("date");
+
+    const endDateField = memberFields.find((f) => f.name === "endDate");
+    expect(endDateField).toBeDefined();
+    expect(endDateField!.type).toBe("date");
+
+    const categoryField = memberFields.find((f) => f.name === "category");
+    expect(categoryField).toBeDefined();
+    expect(categoryField!.type).toBe("string");
+
+    const notesField = memberFields.find((f) => f.name === "notes");
+    expect(notesField).toBeDefined();
+    expect(notesField!.type).toBe("text");
+  });
+
+  // D-04: All 10 category options
+  it("customEvents category field has exactly 10 options matching D-04", () => {
+    const field = project.fields?.find((f) => f.name === "customEvents");
+    const ofArray = (field as any)?.of;
+    const memberFields = ofArray[0].fields as any[];
+    const categoryField = memberFields.find(
+      (f: any) => f.name === "category"
+    );
+    expect(categoryField).toBeDefined();
+    const list = categoryField.options?.list as { value: string }[];
+    expect(list).toBeDefined();
+    expect(list.length).toBe(10);
+    const values = list.map((item) => item.value);
+    expect(values).toContain("walkthrough");
+    expect(values).toContain("inspection");
+    expect(values).toContain("punch-list");
+    expect(values).toContain("move");
+    expect(values).toContain("permit");
+    expect(values).toContain("delivery-window");
+    expect(values).toContain("presentation");
+    expect(values).toContain("deadline");
+    expect(values).toContain("access");
+    expect(values).toContain("other");
+  });
+
+  // SCHED-03: procurementItem has orderDate and expectedDeliveryDate
+  it('procurementItem has "orderDate" field of type "date"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const orderDate = fields!.find((f) => f.name === "orderDate");
+    expect(orderDate).toBeDefined();
+    expect(orderDate!.type).toBe("date");
+  });
+
+  it('procurementItem has "expectedDeliveryDate" field of type "date"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const expectedDeliveryDate = fields!.find(
+      (f) => f.name === "expectedDeliveryDate"
+    );
+    expect(expectedDeliveryDate).toBeDefined();
+    expect(expectedDeliveryDate!.type).toBe("date");
+  });
+
+  // D-03: orderDate and expectedDeliveryDate appear before installDate
+  it("orderDate and expectedDeliveryDate appear before installDate in procurementItem field order", () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const fieldNames = fields!.map((f) => f.name);
+    const orderDateIdx = fieldNames.indexOf("orderDate");
+    const expectedDeliveryIdx = fieldNames.indexOf("expectedDeliveryDate");
+    const installDateIdx = fieldNames.indexOf("installDate");
+    expect(orderDateIdx).toBeGreaterThan(-1);
+    expect(expectedDeliveryIdx).toBeGreaterThan(-1);
+    expect(installDateIdx).toBeGreaterThan(-1);
+    expect(orderDateIdx).toBeLessThan(installDateIdx);
+    expect(expectedDeliveryIdx).toBeLessThan(installDateIdx);
+  });
+});
