@@ -17,10 +17,8 @@ const firstName = client?.name?.split(" ")[0] || "there";
 // Fetch all portal-enabled projects for this client
 const projects = await getProjectsByClientId(clientId) || [];
 
-// Auto-redirect: if exactly 1 project, skip dashboard
-if (projects.length === 1) {
-  return Astro.redirect(`/portal/project/${projects[0]._id}`);
-}
+// Single-project clients see their project card (no auto-redirect,
+// so "Back to Dashboard" from the project detail page works)
 
 // Filter by 30-day visibility window, then separate active vs completed
 const visibleProjects = projects.filter((p: any) => isProjectVisible(p));

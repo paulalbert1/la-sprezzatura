@@ -14,10 +14,7 @@ const firstName = contractor?.name?.split(" ")[0] || "there";
 // Fetch all assigned projects for this contractor
 const projects = await getProjectsByContractorId(contractorId) || [];
 
-// Auto-redirect single-project contractors to project detail
-if (projects.length === 1) {
-  return Astro.redirect(`/workorder/project/${projects[0]._id}`);
-}
+// Single-project contractors see their project card (no auto-redirect)
 ---
 
 <PortalLayout title="Work Orders | La Sprezzatura">

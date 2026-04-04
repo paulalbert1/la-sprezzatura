@@ -10,10 +10,7 @@ const email = Astro.locals.buildingManagerEmail!;
 // Fetch all building projects for this manager
 const projects = await getProjectsByBuildingManagerEmail(email) || [];
 
-// Auto-redirect for single project
-if (projects.length === 1) {
-  return Astro.redirect("/building/project/" + projects[0]._id);
-}
+// Single-project managers see their project card (no auto-redirect)
 
 // Format address helper
 function formatAddress(addr: any): string {
