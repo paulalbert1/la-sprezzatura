@@ -50,7 +50,7 @@ export const GET: APIRoute = async ({ request }) => {
       results.push(`${link.label}\n  ${BASE}/${link.portal}/verify?token=${link.token}\n`);
     }
 
-    return new Response(debugInfo + results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
+    return new Response(results.join("\n") + "\nAll tokens expire in 24 hours.\n", {
       headers: { "Content-Type": "text/plain" },
     });
   } catch (err: any) {
