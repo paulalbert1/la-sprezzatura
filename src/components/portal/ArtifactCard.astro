@@ -23,7 +23,7 @@ const label = getArtifactLabel(artifact.artifactType, artifact.customTypeName);
 const badgeStyle = getArtifactBadgeStyle(artifact.artifactType);
 const isSigned =
   artifact.artifactType === "contract" && isContractSigned(artifact);
-const previousVersions = artifact.versions.filter(
+const previousVersions = (artifact.versions || []).filter(
   (v) => v._key !== currentVersion?._key,
 );
 const hasApproval = artifact.decisionLog?.some((d) => d.action === "approved");
