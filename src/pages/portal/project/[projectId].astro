@@ -74,11 +74,9 @@ try {
       <ProjectHeader project={project} />
       <ConfidentialityBanner />
 
-      {isCompleted && !isReopened && (
-        <PostProjectBanner completedAt={project.completedAt} />
-      )}
+      <!-- DEBUG: Minimal render to isolate 500 -->
+      <p class="text-sm text-stone">Milestones: {(project.milestones || []).length} | Contractors: {(project.contractors || []).length} | Artifacts: {(project.artifacts || []).length} | Procurement: {(project.procurementItems || []).length}</p>
 
-      <!-- Milestones section (always visible) -->
       <MilestoneSection
         milestones={project.milestones || []}
         pipelineStage={project.pipelineStage}
@@ -86,27 +84,14 @@ try {
         projectId={project._id}
       />
 
-      <!-- Contractors section (Full Interior Design only, CVIS-01) -->
       {showProcurement && project.contractors && (
         <ContractorSection contractors={project.contractors} />
       )}
 
-      <!-- Design Options gallery (only if promoted options exist) -->
-      {designOptions.length > 0 && (
-        <DesignOptionsSection
-          options={designOptions}
-          clientId={clientId}
-          projectId={project._id}
-          isCommercial={project.isCommercial}
-        />
-      )}
-
-      <!-- Procurement section (Full Interior Design only) -->
       {showProcurement && (
         <ProcurementTable items={project.procurementItems || []} />
       )}
 
-      <!-- Artifacts section -->
       <ArtifactSection
         artifacts={project.artifacts || []}
         projectId={project._id}
