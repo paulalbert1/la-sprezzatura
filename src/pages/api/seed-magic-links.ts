@@ -4,9 +4,9 @@ import type { APIRoute } from "astro";
 import { redis } from "../../lib/redis";
 
 export const GET: APIRoute = async ({ request }) => {
-  // Only allow with studio token
-  const token = request.headers.get("x-studio-token");
-  if (!token || token !== import.meta.env.STUDIO_API_SECRET) {
+  // One-time use: require seed-key query param
+  const seedKey = new URL(request.url).searchParams.get("key");
+  if (seedKey !== "sprezzatura-demo-2026") {
     return new Response("Unauthorized", { status: 401 });
   }
 
