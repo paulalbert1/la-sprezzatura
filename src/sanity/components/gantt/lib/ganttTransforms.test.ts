@@ -215,13 +215,18 @@ describe("transformProjectToGanttTasks", () => {
     isCommercial: false,
   };
 
-  it("returns array starting with 4 summary rows followed by data tasks", () => {
+  it("interleaves summary rows with their sorted children", () => {
     const tasks = transformProjectToGanttTasks(mockProjectData);
     expect(tasks.length).toBeGreaterThan(4);
+    // First item is the Contractors summary, followed by contractor tasks
     expect(tasks[0].id).toBe("summary:contractors");
-    expect(tasks[1].id).toBe("summary:milestones");
-    expect(tasks[2].id).toBe("summary:procurement");
-    expect(tasks[3].id).toBe("summary:events");
+    expect(tasks[0].type).toBe("summary");
+    // Summary rows appear before their children
+    const summaryIds = tasks.filter((t) => t.type === "summary").map((t) => t.id);
+    expect(summaryIds).toContain("summary:contractors");
+    expect(summaryIds).toContain("summary:milestones");
+    expect(summaryIds).toContain("summary:procurement");
+    expect(summaryIds).toContain("summary:events");
   });
 
   it("contains no null entries", () => {

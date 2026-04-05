@@ -49,8 +49,8 @@ function TaskTemplate({ data }: { data: ITask }) {
     backgroundColor = CATEGORY_COLORS.events;
   }
 
-  // For milestones (diamond markers), SVAR renders its own diamond shape.
-  // The template renders the text outside the diamond. Apply color via a wrapper.
+  // For milestones (diamond markers), SVAR renders the diamond shape.
+  // No text overlay needed — the left panel already shows the name.
   if (task.type === "milestone") {
     return (
       <div
@@ -60,20 +60,14 @@ function TaskTemplate({ data }: { data: ITask }) {
           top: 0,
           width: "100%",
           height: "100%",
-          display: "flex",
-          alignItems: "center",
-          paddingLeft: 20,
-          fontSize: 11,
-          whiteSpace: "nowrap",
           opacity,
         }}
-      >
-        {task.text}
-      </div>
+      />
     );
   }
 
-  // For task bars (contractors, multi-day events): render colored background
+  // For task bars (contractors, multi-day events): render colored background.
+  // No text overlay — the left panel already shows names, and bar text clips.
   return (
     <div
       style={{
@@ -84,20 +78,9 @@ function TaskTemplate({ data }: { data: ITask }) {
         height: "100%",
         backgroundColor,
         borderRadius: 4,
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: 8,
-        color: "#fff",
-        fontSize: 11,
-        fontWeight: 500,
-        overflow: "hidden",
-        whiteSpace: "nowrap",
-        textOverflow: "ellipsis",
         opacity,
       }}
-    >
-      {task.text}
-    </div>
+    />
   );
 }
 
@@ -155,7 +138,7 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
           readonly={true}
           cellHeight={38}
           cellWidth={cellWidth}
-          columns={[{ id: "text", header: "Item", width: 200 }]}
+          columns={[{ id: "text", header: "Item", width: 280 }]}
           links={[]}
           markers={todayMarkers}
           taskTemplate={TaskTemplate}
