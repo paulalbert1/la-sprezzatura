@@ -211,17 +211,18 @@ describe("transformProjectToGanttTasks", () => {
     milestones: [mockMilestone, mockCompletedMilestone],
     procurementItems: [mockProcurement],
     customEvents: [mockEvent, mockMultiDayEvent],
+    scheduleDependencies: [
+      { _key: "d1", fromCategory: "milestone", fromKey: "m1", toCategory: "contractor", toKey: "c1", linkType: "e2s" },
+    ],
     engagementType: "full-interior-design",
     isCommercial: false,
   };
 
   it("interleaves summary rows with their sorted children", () => {
-    const tasks = transformProjectToGanttTasks(mockProjectData);
+    const { tasks } = transformProjectToGanttTasks(mockProjectData);
     expect(tasks.length).toBeGreaterThan(4);
-    // First item is the Contractors summary, followed by contractor tasks
     expect(tasks[0].id).toBe("summary:contractors");
     expect(tasks[0].type).toBe("summary");
-    // Summary rows appear before their children
     const summaryIds = tasks.filter((t) => t.type === "summary").map((t) => t.id);
     expect(summaryIds).toContain("summary:contractors");
     expect(summaryIds).toContain("summary:milestones");
@@ -230,11 +231,30 @@ describe("transformProjectToGanttTasks", () => {
   });
 
   it("contains no null entries", () => {
-    const tasks = transformProjectToGanttTasks(mockProjectData);
+    const { tasks } = transformProjectToGanttTasks(mockProjectData);
     for (const task of tasks) {
       expect(task).not.toBeNull();
       expect(task).not.toBeUndefined();
     }
+  });
+
+  it("returns dependency links for valid source/target pairs", () => {
+    const { links } = transformProjectToGanttTasks(mockProjectData);
+    expect(links).toHaveLength(1);
+    expect(links[0].source).toBe("milestone:m1");
+    expect(links[0].target).toBe("contractor:c1");
+    expect(links[0].type).toBe("e2s");
+  });
+
+  it("filters out links with missing source or target tasks", () => {
+    const badLinkData: SanityProjectData = {
+      ...mockProjectData,
+      scheduleDependencies: [
+        { _key: "d1", fromCategory: "milestone", fromKey: "nonexistent", toCategory: "contractor", toKey: "c1", linkType: "e2s" },
+      ],
+    };
+    const { links } = transformProjectToGanttTasks(badLinkData);
+    expect(links).toHaveLength(0);
   });
 
   it("returns no tasks with empty arrays (SVAR crashes on empty summary rows)", () => {
@@ -243,10 +263,11 @@ describe("transformProjectToGanttTasks", () => {
       milestones: [],
       procurementItems: [],
       customEvents: [],
+      scheduleDependencies: [],
       engagementType: "full-interior-design",
       isCommercial: false,
     };
-    const tasks = transformProjectToGanttTasks(emptyData);
+    const { tasks } = transformProjectToGanttTasks(emptyData);
     expect(tasks).toHaveLength(0);
   });
 
@@ -256,10 +277,11 @@ describe("transformProjectToGanttTasks", () => {
       milestones: [],
       procurementItems: [],
       customEvents: [],
+      scheduleDependencies: [],
       engagementType: "full-interior-design",
       isCommercial: false,
     };
-    const tasks = transformProjectToGanttTasks(partialData);
+    const { tasks } = transformProjectToGanttTasks(partialData);
     const summaryIds = tasks
       .filter((t) => t.type === "summary")
       .map((t) => t.id);
@@ -275,11 +297,11 @@ describe("transformProjectToGanttTasks", () => {
       milestones: [{ ...mockMilestone, date: null }],
       procurementItems: [{ ...mockProcurement, installDate: null }],
       customEvents: [{ ...mockEvent, date: "" }],
+      scheduleDependencies: [],
       engagementType: "full-interior-design",
       isCommercial: false,
     };
-    const tasks = transformProjectToGanttTasks(dataWithBadDates);
-    // No tasks remain — all items had missing dates, no summary rows needed
+    const { tasks } = transformProjectToGanttTasks(dataWithBadDates);
     expect(tasks).toHaveLength(0);
   });
 });

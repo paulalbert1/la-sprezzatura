@@ -64,7 +64,7 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   const [view, setView] = useState<"week" | "month">("week");
 
   // Always call hooks (React rules), but skip rendering for non-qualifying projects
-  const { tasks, contractors, loading, error } = useGanttData(
+  const { tasks, links, contractors, loading, error } = useGanttData(
     documentId,
     rev,
   );
@@ -138,7 +138,7 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
           <GanttLegend contractors={contractors} />
         </Flex>
         <Suspense fallback={<Flex justify="center" padding={4}><Spinner muted /></Flex>}>
-          <GanttChart tasks={tasks} scales={scales} cellWidth={cellWidth} />
+          <GanttChart tasks={tasks} links={links} scales={scales} cellWidth={cellWidth} />
         </Suspense>
       </Stack>
     </Card>

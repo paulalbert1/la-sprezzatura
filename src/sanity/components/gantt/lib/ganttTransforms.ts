@@ -9,6 +9,7 @@
 import { parseSanityDate } from "./ganttDates";
 import type {
   GanttTask,
+  GanttLink,
   ResolvedContractor,
   SanityProjectData,
 } from "./ganttTypes";
@@ -210,5 +211,23 @@ export function transformProjectToGanttTasks(
       if (task.parent === summary.id) result.push(task);
     }
   }
-  return result;
+
+  // Transform dependency links
+  const taskIds = new Set(result.map((t) => t.id));
+  const links: GanttLink[] = (data.scheduleDependencies || [])
+    .map((dep) => {
+      const sourceId = `${dep.fromCategory}:${dep.fromKey}`;
+      const targetId = `${dep.toCategory}:${dep.toKey}`;
+      // Only include links where both tasks exist in the chart
+      if (!taskIds.has(sourceId) || !taskIds.has(targetId)) return null;
+      return {
+        id: dep._key,
+        source: sourceId,
+        target: targetId,
+        type: (dep.linkType || "e2s") as GanttLink["type"],
+      };
+    })
+    .filter((l): l is GanttLink => l !== null);
+
+  return { tasks: result, links };
 }

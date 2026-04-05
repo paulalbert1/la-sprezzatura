@@ -13,10 +13,11 @@ import "@svar-ui/react-gantt/all.css";
 import "./gantt.css";
 
 import { getContractorColor, CATEGORY_COLORS, getProcurementStatusColor } from "./lib/ganttColors";
-import type { GanttTask, GanttScale } from "./lib/ganttTypes";
+import type { GanttTask, GanttLink, GanttScale } from "./lib/ganttTypes";
 
 interface GanttChartProps {
   tasks: GanttTask[];
+  links: GanttLink[];
   scales: GanttScale[];
   cellWidth?: number;
 }
@@ -84,7 +85,7 @@ function TaskTemplate({ data }: { data: ITask }) {
   );
 }
 
-export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
+export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartProps) {
   // Today marker via SVAR markers prop
   const todayMarkers = [
     {
@@ -139,7 +140,12 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
           cellHeight={38}
           cellWidth={cellWidth}
           columns={[{ id: "text", header: "Item", width: 280 }]}
-          links={[]}
+          links={links.map((l, i) => ({
+            id: i + 1,
+            source: idMap.get(l.source) || 0,
+            target: idMap.get(l.target) || 0,
+            type: l.type,
+          }))}
           markers={todayMarkers}
           taskTemplate={TaskTemplate}
         />

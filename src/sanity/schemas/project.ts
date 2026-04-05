@@ -1118,6 +1118,99 @@ export const project = defineType({
         }),
       ],
     }),
+    // Phase 15+: Schedule dependencies (arrows between items on the Gantt chart)
+    defineField({
+      name: "scheduleDependencies",
+      title: "Dependencies",
+      type: "array",
+      group: "schedule",
+      description:
+        "Define which schedule items must finish before others can start. Shows as arrow lines on the Schedule tab.",
+      hidden: ({ document }) =>
+        document?.engagementType !== "full-interior-design",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "scheduleDependency",
+          fields: [
+            defineField({
+              name: "fromCategory",
+              title: "From (category)",
+              type: "string",
+              validation: (r) => r.required(),
+              options: {
+                list: [
+                  { title: "Contractor", value: "contractor" },
+                  { title: "Milestone", value: "milestone" },
+                  { title: "Procurement", value: "procurement" },
+                  { title: "Event", value: "event" },
+                ],
+                layout: "dropdown",
+              },
+            }),
+            defineField({
+              name: "fromKey",
+              title: "From (item key)",
+              type: "string",
+              description:
+                "The _key of the item in its array. Find it in the item's URL or JSON.",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "toCategory",
+              title: "To (category)",
+              type: "string",
+              validation: (r) => r.required(),
+              options: {
+                list: [
+                  { title: "Contractor", value: "contractor" },
+                  { title: "Milestone", value: "milestone" },
+                  { title: "Procurement", value: "procurement" },
+                  { title: "Event", value: "event" },
+                ],
+                layout: "dropdown",
+              },
+            }),
+            defineField({
+              name: "toKey",
+              title: "To (item key)",
+              type: "string",
+              description:
+                "The _key of the target item. This item starts after the 'from' item finishes.",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "linkType",
+              title: "Dependency type",
+              type: "string",
+              initialValue: "e2s",
+              options: {
+                list: [
+                  { title: "End-to-Start (finish A → start B)", value: "e2s" },
+                  { title: "Start-to-Start", value: "s2s" },
+                  { title: "End-to-End", value: "e2e" },
+                  { title: "Start-to-End", value: "s2e" },
+                ],
+                layout: "dropdown",
+              },
+            }),
+          ],
+          preview: {
+            select: {
+              fromCat: "fromCategory",
+              fromKey: "fromKey",
+              toCat: "toCategory",
+              toKey: "toKey",
+              linkType: "linkType",
+            },
+            prepare: ({ fromCat, fromKey, toCat, toKey, linkType }) => ({
+              title: `${fromCat || "?"}:${fromKey || "?"} → ${toCat || "?"}:${toKey || "?"}`,
+              subtitle: linkType || "e2s",
+            }),
+          },
+        }),
+      ],
+    }),
   ],
   preview: {
     select: {

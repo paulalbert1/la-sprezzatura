@@ -88,8 +88,24 @@ export interface SanityProjectData {
     category: string;
     notes: string | null;
   }>;
+  scheduleDependencies: Array<{
+    _key: string;
+    fromCategory: string;
+    fromKey: string;
+    toCategory: string;
+    toKey: string;
+    linkType: string;
+  }>;
   engagementType: string;
   isCommercial: boolean;
+}
+
+/** A dependency link between two Gantt tasks (rendered as an arrow) */
+export interface GanttLink {
+  id: string;
+  source: string;
+  target: string;
+  type: "e2s" | "s2s" | "e2e" | "s2e";
 }
 
 /**
