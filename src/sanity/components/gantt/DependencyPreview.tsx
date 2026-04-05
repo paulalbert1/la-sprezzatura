@@ -162,12 +162,19 @@ export function DependencyPreview(props: DependencyPreviewProps) {
     : 0;
 
   return (
-    <Box padding={2}>
+    <Box
+      padding={2}
+      style={isConflict ? {
+        backgroundColor: "rgba(220, 38, 38, 0.08)",
+        borderLeft: "3px solid #DC2626",
+        borderRadius: 4,
+      } : undefined}
+    >
       <Flex gap={2} align="center">
         {isConflict && (
-          <Text size={1} style={{ color: "#DC2626", flexShrink: 0 }}>
-            <WarningOutlineIcon />
-          </Text>
+          <Box style={{ flexShrink: 0, color: "#DC2626" }}>
+            <WarningOutlineIcon style={{ fontSize: 20 }} />
+          </Box>
         )}
         <Text size={1} weight="medium">
           {sourceName}
@@ -179,16 +186,15 @@ export function DependencyPreview(props: DependencyPreviewProps) {
           {targetName}
         </Text>
       </Flex>
-      <Flex gap={2} align="center" style={{ marginTop: 4 }}>
-        <Text size={0} muted>
+      {isConflict ? (
+        <Text size={0} style={{ color: "#DC2626", marginTop: 4, fontWeight: 500 }}>
+          Scheduling conflict: ends {overlapDays}d after {targetName} starts
+        </Text>
+      ) : (
+        <Text size={0} muted style={{ marginTop: 4 }}>
           {typeLabel}
         </Text>
-        {isConflict && (
-          <Badge tone="critical" fontSize={0}>
-            Conflict: {overlapDays}d overlap
-          </Badge>
-        )}
-      </Flex>
+      )}
     </Box>
   );
 }
