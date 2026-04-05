@@ -1,13 +1,10 @@
 /**
  * SVAR Gantt CSS variable overrides, scoped under .gantt-container.
  * This prevents CSS bleed into Sanity Studio UI (Pitfall 3).
- *
- * Only SVAR-specific overrides live here. All chrome (toolbar, legend, empty state)
- * uses inline styles and @sanity/ui components per codebase convention.
  */
 
 .gantt-container {
-  /* Today marker */
+  /* Today marker (if SVAR renders it) */
   --wx-gantt-marker-color: #EF4444;
   --wx-gantt-marker-font-color: #EF4444;
 
@@ -15,55 +12,30 @@
   --wx-gantt-milestone-color: #8B5CF6;
   --wx-gantt-milestone-border-radius: 1px;
 
-  /* Summary row (if used) */
-  --wx-gantt-summary-color: #e5e7eb;
-  --wx-gantt-summary-fill-color: #e5e7eb;
-  --wx-gantt-summary-font-color: #374151;
-
   /* Default task bar */
   --wx-gantt-task-color: #3B82F6;
   --wx-gantt-task-fill-color: #93c5fd;
   --wx-gantt-bar-border-radius: 4px;
 
-  /* Dependency link arrows — subtle styling */
-  --wx-gantt-link-color: #b0b8c4;
+  /* Dependency link arrows — subtle */
+  --wx-gantt-link-color: #cbd5e1;
   --wx-gantt-link-color-hovered: #64748b;
-  --wx-gantt-link-marker-background: #b0b8c4;
-  --wx-gantt-link-marker-color: #b0b8c4;
+  --wx-gantt-link-marker-background: #cbd5e1;
+  --wx-gantt-link-marker-color: #cbd5e1;
 }
 
-/* Ensure the Gantt chart fills the available space */
 .gantt-container {
   width: 100%;
   min-height: 400px;
 }
 
-/* --- Dependency arrows: make less visually heavy --- */
-
-.gantt-container [class*="wx-link"] {
-  opacity: 0.45;
+/* --- Today column highlight via highlightTime prop --- */
+/* SVAR applies this class to each cell in today's column */
+.gantt-today-col {
+  background-color: rgba(239, 68, 68, 0.08) !important;
 }
 
-.gantt-container [class*="wx-link"]:hover {
-  opacity: 0.8;
-}
-
-/* --- Sticky scale header: keep date row visible when scrolling --- */
-
-.gantt-container [class*="wx-scale"] {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-/* --- Today marker: ensure the red vertical line renders --- */
-
-.gantt-container [class*="wx-marker"] {
-  background-color: #EF4444 !important;
-  min-width: 2px;
-}
-
-.gantt-container .gantt-today-marker {
-  background-color: #EF4444 !important;
-  width: 2px !important;
+/* Also try with common SVAR theme wrappers */
+:global(.gantt-today-col) {
+  background-color: rgba(239, 68, 68, 0.08) !important;
 }

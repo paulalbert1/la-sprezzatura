@@ -128,6 +128,11 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
     rangeEnd.setDate(rangeEnd.getDate() + 14);
   }
 
+  // Highlight today's column with a background tint
+  const todayStr = new Date().toDateString();
+  const highlightToday = (date: Date) =>
+    date.toDateString() === todayStr ? "gantt-today-col" : "";
+
   return (
     <div className="gantt-container">
       <Willow fonts={false}>
@@ -147,6 +152,7 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
             type: l.type,
           }))}
           markers={todayMarkers}
+          highlightTime={highlightToday}
           taskTemplate={TaskTemplate}
         />
       </Willow>
