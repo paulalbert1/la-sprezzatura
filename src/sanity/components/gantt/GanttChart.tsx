@@ -145,8 +145,8 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
       });
     // Force container to match SVG height.
     // Frappe's CSS uses `height: var(--gv-grid-height)` which overrides inline styles.
-    // We must set the CSS variable itself on the element.
-    requestAnimationFrame(() => {
+    // Set the CSS variable on the element after Frappe finishes rendering.
+    const resizeTimer = setTimeout(() => {
       if (!containerRef.current) return;
       const svg = containerRef.current.querySelector('svg.gantt');
       if (svg) {
@@ -154,15 +154,18 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         if (svgHeight) {
           const h = `${parseInt(svgHeight) + 80}px`;
           containerRef.current.style.setProperty('--gv-grid-height', h);
+          // Also set inline as backup
+          containerRef.current.style.height = h;
         }
       }
-    });
+    }, 200);
 
     } catch (err) {
       console.error("[GanttChart] Frappe Gantt init error:", err);
     }
 
     return () => {
+      clearTimeout(resizeTimer);
       ganttRef.current = null;
     };
   }, [tasks, links]);
