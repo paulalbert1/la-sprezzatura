@@ -110,7 +110,8 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         today_button: true,
         scroll_to: "today",
         infinite_padding: false,
-        auto_move_label: true,         // Move labels outside bars when they don't fit
+        auto_move_label: true,
+        container_height: "auto",
         lines: "both",
         popup_on: "hover",
         popup: (ctx: {

@@ -91,8 +91,8 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   }
 
   return (
-    <Card padding={4}>
-      <Stack space={3}>
+    <Card padding={2} style={{ overflow: "visible" }}>
+      <Stack space={2}>
         {/* Conflict banner */}
         {conflicts.length > 0 && (
           <Card padding={3} radius={2} tone="caution" border>
