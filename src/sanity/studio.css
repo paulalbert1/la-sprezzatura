@@ -1,35 +1,55 @@
 /**
  * Sanity Studio global overrides.
  *
- * Forces light mode and hides the first structure pane
- * (Content type list) since navbar tabs handle type navigation.
+ * Forces a light cream/terracotta theme matching the front-end palette,
+ * regardless of the user's OS dark/light mode preference.
  */
 
-/* Force light color scheme regardless of OS preference */
-[data-ui="ColorSchemeProvider"] {
+/* Force ALL Sanity cards and surfaces to use cream palette */
+:root,
+[data-scheme="dark"],
+[data-scheme="light"],
+[data-ui="Card"],
+[data-ui="Dialog"] {
+  --card-bg-color: #FAF8F5 !important;
+  --card-bg2-color: #F5F0EB !important;
+  --card-fg-color: #2C2926 !important;
+  --card-border-color: #D4CCC2 !important;
+  --card-muted-fg-color: #8A8478 !important;
+  --card-accent-fg-color: #C4836A !important;
+  --card-link-fg-color: #C4836A !important;
+  --card-focus-ring-color: #C4836A !important;
+  --card-code-bg-color: #F5F0EB !important;
+  --card-code-fg-color: #6B6358 !important;
+  --card-skeleton-color-from: #F5F0EB !important;
+  --card-skeleton-color-to: #E8E2DA !important;
+  --card-shadow-outline-color: rgba(196, 131, 106, 0.3) !important;
+  --card-shadow-umbra-color: rgba(44, 41, 38, 0.1) !important;
+  --card-shadow-penumbra-color: rgba(44, 41, 38, 0.07) !important;
+  --card-shadow-ambient-color: rgba(44, 41, 38, 0.06) !important;
   color-scheme: light !important;
 }
 
-/* Override dark mode: force light scheme on the root studio element */
-[data-scheme="dark"] {
-  --card-bg-color: #FAF8F5 !important;
+/* Selected/active items */
+[data-selected="true"],
+[data-active="true"],
+[aria-selected="true"] {
+  --card-bg-color: #FAE8DE !important;
   --card-fg-color: #2C2926 !important;
 }
 
-/* Force light appearance on the entire studio */
-html[data-sanity] {
-  color-scheme: light;
+/* Primary tone (terracotta) */
+[data-ui="Card"][data-tone="primary"],
+[data-ui="Button"][data-tone="primary"] {
+  --card-bg-color: #C4836A !important;
+  --card-fg-color: #FFFFFF !important;
 }
 
-/* Hide the first structure pane (Content type list, pane index 0)
-   since navbar tabs provide the same navigation. */
-[data-pane-index="0"][data-testid="document-list-pane"],
-[data-pane-index="0"][data-testid="pane"] {
-  display: none !important;
-}
-
-/* Also hide the divider after the first pane */
-[data-pane-index="0"] + [data-testid="pane-divider"],
-[data-pane-index="0"] + div[style*="cursor"] {
-  display: none !important;
+/* Input fields */
+[data-ui="TextInput"],
+[data-ui="TextArea"],
+[data-ui="Select"] {
+  --input-bg-color: #FFFFFF !important;
+  --input-fg-color: #2C2926 !important;
+  --input-border-color: #D4CCC2 !important;
 }
