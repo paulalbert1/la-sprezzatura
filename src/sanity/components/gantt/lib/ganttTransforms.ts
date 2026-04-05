@@ -10,6 +10,7 @@ import { parseSanityDate } from "./ganttDates";
 import type {
   GanttTask,
   GanttLink,
+  ScheduleConflict,
   ResolvedContractor,
   SanityProjectData,
 } from "./ganttTypes";
@@ -198,21 +199,41 @@ export function transformProjectToGanttTasks(
   // Remove parent references since there are no summary rows
   const result = allTasks.map((t) => ({ ...t, parent: null }));
 
-  // Transform dependency links
-  const taskIds = new Set(result.map((t) => t.id));
-  const links: GanttLink[] = (data.scheduleDependencies || [])
-    .map((dep) => {
-      // source/target are stored as "category:_key" (e.g. "milestone:mil-da01")
-      if (!dep.source || !dep.target) return null;
-      if (!taskIds.has(dep.source) || !taskIds.has(dep.target)) return null;
-      return {
-        id: dep._key,
-        source: dep.source,
-        target: dep.target,
-        type: (dep.linkType || "e2s") as GanttLink["type"],
-      };
-    })
-    .filter((l): l is GanttLink => l !== null);
+  // Transform dependency links and detect conflicts
+  const taskMap = new Map(result.map((t) => [t.id, t]));
+  const links: GanttLink[] = [];
+  const conflicts: ScheduleConflict[] = [];
 
-  return { tasks: result, links };
+  for (const dep of data.scheduleDependencies || []) {
+    if (!dep.source || !dep.target) continue;
+    const srcTask = taskMap.get(dep.source);
+    const tgtTask = taskMap.get(dep.target);
+    if (!srcTask || !tgtTask) continue;
+
+    // Check for conflict: does the predecessor end after the successor starts?
+    const srcEnd = srcTask.end || srcTask.start;
+    const isConflict = srcEnd.getTime() > tgtTask.start.getTime();
+
+    links.push({
+      id: dep._key,
+      source: dep.source,
+      target: dep.target,
+      type: (dep.linkType || "e2s") as GanttLink["type"],
+      conflict: isConflict,
+    });
+
+    if (isConflict) {
+      const overlapMs = srcEnd.getTime() - tgtTask.start.getTime();
+      conflicts.push({
+        linkId: dep._key,
+        sourceName: srcTask.text,
+        sourceEndDate: srcEnd,
+        targetName: tgtTask.text,
+        targetStartDate: tgtTask.start,
+        overlapDays: Math.ceil(overlapMs / (1000 * 60 * 60 * 24)),
+      });
+    }
+  }
+
+  return { tasks: result, links, conflicts };
 }

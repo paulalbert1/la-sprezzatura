@@ -246,7 +246,7 @@ const milestones = [
   {
     _key: KEYS.roughInspection,
     name: "Rough Inspection",
-    date: daysFromNow(20),            // after lighting ends (18)
+    date: daysFromNow(10),            // CONFLICT: before lighting ends (18) — dependency violation
     completed: false,
     description: "Building department rough electrical and plumbing inspection",
   },

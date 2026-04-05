@@ -12,6 +12,7 @@ import { transformProjectToGanttTasks } from "../lib/ganttTransforms";
 import type {
   GanttTask,
   GanttLink,
+  ScheduleConflict,
   ResolvedContractor,
   SanityProjectData,
 } from "../lib/ganttTypes";
@@ -29,6 +30,7 @@ const GANTT_QUERY = `*[_id == $docId || _id == "drafts." + $docId] | order(_id d
 interface UseGanttDataResult {
   tasks: GanttTask[];
   links: GanttLink[];
+  conflicts: ScheduleConflict[];
   contractors: ResolvedContractor[];
   loading: boolean;
   error: string | null;
@@ -41,6 +43,7 @@ export function useGanttData(
   const client = useClient({ apiVersion: "2024-01-01" });
   const [tasks, setTasks] = useState<GanttTask[]>([]);
   const [links, setLinks] = useState<GanttLink[]>([]);
+  const [conflicts, setConflicts] = useState<ScheduleConflict[]>([]);
   const [contractors, setContractors] = useState<ResolvedContractor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +60,7 @@ export function useGanttData(
       if (!data) {
         setTasks([]);
         setLinks([]);
+        setConflicts([]);
         setContractors([]);
         return;
       }
@@ -64,6 +68,7 @@ export function useGanttData(
       const result = transformProjectToGanttTasks(data);
       setTasks(result.tasks);
       setLinks(result.links);
+      setConflicts(result.conflicts);
       setContractors(data.contractors || []);
     } catch (err) {
       const message =
@@ -71,6 +76,7 @@ export function useGanttData(
       setError(message);
       setTasks([]);
       setLinks([]);
+      setConflicts([]);
       setContractors([]);
     } finally {
       setLoading(false);
@@ -81,5 +87,5 @@ export function useGanttData(
     fetchData();
   }, [fetchData, rev]);
 
-  return { tasks, links, contractors, loading, error };
+  return { tasks, links, conflicts, contractors, loading, error };
 }

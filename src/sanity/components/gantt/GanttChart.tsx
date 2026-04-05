@@ -30,6 +30,12 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
     depMap.set(link.target, deps);
   }
 
+  // Build set of task IDs involved in conflicts
+  const conflictTargets = new Set<string>();
+  for (const link of links) {
+    if (link.conflict) conflictTargets.add(link.target);
+  }
+
   return tasks.map((task) => {
     let customClass = `gantt-cat-${task._category}`;
     if (task._category === "contractor" && task._colorIndex !== undefined) {
@@ -40,6 +46,10 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
     }
     if (task._category === "procurement" && task._status) {
       customClass = `gantt-procurement-${task._status}`;
+    }
+    // Mark conflicting tasks with a red outline
+    if (conflictTargets.has(task.id)) {
+      customClass += " gantt-conflict";
     }
 
     const end = task.end || task.start;

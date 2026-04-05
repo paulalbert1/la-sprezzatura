@@ -97,6 +97,13 @@
   fill: #0F172A !important;
 }
 
+/* === Conflict indicator: red dashed outline on bars with violations === */
+.gantt .bar-wrapper.gantt-conflict .bar {
+  stroke: #DC2626 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 4 2;
+}
+
 /* === Arrows === */
 .gantt .arrow {
   stroke: #78716C;

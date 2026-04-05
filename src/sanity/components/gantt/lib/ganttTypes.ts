@@ -104,6 +104,17 @@ export interface GanttLink {
   source: string;
   target: string;
   type: "e2s" | "s2s" | "e2e" | "s2e";
+  conflict?: boolean;
+}
+
+/** A scheduling conflict: predecessor ends after successor starts */
+export interface ScheduleConflict {
+  linkId: string;
+  sourceName: string;
+  sourceEndDate: Date;
+  targetName: string;
+  targetStartDate: Date;
+  overlapDays: number;
 }
 
 /**

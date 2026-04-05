@@ -243,6 +243,25 @@ describe("transformProjectToGanttTasks", () => {
     expect(links[0].source).toBe("milestone:m1");
     expect(links[0].target).toBe("contractor:c1");
     expect(links[0].type).toBe("e2s");
+    // m1 is May 10, c1 starts May 1 — predecessor ends after successor starts
+    expect(links[0].conflict).toBe(true);
+  });
+
+  it("detects conflicts when predecessor ends after successor starts", () => {
+    // milestone m1 is May 10, contractor c1 starts May 1 — conflict!
+    const conflictData: SanityProjectData = {
+      ...mockProjectData,
+      scheduleDependencies: [
+        { _key: "d1", source: "contractor:c1", target: "milestone:m1", linkType: "e2s" },
+      ],
+    };
+    const { links, conflicts } = transformProjectToGanttTasks(conflictData);
+    // contractor c1 ends May 15, milestone m1 starts May 10 → 5 day overlap
+    expect(links[0].conflict).toBe(true);
+    expect(conflicts).toHaveLength(1);
+    expect(conflicts[0].overlapDays).toBe(5);
+    expect(conflicts[0].sourceName).toContain("JP");
+    expect(conflicts[0].targetName).toBe("Design Approval");
   });
 
   it("filters out links with missing source or target tasks", () => {

@@ -1,21 +1,13 @@
 import { lazy, Suspense } from "react";
-import { Card, Flex, Stack, Text, Spinner } from "@sanity/ui";
+import { Card, Flex, Stack, Text, Spinner, Box } from "@sanity/ui";
+import { WarningOutlineIcon } from "@sanity/icons";
 import { useGanttData } from "./hooks/useGanttData";
 import { GanttLegend } from "./GanttLegend";
 import { GanttEmptyState } from "./GanttEmptyState";
 
-// Lazy-load GanttChart to prevent CSS imports from crashing the
-// Studio structure module at load time.
 const GanttChart = lazy(() =>
   import("./GanttChart").then((m) => ({ default: m.GanttChart })),
 );
-
-/**
- * GanttScheduleView - Document view for the Schedule tab.
- *
- * Per D-06: visible for Full Interior Design or Commercial projects.
- * Uses Frappe Gantt with its built-in Day/Week/Month selector.
- */
 
 interface GanttScheduleViewProps {
   document: {
@@ -38,7 +30,7 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   const isScheduleEnabled =
     engagementType === "full-interior-design" || isCommercial === true;
 
-  const { tasks, links, contractors, loading, error } = useGanttData(
+  const { tasks, links, conflicts, contractors, loading, error } = useGanttData(
     documentId,
     rev,
   );
@@ -101,6 +93,29 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   return (
     <Card padding={4}>
       <Stack space={3}>
+        {/* Conflict banner */}
+        {conflicts.length > 0 && (
+          <Card padding={3} radius={2} tone="caution" border>
+            <Flex gap={3} align="flex-start">
+              <Box style={{ flexShrink: 0, marginTop: 2 }}>
+                <Text size={2}>
+                  <WarningOutlineIcon />
+                </Text>
+              </Box>
+              <Stack space={2}>
+                <Text size={1} weight="semibold">
+                  {conflicts.length} scheduling {conflicts.length === 1 ? "conflict" : "conflicts"}
+                </Text>
+                {conflicts.map((c) => (
+                  <Text key={c.linkId} size={1} muted>
+                    {c.sourceName} ends {c.overlapDays}d after {c.targetName} starts
+                  </Text>
+                ))}
+              </Stack>
+            </Flex>
+          </Card>
+        )}
+
         <Flex align="center" justify="flex-end" padding={3}>
           <GanttLegend contractors={contractors} />
         </Flex>
