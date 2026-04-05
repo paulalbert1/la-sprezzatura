@@ -1,4 +1,14 @@
 import { defineType, defineField, defineArrayMember } from "sanity";
+import {
+  MasterDetailIcon,
+  UsersIcon,
+  CalendarIcon,
+  PackageIcon,
+  WrenchIcon,
+  DocumentsIcon,
+  BellIcon,
+  ClockIcon,
+} from "@sanity/icons";
 import { generatePortalToken } from "../../lib/generateToken";
 import { BlobFileInput } from "../components/BlobFileInput";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
@@ -10,14 +20,14 @@ export const project = defineType({
   title: "Portfolio Project",
   type: "document",
   groups: [
-    { name: "content", title: "Content", default: true },
-    { name: "portal", title: "Client Portal" },
-    { name: "milestones", title: "Milestones" },
-    { name: "procurement", title: "Procurement" },
-    { name: "contractors", title: "Contractors" },
-    { name: "artifacts", title: "Artifacts" },
-    { name: "updates", title: "Updates" },
-    { name: "schedule", title: "Schedule" },
+    { name: "content", title: "Content", icon: MasterDetailIcon, default: true },
+    { name: "portal", title: "Client Portal", icon: UsersIcon },
+    { name: "milestones", title: "Milestones", icon: CalendarIcon },
+    { name: "procurement", title: "Procurement", icon: PackageIcon },
+    { name: "contractors", title: "Contractors", icon: WrenchIcon },
+    { name: "artifacts", title: "Artifacts", icon: DocumentsIcon },
+    { name: "updates", title: "Updates", icon: BellIcon },
+    { name: "schedule", title: "Schedule", icon: ClockIcon },
   ],
   fields: [
     defineField({
