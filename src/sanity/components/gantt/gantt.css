@@ -56,15 +56,9 @@
 .gantt .bar-wrapper.gantt-contractor-8 .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
 .gantt .bar-wrapper.gantt-contractor-9 .bar { fill: #6366F1 !important; stroke: #6366F1 !important; }
 
-/* White text on colored bars */
-.gantt .bar-wrapper[class*="gantt-contractor"] .bar-label { fill: #FFFFFF !important; }
-
 /* === Category colors === */
 .gantt .bar-wrapper.gantt-cat-milestone .bar { fill: #8B5CF6 !important; stroke: #8B5CF6 !important; }
-.gantt .bar-wrapper.gantt-cat-milestone .bar-label { fill: #FFFFFF !important; }
-
 .gantt .bar-wrapper.gantt-cat-procurement .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
-.gantt .bar-wrapper.gantt-cat-procurement .bar-label { fill: #FFFFFF !important; }
 
 /* Events by category */
 .gantt .bar-wrapper.gantt-cat-walkthrough .bar,
@@ -77,8 +71,6 @@
 .gantt .bar-wrapper.gantt-cat-deadline .bar,
 .gantt .bar-wrapper.gantt-cat-access .bar,
 .gantt .bar-wrapper.gantt-cat-other .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
-
-.gantt .bar-wrapper[class*="gantt-cat-"] .bar-label { fill: #FFFFFF !important; }
 
 /* Completed milestones — dimmed */
 .gantt .bar-wrapper.gantt-completed .bar {
@@ -95,9 +87,8 @@
 .gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #10B981 !important; stroke: #10B981 !important; }
 .gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #9CA3AF !important; stroke: #9CA3AF !important; }
 
-.gantt .bar-wrapper[class*="gantt-procurement"] .bar-label { fill: #FFFFFF !important; }
-
-/* Labels that overflow outside the bar should be dark (not white) */
+/* ALL labels always dark — readable on any bar color or background */
+.gantt .bar-label,
 .gantt .bar-label.big {
   fill: #0F172A !important;
 }
