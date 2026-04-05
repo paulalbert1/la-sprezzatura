@@ -134,6 +134,8 @@ function DependencyArrows({
   renderKey: number;
 }) {
   const [paths, setPaths] = useState<React.ReactNode[]>([]);
+  const [scrollOffset, setScrollOffset] = useState({ x: 0, y: 0 });
+  const [svgSize, setSvgSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!containerRef.current || links.length === 0 || containerWidth === 0) {
@@ -147,7 +149,6 @@ function DependencyArrows({
       const positions = measureBarPositions(containerRef.current);
       if (positions.size === 0) { setPaths([]); return; }
 
-      // Build index map: task id → row index
       const taskIndex = new Map<string, number>();
       tasks.forEach((t, i) => taskIndex.set(t.id, i));
 
@@ -162,19 +163,13 @@ function DependencyArrows({
         const tgtPos = positions.get(tgtIdx);
         if (!srcPos || !tgtPos) continue;
 
-        // Source: right edge of the bar
         const srcX = srcPos.right;
         const srcY = srcPos.centerY;
-
-        // Target: left edge of the bar
         const tgtX = tgtPos.left;
         const tgtY = tgtPos.centerY;
-
-        // L-shape: short horizontal from source, then vertical, then horizontal to target
         const gapX = srcX + 6;
 
         const pathD = `M ${srcX} ${srcY} L ${gapX} ${srcY} L ${gapX} ${tgtY} L ${tgtX} ${tgtY}`;
-
         const arrowD = `M ${tgtX} ${tgtY} L ${tgtX - ARROW_SIZE} ${tgtY - ARROW_SIZE} L ${tgtX - ARROW_SIZE} ${tgtY + ARROW_SIZE} Z`;
 
         newPaths.push(
@@ -186,23 +181,62 @@ function DependencyArrows({
       }
 
       setPaths(newPaths);
-    }, 600); // wait for SVAR to finish rendering
+      setSvgSize({
+        width: containerRef.current.scrollWidth,
+        height: containerRef.current.scrollHeight,
+      });
+    }, 600);
 
     return () => clearTimeout(timer);
   }, [tasks, links, containerRef, containerWidth, renderKey]);
 
-  if (paths.length === 0) return null;
+  // Sync SVG position with SVAR's internal scroll
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  const totalHeight = containerRef.current?.scrollHeight || 800;
+    // Find SVAR's scrollable containers (both horizontal and vertical)
+    const scrollables: HTMLElement[] = [];
+    containerRef.current.querySelectorAll("*").forEach((el) => {
+      const style = window.getComputedStyle(el);
+      if ((style.overflow === "auto" || style.overflow === "scroll" ||
+           style.overflowX === "auto" || style.overflowX === "scroll" ||
+           style.overflowY === "auto" || style.overflowY === "scroll") &&
+          (el as HTMLElement).scrollWidth > (el as HTMLElement).clientWidth ||
+          (el as HTMLElement).scrollHeight > (el as HTMLElement).clientHeight) {
+        scrollables.push(el as HTMLElement);
+      }
+    });
+
+    const handleScroll = () => {
+      // Use the largest scroll offset from any scrollable container
+      let maxX = 0, maxY = 0;
+      for (const el of scrollables) {
+        if (el.scrollLeft > maxX) maxX = el.scrollLeft;
+        if (el.scrollTop > maxY) maxY = el.scrollTop;
+      }
+      setScrollOffset({ x: maxX, y: maxY });
+    };
+
+    for (const el of scrollables) {
+      el.addEventListener("scroll", handleScroll, { passive: true });
+    }
+    return () => {
+      for (const el of scrollables) {
+        el.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [containerRef, containerWidth]);
+
+  if (paths.length === 0) return null;
 
   return (
     <svg
       style={{
         position: "absolute",
-        top: 0,
-        left: 0,
-        width: containerWidth,
-        height: totalHeight,
+        top: -scrollOffset.y,
+        left: -scrollOffset.x,
+        width: svgSize.width || containerWidth,
+        height: svgSize.height || 800,
         pointerEvents: "none",
         zIndex: 4,
       }}
