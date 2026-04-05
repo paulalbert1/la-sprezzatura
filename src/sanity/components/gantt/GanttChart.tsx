@@ -123,6 +123,9 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
     end: t.end || t.start,
     // Root tasks (parent: null) use 0; child tasks use mapped numeric parent
     parent: t.parent ? (idMap.get(t.parent) || 0) : 0,
+    // SVAR crashes if leaf tasks have open: true (tries to expand nonexistent children).
+    // Only summary rows should be expandable.
+    open: t.type === "summary" ? t.open : undefined,
   }));
 
   return (
