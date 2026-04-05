@@ -8,9 +8,19 @@
 /* === Container sizing === */
 .gantt-container {
   --gv-grid-height: 600px;
-  --gv-bar-height: 26px;
+  --gv-bar-height: 28px;
   --gv-upper-header-height: 40px;
   --gv-lower-header-height: 28px;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Force sans-serif on all Frappe Gantt text */
+.gantt-container *,
+.gantt .bar-label,
+.gantt .upper-text,
+.gantt .lower-text,
+.gantt-container .popup-wrapper {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 /* === Theme: warm off-white to match Studio === */

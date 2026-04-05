@@ -1,9 +1,8 @@
 /**
  * GanttChart — Frappe Gantt wrapper for Sanity Studio.
  *
- * Replaces SVAR React Gantt with Frappe Gantt for better dependency
- * arrow rendering, simpler CSS styling, and cleaner API.
- * Uses useRef + useEffect to mount the vanilla JS Frappe Gantt instance.
+ * Vanilla JS Frappe Gantt mounted via useRef + useEffect.
+ * Day view by default, with Frappe's built-in view selector.
  */
 
 import { useRef, useEffect } from "react";
@@ -12,20 +11,15 @@ import Gantt from "frappe-gantt";
 import "./frappe-gantt.css";
 import "./gantt.css";
 
-import { getContractorColor, CATEGORY_COLORS, getProcurementStatusColor } from "./lib/ganttColors";
-import type { GanttTask, GanttLink, GanttScale } from "./lib/ganttTypes";
+import type { GanttTask, GanttLink } from "./lib/ganttTypes";
 
 interface GanttChartProps {
   tasks: GanttTask[];
   links: GanttLink[];
-  scales: GanttScale[];
-  cellWidth?: number;
 }
 
 /**
  * Convert our GanttTask + GanttLink arrays to Frappe Gantt's task format.
- * Frappe uses: { id, name, start, end, progress, dependencies, custom_class }
- * Dependencies are a comma-separated string of task IDs.
  */
 function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
   // Build dependency map: target → [source1, source2, ...]
@@ -37,7 +31,6 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
   }
 
   return tasks.map((task) => {
-    // Determine custom CSS class for per-category/contractor coloring
     let customClass = `gantt-cat-${task._category}`;
     if (task._category === "contractor" && task._colorIndex !== undefined) {
       customClass = `gantt-contractor-${task._colorIndex % 10}`;
@@ -52,7 +45,6 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
     const end = task.end || task.start;
     const startStr = formatDate(task.start);
     let endStr = formatDate(end);
-    // Frappe needs end to be at least 1 day after start to render a visible bar
     if (startStr === endStr) {
       const nextDay = new Date(end);
       nextDay.setDate(nextDay.getDate() + 1);
@@ -80,36 +72,34 @@ function formatDate(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartProps) {
+export function GanttChart({ tasks, links }: GanttChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const ganttRef = useRef<InstanceType<typeof Gantt> | null>(null);
-
-  // Determine view mode from scales
-  const viewMode = scales.some((s) => s.unit === "day") ? "Week" : "Month";
 
   useEffect(() => {
     if (!containerRef.current || tasks.length === 0) return;
 
     const frappeTasks = toFrappeTasks(tasks, links);
 
-    // Clear previous instance safely
+    // Clear previous instance
     while (containerRef.current.firstChild) {
       containerRef.current.removeChild(containerRef.current.firstChild);
     }
 
     try {
       ganttRef.current = new Gantt(containerRef.current, frappeTasks, {
-        view_mode: viewMode,
-        view_mode_select: false,
+        view_mode: "Day",
+        view_mode_select: true,        // Frappe's built-in Day/Week/Month selector
         readonly: true,
         readonly_progress: true,
-        bar_height: 24,
+        bar_height: 28,
         bar_corner_radius: 4,
-        padding: 14,
-        column_width: cellWidth,
-        arrow_curve: 4,
-        today_button: false,
+        padding: 16,
+        column_width: 45,
+        arrow_curve: 5,
+        today_button: true,
         scroll_to: "today",
+        infinite_padding: false,       // Don't allow scrolling past data bounds
         lines: "both",
         popup_on: "hover",
         popup: (ctx: {
@@ -121,20 +111,21 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
           const { task } = ctx;
           ctx.set_title(task.name);
 
-          const startStr = task._start?.toLocaleDateString("en-US", { month: "short", day: "numeric" }) || "";
-          const endStr = task._end?.toLocaleDateString("en-US", { month: "short", day: "numeric" }) || "";
+          const startStr = task._start?.toLocaleDateString("en-US", {
+            month: "short", day: "numeric", year: "numeric",
+          }) || "";
+          const endStr = task._end?.toLocaleDateString("en-US", {
+            month: "short", day: "numeric", year: "numeric",
+          }) || "";
           ctx.set_subtitle(`${startStr} — ${endStr}`);
 
-          // Show dependencies in the popup
           if (task.dependencies) {
             const depIds = task.dependencies.split(",").map((s: string) => s.trim()).filter(Boolean);
             const depNames = depIds.map((id: string) => {
               const depTask = tasks.find((t) => t.id === id);
               return depTask?.text || id;
             });
-            const depText = document.createElement("div");
-            depText.textContent = `Depends on: ${depNames.join(", ")}`;
-            ctx.set_details(depText.textContent);
+            ctx.set_details(`Depends on: ${depNames.join(", ")}`);
           } else {
             ctx.set_details("");
           }
@@ -147,7 +138,7 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
     return () => {
       ganttRef.current = null;
     };
-  }, [tasks, links, viewMode, cellWidth]);
+  }, [tasks, links]);
 
   return <div className="gantt-container" ref={containerRef} />;
 }

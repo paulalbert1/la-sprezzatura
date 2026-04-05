@@ -1,13 +1,11 @@
-import { useState, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Card, Flex, Stack, Text, Spinner } from "@sanity/ui";
 import { useGanttData } from "./hooks/useGanttData";
-import { ScaleToggle } from "./ScaleToggle";
 import { GanttLegend } from "./GanttLegend";
 import { GanttEmptyState } from "./GanttEmptyState";
-import type { GanttScale } from "./lib/ganttTypes";
 
-// Lazy-load GanttChart to prevent SVAR's CSS/browser-API imports from
-// crashing the Studio structure module at load time.
+// Lazy-load GanttChart to prevent CSS imports from crashing the
+// Studio structure module at load time.
 const GanttChart = lazy(() =>
   import("./GanttChart").then((m) => ({ default: m.GanttChart })),
 );
@@ -15,14 +13,8 @@ const GanttChart = lazy(() =>
 /**
  * GanttScheduleView - Document view for the Schedule tab.
  *
- * Registered as a document view via structure.ts. Receives Sanity's document
- * view props (document, documentId, schemaType).
- *
- * Per D-06: The Schedule tab content is visible when:
- *   engagementType === "full-interior-design" OR isCommercial === true
- *
- * For non-qualifying projects, a muted message is shown.
- * For qualifying projects, renders the full Gantt timeline with toolbar.
+ * Per D-06: visible for Full Interior Design or Commercial projects.
+ * Uses Frappe Gantt with its built-in Day/Week/Month selector.
  */
 
 interface GanttScheduleViewProps {
@@ -35,20 +27,6 @@ interface GanttScheduleViewProps {
   schemaType: { name: string };
 }
 
-/**
- * Scale configurations per Research Pattern 6.
- * SVAR uses strftime-style format strings.
- */
-const WEEK_SCALES: GanttScale[] = [
-  { unit: "month", step: 1, format: "%F %Y" },
-  { unit: "day", step: 1, format: "%j" },
-];
-
-const MONTH_SCALES: GanttScale[] = [
-  { unit: "year", step: 1, format: "%Y" },
-  { unit: "month", step: 1, format: "%M" },
-];
-
 export function GanttScheduleView(props: GanttScheduleViewProps) {
   const { document, documentId } = props;
   const displayed = document.displayed;
@@ -57,13 +35,9 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   const isCommercial = displayed?.isCommercial as boolean | undefined;
   const rev = displayed?._rev as string | undefined;
 
-  // Per D-06: visible for Full Interior Design or any Commercial project
   const isScheduleEnabled =
     engagementType === "full-interior-design" || isCommercial === true;
 
-  const [view, setView] = useState<"week" | "month">("week");
-
-  // Always call hooks (React rules), but skip rendering for non-qualifying projects
   const { tasks, links, contractors, loading, error } = useGanttData(
     documentId,
     rev,
@@ -116,10 +90,7 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
     );
   }
 
-  // Empty summary rows are now filtered out, so any tasks means there's data
-  const hasDataTasks = tasks.length > 0;
-
-  if (!hasDataTasks) {
+  if (tasks.length === 0) {
     return (
       <Card padding={4}>
         <GanttEmptyState />
@@ -127,18 +98,14 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
     );
   }
 
-  const scales = view === "week" ? WEEK_SCALES : MONTH_SCALES;
-  const cellWidth = view === "week" ? 60 : 80;
-
   return (
     <Card padding={4}>
       <Stack space={3}>
-        <Flex align="center" justify="space-between" padding={3}>
-          <ScaleToggle view={view} onViewChange={setView} />
+        <Flex align="center" justify="flex-end" padding={3}>
           <GanttLegend contractors={contractors} />
         </Flex>
         <Suspense fallback={<Flex justify="center" padding={4}><Spinner muted /></Flex>}>
-          <GanttChart tasks={tasks} links={links} scales={scales} cellWidth={cellWidth} />
+          <GanttChart tasks={tasks} links={links} />
         </Suspense>
       </Stack>
     </Card>
