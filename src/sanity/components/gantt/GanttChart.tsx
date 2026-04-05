@@ -140,22 +140,65 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
       const el = containerRef.current;
       if (!el) return;
 
+      // --- Today line ---
       const totalMs = rangeEnd.getTime() - rangeStart.getTime();
       const nowMs = Date.now() - rangeStart.getTime();
-      if (nowMs <= 0 || nowMs >= totalMs) { setTodayLeft(null); return; }
+      if (nowMs <= 0 || nowMs >= totalMs) { setTodayLeft(null); }
+      else {
+        const containerWidth = el.offsetWidth;
+        const timelineWidth = containerWidth - 280;
+        const pct = nowMs / totalMs;
+        setTodayLeft(280 + (pct * timelineWidth));
+      }
 
-      // The SVAR chart has a left panel (item names) and a right area (timeline).
-      // Find all direct children and measure — the timeline area is typically
-      // the wider right portion after the ~280px left column.
-      const containerWidth = el.offsetWidth;
+      // --- Sticky header ---
+      // Find the scale element (contains "2026", month names) and make it sticky.
+      // Walk all descendants looking for the scale row container.
+      const allDivs = el.querySelectorAll('div');
+      for (const div of allDivs) {
+        // The scale container typically has a fixed height and contains
+        // child rows for year + month labels. It sits at the top of the
+        // right-side chart area above the grid rows.
+        const cls = div.className || '';
+        if (cls.includes('wx-scale') || cls.includes('scale')) {
+          div.style.position = 'sticky';
+          div.style.top = '0';
+          div.style.zIndex = '10';
+          div.style.backgroundColor = 'var(--wx-background, #fff)';
+          break;
+        }
+      }
 
-      // Estimate: left panel is ~280px (our column width setting).
-      // Timeline area is the remainder.
-      const timelineWidth = containerWidth - 280;
-      const pct = nowMs / totalMs;
-      const xPos = 280 + (pct * timelineWidth);
-      setTodayLeft(xPos);
-    }, 300);
+      // Fallback: if no class match, try to find by structure.
+      // The SVAR layout is typically: container > [left-panel, right-panel]
+      // right-panel > [scale-header, grid-body]. The scale-header is the
+      // first child of the right panel area.
+      if (!el.querySelector('[style*="sticky"]')) {
+        // Find the element that contains the year/month text
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          if (node.textContent?.includes('2026') || node.textContent?.includes('2025')) {
+            // Walk up to find a suitable container to make sticky
+            let parent = node.parentElement;
+            while (parent && parent !== el) {
+              // Look for a container that spans the full width and is near the top
+              const rect = parent.getBoundingClientRect();
+              const elRect = el.getBoundingClientRect();
+              if (rect.top - elRect.top < 60 && rect.width > 200) {
+                parent.style.position = 'sticky';
+                parent.style.top = '0';
+                parent.style.zIndex = '10';
+                parent.style.backgroundColor = '#1e1e1e'; // dark theme bg
+                break;
+              }
+              parent = parent.parentElement;
+            }
+            break;
+          }
+        }
+      }
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [rangeStart, rangeEnd, cellWidth, tasks.length]);
