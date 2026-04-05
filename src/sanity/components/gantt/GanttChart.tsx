@@ -7,8 +7,9 @@
  * Today marker uses the SVAR markers prop with IMarker interface.
  */
 
+import { useRef, useEffect, useCallback } from "react";
 import { Gantt, Willow } from "@svar-ui/react-gantt";
-import type { ITask } from "@svar-ui/react-gantt";
+import type { ITask, IApi } from "@svar-ui/react-gantt";
 import "@svar-ui/react-gantt/all.css";
 import "./gantt.css";
 
@@ -128,13 +129,59 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
     rangeEnd.setDate(rangeEnd.getDate() + 14);
   }
 
-  // Highlight today's column with a background tint
-  const todayStr = new Date().toDateString();
-  const highlightToday = (date: Date) =>
-    date.toDateString() === todayStr ? "gantt-today-col" : "";
+  // Draw today line as a custom overlay after SVAR renders.
+  // We compute the X position from the date range and cell widths.
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !rangeStart || !rangeEnd) return;
+
+    // Find the SVAR chart area (the timeline grid, not the left panel)
+    const chartEl = containerRef.current.querySelector('[class*="wx-chart"]') as HTMLElement | null;
+    if (!chartEl) return;
+
+    // Remove any existing today line
+    const existing = containerRef.current.querySelector('.gantt-today-line');
+    if (existing) existing.remove();
+
+    const totalMs = rangeEnd.getTime() - rangeStart.getTime();
+    const nowMs = Date.now() - rangeStart.getTime();
+    if (nowMs < 0 || nowMs > totalMs) return; // today is outside range
+
+    const pct = (nowMs / totalMs) * 100;
+
+    // Get the chart's scroll width to compute pixel position
+    const scrollWidth = chartEl.scrollWidth;
+    const xPos = (nowMs / totalMs) * scrollWidth;
+
+    const line = document.createElement('div');
+    line.className = 'gantt-today-line';
+    line.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: ${xPos}px;
+      width: 2px;
+      height: 100%;
+      background-color: #EF4444;
+      opacity: 0.7;
+      z-index: 5;
+      pointer-events: none;
+    `;
+
+    // Insert into the chart's scroll container so it scrolls with content
+    const scrollContainer = chartEl.querySelector('[class*="wx-grid"]') || chartEl;
+    if (scrollContainer.style !== undefined) {
+      (scrollContainer as HTMLElement).style.position = 'relative';
+    }
+    scrollContainer.appendChild(line);
+
+    return () => {
+      line.remove();
+    };
+  }, [rangeStart, rangeEnd, cellWidth, tasks.length]);
 
   return (
-    <div className="gantt-container">
+    <div className="gantt-container" ref={containerRef}>
       <Willow fonts={false}>
         <Gantt
           tasks={svarTasks}
