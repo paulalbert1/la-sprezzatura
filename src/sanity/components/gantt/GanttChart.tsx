@@ -9,7 +9,7 @@
 import { useRef, useEffect } from "react";
 // @ts-expect-error — Frappe Gantt has no TypeScript declarations
 import Gantt from "frappe-gantt";
-import "frappe-gantt/dist/frappe-gantt.css";
+import "./frappe-gantt.css";
 import "./gantt.css";
 
 import { getContractorColor, CATEGORY_COLORS, getProcurementStatusColor } from "./lib/ganttColors";
