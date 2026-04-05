@@ -7,14 +7,16 @@
  * provide the same navigation.
  */
 
-import { useEffect } from "react";
-import { Flex, Button, Card } from "@sanity/ui";
+import { useEffect, useState, useCallback } from "react";
+import { Flex, Button, Card, Tooltip, Box, Text } from "@sanity/ui";
 import {
   DocumentsIcon,
   UsersIcon,
   CogIcon,
   ComponentIcon,
   UlistIcon,
+  MenuIcon,
+  CloseIcon,
 } from "@sanity/icons";
 
 interface NavbarProps {
@@ -77,8 +79,48 @@ function hideFirstPane() {
   }
 }
 
+/**
+ * Find the document list pane (the second visible pane with the project list).
+ * Returns the pane element and its divider if found.
+ */
+function findDocListPane(): { pane: HTMLElement; divider: HTMLElement | null } | null {
+  // Look for pane with "Search list" or document list content
+  const searchInputs = document.querySelectorAll('input[placeholder*="Search"]');
+  for (const input of searchInputs) {
+    let el: HTMLElement | null = input as HTMLElement;
+    for (let i = 0; i < 15 && el; i++) {
+      el = el.parentElement;
+      if (!el) break;
+      if (el.getAttribute("data-testid")?.includes("pane") ||
+          el.getAttribute("data-pane-index") !== null) {
+        const divider = el.previousElementSibling as HTMLElement | null;
+        return { pane: el, divider };
+      }
+    }
+  }
+  return null;
+}
+
 export function StudioNavbar(props: NavbarProps) {
   const { renderDefault } = props;
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = useCallback(() => {
+    const result = findDocListPane();
+    if (result) {
+      const { pane, divider } = result;
+      const isHidden = pane.style.display === "none";
+      pane.style.display = isHidden ? "" : "none";
+      if (divider) divider.style.display = isHidden ? "" : "none";
+      setSidebarCollapsed(!isHidden);
+    } else {
+      // Fallback: try to click Sanity's built-in collapse button
+      const collapseBtn = document.querySelector(
+        '[data-testid="focus-pane-button-collapse"]'
+      ) as HTMLElement | null;
+      if (collapseBtn) collapseBtn.click();
+    }
+  }, []);
 
   useEffect(() => {
     // Force light mode
@@ -131,6 +173,23 @@ export function StudioNavbar(props: NavbarProps) {
         style={{ backgroundColor: "var(--card-bg-color)" }}
       >
         <Flex gap={1} align="center">
+          <Tooltip
+            content={
+              <Box padding={2}>
+                <Text size={1}>{sidebarCollapsed ? "Show sidebar" : "Hide sidebar"}</Text>
+              </Box>
+            }
+            placement="bottom"
+          >
+            <Button
+              icon={sidebarCollapsed ? MenuIcon : CloseIcon}
+              mode="bleed"
+              tone="default"
+              fontSize={1}
+              padding={2}
+              onClick={toggleSidebar}
+            />
+          </Tooltip>
           {DOC_TYPES.map((type) => {
             const isActive = typeof window !== "undefined" &&
               window.location.pathname.includes(type.path);
