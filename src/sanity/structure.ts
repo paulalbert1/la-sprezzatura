@@ -8,7 +8,7 @@ export const getDefaultDocumentNode: DefaultDocumentNodeResolver = (
   if (schemaType === "project") {
     return S.document().views([
       S.view.form(),
-      S.view.component(GanttScheduleView).title("Schedule"),
+      S.view.component(GanttScheduleView).title("Timeline"),
     ]);
   }
   return S.document().views([S.view.form()]);
