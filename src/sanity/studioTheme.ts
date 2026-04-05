@@ -1,49 +1,48 @@
 /**
- * Custom Sanity Studio theme matching La Sprezzatura's front-end palette.
+ * Custom Sanity Studio theme — La Sprezzatura.
  *
- * Palette: cream backgrounds, charcoal text, terracotta accents.
- * Uses buildTheme from @sanity/ui/theme with custom color tokens.
+ * Interior Design palette: warm gray primary, amber/gold accent,
+ * warm off-white background, slate text.
+ * Source: UI/UX Pro Max "Home Decoration & Interior Design" palette.
  */
 
 import { buildTheme } from "@sanity/ui/theme";
 
 export const studioTheme = buildTheme({
-  // Override the gray palette to use warm cream/stone tones
   palette: {
-    black: { hex: "#2C2926" }, // charcoal
-    white: { hex: "#FAF8F5" }, // cream
+    black: { hex: "#0F172A" },
+    white: { hex: "#FAF5F2" },
 
-    // Gray → warm stone tones (cream-to-charcoal)
+    // Gray → warm stone tones
     gray: {
-      50: { hex: "#FAF8F5" },   // cream
-      100: { hex: "#F5F0EB" },  // cream-dark
-      200: { hex: "#E8E2DA" },
-      300: { hex: "#D4CCC2" },
-      400: { hex: "#B8B0A4" },  // stone-light
-      500: { hex: "#8A8478" },  // stone
-      600: { hex: "#6B6358" },  // stone-dark
-      700: { hex: "#4A4540" },  // charcoal-light
-      800: { hex: "#2C2926" },  // charcoal
-      900: { hex: "#1A1816" },
-      950: { hex: "#0F0E0D" },
+      50: { hex: "#FAF5F2" },
+      100: { hex: "#F6F6F6" },
+      200: { hex: "#EEEDED" },
+      300: { hex: "#D6D3D1" },
+      400: { hex: "#A8A29E" },
+      500: { hex: "#78716C" },
+      600: { hex: "#57534E" },
+      700: { hex: "#44403C" },
+      800: { hex: "#292524" },
+      900: { hex: "#1C1917" },
+      950: { hex: "#0F172A" },
     },
 
-    // Orange → terracotta tones (accent color)
+    // Orange → amber/gold accent
     orange: {
-      50: { hex: "#FDF5F0" },
-      100: { hex: "#FAE8DE" },
-      200: { hex: "#F0CDB8" },
-      300: { hex: "#E5B192" },
-      400: { hex: "#D4A08A" },  // terracotta-light
-      500: { hex: "#C4836A" },  // terracotta
-      600: { hex: "#A96B52" },
-      700: { hex: "#8E5740" },
-      800: { hex: "#724530" },
-      900: { hex: "#553322" },
-      950: { hex: "#3A2318" },
+      50: { hex: "#FFFBEB" },
+      100: { hex: "#FEF3C7" },
+      200: { hex: "#FDE68A" },
+      300: { hex: "#FCD34D" },
+      400: { hex: "#FBBF24" },
+      500: { hex: "#D97706" },
+      600: { hex: "#B45309" },
+      700: { hex: "#92400E" },
+      800: { hex: "#78350F" },
+      900: { hex: "#451A03" },
+      950: { hex: "#2A1005" },
     },
 
-    // Keep other hues close to defaults but warmer
     red: {
       50: { hex: "#FEF2F2" },
       100: { hex: "#FEE2E2" },
@@ -140,42 +139,6 @@ export const studioTheme = buildTheme({
       800: { hex: "#9D174D" },
       900: { hex: "#831843" },
       950: { hex: "#500724" },
-    },
-  },
-
-  color: {
-    base: {
-      // Default card: cream background, charcoal text
-      default: {
-        _hue: "gray",
-        bg: ["50", "950"],
-        fg: ["800", "200"],
-        border: ["300", "700"],
-        focusRing: ["orange/500", "orange/400"],
-        "muted/fg": ["500", "400"],
-        "accent/fg": ["orange/600", "orange/400"],
-        "link/fg": ["orange/600", "orange/400"],
-        "code/bg": ["100", "900"],
-        "code/fg": ["700", "300"],
-        "skeleton/from": ["100", "900"],
-        "skeleton/to": ["200", "800"],
-      },
-      // Primary tone: terracotta
-      primary: {
-        _hue: "orange",
-      },
-      // Positive tone: green
-      positive: {
-        _hue: "green",
-      },
-      // Caution tone: yellow/warm
-      caution: {
-        _hue: "yellow",
-      },
-      // Critical/danger: red
-      critical: {
-        _hue: "red",
-      },
     },
   },
 });

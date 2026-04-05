@@ -1,55 +1,94 @@
 /**
- * Sanity Studio global overrides.
+ * Sanity Studio theme overrides — La Sprezzatura.
  *
- * Forces a light cream/terracotta theme matching the front-end palette,
- * regardless of the user's OS dark/light mode preference.
+ * Palette: Home Decoration & Interior Design (UI/UX Pro Max).
+ * Primary: warm gray (#78716C), Accent: amber/gold (#D97706),
+ * Background: warm off-white (#FAF5F2), Text: slate (#0F172A).
+ *
+ * Forces light mode and hides first structure pane.
  */
 
-/* Force ALL Sanity cards and surfaces to use cream palette */
+/* ===== FORCE LIGHT SCHEME ===== */
+/* Override every dark-scheme context to use our light palette */
 :root,
+html,
+body,
 [data-scheme="dark"],
 [data-scheme="light"],
-[data-ui="Card"],
-[data-ui="Dialog"] {
-  --card-bg-color: #FAF8F5 !important;
-  --card-bg2-color: #F5F0EB !important;
-  --card-fg-color: #2C2926 !important;
-  --card-border-color: #D4CCC2 !important;
-  --card-muted-fg-color: #8A8478 !important;
-  --card-accent-fg-color: #C4836A !important;
-  --card-link-fg-color: #C4836A !important;
-  --card-focus-ring-color: #C4836A !important;
-  --card-code-bg-color: #F5F0EB !important;
-  --card-code-fg-color: #6B6358 !important;
-  --card-skeleton-color-from: #F5F0EB !important;
-  --card-skeleton-color-to: #E8E2DA !important;
-  --card-shadow-outline-color: rgba(196, 131, 106, 0.3) !important;
-  --card-shadow-umbra-color: rgba(44, 41, 38, 0.1) !important;
-  --card-shadow-penumbra-color: rgba(44, 41, 38, 0.07) !important;
-  --card-shadow-ambient-color: rgba(44, 41, 38, 0.06) !important;
+[data-scheme] {
   color-scheme: light !important;
 }
 
-/* Selected/active items */
-[data-selected="true"],
-[data-active="true"],
-[aria-selected="true"] {
-  --card-bg-color: #FAE8DE !important;
-  --card-fg-color: #2C2926 !important;
+/* ===== COLOR TOKEN OVERRIDES ===== */
+/* Applied with high specificity to override Sanity's built-in theme */
+
+:root {
+  /* Surface colors */
+  --card-bg-color: #FAF5F2 !important;
+  --card-bg2-color: #F6F6F6 !important;
+  --card-fg-color: #0F172A !important;
+  --card-border-color: #EEEDED !important;
+
+  /* Muted/secondary text */
+  --card-muted-fg-color: #64748B !important;
+
+  /* Accent — amber/gold for links, focus rings, active states */
+  --card-accent-fg-color: #D97706 !important;
+  --card-link-fg-color: #92400E !important;
+  --card-focus-ring-color: rgba(217, 119, 6, 0.4) !important;
+
+  /* Code blocks */
+  --card-code-bg-color: #F6F6F6 !important;
+  --card-code-fg-color: #78716C !important;
+
+  /* Skeleton loading */
+  --card-skeleton-color-from: #F6F6F6 !important;
+  --card-skeleton-color-to: #EEEDED !important;
+
+  /* Shadows — warm tint */
+  --card-shadow-outline-color: rgba(120, 113, 108, 0.15) !important;
+  --card-shadow-umbra-color: rgba(15, 23, 42, 0.08) !important;
+  --card-shadow-penumbra-color: rgba(15, 23, 42, 0.05) !important;
+  --card-shadow-ambient-color: rgba(15, 23, 42, 0.04) !important;
 }
 
-/* Primary tone (terracotta) */
-[data-ui="Card"][data-tone="primary"],
-[data-ui="Button"][data-tone="primary"] {
-  --card-bg-color: #C4836A !important;
+/* Ensure dark scheme elements also get the light palette */
+[data-scheme="dark"] {
+  --card-bg-color: #FAF5F2 !important;
+  --card-bg2-color: #F6F6F6 !important;
+  --card-fg-color: #0F172A !important;
+  --card-border-color: #EEEDED !important;
+  --card-muted-fg-color: #64748B !important;
+  --card-accent-fg-color: #D97706 !important;
+  --card-link-fg-color: #92400E !important;
+  --card-focus-ring-color: rgba(217, 119, 6, 0.4) !important;
+  --card-code-bg-color: #F6F6F6 !important;
+  --card-code-fg-color: #78716C !important;
+}
+
+/* ===== PRIMARY TONE (terracotta/amber) ===== */
+[data-tone="primary"] {
+  --card-bg-color: #D97706 !important;
   --card-fg-color: #FFFFFF !important;
 }
 
-/* Input fields */
+/* ===== SELECTED / ACTIVE ITEMS ===== */
+[data-selected="true"],
+[aria-selected="true"],
+[aria-current="true"] {
+  --card-bg-color: #FEF3C7 !important;
+  --card-fg-color: #0F172A !important;
+  --card-border-color: #D97706 !important;
+}
+
+/* ===== INPUT FIELDS — white background for clarity ===== */
+input,
+textarea,
+select,
 [data-ui="TextInput"],
 [data-ui="TextArea"],
 [data-ui="Select"] {
   --input-bg-color: #FFFFFF !important;
-  --input-fg-color: #2C2926 !important;
-  --input-border-color: #D4CCC2 !important;
+  --input-fg-color: #0F172A !important;
+  --input-border-color: #EEEDED !important;
 }
