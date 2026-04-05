@@ -199,7 +199,6 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
             type: l.type,
           }))}
           markers={todayMarkers}
-          highlightTime={highlightToday}
           taskTemplate={TaskTemplate}
         />
       </Willow>
