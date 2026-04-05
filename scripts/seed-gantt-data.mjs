@@ -152,12 +152,14 @@ const KEYS = {
   presentation: "evt-pr01",
 };
 
+// Timeline designed so all dependencies flow forward (predecessor ends before successor starts).
+// Day 0 = today. Negative = past, positive = future.
 const contractors = [
   {
     _key: KEYS.jpPainting,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.jpPainting },
-    startDate: daysFromNow(-14),
-    endDate: daysFromNow(10),
+    startDate: daysFromNow(-12),   // starts 2 days after approval (day -14)
+    endDate: daysFromNow(2),
     scopeOfWork: textBlock(
       "Full interior painting: living room, dining room, master bedroom, two guest rooms. Benjamin Moore Revere Pewter throughout.",
     ),
@@ -167,8 +169,8 @@ const contractors = [
   {
     _key: KEYS.eliteFloor,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.eliteFlooring },
-    startDate: daysFromNow(-7),
-    endDate: daysFromNow(21),
+    startDate: daysFromNow(-5),    // starts 2 days after demo complete (day -7)
+    endDate: daysFromNow(16),
     scopeOfWork: textBlock(
       "Remove existing carpet, install wide-plank white oak hardwood in all common areas and bedrooms. Herringbone pattern in foyer.",
     ),
@@ -178,7 +180,7 @@ const contractors = [
   {
     _key: KEYS.luxeLight,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.luxeLighting },
-    startDate: daysFromNow(5),
+    startDate: daysFromNow(5),     // starts 2 days after pendants arrive (day 3)
     endDate: daysFromNow(18),
     scopeOfWork: textBlock(
       "Install recessed lighting in kitchen and dining room. Pendant installation over kitchen island. Dimmer switches throughout.",
@@ -188,8 +190,8 @@ const contractors = [
   {
     _key: KEYS.precPlumb,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.precisionPlumb },
-    startDate: daysFromNow(12),
-    endDate: daysFromNow(20),
+    startDate: daysFromNow(12),    // starts 2 days after fixtures arrive (day 10)
+    endDate: daysFromNow(22),
     scopeOfWork: textBlock(
       "Master bath fixture installation: freestanding tub, dual vanity, rain shower. Rough-in already complete.",
     ),
@@ -198,8 +200,8 @@ const contractors = [
   {
     _key: KEYS.artisanMill,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.artisanMill },
-    startDate: daysFromNow(15),
-    endDate: daysFromNow(35),
+    startDate: daysFromNow(8),     // starts after demo
+    endDate: daysFromNow(30),
     scopeOfWork: textBlock(
       "Custom built-in bookshelves for study. Wainscoting in dining room. Crown molding throughout first floor.",
     ),
@@ -209,8 +211,8 @@ const contractors = [
   {
     _key: KEYS.jpTouchups,
     contractor: { _type: "reference", _ref: CONTRACTOR_IDS.jpPainting },
-    startDate: daysFromNow(25),
-    endDate: daysFromNow(30),
+    startDate: daysFromNow(32),    // starts 2 days after BOTH flooring (16) AND millwork (30) end
+    endDate: daysFromNow(37),
     scopeOfWork: textBlock(
       "Touch-up painting after flooring and millwork installation. Fill nail holes, patch drywall dings, repaint baseboards.",
     ),
@@ -237,35 +239,35 @@ const milestones = [
   {
     _key: KEYS.demoComplete,
     name: "Demolition Complete",
-    date: daysFromNow(-5),
+    date: daysFromNow(-7),           // before flooring (-5) and lighting (5) can start
     completed: true,
     description: "Carpet removed, old fixtures demolished, walls prepped",
   },
   {
     _key: KEYS.roughInspection,
     name: "Rough Inspection",
-    date: daysFromNow(8),
+    date: daysFromNow(20),            // after lighting ends (18)
     completed: false,
     description: "Building department rough electrical and plumbing inspection",
   },
   {
     _key: KEYS.furnitureDelivery,
     name: "Furniture Delivery Window",
-    date: daysFromNow(28),
+    date: daysFromNow(34),
     completed: false,
     description: "RH and custom upholstery pieces scheduled for delivery",
   },
   {
     _key: KEYS.finalWalk,
     name: "Final Walkthrough",
-    date: daysFromNow(38),
+    date: daysFromNow(39),            // after touch-ups end (37)
     completed: false,
     description: "Pre-photography punch list walk with client",
   },
   {
     _key: KEYS.photoShoot,
     name: "Photography Shoot",
-    date: daysFromNow(42),
+    date: daysFromNow(45),            // after punch list (43) and walkthrough (39)
     completed: false,
     description: "Professional photography for portfolio",
   },
@@ -273,22 +275,22 @@ const milestones = [
 
 const procurementItems = [
   {
-    _key: KEYS.rhSofa,
-    name: "Restoration Hardware Cloud Sofa",
-    status: "delivered",
-    orderDate: daysFromNow(-30),
-    expectedDeliveryDate: daysFromNow(-5),
-    installDate: daysFromNow(30),
-    clientCost: 899500,
-    retailPrice: 1199900,
+    _key: KEYS.carpetRunner,
+    name: "Stark Carpet Runner (stair)",
+    status: "installed",
+    orderDate: daysFromNow(-45),
+    expectedDeliveryDate: daysFromNow(-15),
+    installDate: daysFromNow(-10),      // installed early, before everything
+    clientCost: 180000,
+    retailPrice: 245000,
   },
   {
     _key: KEYS.vcPendants,
     name: "Visual Comfort Pendants (x3)",
-    status: "ordered",
-    orderDate: daysFromNow(-10),
-    expectedDeliveryDate: daysFromNow(12),
-    installDate: daysFromNow(16),
+    status: "delivered",
+    orderDate: daysFromNow(-20),
+    expectedDeliveryDate: daysFromNow(1),
+    installDate: daysFromNow(3),         // arrives day 3, before lighting starts day 5
     clientCost: 285000,
     retailPrice: 375000,
   },
@@ -297,30 +299,10 @@ const procurementItems = [
     name: "Waterworks Master Bath Fixtures",
     status: "in-transit",
     orderDate: daysFromNow(-20),
-    expectedDeliveryDate: daysFromNow(3),
-    installDate: daysFromNow(14),
+    expectedDeliveryDate: daysFromNow(8),
+    installDate: daysFromNow(10),        // arrives day 10, before plumbing starts day 12
     clientCost: 425000,
     retailPrice: 560000,
-  },
-  {
-    _key: KEYS.diningTable,
-    name: "Custom Dining Table (walnut)",
-    status: "pending",
-    orderDate: null,
-    expectedDeliveryDate: daysFromNow(25),
-    installDate: daysFromNow(30),
-    clientCost: 650000,
-    retailPrice: 850000,
-  },
-  {
-    _key: KEYS.carpetRunner,
-    name: "Stark Carpet Runner (stair)",
-    status: "installed",
-    orderDate: daysFromNow(-45),
-    expectedDeliveryDate: daysFromNow(-10),
-    installDate: daysFromNow(-3),
-    clientCost: 180000,
-    retailPrice: 245000,
   },
   {
     _key: KEYS.wallcovering,
@@ -328,9 +310,29 @@ const procurementItems = [
     status: "ordered",
     orderDate: daysFromNow(-5),
     expectedDeliveryDate: daysFromNow(18),
-    installDate: daysFromNow(22),
+    installDate: daysFromNow(24),
     clientCost: 320000,
     retailPrice: 420000,
+  },
+  {
+    _key: KEYS.rhSofa,
+    name: "Restoration Hardware Cloud Sofa",
+    status: "delivered",
+    orderDate: daysFromNow(-30),
+    expectedDeliveryDate: daysFromNow(-5),
+    installDate: daysFromNow(34),        // furniture delivery window
+    clientCost: 899500,
+    retailPrice: 1199900,
+  },
+  {
+    _key: KEYS.diningTable,
+    name: "Custom Dining Table (walnut)",
+    status: "pending",
+    orderDate: null,
+    expectedDeliveryDate: daysFromNow(30),
+    installDate: daysFromNow(34),        // same delivery window as sofa
+    clientCost: 650000,
+    retailPrice: 850000,
   },
 ];
 
@@ -354,7 +356,7 @@ const customEvents = [
   {
     _key: KEYS.bldgPermit,
     name: "Building Permit Inspection",
-    date: daysFromNow(8),
+    date: daysFromNow(21),             // after rough inspection (day 20)
     endDate: null,
     category: "inspection",
     notes: "Rough electrical and plumbing sign-off required",
@@ -362,26 +364,26 @@ const customEvents = [
   {
     _key: KEYS.furnDelWin,
     name: "Furniture Delivery Window",
-    date: daysFromNow(28),
-    endDate: daysFromNow(30),
+    date: daysFromNow(33),
+    endDate: daysFromNow(35),
     category: "delivery-window",
     notes: "RH delivery requires 2-person team, clear path to living room",
   },
   {
-    _key: KEYS.moveIn,
-    name: "Move-In Week",
-    date: daysFromNow(36),
-    endDate: daysFromNow(40),
-    category: "move",
-    notes: "Staging, final styling, and client move-in",
-  },
-  {
     _key: KEYS.punchList,
     name: "Final Punch List Review",
-    date: daysFromNow(35),
+    date: daysFromNow(38),             // after touch-ups end (37)
     endDate: null,
     category: "punch-list",
     notes: "Walk every room with client, document any touch-ups needed",
+  },
+  {
+    _key: KEYS.moveIn,
+    name: "Move-In Week",
+    date: daysFromNow(41),             // after final walkthrough (39)
+    endDate: daysFromNow(45),
+    category: "move",
+    notes: "Staging, final styling, and client move-in",
   },
   {
     _key: KEYS.presentation,
