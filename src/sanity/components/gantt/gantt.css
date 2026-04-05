@@ -6,14 +6,14 @@
  */
 
 /* === Container sizing === */
-/* Frappe's sticky header needs the container to be the scroll parent */
 .gantt-container {
-  --gv-grid-height: 600px;
+  --gv-grid-height: auto;
   --gv-bar-height: 28px;
   --gv-upper-header-height: 40px;
   --gv-lower-header-height: 28px;
-  overflow: auto !important;
-  max-height: 600px;
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
