@@ -33,21 +33,21 @@ const mockContractor: ResolvedContractor = {
 
 const mockMilestone = {
   _key: "m1",
-  title: "Design Approval",
+  name: "Design Approval",
   date: "2026-05-10",
   completed: false,
 };
 
 const mockCompletedMilestone = {
   _key: "m2",
-  title: "Install Complete",
+  name: "Install Complete",
   date: "2026-06-01",
   completed: true,
 };
 
 const mockProcurement = {
   _key: "p1",
-  itemName: "Custom Sofa",
+  name: "Custom Sofa",
   status: "ordered" as const,
   installDate: "2026-06-15",
   orderDate: null,

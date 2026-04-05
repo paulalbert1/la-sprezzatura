@@ -111,11 +111,18 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
     },
   ];
 
-  // Convert our GanttTask[] to SVAR's ITask[] format
+  // SVAR only works reliably with numeric IDs — convert string IDs to numbers.
+  // Build a stable mapping from our string IDs to sequential numeric IDs.
+  const idMap = new Map<string, number>();
+  tasks.forEach((t, i) => idMap.set(t.id, i + 1));
+
   const svarTasks = tasks.map((t) => ({
     ...t,
-    // SVAR expects end to always be a Date (not null) for tasks
+    id: idMap.get(t.id) || 0,
+    // SVAR expects end to always be a Date (not null)
     end: t.end || t.start,
+    // Root tasks (parent: null) use 0; child tasks use mapped numeric parent
+    parent: t.parent ? (idMap.get(t.parent) || 0) : 0,
   }));
 
   return (
@@ -128,6 +135,7 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
           cellHeight={38}
           cellWidth={cellWidth}
           columns={[{ id: "text", header: "Item", width: 200 }]}
+          links={[]}
           markers={todayMarkers}
           taskTemplate={TaskTemplate}
         />

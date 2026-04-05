@@ -76,7 +76,7 @@ export function contractorToTask(
  * Per SCHED-06: completed milestones are marked with _completed: true for dimmed styling.
  */
 export function milestoneToTask(
-  milestone: { _key: string; title: string; date: string | null; completed: boolean; description?: string },
+  milestone: { _key: string; name: string; date: string | null; completed: boolean; description?: string },
   _index: number,
 ): GanttTask | null {
   const start = parseSanityDate(milestone.date);
@@ -84,7 +84,7 @@ export function milestoneToTask(
 
   return {
     id: `milestone:${milestone._key}`,
-    text: milestone.title || "Untitled Milestone",
+    text: milestone.name || "Untitled Milestone",
     start,
     end: start,
     type: "milestone",
@@ -104,7 +104,7 @@ export function milestoneToTask(
 export function procurementToTask(
   item: {
     _key: string;
-    itemName: string;
+    name: string;
     status: string;
     installDate: string | null;
     orderDate: string | null;
@@ -117,7 +117,7 @@ export function procurementToTask(
 
   return {
     id: `procurement:${item._key}`,
-    text: item.itemName || "Untitled Item",
+    text: item.name || "Untitled Item",
     start,
     end: start,
     type: "milestone",

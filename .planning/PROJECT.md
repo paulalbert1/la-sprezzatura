@@ -29,7 +29,7 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - Rows for: contractor assignments, procurement items, milestones, and custom ad-hoc events
 - Interactive drag-and-drop to reschedule items (dates sync back to Sanity)
 - Timeline scale control (week/month view)
-- Color-coded by category
+- Color-coded by user role (contractor identity, not item category)
 - Custom events schema (vacate office, walkthrough, punch list, etc.)
 
 ## Requirements

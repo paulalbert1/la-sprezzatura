@@ -7,6 +7,7 @@
 - 📋 **v2.5 Contractor & Commercial Workflows** - Phases 7-8 (planned)
 - 📋 **v3.0 AI Rendering & Go-Live** - Phases 9-12 (planned)
 - 📋 **v3.1 Rendering Tool Polish** - Phases 13-14 (planned)
+- 📋 **v4.0 Project Schedule** - Phases 15-17 (planned)
 
 ## Phases
 
@@ -302,3 +303,66 @@ Plans:
 ---
 *Phase 13 plans created: 2026-04-03 (2 plans in 1 wave -- parallel execution)*
 *Phase 14 plans created: 2026-04-03 (2 plans in 2 waves -- sequential execution)*
+
+### v4.0 Project Schedule (Gantt Chart)
+
+**Milestone Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects -- using SVAR React Gantt as a custom document view tab with transform-on-read, patch-on-write architecture.
+
+- [x] **Phase 15: Schema and Read-Only Timeline** - Custom events schema, procurement date fields, Gantt tab as Sanity document view with contractor bars, milestone markers, procurement markers, swim lanes, today line, and week/month toggle
+- [ ] **Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips** - Drag-to-reschedule contractor bars and events, Sanity document patch on drag, undo toast, and hover tooltips for all items
+- [ ] **Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars** - Contractor appointment dots, overlapping schedule highlights, and segmented order-to-install procurement bars
+
+### Phase 15: Schema and Read-Only Timeline
+**Goal**: Liz can open a Schedule tab on any Full Interior Design or Commercial project in Sanity Studio and see all contractor assignments, milestones, procurement items, and custom events displayed as a color-coded, read-only Gantt chart with collapsible swim lanes, a today marker, and week/month view toggle -- proving the data transformation, reference resolution, and CSS integration before any write-back complexity is added
+**Depends on**: Phase 14 (v3.1 complete)
+**Requirements**: SCHED-01, SCHED-02, SCHED-03, SCHED-04, SCHED-05, SCHED-06, SCHED-07, SCHED-08, SCHED-09, SCHED-10, SCHED-11
+**Success Criteria** (what must be TRUE):
+  1. Liz opens a Full Interior Design project in Sanity Studio and sees a "Schedule" tab; opening a Carpet Curating project shows no Schedule tab
+  2. Liz adds a custom schedule event (e.g., "Office Walkthrough" with a date and category) in the schedule group fields, and the event appears on the Gantt timeline as a point marker -- a multi-day event appears as a bar
+  3. Contractor assignments appear as horizontal bars in unique per-contractor colors with a legend showing contractor name and color swatch; milestones appear as diamond markers (dimmed when complete); procurement install dates appear as markers styled by status (pending / ordered / delivered / installed)
+  4. A vertical "Today" line is visible on the timeline, and Liz can toggle between week view (day-level columns, default) and month view (week-level columns) via a segmented control
+  5. Contractors, procurement items, milestones, and custom events are grouped into labeled, individually collapsible swim lanes
+**Plans**: 3 plans
+
+Plans:
+- [x] 15-PLAN-1-schema-extensions.md -- Schedule group, customEvents[] array, procurement date fields (orderDate, expectedDeliveryDate), schema tests
+- [x] 15-PLAN-2-gantt-foundation.md -- npm deps (SVAR, date-fns), type contracts, date/color utilities with tests, structure.ts tab wiring, GanttScheduleView shell
+- [x] 15-PLAN-3-gantt-render.md -- Data transform functions (TDD), useGanttData hook, GanttChart, ScaleToggle, Legend, EmptyState, gantt.css, visual verification
+
+### Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips
+**Goal**: Liz can drag bars and markers on the Gantt chart to reschedule items, with date changes written back to the Sanity project document draft immediately, undo available via a floating toast, and item details visible on hover -- making the timeline an interactive scheduling tool rather than a read-only display
+**Depends on**: Phase 15
+**Requirements**: SCHED-12, SCHED-13, SCHED-14, SCHED-15
+**Success Criteria** (what must be TRUE):
+  1. Liz drags a contractor bar to the right and both the start and end dates shift by the same number of days (duration preserved); dragging the right edge of the bar changes only the end date
+  2. After a drag, the Sanity document draft reflects the updated dates immediately -- no explicit save or sync action required
+  3. A floating "Undo" toast appears after each drag; clicking it reverts the dates on the Sanity document to their pre-drag values
+  4. Hovering any bar or marker shows a tooltip with the item's name, date(s), status or category, and any notes
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars
+**Goal**: The Gantt chart shows fine-grained scheduling details -- contractor appointments as sub-markers along their bars, overlapping contractor schedules highlighted for conflict awareness, and procurement items displayed as full lifecycle bars when order and delivery dates are available -- completing the scheduling picture for complex commercial projects
+**Depends on**: Phase 16
+**Requirements**: SCHED-16, SCHED-17, SCHED-18
+**Success Criteria** (what must be TRUE):
+  1. Contractor appointments (measurement visits, install days) appear as small dot sub-markers positioned along their contractor's timeline bar
+  2. When two contractors have overlapping date ranges, a subtle background highlight indicates the overlapping period on the timeline
+  3. A procurement item with order date, expected delivery date, and install date displays as a segmented lifecycle bar (order -> expected delivery -> install); a procurement item with only an install date falls back to a single marker
+**Plans**: TBD
+**UI hint**: yes
+
+## Progress (v4.0)
+
+**Execution Order:**
+Phases execute in numeric order: 15 -> 16 -> 17
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 15. Schema and Read-Only Timeline | v4.0 | 0/3 | Planning complete | - |
+| 16. Drag-and-Drop, Write-back, Undo, and Tooltips | v4.0 | 0/TBD | Not started | - |
+| 17. Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars | v4.0 | 0/TBD | Not started | - |
+
+---
+*v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
+*Phase 15 plans created: 2026-04-04 (3 plans in 2 waves -- Plans 1-2 parallel, Plan 3 sequential)*

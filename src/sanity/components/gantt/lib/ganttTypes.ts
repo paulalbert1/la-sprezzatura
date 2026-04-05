@@ -67,14 +67,14 @@ export interface SanityProjectData {
   contractors: ResolvedContractor[];
   milestones: Array<{
     _key: string;
-    title: string;
+    name: string;
     date: string | null;
     completed: boolean;
     description?: string;
   }>;
   procurementItems: Array<{
     _key: string;
-    itemName: string;
+    name: string;
     status: ProcurementStatus;
     installDate: string | null;
     orderDate: string | null;
