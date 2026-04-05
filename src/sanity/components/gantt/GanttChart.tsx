@@ -163,13 +163,14 @@ function DependencyArrows({
         const tgtPos = positions.get(tgtIdx);
         if (!srcPos || !tgtPos) continue;
 
-        const srcX = srcPos.right;
+        const srcX = srcPos.right + 4;
         const srcY = srcPos.centerY;
-        const tgtX = tgtPos.left;
+        const tgtX = tgtPos.left - 4;
         const tgtY = tgtPos.centerY;
-        const gapX = srcX + 6;
 
-        const pathD = `M ${srcX} ${srcY} L ${gapX} ${srcY} L ${gapX} ${tgtY} L ${tgtX} ${tgtY}`;
+        // True L-shape: vertical first (down to target row), then horizontal (right to target).
+        // This minimizes segments and avoids long horizontal lines from the source.
+        const pathD = `M ${srcX} ${srcY} L ${srcX} ${tgtY} L ${tgtX} ${tgtY}`;
         const arrowD = `M ${tgtX} ${tgtY} L ${tgtX - ARROW_SIZE} ${tgtY - ARROW_SIZE} L ${tgtX - ARROW_SIZE} ${tgtY + ARROW_SIZE} Z`;
 
         newPaths.push(
@@ -239,6 +240,7 @@ function DependencyArrows({
         height: svgSize.height || 800,
         pointerEvents: "none",
         zIndex: 4,
+        clipPath: `inset(0 0 0 ${LEFT_COL_WIDTH + scrollOffset.x}px)`,
       }}
     >
       {paths}
