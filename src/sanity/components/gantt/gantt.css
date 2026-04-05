@@ -25,10 +25,54 @@
 
   /* Bar appearance */
   --wx-gantt-bar-border-radius: 4px;
+
+  /* Link/arrow appearance — subtle and clean */
+  --wx-gantt-link-color: #94a3b8;
 }
 
 /* Ensure the Gantt chart fills the available space */
 .gantt-container {
   width: 100%;
   min-height: 400px;
+}
+
+/* --- Dependency arrows: subtle styling --- */
+
+/* Make link lines thinner and lighter */
+.gantt-container .wx-line {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+  opacity: 0.5;
+}
+
+/* Arrowheads: smaller and matching color */
+.gantt-container .wx-arrow {
+  fill: #94a3b8;
+  opacity: 0.5;
+}
+
+/* Hide the connector boxes at start/end of links */
+.gantt-container .wx-link-start,
+.gantt-container .wx-link-end,
+.gantt-container .wx-link-point {
+  display: none;
+}
+
+/* --- Sticky scale header --- */
+
+/* Make the scale (date headers) stick to the top when scrolling */
+.gantt-container .wx-scale {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* --- Today marker: vertical red line --- */
+
+.gantt-container .gantt-today-marker,
+.wx-willow-theme .gantt-today-marker {
+  background-color: #EF4444;
+  width: 2px !important;
+  opacity: 0.8;
+  z-index: 5;
 }

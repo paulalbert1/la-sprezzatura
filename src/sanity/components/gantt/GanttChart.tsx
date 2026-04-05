@@ -140,7 +140,12 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
           cellHeight={38}
           cellWidth={cellWidth}
           columns={[{ id: "text", header: "Item", width: 280 }]}
-          links={[]}
+          links={links.map((l, i) => ({
+            id: i + 1,
+            source: idMap.get(l.source) || 0,
+            target: idMap.get(l.target) || 0,
+            type: l.type,
+          }))}
           markers={todayMarkers}
           taskTemplate={TaskTemplate}
         />
