@@ -99,7 +99,8 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         arrow_curve: 5,
         today_button: true,
         scroll_to: "today",
-        infinite_padding: false,       // Don't allow scrolling past data bounds
+        infinite_padding: false,
+        auto_move_label: true,         // Move labels outside bars when they don't fit
         lines: "both",
         popup_on: "hover",
         popup: (ctx: {
