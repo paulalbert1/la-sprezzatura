@@ -367,8 +367,8 @@ Phases execute in numeric order: 15 -> 16 -> 17
 
 **Milestone Goal:** Audit and fix all visual/UX issues in Sanity Studio — colors, contrast, fonts, layout consistency, Gantt chart cleanup, and introduce Portfolio Project type for client-facing project narratives.
 
-- [ ] **Phase 18: Visual Audit & Theme Fix** - Playwright-driven audit of every Sanity Studio screen, fix all theme/contrast/font issues, make Editor/Timeline tabs visually distinct
-- [ ] **Phase 19: Gantt & Layout Polish** - Fix Gantt labels, scroll behavior, remove test page, reliable sidebar hiding
+- [x] **Phase 18: Visual Audit & Theme Fix** - Playwright-driven audit of every Sanity Studio screen, fix all theme/contrast/font issues, make Editor/Timeline tabs visually distinct (completed 2026-04-05)
+- [x] **Phase 19: Gantt & Layout Polish** - Fix Gantt labels, scroll behavior, remove test page, reliable sidebar hiding (completed 2026-04-05)
 - [ ] **Phase 20: Portfolio Project Type** - New portfolioProject schema, "Create Portfolio Version" spawn button on admin projects, image selection modal
 
 ### Phase 18: Visual Audit & Theme Fix
@@ -389,7 +389,14 @@ Plans:
 
 ### Phase 19: Gantt & Layout Polish
 **Goal**: Fix remaining Gantt chart rendering issues and make sidebar pane hiding reliable
+**Depends on**: Phase 18
 **Requirements**: GANTT-01, GANTT-02, GANTT-03, GANTT-04, LAYOUT-01
+**Plans**: 2 plans
+
+Plans:
+- [x] 19-01-PLAN.md -- Gantt label visibility CSS, smart scroll logic with tests, delete test page
+- [x] 19-02-PLAN.md -- CSS-first pane hiding, MutationObserver replacing setInterval polling
+
 **Success Criteria**:
   1. Every task bar has a visible label (verified via Playwright)
   2. Chart loads with first task visible, not empty space
@@ -408,8 +415,18 @@ Plans:
   4. Title, location, description auto-copied from admin project
   5. Portfolio project created as independent document with sourceAdminProjectId reference
 
+### Phase 21: Portal UX Controls
+**Goal**: Replace dropdown controls with purpose-built UX components — pipeline stepper, wider portal token with email action, date-time picker with mark-complete button
+**Depends on**: Phase 18 (theme must be consistent first)
+**Success Criteria**:
+  1. Pipeline Stage shows as a horizontal stepper (Discovery → Concept → Design Dev → Procurement → Installation → Closeout) with completed/current/future states, clickable to advance — dropdown fallback on narrow widths
+  2. Portal Token field is wider (full-width) with a mail icon button that fires an email to the client's contact email
+  3. Completed At field has a date+time picker (not plain text input) and a "Mark as Completed" button that sets the date and transitions Project Status
+  4. Project Status uses a visual control consistent with the pipeline stepper rather than a plain dropdown
+
 ---
 *v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
 *Phase 15 plans created: 2026-04-04 (3 plans in 2 waves -- Plans 1-2 parallel, Plan 3 sequential)*
 *v4.1 roadmap created: 2026-04-05 (3 phases, 16 requirements mapped)*
 *Phase 18 plans created: 2026-04-05 (2 plans in 2 waves -- audit then fix, sequential)*
+*Phase 21 added: 2026-04-05 (Portal UX Controls — stepper, email action, date picker)*
