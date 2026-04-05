@@ -143,15 +143,17 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
           }
         },
       });
-    // Force container height to match SVG after Frappe renders
-    // Frappe sets height via --gv-grid-height CSS var which collapses to 86px
+    // Force container to match SVG height.
+    // Frappe's CSS uses `height: var(--gv-grid-height)` which overrides inline styles.
+    // We must set the CSS variable itself on the element.
     requestAnimationFrame(() => {
       if (!containerRef.current) return;
       const svg = containerRef.current.querySelector('svg.gantt');
       if (svg) {
         const svgHeight = svg.getAttribute('height');
         if (svgHeight) {
-          containerRef.current.style.height = `${parseInt(svgHeight) + 80}px`;
+          const h = `${parseInt(svgHeight) + 80}px`;
+          containerRef.current.style.setProperty('--gv-grid-height', h);
         }
       }
     });
