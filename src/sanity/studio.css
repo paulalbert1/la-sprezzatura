@@ -21,15 +21,15 @@ html[data-sanity] {
   color-scheme: light;
 }
 
-/* Hide the first structure pane (Content type list) since
-   the navbar tabs provide the same navigation. This gives
-   the document list and editor more horizontal space. */
-[data-testid="structure-tool-list-pane"]:first-child {
-  display: none;
+/* Hide the first structure pane (Content type list, pane index 0)
+   since navbar tabs provide the same navigation. */
+[data-pane-index="0"][data-testid="document-list-pane"],
+[data-pane-index="0"][data-testid="pane"] {
+  display: none !important;
 }
 
-/* If the above selector doesn't match, try by structure:
-   the first pane in the structure tool is the leftmost panel */
-[data-ui="PaneLayout"] > [data-ui="Pane"]:first-child {
-  display: none;
+/* Also hide the divider after the first pane */
+[data-pane-index="0"] + [data-testid="pane-divider"],
+[data-pane-index="0"] + div[style*="cursor"] {
+  display: none !important;
 }
