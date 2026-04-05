@@ -46,7 +46,7 @@ const WEEK_SCALES: GanttScale[] = [
 
 const MONTH_SCALES: GanttScale[] = [
   { unit: "year", step: 1, format: "%Y" },
-  { unit: "month", step: 1, format: "%F" },
+  { unit: "month", step: 1, format: "%M" },
 ];
 
 export function GanttScheduleView(props: GanttScheduleViewProps) {
@@ -128,7 +128,7 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
   }
 
   const scales = view === "week" ? WEEK_SCALES : MONTH_SCALES;
-  const cellWidth = view === "week" ? 60 : 40;
+  const cellWidth = view === "week" ? 60 : 80;
 
   return (
     <Card padding={4}>

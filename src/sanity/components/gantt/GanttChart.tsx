@@ -128,12 +128,30 @@ export function GanttChart({ tasks, scales, cellWidth = 60 }: GanttChartProps) {
     open: t.type === "summary" ? t.open : undefined,
   }));
 
+  // Compute tight date bounds from actual task data (skip summary rows).
+  // Add 1 week padding before and 2 weeks after for breathing room.
+  const dataTasks = tasks.filter((t) => t.type !== "summary");
+  let rangeStart: Date | undefined;
+  let rangeEnd: Date | undefined;
+  if (dataTasks.length > 0) {
+    const starts = dataTasks.map((t) => t.start.getTime());
+    const ends = dataTasks.map((t) => (t.end || t.start).getTime());
+    const earliest = new Date(Math.min(...starts));
+    const latest = new Date(Math.max(...ends));
+    rangeStart = new Date(earliest);
+    rangeStart.setDate(rangeStart.getDate() - 7);
+    rangeEnd = new Date(latest);
+    rangeEnd.setDate(rangeEnd.getDate() + 14);
+  }
+
   return (
     <div className="gantt-container">
       <Willow fonts={false}>
         <Gantt
           tasks={svarTasks}
           scales={scales}
+          start={rangeStart}
+          end={rangeEnd}
           readonly={true}
           cellHeight={38}
           cellWidth={cellWidth}
