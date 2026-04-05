@@ -87,11 +87,18 @@
 /* Labels inside bars: white text on colored backgrounds */
 .gantt .bar-label {
   fill: #FFFFFF !important;
+  font-size: 13px !important;
 }
 
 /* Labels outside bars (overflowed): dark text on light background */
 .gantt .bar-label.big {
   fill: #0F172A !important;
+  font-size: 13px !important;
+}
+
+/* Prevent label clipping on edge bars */
+.gantt-container svg.gantt {
+  overflow: visible !important;
 }
 
 /* === Conflict indicator: red dashed outline on bars with violations === */
