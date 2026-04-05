@@ -190,27 +190,13 @@ export function transformProjectToGanttTasks(
     .map((e, i) => customEventToTask(e, i))
     .filter((t): t is GanttTask => t !== null);
 
-  // Sort each category by start date (earliest first).
-  const byDate = (a: GanttTask, b: GanttTask) => a.start.getTime() - b.start.getTime();
-  contractorTasks.sort(byDate);
-  milestoneTasks.sort(byDate);
-  procurementTasks.sort(byDate);
-  eventTasks.sort(byDate);
-
-  // SVAR crashes if a summary row has zero children — only include
-  // summary rows for categories that have at least one task.
-  // Interleave: summary row followed immediately by its sorted children.
+  // Flat chronological view — all items sorted by date regardless of category.
+  // No swim lane grouping; items are distinguished by color instead.
   const allTasks = [...contractorTasks, ...milestoneTasks, ...procurementTasks, ...eventTasks];
-  const parentIds = new Set(allTasks.map((t) => t.parent));
-  const activeSummaries = summaryRows.filter((s) => parentIds.has(s.id));
+  allTasks.sort((a, b) => a.start.getTime() - b.start.getTime());
 
-  const result: GanttTask[] = [];
-  for (const summary of activeSummaries) {
-    result.push(summary);
-    for (const task of allTasks) {
-      if (task.parent === summary.id) result.push(task);
-    }
-  }
+  // Remove parent references since there are no summary rows
+  const result = allTasks.map((t) => ({ ...t, parent: null }));
 
   // Transform dependency links
   const taskIds = new Set(result.map((t) => t.id));

@@ -218,16 +218,15 @@ describe("transformProjectToGanttTasks", () => {
     isCommercial: false,
   };
 
-  it("interleaves summary rows with their sorted children", () => {
+  it("returns flat chronological list with no summary rows", () => {
     const { tasks } = transformProjectToGanttTasks(mockProjectData);
-    expect(tasks.length).toBeGreaterThan(4);
-    expect(tasks[0].id).toBe("summary:contractors");
-    expect(tasks[0].type).toBe("summary");
-    const summaryIds = tasks.filter((t) => t.type === "summary").map((t) => t.id);
-    expect(summaryIds).toContain("summary:contractors");
-    expect(summaryIds).toContain("summary:milestones");
-    expect(summaryIds).toContain("summary:procurement");
-    expect(summaryIds).toContain("summary:events");
+    expect(tasks.length).toBe(6); // 1 contractor + 2 milestones + 1 procurement + 2 events
+    expect(tasks.every((t) => t.type !== "summary")).toBe(true);
+    expect(tasks.every((t) => t.parent === null)).toBe(true);
+    // Sorted by date
+    for (let i = 1; i < tasks.length; i++) {
+      expect(tasks[i].start.getTime()).toBeGreaterThanOrEqual(tasks[i - 1].start.getTime());
+    }
   });
 
   it("contains no null entries", () => {
@@ -271,7 +270,7 @@ describe("transformProjectToGanttTasks", () => {
     expect(tasks).toHaveLength(0);
   });
 
-  it("only includes summary rows for categories that have data", () => {
+  it("returns only data tasks for partial data (no summary rows)", () => {
     const partialData: SanityProjectData = {
       contractors: [mockContractor],
       milestones: [],
@@ -282,13 +281,8 @@ describe("transformProjectToGanttTasks", () => {
       isCommercial: false,
     };
     const { tasks } = transformProjectToGanttTasks(partialData);
-    const summaryIds = tasks
-      .filter((t) => t.type === "summary")
-      .map((t) => t.id);
-    expect(summaryIds).toContain("summary:contractors");
-    expect(summaryIds).not.toContain("summary:milestones");
-    expect(summaryIds).not.toContain("summary:procurement");
-    expect(summaryIds).not.toContain("summary:events");
+    expect(tasks).toHaveLength(1);
+    expect(tasks[0].id).toBe("contractor:c1");
   });
 
   it("filters out items with missing dates", () => {
