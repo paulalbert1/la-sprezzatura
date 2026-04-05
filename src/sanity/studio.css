@@ -1,0 +1,35 @@
+/**
+ * Sanity Studio global overrides.
+ *
+ * Forces light mode and hides the first structure pane
+ * (Content type list) since navbar tabs handle type navigation.
+ */
+
+/* Force light color scheme regardless of OS preference */
+[data-ui="ColorSchemeProvider"] {
+  color-scheme: light !important;
+}
+
+/* Override dark mode: force light scheme on the root studio element */
+[data-scheme="dark"] {
+  --card-bg-color: #FAF8F5 !important;
+  --card-fg-color: #2C2926 !important;
+}
+
+/* Force light appearance on the entire studio */
+html[data-sanity] {
+  color-scheme: light;
+}
+
+/* Hide the first structure pane (Content type list) since
+   the navbar tabs provide the same navigation. This gives
+   the document list and editor more horizontal space. */
+[data-testid="structure-tool-list-pane"]:first-child {
+  display: none;
+}
+
+/* If the above selector doesn't match, try by structure:
+   the first pane in the structure tool is the leftmost panel */
+[data-ui="PaneLayout"] > [data-ui="Pane"]:first-child {
+  display: none;
+}

@@ -6,6 +6,7 @@
  * first sidebar pane.
  */
 
+import { useEffect } from "react";
 import { useRouter } from "sanity/router";
 import { Flex, Button, Card } from "@sanity/ui";
 import {
@@ -15,7 +16,6 @@ import {
   ComponentIcon,
   UlistIcon,
 } from "@sanity/icons";
-import type { ComponentType } from "react";
 
 interface NavbarProps {
   renderDefault: (props: NavbarProps) => React.JSX.Element;
@@ -32,7 +32,31 @@ const DOC_TYPES = [
 export function StudioNavbar(props: NavbarProps) {
   const { renderDefault } = props;
   const router = useRouter();
-  const currentPath = router.state?._searchParams?.toString() || "";
+
+  // Force light mode — set Sanity's localStorage preference and
+  // update the DOM scheme attribute on mount.
+  useEffect(() => {
+    try {
+      // Sanity stores scheme preference in localStorage
+      const studioKey = Object.keys(localStorage).find(
+        (k) => k.includes("sanity") && k.includes("colorScheme"),
+      );
+      if (studioKey) {
+        localStorage.setItem(studioKey, JSON.stringify("light"));
+      }
+      // Also try the standard key format
+      localStorage.setItem("sanityStudio:ui:colorScheme", '"light"');
+
+      // Force the data-scheme attribute on all elements that use it
+      document.querySelectorAll("[data-scheme]").forEach((el) => {
+        el.setAttribute("data-scheme", "light");
+      });
+      // Set on html element too
+      document.documentElement.setAttribute("data-scheme", "light");
+    } catch {
+      // localStorage might be unavailable
+    }
+  }, []);
 
   return (
     <div>

@@ -11,6 +11,7 @@ import { renderingTool } from "./src/sanity/components/rendering/RenderingToolPl
 import { getDefaultDocumentNode } from "./src/sanity/structure";
 import { studioTheme } from "./src/sanity/studioTheme";
 import { StudioNavbar } from "./src/sanity/components/StudioNavbar";
+import "./src/sanity/studio.css";
 
 export default defineConfig({
   name: "la-sprezzatura",
