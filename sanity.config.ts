@@ -9,12 +9,20 @@ import { SendBuildingAccessAction } from "./src/sanity/actions/sendBuildingAcces
 import { SendUpdateAction } from "./src/sanity/actions/sendUpdate";
 import { renderingTool } from "./src/sanity/components/rendering/RenderingToolPlugin";
 import { getDefaultDocumentNode } from "./src/sanity/structure";
+import { studioTheme } from "./src/sanity/studioTheme";
+import { StudioNavbar } from "./src/sanity/components/StudioNavbar";
 
 export default defineConfig({
   name: "la-sprezzatura",
   title: "La Sprezzatura",
   projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
   dataset: import.meta.env.PUBLIC_SANITY_DATASET,
+  theme: studioTheme,
+  studio: {
+    components: {
+      navbar: StudioNavbar,
+    },
+  },
   plugins: [
     structureTool({
       structure: (S) =>
