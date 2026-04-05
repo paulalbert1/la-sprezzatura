@@ -216,14 +216,13 @@ export function transformProjectToGanttTasks(
   const taskIds = new Set(result.map((t) => t.id));
   const links: GanttLink[] = (data.scheduleDependencies || [])
     .map((dep) => {
-      const sourceId = `${dep.fromCategory}:${dep.fromKey}`;
-      const targetId = `${dep.toCategory}:${dep.toKey}`;
-      // Only include links where both tasks exist in the chart
-      if (!taskIds.has(sourceId) || !taskIds.has(targetId)) return null;
+      // source/target are stored as "category:_key" (e.g. "milestone:mil-da01")
+      if (!dep.source || !dep.target) return null;
+      if (!taskIds.has(dep.source) || !taskIds.has(dep.target)) return null;
       return {
         id: dep._key,
-        source: sourceId,
-        target: targetId,
+        source: dep.source,
+        target: dep.target,
         type: (dep.linkType || "e2s") as GanttLink["type"],
       };
     })

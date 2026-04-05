@@ -90,10 +90,8 @@ export interface SanityProjectData {
   }>;
   scheduleDependencies: Array<{
     _key: string;
-    fromCategory: string;
-    fromKey: string;
-    toCategory: string;
-    toKey: string;
+    source: string;   // "category:_key" format, e.g. "milestone:mil-da01"
+    target: string;   // "category:_key" format
     linkType: string;
   }>;
   engagementType: string;

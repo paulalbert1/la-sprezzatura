@@ -212,7 +212,7 @@ describe("transformProjectToGanttTasks", () => {
     procurementItems: [mockProcurement],
     customEvents: [mockEvent, mockMultiDayEvent],
     scheduleDependencies: [
-      { _key: "d1", fromCategory: "milestone", fromKey: "m1", toCategory: "contractor", toKey: "c1", linkType: "e2s" },
+      { _key: "d1", source: "milestone:m1", target: "contractor:c1", linkType: "e2s" },
     ],
     engagementType: "full-interior-design",
     isCommercial: false,
@@ -250,7 +250,7 @@ describe("transformProjectToGanttTasks", () => {
     const badLinkData: SanityProjectData = {
       ...mockProjectData,
       scheduleDependencies: [
-        { _key: "d1", fromCategory: "milestone", fromKey: "nonexistent", toCategory: "contractor", toKey: "c1", linkType: "e2s" },
+        { _key: "d1", source: "milestone:nonexistent", target: "contractor:c1", linkType: "e2s" },
       ],
     };
     const { links } = transformProjectToGanttTasks(badLinkData);

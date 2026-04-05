@@ -2,6 +2,7 @@ import { defineType, defineField, defineArrayMember } from "sanity";
 import { generatePortalToken } from "../../lib/generateToken";
 import { BlobFileInput } from "../components/BlobFileInput";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
+import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
 
 export const project = defineType({
   name: "project",
@@ -1134,50 +1135,18 @@ export const project = defineType({
           name: "scheduleDependency",
           fields: [
             defineField({
-              name: "fromCategory",
-              title: "From (category)",
+              name: "source",
+              title: "Predecessor (must finish first)",
               type: "string",
               validation: (r) => r.required(),
-              options: {
-                list: [
-                  { title: "Contractor", value: "contractor" },
-                  { title: "Milestone", value: "milestone" },
-                  { title: "Procurement", value: "procurement" },
-                  { title: "Event", value: "event" },
-                ],
-                layout: "dropdown",
-              },
+              components: { input: ScheduleItemPicker },
             }),
             defineField({
-              name: "fromKey",
-              title: "From (item key)",
-              type: "string",
-              description:
-                "The _key of the item in its array. Find it in the item's URL or JSON.",
-              validation: (r) => r.required(),
-            }),
-            defineField({
-              name: "toCategory",
-              title: "To (category)",
+              name: "target",
+              title: "Successor (starts after)",
               type: "string",
               validation: (r) => r.required(),
-              options: {
-                list: [
-                  { title: "Contractor", value: "contractor" },
-                  { title: "Milestone", value: "milestone" },
-                  { title: "Procurement", value: "procurement" },
-                  { title: "Event", value: "event" },
-                ],
-                layout: "dropdown",
-              },
-            }),
-            defineField({
-              name: "toKey",
-              title: "To (item key)",
-              type: "string",
-              description:
-                "The _key of the target item. This item starts after the 'from' item finishes.",
-              validation: (r) => r.required(),
+              components: { input: ScheduleItemPicker },
             }),
             defineField({
               name: "linkType",
@@ -1197,15 +1166,13 @@ export const project = defineType({
           ],
           preview: {
             select: {
-              fromCat: "fromCategory",
-              fromKey: "fromKey",
-              toCat: "toCategory",
-              toKey: "toKey",
+              source: "source",
+              target: "target",
               linkType: "linkType",
             },
-            prepare: ({ fromCat, fromKey, toCat, toKey, linkType }) => ({
-              title: `${fromCat || "?"}:${fromKey || "?"} → ${toCat || "?"}:${toKey || "?"}`,
-              subtitle: linkType || "e2s",
+            prepare: ({ source, target, linkType }) => ({
+              title: `${source || "?"} → ${target || "?"}`,
+              subtitle: linkType === "e2s" ? "End-to-Start" : linkType || "e2s",
             }),
           },
         }),
