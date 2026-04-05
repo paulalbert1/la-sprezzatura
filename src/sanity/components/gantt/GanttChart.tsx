@@ -97,6 +97,8 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
       containerRef.current.removeChild(containerRef.current.firstChild);
     }
 
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+
     try {
       ganttRef.current = new Gantt(containerRef.current, frappeTasks, {
         view_mode: "Day",
@@ -146,7 +148,7 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
     // Force container to match SVG height.
     // Frappe's CSS uses `height: var(--gv-grid-height)` which overrides inline styles.
     // Set the CSS variable on the element after Frappe finishes rendering.
-    const resizeTimer = setTimeout(() => {
+    resizeTimer = setTimeout(() => {
       if (!containerRef.current) return;
       const svg = containerRef.current.querySelector('svg.gantt');
       if (svg) {
