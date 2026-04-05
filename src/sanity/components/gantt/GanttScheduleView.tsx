@@ -116,8 +116,8 @@ export function GanttScheduleView(props: GanttScheduleViewProps) {
     );
   }
 
-  // Check if there are data tasks beyond the 4 summary rows
-  const hasDataTasks = tasks.length > 4;
+  // Empty summary rows are now filtered out, so any tasks means there's data
+  const hasDataTasks = tasks.length > 0;
 
   if (!hasDataTasks) {
     return (

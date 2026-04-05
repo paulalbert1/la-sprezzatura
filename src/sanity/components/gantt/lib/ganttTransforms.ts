@@ -189,11 +189,11 @@ export function transformProjectToGanttTasks(
     .map((e, i) => customEventToTask(e, i))
     .filter((t): t is GanttTask => t !== null);
 
-  return [
-    ...summaryRows,
-    ...contractorTasks,
-    ...milestoneTasks,
-    ...procurementTasks,
-    ...eventTasks,
-  ];
+  // SVAR crashes if a summary row has zero children — only include
+  // summary rows for categories that have at least one task.
+  const allTasks = [...contractorTasks, ...milestoneTasks, ...procurementTasks, ...eventTasks];
+  const parentIds = new Set(allTasks.map((t) => t.parent));
+  const activeSummaries = summaryRows.filter((s) => parentIds.has(s.id));
+
+  return [...activeSummaries, ...allTasks];
 }

@@ -232,7 +232,7 @@ describe("transformProjectToGanttTasks", () => {
     }
   });
 
-  it("returns only 4 summary rows with empty arrays", () => {
+  it("returns no tasks with empty arrays (SVAR crashes on empty summary rows)", () => {
     const emptyData: SanityProjectData = {
       contractors: [],
       milestones: [],
@@ -242,11 +242,10 @@ describe("transformProjectToGanttTasks", () => {
       isCommercial: false,
     };
     const tasks = transformProjectToGanttTasks(emptyData);
-    expect(tasks).toHaveLength(4);
-    expect(tasks.every((t) => t.type === "summary")).toBe(true);
+    expect(tasks).toHaveLength(0);
   });
 
-  it("includes summary rows for empty categories even in mixed data", () => {
+  it("only includes summary rows for categories that have data", () => {
     const partialData: SanityProjectData = {
       contractors: [mockContractor],
       milestones: [],
@@ -259,9 +258,10 @@ describe("transformProjectToGanttTasks", () => {
     const summaryIds = tasks
       .filter((t) => t.type === "summary")
       .map((t) => t.id);
-    expect(summaryIds).toContain("summary:milestones");
-    expect(summaryIds).toContain("summary:procurement");
-    expect(summaryIds).toContain("summary:events");
+    expect(summaryIds).toContain("summary:contractors");
+    expect(summaryIds).not.toContain("summary:milestones");
+    expect(summaryIds).not.toContain("summary:procurement");
+    expect(summaryIds).not.toContain("summary:events");
   });
 
   it("filters out items with missing dates", () => {
@@ -274,7 +274,7 @@ describe("transformProjectToGanttTasks", () => {
       isCommercial: false,
     };
     const tasks = transformProjectToGanttTasks(dataWithBadDates);
-    // Only summary rows should remain
-    expect(tasks).toHaveLength(4);
+    // No tasks remain — all items had missing dates, no summary rows needed
+    expect(tasks).toHaveLength(0);
   });
 });
