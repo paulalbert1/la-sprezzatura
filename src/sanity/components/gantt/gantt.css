@@ -7,27 +7,29 @@
  */
 
 .gantt-container {
-  /* Today marker color */
+  /* Today marker */
   --wx-gantt-marker-color: #EF4444;
+  --wx-gantt-marker-font-color: #EF4444;
 
-  /* Milestone diamond styling */
+  /* Milestone diamond */
   --wx-gantt-milestone-color: #8B5CF6;
   --wx-gantt-milestone-border-radius: 1px;
 
-  /* Summary row (swim lane header) styling */
+  /* Summary row (if used) */
   --wx-gantt-summary-color: #e5e7eb;
   --wx-gantt-summary-fill-color: #e5e7eb;
   --wx-gantt-summary-font-color: #374151;
 
-  /* Default task bar styling (overridden per-contractor via taskTemplate) */
+  /* Default task bar */
   --wx-gantt-task-color: #3B82F6;
   --wx-gantt-task-fill-color: #93c5fd;
-
-  /* Bar appearance */
   --wx-gantt-bar-border-radius: 4px;
 
-  /* Link/arrow appearance — subtle and clean */
-  --wx-gantt-link-color: #94a3b8;
+  /* Dependency link arrows — subtle styling */
+  --wx-gantt-link-color: #b0b8c4;
+  --wx-gantt-link-color-hovered: #64748b;
+  --wx-gantt-link-marker-background: #b0b8c4;
+  --wx-gantt-link-marker-color: #b0b8c4;
 }
 
 /* Ensure the Gantt chart fills the available space */
@@ -36,43 +38,32 @@
   min-height: 400px;
 }
 
-/* --- Dependency arrows: subtle styling --- */
+/* --- Dependency arrows: make less visually heavy --- */
 
-/* Make link lines thinner and lighter */
-.gantt-container .wx-line {
-  stroke: #94a3b8;
-  stroke-width: 1.5;
-  opacity: 0.5;
+.gantt-container [class*="wx-link"] {
+  opacity: 0.45;
 }
 
-/* Arrowheads: smaller and matching color */
-.gantt-container .wx-arrow {
-  fill: #94a3b8;
-  opacity: 0.5;
+.gantt-container [class*="wx-link"]:hover {
+  opacity: 0.8;
 }
 
-/* Hide the connector boxes at start/end of links */
-.gantt-container .wx-link-start,
-.gantt-container .wx-link-end,
-.gantt-container .wx-link-point {
-  display: none;
-}
+/* --- Sticky scale header: keep date row visible when scrolling --- */
 
-/* --- Sticky scale header --- */
-
-/* Make the scale (date headers) stick to the top when scrolling */
-.gantt-container .wx-scale {
+.gantt-container [class*="wx-scale"] {
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
-/* --- Today marker: vertical red line --- */
+/* --- Today marker: ensure the red vertical line renders --- */
 
-.gantt-container .gantt-today-marker,
-.wx-willow-theme .gantt-today-marker {
-  background-color: #EF4444;
+.gantt-container [class*="wx-marker"] {
+  background-color: #EF4444 !important;
+  min-width: 2px;
+}
+
+.gantt-container .gantt-today-marker {
+  background-color: #EF4444 !important;
   width: 2px !important;
-  opacity: 0.8;
-  z-index: 5;
 }
