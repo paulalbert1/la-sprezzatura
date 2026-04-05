@@ -87,8 +87,12 @@
 .gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #10B981 !important; stroke: #10B981 !important; }
 .gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #9CA3AF !important; stroke: #9CA3AF !important; }
 
-/* ALL labels always dark — readable on any bar color or background */
-.gantt .bar-label,
+/* Labels inside bars: white text on colored backgrounds */
+.gantt .bar-label {
+  fill: #FFFFFF !important;
+}
+
+/* Labels outside bars (overflowed): dark text on light background */
 .gantt .bar-label.big {
   fill: #0F172A !important;
 }
