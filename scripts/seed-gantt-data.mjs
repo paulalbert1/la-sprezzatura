@@ -483,17 +483,24 @@ async function main() {
     console.log(`  ✓ ${doc.company} (${doc._id})`);
   }
 
-  console.log("\nPatching seed-project-darien with Gantt data...");
-  await client
-    .patch("seed-project-darien")
-    .set({
-      contractors,
-      milestones,
-      procurementItems,
-      customEvents,
-      scheduleDependencies,
-    })
-    .commit();
+  const ganttData = {
+    contractors,
+    milestones,
+    procurementItems,
+    customEvents,
+    scheduleDependencies,
+  };
+
+  // Patch both published and draft documents so Studio shows the latest data
+  console.log("\nPatching seed-project-darien (published + draft)...");
+  await client.patch("seed-project-darien").set(ganttData).commit();
+  const draftExists = await client.getDocument("drafts.seed-project-darien");
+  if (draftExists) {
+    await client.patch("drafts.seed-project-darien").set(ganttData).commit();
+    console.log("  ✓ draft patched");
+  } else {
+    console.log("  ✓ no draft (published only)");
+  }
 
   console.log("  ✓ contractors:", contractors.length);
   console.log("  ✓ milestones:", milestones.length);

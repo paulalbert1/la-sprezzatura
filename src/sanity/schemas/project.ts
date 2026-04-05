@@ -1166,18 +1166,18 @@ export const project = defineType({
             }),
           ],
           components: {
-            preview: (props) =>
+            preview: (props: Record<string, unknown>) =>
               DependencyPreview({
-                source: props.source as string,
-                target: props.target as string,
-                linkType: props.linkType as string,
+                source: (props.title || props.source) as string,
+                target: (props.subtitle || props.target) as string,
+                linkType: (props.description || props.linkType) as string,
               }),
           },
           preview: {
             select: {
-              source: "source",
-              target: "target",
-              linkType: "linkType",
+              title: "source",
+              subtitle: "target",
+              description: "linkType",
             },
           },
         }),
