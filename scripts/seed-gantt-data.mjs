@@ -125,6 +125,7 @@ const contractorDocs = [
 // Use fixed keys for items referenced by dependencies
 const KEYS = {
   jpPainting: "cnt-jpp1",
+  jpTouchups: "cnt-jpp2",
   eliteFloor: "cnt-elf1",
   luxeLight: "cnt-lux1",
   precPlumb: "cnt-prp1",
@@ -204,6 +205,17 @@ const contractors = [
     ),
     estimateAmount: 4500000,
     internalNotes: "Material lead time is 3 weeks — confirm walnut availability",
+  },
+  {
+    _key: KEYS.jpTouchups,
+    contractor: { _type: "reference", _ref: CONTRACTOR_IDS.jpPainting },
+    startDate: daysFromNow(25),
+    endDate: daysFromNow(30),
+    scopeOfWork: textBlock(
+      "Touch-up painting after flooring and millwork installation. Fill nail holes, patch drywall dings, repaint baseboards.",
+    ),
+    estimateAmount: 450000,
+    internalNotes: "Schedule after Elite Flooring and Artisan Millwork are done",
   },
 ];
 
@@ -383,12 +395,14 @@ const customEvents = [
 
 // Dependencies: arrows connecting schedule items
 const scheduleDependencies = [
+  // Design flow
   {
     _key: uuid(),
     source: `milestone:${KEYS.designPresentation}`,
     target: `milestone:${KEYS.designApproval}`,
     linkType: "e2s",
   },
+  // Approval unlocks contractors
   {
     _key: uuid(),
     source: `milestone:${KEYS.designApproval}`,
@@ -397,26 +411,63 @@ const scheduleDependencies = [
   },
   {
     _key: uuid(),
-    source: `milestone:${KEYS.demoComplete}`,
+    source: `milestone:${KEYS.designApproval}`,
     target: `contractor:${KEYS.eliteFloor}`,
     linkType: "e2s",
   },
+  // Demo must complete before lighting and flooring
+  {
+    _key: uuid(),
+    source: `milestone:${KEYS.demoComplete}`,
+    target: `contractor:${KEYS.luxeLight}`,
+    linkType: "e2s",
+  },
+  // Lighting done triggers rough inspection
   {
     _key: uuid(),
     source: `contractor:${KEYS.luxeLight}`,
     target: `milestone:${KEYS.roughInspection}`,
     linkType: "e2s",
   },
+  // Fixtures must arrive before plumber installs
   {
     _key: uuid(),
     source: `procurement:${KEYS.wwFixtures}`,
     target: `contractor:${KEYS.precPlumb}`,
     linkType: "e2s",
   },
+  // Pendants must arrive before lighting installs them
+  {
+    _key: uuid(),
+    source: `procurement:${KEYS.vcPendants}`,
+    target: `contractor:${KEYS.luxeLight}`,
+    linkType: "e2s",
+  },
+  // Flooring and millwork done before JP touch-ups
+  {
+    _key: uuid(),
+    source: `contractor:${KEYS.eliteFloor}`,
+    target: `contractor:${KEYS.jpTouchups}`,
+    linkType: "e2s",
+  },
+  {
+    _key: uuid(),
+    source: `contractor:${KEYS.artisanMill}`,
+    target: `contractor:${KEYS.jpTouchups}`,
+    linkType: "e2s",
+  },
+  // Punch list before photo shoot
+  {
+    _key: uuid(),
+    source: `event:${KEYS.punchList}`,
+    target: `milestone:${KEYS.photoShoot}`,
+    linkType: "e2s",
+  },
+  // Final walkthrough before move-in
   {
     _key: uuid(),
     source: `milestone:${KEYS.finalWalk}`,
-    target: `milestone:${KEYS.photoShoot}`,
+    target: `event:${KEYS.moveIn}`,
     linkType: "e2s",
   },
 ];
