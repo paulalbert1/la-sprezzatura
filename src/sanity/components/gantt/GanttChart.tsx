@@ -1,13 +1,12 @@
 /**
- * GanttChart -- SVAR Gantt wrapper with Willow theme, readonly mode, CSS scoping.
+ * GanttChart -- SVAR Gantt wrapper with custom L-shaped dependency arrows.
  *
- * Renders the SVAR React Gantt inside a .gantt-container div for CSS isolation (Pitfall 3).
- * Uses the Willow theme with fonts={false} to inherit Sanity Studio's Inter font.
- * Per-contractor colors are applied via a custom taskTemplate that reads _colorIndex.
- * Today marker uses the SVAR markers prop with IMarker interface.
+ * Renders SVAR React Gantt in readonly mode with Willow theme.
+ * SVAR's built-in link rendering is disabled — we draw our own clean
+ * L-shaped arrows (vertical then horizontal) as an SVG overlay.
  */
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { Gantt, Willow } from "@svar-ui/react-gantt";
 import type { ITask } from "@svar-ui/react-gantt";
 import "@svar-ui/react-gantt/all.css";
@@ -23,15 +22,11 @@ interface GanttChartProps {
   cellWidth?: number;
 }
 
-/**
- * Custom task bar template for per-contractor color assignment.
- * Renders colored overlay inside the SVAR task bar, reading custom fields
- * from the task data object (_colorIndex, _category, _status, _completed).
- *
- * Per D-12 spike resolution: taskTemplate renders INSIDE the bar element.
- * We use a full-width, full-height div with absolute positioning and the
- * contractor color as background, plus the task text overlaid.
- */
+const CELL_HEIGHT = 38;
+const LEFT_COL_WIDTH = 280;
+const SCALE_HEADER_HEIGHT = 62; // approximate height of the two-row scale header
+const ARROW_SIZE = 5;
+
 function TaskTemplate({ data }: { data: ITask }) {
   const task = data as unknown as GanttTask;
 
@@ -51,160 +46,162 @@ function TaskTemplate({ data }: { data: ITask }) {
     backgroundColor = CATEGORY_COLORS.events;
   }
 
-  // For milestones (diamond markers), SVAR renders the diamond shape.
-  // No text overlay needed — the left panel already shows the name.
   if (task.type === "milestone") {
-    return (
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: "100%",
-          height: "100%",
-          opacity,
-        }}
-      />
+    return <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", opacity }} />;
+  }
+
+  return (
+    <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", backgroundColor, borderRadius: 4, opacity }} />
+  );
+}
+
+/**
+ * Convert a date to an X pixel position within the timeline area.
+ */
+function dateToX(date: Date, rangeStart: Date, rangeEnd: Date, timelineWidth: number): number {
+  const totalMs = rangeEnd.getTime() - rangeStart.getTime();
+  const dateMs = date.getTime() - rangeStart.getTime();
+  return LEFT_COL_WIDTH + (dateMs / totalMs) * timelineWidth;
+}
+
+/**
+ * Render custom L-shaped dependency arrows as SVG paths.
+ * Each arrow: vertical from source row to target row, then horizontal to target.
+ */
+function DependencyArrows({
+  tasks,
+  links,
+  rangeStart,
+  rangeEnd,
+  containerWidth,
+}: {
+  tasks: GanttTask[];
+  links: GanttLink[];
+  rangeStart: Date;
+  rangeEnd: Date;
+  containerWidth: number;
+}) {
+  const timelineWidth = containerWidth - LEFT_COL_WIDTH;
+  if (timelineWidth <= 0 || links.length === 0) return null;
+
+  // Build index map: task id → row index
+  const taskIndex = new Map<string, number>();
+  tasks.forEach((t, i) => taskIndex.set(t.id, i));
+
+  const paths: React.ReactNode[] = [];
+
+  for (const link of links) {
+    const srcIdx = taskIndex.get(link.source);
+    const tgtIdx = taskIndex.get(link.target);
+    if (srcIdx === undefined || tgtIdx === undefined) continue;
+
+    const srcTask = tasks[srcIdx];
+    const tgtTask = tasks[tgtIdx];
+
+    // Source: end of the bar (or the milestone point)
+    const srcEndDate = srcTask.end || srcTask.start;
+    const srcX = dateToX(srcEndDate, rangeStart, rangeEnd, timelineWidth);
+    const srcY = SCALE_HEADER_HEIGHT + srcIdx * CELL_HEIGHT + CELL_HEIGHT / 2;
+
+    // Target: start of the bar
+    const tgtX = dateToX(tgtTask.start, rangeStart, rangeEnd, timelineWidth);
+    const tgtY = SCALE_HEADER_HEIGHT + tgtIdx * CELL_HEIGHT + CELL_HEIGHT / 2;
+
+    // L-shape: go down (or up) from source, then right to target
+    // If target is below source: down then right
+    // If target is above source: up then right
+    const midX = srcX + 8; // small horizontal offset from source end
+
+    const pathD = srcY === tgtY
+      // Same row: just a horizontal line
+      ? `M ${srcX} ${srcY} L ${tgtX} ${tgtY}`
+      // Different rows: vertical then horizontal (L-shape)
+      : `M ${srcX} ${srcY} L ${midX} ${srcY} L ${midX} ${tgtY} L ${tgtX} ${tgtY}`;
+
+    // Arrowhead pointing right at target
+    const arrowD = `M ${tgtX} ${tgtY} L ${tgtX - ARROW_SIZE} ${tgtY - ARROW_SIZE} L ${tgtX - ARROW_SIZE} ${tgtY + ARROW_SIZE} Z`;
+
+    paths.push(
+      <g key={link.id} opacity={0.4}>
+        <path d={pathD} fill="none" stroke="#78716C" strokeWidth={1.5} />
+        <path d={arrowD} fill="#78716C" />
+      </g>,
     );
   }
 
-  // For task bars (contractors, multi-day events): render colored background.
-  // No text overlay — the left panel already shows names, and bar text clips.
+  const totalHeight = SCALE_HEADER_HEIGHT + tasks.length * CELL_HEIGHT;
+
   return (
-    <div
+    <svg
       style={{
         position: "absolute",
-        left: 0,
         top: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor,
-        borderRadius: 4,
-        opacity,
+        left: 0,
+        width: containerWidth,
+        height: totalHeight,
+        pointerEvents: "none",
+        zIndex: 4,
       }}
-    />
+    >
+      {paths}
+    </svg>
   );
 }
 
 export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartProps) {
-  // Today marker via SVAR markers prop
-  const todayMarkers = [
-    {
-      start: new Date(),
-      text: "Today",
-      css: "gantt-today-marker",
-    },
-  ];
+  const todayMarkers = [{ start: new Date(), text: "Today", css: "gantt-today-marker" }];
 
-  // SVAR only works reliably with numeric IDs — convert string IDs to numbers.
-  // Build a stable mapping from our string IDs to sequential numeric IDs.
   const idMap = new Map<string, number>();
   tasks.forEach((t, i) => idMap.set(t.id, i + 1));
 
   const svarTasks = tasks.map((t) => ({
     ...t,
     id: idMap.get(t.id) || 0,
-    // SVAR expects end to always be a Date (not null)
     end: t.end || t.start,
-    // Root tasks (parent: null) use 0; child tasks use mapped numeric parent
     parent: t.parent ? (idMap.get(t.parent) || 0) : 0,
-    // SVAR crashes if leaf tasks have open: true (tries to expand nonexistent children).
-    // Only summary rows should be expandable.
     open: t.type === "summary" ? t.open : undefined,
   }));
 
-  // Compute tight date bounds from actual task data (skip summary rows).
-  // Add 1 week padding before and 2 weeks after for breathing room.
+  // Date range with padding
   const dataTasks = tasks.filter((t) => t.type !== "summary");
   let rangeStart: Date | undefined;
   let rangeEnd: Date | undefined;
   if (dataTasks.length > 0) {
     const starts = dataTasks.map((t) => t.start.getTime());
     const ends = dataTasks.map((t) => (t.end || t.start).getTime());
-    const earliest = new Date(Math.min(...starts));
-    const latest = new Date(Math.max(...ends));
-    rangeStart = new Date(earliest);
+    rangeStart = new Date(Math.min(...starts));
     rangeStart.setDate(rangeStart.getDate() - 7);
-    rangeEnd = new Date(latest);
+    rangeEnd = new Date(Math.max(...ends));
     rangeEnd.setDate(rangeEnd.getDate() + 14);
   }
 
-  // Today line: compute pixel position after SVAR renders.
+  // Measure container width for arrow positioning
   const containerRef = useRef<HTMLDivElement>(null);
-  const [todayLeft, setTodayLeft] = useState<number | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {
-    if (!containerRef.current || !rangeStart || !rangeEnd) return;
+    if (!containerRef.current) return;
+    const measure = () => {
+      if (containerRef.current) setContainerWidth(containerRef.current.offsetWidth);
+    };
+    const timer = setTimeout(measure, 300);
+    const observer = new ResizeObserver(measure);
+    observer.observe(containerRef.current);
+    return () => { clearTimeout(timer); observer.disconnect(); };
+  }, [tasks.length]);
 
-    const timer = setTimeout(() => {
-      const el = containerRef.current;
-      if (!el) return;
-
-      // --- Today line ---
-      const totalMs = rangeEnd.getTime() - rangeStart.getTime();
-      const nowMs = Date.now() - rangeStart.getTime();
-      if (nowMs <= 0 || nowMs >= totalMs) { setTodayLeft(null); }
-      else {
-        const containerWidth = el.offsetWidth;
-        const timelineWidth = containerWidth - 280;
-        const pct = nowMs / totalMs;
-        setTodayLeft(280 + (pct * timelineWidth));
-      }
-
-      // --- Sticky header ---
-      // Find the scale element (contains "2026", month names) and make it sticky.
-      // Walk all descendants looking for the scale row container.
-      const allDivs = el.querySelectorAll('div');
-      for (const div of allDivs) {
-        // The scale container typically has a fixed height and contains
-        // child rows for year + month labels. It sits at the top of the
-        // right-side chart area above the grid rows.
-        const cls = div.className || '';
-        if (cls.includes('wx-scale') || cls.includes('scale')) {
-          div.style.position = 'sticky';
-          div.style.top = '0';
-          div.style.zIndex = '10';
-          div.style.backgroundColor = 'var(--wx-background, #fff)';
-          break;
-        }
-      }
-
-      // Fallback: if no class match, try to find by structure.
-      // The SVAR layout is typically: container > [left-panel, right-panel]
-      // right-panel > [scale-header, grid-body]. The scale-header is the
-      // first child of the right panel area.
-      if (!el.querySelector('[style*="sticky"]')) {
-        // Find the element that contains the year/month text
-        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-        let node: Node | null;
-        while ((node = walker.nextNode())) {
-          if (node.textContent?.includes('2026') || node.textContent?.includes('2025')) {
-            // Walk up to find a suitable container to make sticky
-            let parent = node.parentElement;
-            while (parent && parent !== el) {
-              // Look for a container that spans the full width and is near the top
-              const rect = parent.getBoundingClientRect();
-              const elRect = el.getBoundingClientRect();
-              if (rect.top - elRect.top < 60 && rect.width > 200) {
-                parent.style.position = 'sticky';
-                parent.style.top = '0';
-                parent.style.zIndex = '10';
-                parent.style.backgroundColor = '#1e1e1e'; // dark theme bg
-                break;
-              }
-              parent = parent.parentElement;
-            }
-            break;
-          }
-        }
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [rangeStart, rangeEnd, cellWidth, tasks.length]);
+  // Today line X position
+  const todayLeft = useMemo(() => {
+    if (!rangeStart || !rangeEnd || containerWidth === 0) return null;
+    const totalMs = rangeEnd.getTime() - rangeStart.getTime();
+    const nowMs = Date.now() - rangeStart.getTime();
+    if (nowMs <= 0 || nowMs >= totalMs) return null;
+    return LEFT_COL_WIDTH + (nowMs / totalMs) * (containerWidth - LEFT_COL_WIDTH);
+  }, [rangeStart, rangeEnd, containerWidth]);
 
   return (
     <div className="gantt-container" ref={containerRef} style={{ position: "relative" }}>
+      {/* Today line */}
       {todayLeft !== null && (
         <div
           style={{
@@ -220,6 +217,18 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
           }}
         />
       )}
+
+      {/* Custom L-shaped dependency arrows */}
+      {rangeStart && rangeEnd && containerWidth > 0 && (
+        <DependencyArrows
+          tasks={tasks}
+          links={links}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          containerWidth={containerWidth}
+        />
+      )}
+
       <Willow fonts={false}>
         <Gantt
           tasks={svarTasks}
@@ -227,15 +236,10 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
           start={rangeStart}
           end={rangeEnd}
           readonly={true}
-          cellHeight={38}
+          cellHeight={CELL_HEIGHT}
           cellWidth={cellWidth}
-          columns={[{ id: "text", header: "Item", width: 280 }]}
-          links={links.map((l, i) => ({
-            id: i + 1,
-            source: idMap.get(l.source) || 0,
-            target: idMap.get(l.target) || 0,
-            type: l.type,
-          }))}
+          columns={[{ id: "text", header: "Item", width: LEFT_COL_WIDTH }]}
+          links={[]}
           markers={todayMarkers}
           taskTemplate={TaskTemplate}
         />
