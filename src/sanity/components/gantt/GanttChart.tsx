@@ -47,9 +47,10 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
     if (task._category === "procurement" && task._status) {
       customClass = `gantt-procurement-${task._status}`;
     }
-    // Mark conflicting tasks with a red outline
+    // Mark conflicting tasks — Frappe's classList.add() doesn't allow spaces,
+    // so conflict replaces the category class
     if (conflictTargets.has(task.id)) {
-      customClass += " gantt-conflict";
+      customClass = "gantt-conflict";
     }
 
     const end = task.end || task.start;
