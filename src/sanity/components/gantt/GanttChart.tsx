@@ -112,7 +112,6 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         scroll_to: "start",
         infinite_padding: false,
         auto_move_label: true,
-        container_height: "auto",
         lines: "both",
         popup_on: "hover",
         popup: (ctx: {
