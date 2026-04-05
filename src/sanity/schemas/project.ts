@@ -3,6 +3,7 @@ import { generatePortalToken } from "../../lib/generateToken";
 import { BlobFileInput } from "../components/BlobFileInput";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
+import { DependencyPreview } from "../components/gantt/DependencyPreview";
 
 export const project = defineType({
   name: "project",
@@ -1164,16 +1165,20 @@ export const project = defineType({
               },
             }),
           ],
+          components: {
+            preview: (props) =>
+              DependencyPreview({
+                source: props.source as string,
+                target: props.target as string,
+                linkType: props.linkType as string,
+              }),
+          },
           preview: {
             select: {
               source: "source",
               target: "target",
               linkType: "linkType",
             },
-            prepare: ({ source, target, linkType }) => ({
-              title: `${source || "?"} → ${target || "?"}`,
-              subtitle: linkType === "e2s" ? "End-to-Start" : linkType || "e2s",
-            }),
           },
         }),
       ],
