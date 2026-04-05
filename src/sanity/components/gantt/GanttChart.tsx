@@ -56,80 +56,144 @@ function TaskTemplate({ data }: { data: ITask }) {
 }
 
 /**
- * Convert a date to an X pixel position within the timeline area.
+ * Measure actual bar/diamond positions from the DOM after SVAR renders.
+ * Returns a map from row index to { left, right, centerY } in container-relative coords.
  */
-function dateToX(date: Date, rangeStart: Date, rangeEnd: Date, timelineWidth: number): number {
-  const totalMs = rangeEnd.getTime() - rangeStart.getTime();
-  const dateMs = date.getTime() - rangeStart.getTime();
-  return LEFT_COL_WIDTH + (dateMs / totalMs) * timelineWidth;
+function measureBarPositions(container: HTMLElement): Map<number, { left: number; right: number; centerY: number }> {
+  const positions = new Map<number, { left: number; right: number; centerY: number }>();
+  const containerRect = container.getBoundingClientRect();
+
+  // Find all task rows — SVAR renders bars/diamonds inside row containers
+  // Each row has a consistent height (CELL_HEIGHT). We look for the actual
+  // bar or diamond elements and measure their bounding rects.
+  const rows = container.querySelectorAll('[class*="wx-row"], [class*="wx-bar"], tr');
+
+  // Alternative: find all visual elements (colored bars and diamonds)
+  // that are positioned in the timeline area (right of LEFT_COL_WIDTH)
+  const barElements: HTMLElement[] = [];
+  container.querySelectorAll('div, rect, polygon').forEach((el) => {
+    const rect = (el as HTMLElement).getBoundingClientRect();
+    const relLeft = rect.left - containerRect.left;
+    // Must be in the timeline area, not the left panel
+    if (relLeft >= LEFT_COL_WIDTH - 20 && rect.width > 0 && rect.height > 4 && rect.height < CELL_HEIGHT) {
+      barElements.push(el as HTMLElement);
+    }
+  });
+
+  // Group bars by their vertical center (row)
+  // Sort by Y position, then assign to row indices
+  barElements.sort((a, b) => {
+    const aRect = a.getBoundingClientRect();
+    const bRect = b.getBoundingClientRect();
+    return aRect.top - bRect.top;
+  });
+
+  // Deduplicate by row: group elements within the same CELL_HEIGHT band
+  let currentRow = -1;
+  let lastY = -999;
+
+  for (const el of barElements) {
+    const rect = el.getBoundingClientRect();
+    const relLeft = rect.left - containerRect.left;
+    const relRight = rect.right - containerRect.left;
+    const centerY = rect.top - containerRect.top + rect.height / 2;
+
+    if (Math.abs(centerY - lastY) > CELL_HEIGHT * 0.5) {
+      currentRow++;
+      lastY = centerY;
+    }
+
+    const existing = positions.get(currentRow);
+    if (!existing) {
+      positions.set(currentRow, { left: relLeft, right: relRight, centerY });
+    } else {
+      // Expand the range if multiple elements in the same row
+      existing.left = Math.min(existing.left, relLeft);
+      existing.right = Math.max(existing.right, relRight);
+    }
+  }
+
+  return positions;
 }
 
 /**
  * Render custom L-shaped dependency arrows as SVG paths.
- * Each arrow: vertical from source row to target row, then horizontal to target.
+ * Measures actual bar positions from the DOM for accurate alignment.
  */
 function DependencyArrows({
   tasks,
   links,
-  rangeStart,
-  rangeEnd,
+  containerRef,
   containerWidth,
+  renderKey,
 }: {
   tasks: GanttTask[];
   links: GanttLink[];
-  rangeStart: Date;
-  rangeEnd: Date;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   containerWidth: number;
+  renderKey: number;
 }) {
-  const timelineWidth = containerWidth - LEFT_COL_WIDTH;
-  if (timelineWidth <= 0 || links.length === 0) return null;
+  const [paths, setPaths] = useState<React.ReactNode[]>([]);
 
-  // Build index map: task id → row index
-  const taskIndex = new Map<string, number>();
-  tasks.forEach((t, i) => taskIndex.set(t.id, i));
+  useEffect(() => {
+    if (!containerRef.current || links.length === 0 || containerWidth === 0) {
+      setPaths([]);
+      return;
+    }
 
-  const paths: React.ReactNode[] = [];
+    const timer = setTimeout(() => {
+      if (!containerRef.current) return;
 
-  for (const link of links) {
-    const srcIdx = taskIndex.get(link.source);
-    const tgtIdx = taskIndex.get(link.target);
-    if (srcIdx === undefined || tgtIdx === undefined) continue;
+      const positions = measureBarPositions(containerRef.current);
+      if (positions.size === 0) { setPaths([]); return; }
 
-    const srcTask = tasks[srcIdx];
-    const tgtTask = tasks[tgtIdx];
+      // Build index map: task id → row index
+      const taskIndex = new Map<string, number>();
+      tasks.forEach((t, i) => taskIndex.set(t.id, i));
 
-    // Source: end of the bar (or the milestone point)
-    const srcEndDate = srcTask.end || srcTask.start;
-    const srcX = dateToX(srcEndDate, rangeStart, rangeEnd, timelineWidth);
-    const srcY = SCALE_HEADER_HEIGHT + srcIdx * CELL_HEIGHT + CELL_HEIGHT / 2;
+      const newPaths: React.ReactNode[] = [];
 
-    // Target: start of the bar
-    const tgtX = dateToX(tgtTask.start, rangeStart, rangeEnd, timelineWidth);
-    const tgtY = SCALE_HEADER_HEIGHT + tgtIdx * CELL_HEIGHT + CELL_HEIGHT / 2;
+      for (const link of links) {
+        const srcIdx = taskIndex.get(link.source);
+        const tgtIdx = taskIndex.get(link.target);
+        if (srcIdx === undefined || tgtIdx === undefined) continue;
 
-    // L-shape: go down (or up) from source, then right to target
-    // If target is below source: down then right
-    // If target is above source: up then right
-    const midX = srcX + 8; // small horizontal offset from source end
+        const srcPos = positions.get(srcIdx);
+        const tgtPos = positions.get(tgtIdx);
+        if (!srcPos || !tgtPos) continue;
 
-    const pathD = srcY === tgtY
-      // Same row: just a horizontal line
-      ? `M ${srcX} ${srcY} L ${tgtX} ${tgtY}`
-      // Different rows: vertical then horizontal (L-shape)
-      : `M ${srcX} ${srcY} L ${midX} ${srcY} L ${midX} ${tgtY} L ${tgtX} ${tgtY}`;
+        // Source: right edge of the bar
+        const srcX = srcPos.right;
+        const srcY = srcPos.centerY;
 
-    // Arrowhead pointing right at target
-    const arrowD = `M ${tgtX} ${tgtY} L ${tgtX - ARROW_SIZE} ${tgtY - ARROW_SIZE} L ${tgtX - ARROW_SIZE} ${tgtY + ARROW_SIZE} Z`;
+        // Target: left edge of the bar
+        const tgtX = tgtPos.left;
+        const tgtY = tgtPos.centerY;
 
-    paths.push(
-      <g key={link.id} opacity={0.4}>
-        <path d={pathD} fill="none" stroke="#78716C" strokeWidth={1.5} />
-        <path d={arrowD} fill="#78716C" />
-      </g>,
-    );
-  }
+        // L-shape: short horizontal from source, then vertical, then horizontal to target
+        const gapX = srcX + 6;
 
-  const totalHeight = SCALE_HEADER_HEIGHT + tasks.length * CELL_HEIGHT;
+        const pathD = `M ${srcX} ${srcY} L ${gapX} ${srcY} L ${gapX} ${tgtY} L ${tgtX} ${tgtY}`;
+
+        const arrowD = `M ${tgtX} ${tgtY} L ${tgtX - ARROW_SIZE} ${tgtY - ARROW_SIZE} L ${tgtX - ARROW_SIZE} ${tgtY + ARROW_SIZE} Z`;
+
+        newPaths.push(
+          <g key={link.id} opacity={0.35}>
+            <path d={pathD} fill="none" stroke="#78716C" strokeWidth={1.5} />
+            <path d={arrowD} fill="#78716C" />
+          </g>,
+        );
+      }
+
+      setPaths(newPaths);
+    }, 600); // wait for SVAR to finish rendering
+
+    return () => clearTimeout(timer);
+  }, [tasks, links, containerRef, containerWidth, renderKey]);
+
+  if (paths.length === 0) return null;
+
+  const totalHeight = containerRef.current?.scrollHeight || 800;
 
   return (
     <svg
@@ -218,16 +282,14 @@ export function GanttChart({ tasks, links, scales, cellWidth = 60 }: GanttChartP
         />
       )}
 
-      {/* Custom L-shaped dependency arrows */}
-      {rangeStart && rangeEnd && containerWidth > 0 && (
-        <DependencyArrows
-          tasks={tasks}
-          links={links}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          containerWidth={containerWidth}
-        />
-      )}
+      {/* Custom L-shaped dependency arrows — measured from actual DOM positions */}
+      <DependencyArrows
+        tasks={tasks}
+        links={links}
+        containerRef={containerRef}
+        containerWidth={containerWidth}
+        renderKey={containerWidth + tasks.length}
+      />
 
       <Willow fonts={false}>
         <Gantt
