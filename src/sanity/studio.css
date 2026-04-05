@@ -188,6 +188,12 @@ select,
   border-color: transparent !important;
 }
 
+/* ===== NESTED OBJECT DIALOG — warm overlay instead of gray ===== */
+/* Sanity's default overlay is rgba(238,237,237,0.5) which clashes with warm theme */
+[data-testid="nested-object-dialog"] {
+  background: rgba(120, 113, 108, 0.15) !important;
+}
+
 /* ===== LAYOUT-02 / D-01: VIEW TABS (EDITOR/TIMELINE) — AMBER UNDERLINE ===== */
 /* View tabs use data-ui="Tab" with data-selected and role="tab",
    but are NOT form group tabs (no data-testid="group-tab-*").
