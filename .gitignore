@@ -21,3 +21,4 @@ dist/
 .planning/
 .vercel
 .env*.local
+.playwright-mcp/
