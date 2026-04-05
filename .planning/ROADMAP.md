@@ -363,6 +363,53 @@ Phases execute in numeric order: 15 -> 16 -> 17
 | 16. Drag-and-Drop, Write-back, Undo, and Tooltips | v4.0 | 0/TBD | Not started | - |
 | 17. Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars | v4.0 | 0/TBD | Not started | - |
 
+### v4.1 Studio UI Polish
+
+**Milestone Goal:** Audit and fix all visual/UX issues in Sanity Studio — colors, contrast, fonts, layout consistency, Gantt chart cleanup, and introduce Portfolio Project type for client-facing project narratives.
+
+- [ ] **Phase 18: Visual Audit & Theme Fix** - Playwright-driven audit of every Sanity Studio screen, fix all theme/contrast/font issues, make Editor/Timeline tabs visually distinct
+- [ ] **Phase 19: Gantt & Layout Polish** - Fix Gantt labels, scroll behavior, remove test page, reliable sidebar hiding
+- [ ] **Phase 20: Portfolio Project Type** - New portfolioProject schema, "Create Portfolio Version" spawn button on admin projects, image selection modal
+
+### Phase 18: Visual Audit & Theme Fix
+**Goal**: Use Playwright to screenshot every Studio screen, identify all color/contrast/font issues, and fix them in studio.css/studioTheme.ts
+**Requirements**: THEME-01, THEME-02, THEME-03, THEME-04, THEME-05, LAYOUT-02
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-PLAN-1-playwright-audit.md -- Screenshot all Studio screens via Playwright MCP, produce structured audit findings document with CSS selectors and fix recommendations
+- [ ] 18-PLAN-2-theme-fixes.md -- Apply all CSS fixes from audit findings to studio.css, re-screenshot to verify, user visual approval
+
+**Success Criteria**:
+  1. Playwright screenshots of navbar, editor, all form groups show consistent warm off-white palette
+  2. Portal Token field is clearly readable (light bg, dark text)
+  3. No serif fonts visible anywhere in Studio
+  4. Active/selected tab states are visually consistent
+  5. Editor/Timeline tabs are visually distinct from form group tabs
+
+### Phase 19: Gantt & Layout Polish
+**Goal**: Fix remaining Gantt chart rendering issues and make sidebar pane hiding reliable
+**Requirements**: GANTT-01, GANTT-02, GANTT-03, GANTT-04, LAYOUT-01
+**Success Criteria**:
+  1. Every task bar has a visible label (verified via Playwright)
+  2. Chart loads with first task visible, not empty space
+  3. gantt-test.astro is deleted
+  4. If today falls within the project range, chart scrolls to show today in context
+  5. Content type list pane stays hidden across tab switches and navigation
+
+### Phase 20: Portfolio Project Type
+**Goal**: Create a new portfolioProject schema type with spawn workflow from admin projects
+**Depends on**: Phase 18 (theme must be consistent before adding new document type)
+**Requirements**: PORT-01, PORT-02, PORT-03, PORT-04, PORT-05
+**Success Criteria**:
+  1. portfolioProject schema exists with title, location, description, tags, images fields
+  2. "Create Portfolio Version" button visible on admin projects only after Client Sign-off is complete
+  3. Spawn modal asks about photography; if yes, user selects images to copy
+  4. Title, location, description auto-copied from admin project
+  5. Portfolio project created as independent document with sourceAdminProjectId reference
+
 ---
 *v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
 *Phase 15 plans created: 2026-04-04 (3 plans in 2 waves -- Plans 1-2 parallel, Plan 3 sequential)*
+*v4.1 roadmap created: 2026-04-05 (3 phases, 16 requirements mapped)*
+*Phase 18 plans created: 2026-04-05 (2 plans in 2 waves -- audit then fix, sequential)*

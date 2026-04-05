@@ -20,17 +20,16 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v4.0 Project Schedule | Interactive Gantt chart in Sanity Studio for project sequencing | 15-? |
 | v5.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
 
-## Current Milestone: v4.0 Project Schedule (Gantt Chart)
+## Current Milestone: v4.1 Studio UI Polish
 
-**Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects.
+**Goal:** Audit and fix all visual/UX issues in Sanity Studio — colors, contrast, fonts, layout consistency, and Gantt chart cleanup — so every screen looks intentional and professional.
 
 **Target features:**
-- Gantt chart tab on the project document in Sanity Studio
-- Rows for: contractor assignments, procurement items, milestones, and custom ad-hoc events
-- Interactive drag-and-drop to reschedule items (dates sync back to Sanity)
-- Timeline scale control (week/month view)
-- Color-coded by user role (contractor identity, not item category)
-- Custom events schema (vacate office, walkthrough, punch list, etc.)
+- Studio theme consistency — light palette fully applied to navbar, form backgrounds, active states
+- Contrast/readability fixes — Portal Token and any other black-on-black or unreadable fields
+- Font consistency — Inter/sans-serif everywhere, no serif leaks
+- Gantt chart polish — labels, scroll behavior, cleanup
+- Layout reliability — sidebar hiding, tab visual hierarchy
 
 ## Requirements
 

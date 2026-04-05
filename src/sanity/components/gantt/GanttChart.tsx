@@ -111,7 +111,7 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         column_width: 45,
         arrow_curve: 5,
         today_button: true,
-        scroll_to: "start",
+        scroll_to: "today",
         infinite_padding: false,
         auto_move_label: true,
         lines: "both",

@@ -200,6 +200,7 @@ export function StudioNavbar(props: NavbarProps) {
                 tone={isActive ? "primary" : "default"}
                 fontSize={1}
                 padding={2}
+                data-active={isActive ? "" : undefined}
                 onClick={() => {
                   window.location.href = `/admin/structure/${type.id}`;
                 }}
