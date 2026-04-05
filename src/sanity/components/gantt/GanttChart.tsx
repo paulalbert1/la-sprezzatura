@@ -143,6 +143,19 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
           }
         },
       });
+    // Force container height to match SVG after Frappe renders
+    // Frappe sets height via --gv-grid-height CSS var which collapses to 86px
+    requestAnimationFrame(() => {
+      if (!containerRef.current) return;
+      const svg = containerRef.current.querySelector('svg.gantt');
+      if (svg) {
+        const svgHeight = svg.getAttribute('height');
+        if (svgHeight) {
+          containerRef.current.style.height = `${parseInt(svgHeight) + 80}px`;
+        }
+      }
+    });
+
     } catch (err) {
       console.error("[GanttChart] Frappe Gantt init error:", err);
     }
