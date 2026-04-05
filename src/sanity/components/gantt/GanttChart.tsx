@@ -89,7 +89,7 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
     try {
       ganttRef.current = new Gantt(containerRef.current, frappeTasks, {
         view_mode: "Day",
-        view_mode_select: true,        // Frappe's built-in Day/Week/Month selector
+        view_mode_select: false,       // Locked to Day — Week/Month views collapse bars unreadably
         readonly: true,
         readonly_progress: true,
         bar_height: 28,
