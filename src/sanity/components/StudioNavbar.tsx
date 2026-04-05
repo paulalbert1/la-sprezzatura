@@ -142,20 +142,27 @@ export function StudioNavbar(props: NavbarProps) {
       // localStorage might be unavailable
     }
 
-    // Hide first pane — retry on multiple timings
-    const timers = [
-      setTimeout(hideFirstPane, 100),
-      setTimeout(hideFirstPane, 500),
-      setTimeout(hideFirstPane, 1500),
-      setTimeout(hideFirstPane, 3000),
-    ];
+    // Hide first pane — CSS handles initial hide (studio.css),
+    // MutationObserver keeps it hidden after Sanity re-renders on navigation
+    hideFirstPane();
 
-    // Keep checking periodically (every 2s) in case pane re-renders on navigation
-    const interval = setInterval(hideFirstPane, 2000);
+    const observer = new MutationObserver(() => {
+      hideFirstPane();
+    });
+
+    requestAnimationFrame(() => {
+      const target = document.querySelector('[data-testid="structure-tool"]')
+        || document.body;
+      observer.observe(target, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['data-pane-index', 'style', 'hidden'],
+      });
+    });
 
     return () => {
-      timers.forEach(clearTimeout);
-      clearInterval(interval);
+      observer.disconnect();
     };
   }, []);
 

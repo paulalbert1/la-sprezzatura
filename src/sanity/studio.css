@@ -122,6 +122,17 @@ select,
   --card-bg-color: #F0EEEB !important;
 }
 
+/* ===== LAYOUT-01: HIDE FIRST STRUCTURE PANE (Content type list) ===== */
+/* CSS-first approach: hides before JS runs, preventing any flash.
+   The StudioNavbar tabs replace this pane's navigation function. */
+[data-pane-index="0"] {
+  display: none !important;
+}
+/* Hide the divider/resizer that follows the first pane */
+[data-pane-index="0"] + * {
+  display: none !important;
+}
+
 /* ===== SIDEBAR / PANE LIST — match main bg ===== */
 [data-testid="document-list-pane"],
 [data-testid="pane"] {
