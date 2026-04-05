@@ -1,41 +1,122 @@
 /**
- * SVAR Gantt CSS variable overrides, scoped under .gantt-container.
- * This prevents CSS bleed into Sanity Studio UI (Pitfall 3).
+ * Frappe Gantt styling for La Sprezzatura.
+ *
+ * Uses Frappe's CSS variables and plain class selectors.
+ * Per-contractor colors via custom_class (gantt-contractor-0 through 9).
  */
 
-.gantt-container {
-  /* Today marker (if SVAR renders it) */
-  --wx-gantt-marker-color: #EF4444;
-  --wx-gantt-marker-font-color: #EF4444;
-
-  /* Milestone diamond */
-  --wx-gantt-milestone-color: #8B5CF6;
-  --wx-gantt-milestone-border-radius: 1px;
-
-  /* Default task bar */
-  --wx-gantt-task-color: #3B82F6;
-  --wx-gantt-task-fill-color: #93c5fd;
-  --wx-gantt-bar-border-radius: 4px;
-
-  /* Dependency link arrows — subtle */
-  --wx-gantt-link-color: #cbd5e1;
-  --wx-gantt-link-color-hovered: #64748b;
-  --wx-gantt-link-marker-background: #cbd5e1;
-  --wx-gantt-link-marker-color: #cbd5e1;
-}
-
+/* === Container === */
 .gantt-container {
   width: 100%;
   min-height: 400px;
+  --gv-bar-height: 24px;
+  --gv-column-width: 50px;
+  --gv-upper-header-height: 40px;
+  --gv-lower-header-height: 28px;
+  --g-weekend-highlight-color: rgba(0, 0, 0, 0.02);
 }
 
-/* --- Today column highlight via highlightTime prop --- */
-/* SVAR applies this class to each cell in today's column */
-.gantt-today-col {
-  background-color: rgba(239, 68, 68, 0.08) !important;
+/* === Grid & background === */
+.gantt-container .gantt .grid-background {
+  fill: #FAF5F2;
 }
 
-/* Also try with common SVAR theme wrappers */
-:global(.gantt-today-col) {
-  background-color: rgba(239, 68, 68, 0.08) !important;
+.gantt-container .gantt .grid-header {
+  fill: #F0EEEB;
 }
+
+.gantt-container .gantt .grid-row:nth-child(even) {
+  fill: rgba(0, 0, 0, 0.015);
+}
+
+/* === Header text === */
+.gantt-container .gantt .upper-text,
+.gantt-container .gantt .lower-text {
+  fill: #0F172A;
+  font-size: 12px;
+}
+
+/* === Default bar style === */
+.gantt-container .gantt .bar {
+  fill: #78716C;
+  stroke: none;
+}
+
+.gantt-container .gantt .bar-label {
+  fill: #FFFFFF;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* === Dependency arrows === */
+.gantt-container .gantt .arrow {
+  stroke: #A8A29E;
+  stroke-width: 1.5px;
+  fill: none;
+  opacity: 0.5;
+}
+
+/* === Today marker === */
+.gantt-container .gantt .today-highlight {
+  fill: rgba(239, 68, 68, 0.08);
+}
+
+/* === Popup === */
+.gantt-container .popup-wrapper {
+  background: #FFFFFF;
+  border: 1px solid #E2DFDC;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.gantt-container .popup-wrapper .title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.gantt-container .popup-wrapper .subtitle {
+  color: #64748B;
+  font-size: 12px;
+}
+
+/* === Per-contractor colors (matches CONTRACTOR_PALETTE) === */
+.gantt-container .gantt .bar-wrapper.gantt-contractor-0 .bar { fill: #3B82F6; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-1 .bar { fill: #EF4444; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-2 .bar { fill: #10B981; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-3 .bar { fill: #F59E0B; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-4 .bar { fill: #8B5CF6; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-5 .bar { fill: #EC4899; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-6 .bar { fill: #06B6D4; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-7 .bar { fill: #F97316; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-8 .bar { fill: #14B8A6; }
+.gantt-container .gantt .bar-wrapper.gantt-contractor-9 .bar { fill: #6366F1; }
+
+/* === Category colors === */
+.gantt-container .gantt .bar-wrapper.gantt-cat-milestone .bar { fill: #8B5CF6; }
+.gantt-container .gantt .bar-wrapper.gantt-cat-procurement .bar { fill: #F59E0B; }
+.gantt-container .gantt .bar-wrapper.gantt-cat-events .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-walkthrough .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-inspection .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-punch-list .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-move .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-permit .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-delivery-window .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-presentation .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-deadline .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-access .bar,
+.gantt-container .gantt .bar-wrapper.gantt-cat-other .bar { fill: #14B8A6; }
+
+/* Completed milestones — dimmed */
+.gantt-container .gantt .bar-wrapper.gantt-completed .bar {
+  fill: #9CA3AF;
+  opacity: 0.5;
+}
+
+/* Procurement by status */
+.gantt-container .gantt .bar-wrapper.gantt-procurement-pending .bar { fill: #D1D5DB; }
+.gantt-container .gantt .bar-wrapper.gantt-procurement-ordered .bar { fill: #F59E0B; }
+.gantt-container .gantt .bar-wrapper.gantt-procurement-warehouse .bar,
+.gantt-container .gantt .bar-wrapper.gantt-procurement-in-transit .bar { fill: #F59E0B; }
+.gantt-container .gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #10B981; }
+.gantt-container .gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #9CA3AF; }
