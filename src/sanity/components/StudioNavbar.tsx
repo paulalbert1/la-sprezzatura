@@ -142,23 +142,20 @@ export function StudioNavbar(props: NavbarProps) {
       // localStorage might be unavailable
     }
 
-    // Hide first pane — retry a few times since SVAR renders async
+    // Hide first pane — retry on multiple timings
     const timers = [
       setTimeout(hideFirstPane, 100),
       setTimeout(hideFirstPane, 500),
       setTimeout(hideFirstPane, 1500),
+      setTimeout(hideFirstPane, 3000),
     ];
 
-    // Also observe DOM changes to re-hide if pane is re-rendered
-    const observer = new MutationObserver(() => hideFirstPane());
-    observer.observe(document.body, { childList: true, subtree: true });
-    // Stop observing after 5 seconds to avoid performance issues
-    const stopTimer = setTimeout(() => observer.disconnect(), 5000);
+    // Keep checking periodically (every 2s) in case pane re-renders on navigation
+    const interval = setInterval(hideFirstPane, 2000);
 
     return () => {
       timers.forEach(clearTimeout);
-      clearTimeout(stopTimer);
-      observer.disconnect();
+      clearInterval(interval);
     };
   }, []);
 
