@@ -441,7 +441,7 @@ Plans:
 
 - [x] **Phase 22: Procurement Foundation** - CSS audit of studio.css Badge selectors, schema expansion (manufacturer, quantity, notes, files, net price), and status color constants (completed 2026-04-06)
 - [~] **Phase 23: Custom List UI** - ABANDONED 2026-04-06: Studio custom list UI work is superseded by v5.0 Custom Admin (Sanity Studio being retired). Visual/interaction design preserved in `.planning/references/v5-custom-admin-plan.md` for Phase 27 carry-forward.
-- [ ] **Phase 24: Portal Integration** - Client portal procurement table update with new schema fields and Send Update email procurement summary section
+- [x] **Phase 24: Portal Integration** - Client portal procurement table update with new schema fields and Send Update email procurement summary section (completed 2026-04-06)
 
 ### Phase 22: Procurement Foundation
 **Goal**: The studio.css Badge selectors are narrowed so tone-based colors work correctly, the procurement schema includes all new fields (manufacturer, quantity, notes, files), net price computes at render time, and a shared status constants module provides the single source of truth for the 6-stage pipeline colors
@@ -487,8 +487,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 24-01-PLAN.md -- Portal table: manufacturer/quantity sub-line, status value alignment with PROCUREMENT_STAGES
-- [ ] 24-02-PLAN.md -- Send Update email: status-count summary block, remove savings/dates, simplify GROQ
+- [x] 24-01-PLAN.md -- Portal table: manufacturer/quantity sub-line, status value alignment with PROCUREMENT_STAGES
+- [x] 24-02-PLAN.md -- Send Update email: status-count summary block, remove savings/dates, simplify GROQ
 
 ## Progress (v4.2)
 
@@ -499,7 +499,7 @@ Phases execute in numeric order: 22 -> 23 -> 24
 |-------|-----------|----------------|--------|-----------|
 | 22. Procurement Foundation | v4.2 | 2/2 | Complete   | 2026-04-06 |
 | 23. Custom List UI | v4.2 | 0/2 | Abandoned  | 2026-04-06 |
-| 24. Portal Integration | v4.2 | 0/2 | Not started | - |
+| 24. Portal Integration | v4.2 | 2/2 | Complete    | 2026-04-06 |
 
 ---
 *v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*

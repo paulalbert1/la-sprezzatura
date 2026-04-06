@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
 status: executing
-stopped_at: Phase 23 UI-SPEC approved
-last_updated: "2026-04-06T14:09:17.159Z"
-last_activity: 2026-04-06 -- Phase 23 execution started
+stopped_at: Phase 24 UI-SPEC approved
+last_updated: "2026-04-06T20:43:58.409Z"
+last_activity: 2026-04-06
 progress:
   total_phases: 20
-  completed_phases: 13
-  total_plans: 49
-  completed_plans: 42
-  percent: 86
+  completed_phases: 15
+  total_plans: 51
+  completed_plans: 46
+  percent: 90
 ---
 
 # Project State
@@ -21,14 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 23 — custom-list-ui
+**Current focus:** Phase 24 — portal-integration
 
 ## Current Position
 
-Phase: 23 (custom-list-ui) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 23
-Last activity: 2026-04-06 -- Phase 23 execution started
+Phase: 24
+Plan: Not started
+Status: Executing Phase 24
+Last activity: 2026-04-06
+
+**Next steps:**
+
+1. Execute Phase 24 (Portal Integration) — client portal + Send Update email, independent of Studio
+2. Begin v5.0 with `/gsd:new-milestone` or proceed directly to `/gsd:discuss-phase 25`
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -36,7 +41,7 @@ Progress: [░░░░░░░░░░] 0%
 
 **Velocity:**
 
-- Total plans completed: 43
+- Total plans completed: 45
 - Average duration: ~5 min
 - Total execution time: ~3.5 hours
 
@@ -49,8 +54,10 @@ Progress: [░░░░░░░░░░] 0%
 - [v4.0]: Interior Design palette from UI/UX Pro Max -- warm off-white, amber accent
 - [v4.2]: CSS audit is hard prerequisite -- studio.css !important overrides break status badge tone colors
 - [v4.2]: Net price computed at render time only -- never stored as schema field
-- [v4.2]: Use components.item (not components.preview) for interactive StatusBadge dropdown
 - [v4.2]: No new npm dependencies -- all capabilities map to installed packages
+- [v5.0]: Sanity Studio retired -- replaced by custom admin at /admin/*; Content Lake (schemas, GROQ, write client, image pipeline) stays
+- [v5.0]: Phase 23 visual/interaction design carried forward into Phase 27 (procurement editor) -- see 23-UI-SPEC.md and 23-DISCUSSION-LOG.md
+- [v5.0]: isOverdue logic and unit tests from Phase 23 carry forward to ProcurementEditor.tsx
 
 ### Pending Todos
 
@@ -60,10 +67,9 @@ None.
 
 - DNS record audit needed for all 4 domains before cutover
 - Resend sandbox only delivers to account owner until domain verified
-- [v4.2]: useDocumentPane is internal API -- verify import path from sanity/structure at start of Phase 23
 
 ## Session Continuity
 
-Last session: 2026-04-06T13:53:05.020Z
-Stopped at: Phase 23 UI-SPEC approved
-Resume file: .planning/phases/23-custom-list-ui/23-UI-SPEC.md
+Last session: 2026-04-06T19:21:17.855Z
+Stopped at: Phase 24 UI-SPEC approved
+Resume file: .planning/phases/24-portal-integration/24-UI-SPEC.md
