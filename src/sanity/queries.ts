@@ -226,7 +226,9 @@ export const PROJECT_DETAIL_QUERY = `
         installDate,
         retailPrice,
         "savings": retailPrice - clientCost,
-        trackingNumber
+        trackingNumber,
+        manufacturer,
+        quantity
       },
       "contractors": contractors[] {
         "name": contractor->name,
