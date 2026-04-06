@@ -369,7 +369,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 
 - [x] **Phase 18: Visual Audit & Theme Fix** - Playwright-driven audit of every Sanity Studio screen, fix all theme/contrast/font issues, make Editor/Timeline tabs visually distinct (completed 2026-04-05)
 - [x] **Phase 19: Gantt & Layout Polish** - Fix Gantt labels, scroll behavior, remove test page, reliable sidebar hiding (completed 2026-04-05)
-- [ ] **Phase 20: Portfolio Project Type** - New portfolioProject schema, "Create Portfolio Version" spawn button on admin projects, image selection modal
+- [x] **Phase 20: Portfolio Project Type** - New portfolioProject schema, "Create Portfolio Version" spawn button on admin projects, image selection modal (completed 2026-04-06)
 
 ### Phase 18: Visual Audit & Theme Fix
 **Goal**: Use Playwright to screenshot every Studio screen, identify all color/contrast/font issues, and fix them in studio.css/studioTheme.ts
@@ -414,6 +414,13 @@ Plans:
   3. Spawn modal asks about photography; if yes, user selects images to copy
   4. Title, location, description auto-copied from admin project
   5. Portfolio project created as independent document with sourceAdminProjectId reference
+**Plans**: 3 plans
+
+Plans:
+- [x] 20-01-PLAN.md -- portfolioProject schema, field copy utility, and tests
+- [x] 20-02-PLAN.md -- Studio sidebar rename, Portfolio list item, and navbar tab
+- [x] 20-03-PLAN.md -- SpawnPortfolioAction document action with multi-step dialog and registration
+
 
 ### Phase 21: Portal UX Controls
 **Goal**: Replace dropdown controls with purpose-built UX components — pipeline stepper, wider portal token with email action, date-time picker with mark-complete button
