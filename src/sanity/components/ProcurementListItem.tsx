@@ -1,13 +1,38 @@
 import { type ObjectItemProps, PatchEvent, set } from 'sanity'
-import { Badge, Box, Button, Card, Flex, Menu, MenuButton, MenuItem, Text } from '@sanity/ui'
+import { Box, Button, Flex, Menu, MenuButton, MenuItem, Text } from '@sanity/ui'
 import { EllipsisVerticalIcon, EditIcon, TrashIcon } from '@sanity/icons'
 import { useCallback } from 'react'
 import {
   PROCUREMENT_STAGES,
   PROCUREMENT_STAGE_META,
-  getProcurementTone,
   type ProcurementStageKey,
 } from '../../lib/procurementStages'
+
+/**
+ * Explicit status pill colors — bypasses @sanity/ui theming entirely.
+ * The Studio's warm beige theme makes tone-based colors indistinguishable;
+ * these hardcoded values guarantee visible, distinct status colors.
+ */
+const STATUS_PILL: Record<string, { bg: string; fg: string }> = {
+  'not-yet-ordered': { bg: '#94A3B8', fg: '#fff' }, // slate   — not started
+  'ordered':         { bg: '#3B82F6', fg: '#fff' }, // blue    — in process
+  'in-transit':      { bg: '#F59E0B', fg: '#fff' }, // amber   — moving
+  'warehouse':       { bg: '#F97316', fg: '#fff' }, // orange  — received/stored
+  'delivered':       { bg: '#10B981', fg: '#fff' }, // emerald — at site
+  'installed':       { bg: '#16A34A', fg: '#fff' }, // green   — complete
+}
+const DEFAULT_PILL = { bg: '#CBD5E1', fg: '#1e293b' }
+
+/**
+ * Column widths (px) — exported so ProcurementTableInput can use the same values
+ * for the header row, ensuring columns align perfectly.
+ */
+export const PROCUREMENT_COL_WIDTHS = {
+  status: 130,
+  date: 82,
+  tracking: 150,
+  menu: 33,
+} as const
 
 /** Typed shape of a procurementItem array member's data fields. */
 interface ProcurementItemValue {
@@ -39,22 +64,23 @@ export function isOverdue(
 }
 
 /**
- * Custom array item component for procurement items (D-14, LIST-06).
+ * Custom array item component — renders each procurement item as a table row.
  *
- * Renders a rich row with:
- * - Item name (bold) + manufacturer (gray, below name)
- * - Status badge dropdown for inline status changes (LIST-01, D-01–D-03)
- * - Expected delivery date, red if overdue (LIST-02, D-09–D-10)
- * - Tracking number as gray monospace, clickable link if trackingUrl set (LIST-05, D-05, D-11)
- * - Three-dot overflow menu: Edit + Remove (LIST-04, D-12)
- * - renderDefault rendered hidden to preserve DnD + dialog context (LIST-03)
+ * Column layout (must match ProcurementTableInput header):
+ *   [Item name / manufacturer — flex 1] [Status — 130px] [Expected — 82px] [Tracking — 150px] [⋮ — 33px]
+ *
+ * Key behaviors:
+ * - Status: Button with tone color (fixes Badge-in-MenuButton styling issue) → dropdown to
+ *   change status inline without opening edit dialog (LIST-01, D-01–D-03)
+ * - Overdue date: red when past due and status not delivered/installed (LIST-02, D-09)
+ * - Tracking: gray monospace; clickable link when trackingUrl is valid (LIST-05, D-05)
+ * - DnD: renderDefault hidden in zero-height div preserves @dnd-kit/sortable context (LIST-03)
+ * - Edit/Remove: overflow menu (LIST-04, D-12)
  */
 export function ProcurementListItem(props: ObjectItemProps) {
   const { inputProps } = props
-  // Cast to typed interface — ObjectItem is intentionally untyped; all fields are unknown
   const value = props.value as ProcurementItemValue
 
-  // Inline status patch — scoped to this array item (Pitfall 5: must wrap in PatchEvent.from)
   const handleStatusChange = useCallback(
     (newStatus: string) => {
       inputProps.onChange(PatchEvent.from(set(newStatus, ['status'])))
@@ -62,14 +88,19 @@ export function ProcurementListItem(props: ObjectItemProps) {
     [inputProps],
   )
 
-  // Date display: append T00:00:00 to prevent UTC offset shifting the displayed day
+  // Normalize legacy "pending" status (pre-Phase 23 data) → "not-yet-ordered"
+  const normalizedStatus = value?.status === 'pending' ? 'not-yet-ordered' : value?.status
+  const stageMeta = PROCUREMENT_STAGE_META[normalizedStatus as ProcurementStageKey]
+  const pill = STATUS_PILL[normalizedStatus ?? ''] ?? DEFAULT_PILL
+
+  // Append T00:00:00 to prevent UTC offset from shifting the displayed day
   const dateDisplay = value?.expectedDeliveryDate
     ? new Date(value.expectedDeliveryDate + 'T00:00:00').toLocaleDateString()
     : null
 
-  const overdue = isOverdue(value?.expectedDeliveryDate, value?.status)
+  const overdue = isOverdue(value?.expectedDeliveryDate, normalizedStatus)
 
-  // Validate trackingUrl to prevent javascript: protocol (security: threat model D-05)
+  // Validate trackingUrl: only http/https allowed (security: prevents javascript: injection)
   const rawUrl = value?.trackingUrl
   const validTrackingUrl =
     rawUrl && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://'))
@@ -80,8 +111,8 @@ export function ProcurementListItem(props: ObjectItemProps) {
     <div style={{ display: 'contents' }}>
       {/*
        * Hidden renderDefault preserves Sanity's DnD context (@dnd-kit/sortable
-       * SortableItemIdContext) and dialog management — without this the drag
-       * handle and open/close lifecycle would be lost (LIST-03, RESEARCH Pitfall).
+       * SortableItemIdContext) and dialog open/close lifecycle. Without this,
+       * drag handles and edit dialogs stop working (LIST-03, RESEARCH Pitfall).
        */}
       <div
         style={{
@@ -95,10 +126,15 @@ export function ProcurementListItem(props: ObjectItemProps) {
         {props.renderDefault(props)}
       </div>
 
-      {/* Visible custom row */}
-      <Card padding={3} radius={2} border>
+      {/* Table row: bottom-border separator only (no full Card border) */}
+      <Box
+        paddingX={3}
+        paddingY={2}
+        data-procurement-row
+        style={{ borderBottom: '1px solid var(--card-border-color)' }}
+      >
         <Flex align="center" gap={3}>
-          {/* Left: item name + manufacturer (D-07, D-08) */}
+          {/* Item name + manufacturer — fills remaining width */}
           <Box flex={1}>
             <Text size={2} weight="semibold">
               {value?.name || 'Untitled item'}
@@ -112,21 +148,30 @@ export function ProcurementListItem(props: ObjectItemProps) {
             )}
           </Box>
 
-          {/* Center-right: badge + date + tracking */}
-          <Flex direction="column" gap={1} align="flex-end">
-            {/* Status badge dropdown (LIST-01, D-01–D-03, Pitfall 4: stopPropagation) */}
+          {/* Status — 130px. Explicit bg colors bypass @sanity/ui theme variable conflicts. */}
+          <Box style={{ width: PROCUREMENT_COL_WIDTHS.status }}>
             <div onClick={(e) => e.stopPropagation()}>
               <MenuButton
                 id={`status-${value?._key}`}
                 button={
-                  <Badge
-                    tone={getProcurementTone(value?.status ?? '')}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    {PROCUREMENT_STAGE_META[value?.status as ProcurementStageKey]?.title ??
-                      value?.status ??
-                      'No status'}
-                  </Badge>
+                  <Button
+                    mode="bleed"
+                    fontSize={0}
+                    style={{
+                      backgroundColor: pill.bg,
+                      color: pill.fg,
+                      borderRadius: 3,
+                      width: '100%',
+                      padding: '3px 10px',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                    text={stageMeta?.title ?? normalizedStatus ?? 'No status'}
+                  />
                 }
                 menu={
                   <Menu>
@@ -135,7 +180,7 @@ export function ProcurementListItem(props: ObjectItemProps) {
                         key={stage.value}
                         text={stage.title}
                         tone={stage.tone}
-                        pressed={value?.status === stage.value}
+                        pressed={normalizedStatus === stage.value}
                         onClick={() => handleStatusChange(stage.value)}
                       />
                     ))}
@@ -143,82 +188,77 @@ export function ProcurementListItem(props: ObjectItemProps) {
                 }
               />
             </div>
+          </Box>
 
-            {/* Delivery date — omitted if not set (D-10); red if overdue (LIST-02, D-09) */}
-            {dateDisplay && (
-              <div>
-                {overdue ? (
-                  <Text size={1} style={{ color: '#DC2626' }}>
-                    {dateDisplay}
-                  </Text>
-                ) : (
-                  <Text size={1} muted>
-                    {dateDisplay}
-                  </Text>
-                )}
-              </div>
-            )}
+          {/* Expected delivery date — 82px, right-aligned, red when overdue */}
+          <Box style={{ width: PROCUREMENT_COL_WIDTHS.date, textAlign: 'right' }}>
+            {dateDisplay &&
+              (overdue ? (
+                <Text size={1} style={{ color: '#DC2626' }}>
+                  {dateDisplay}
+                </Text>
+              ) : (
+                <Text size={1} muted>
+                  {dateDisplay}
+                </Text>
+              ))}
+          </Box>
 
-            {/* Tracking number — omitted if not set (D-11); clickable if trackingUrl valid (LIST-05, D-05) */}
-            {value?.trackingNumber && (
-              <div onClick={(e) => e.stopPropagation()}>
-                {validTrackingUrl ? (
-                  <a
-                    href={validTrackingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      fontFamily:
-                        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                      color: '#64748B',
-                      fontSize: '13px',
-                      textDecoration: 'none',
-                    }}
-                    onMouseEnter={(e) => {
-                      ;(e.currentTarget as HTMLAnchorElement).style.color = '#475569'
-                    }}
-                    onMouseLeave={(e) => {
-                      ;(e.currentTarget as HTMLAnchorElement).style.color = '#64748B'
-                    }}
-                  >
-                    {value.trackingNumber}
-                  </a>
-                ) : (
-                  <Text
-                    size={1}
-                    style={{
-                      fontFamily:
-                        'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                      color: '#64748B',
-                    }}
-                  >
-                    {value.trackingNumber}
-                  </Text>
-                )}
-              </div>
-            )}
-          </Flex>
+          {/* Tracking number — 150px, monospace; clickable link when trackingUrl is valid */}
+          <Box style={{ width: PROCUREMENT_COL_WIDTHS.tracking }}>
+            {value?.trackingNumber &&
+              (validTrackingUrl ? (
+                <a
+                  href={validTrackingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily:
+                      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                    color: '#64748B',
+                    fontSize: '12px',
+                    textDecoration: 'none',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {value.trackingNumber}
+                </a>
+              ) : (
+                <Text
+                  size={1}
+                  style={{
+                    fontFamily:
+                      'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                    color: '#94A3B8',
+                  }}
+                >
+                  {value.trackingNumber}
+                </Text>
+              ))}
+          </Box>
 
-          {/* Far right: overflow menu (LIST-04, D-12, Pitfall 4: stopPropagation) */}
-          <div onClick={(e) => e.stopPropagation()}>
-            <MenuButton
-              id={`overflow-${value?._key}`}
-              button={<Button icon={EllipsisVerticalIcon} mode="bleed" padding={2} />}
-              menu={
-                <Menu>
-                  <MenuItem text="Edit" icon={EditIcon} onClick={() => props.onOpen()} />
-                  <MenuItem
-                    text="Remove"
-                    icon={TrashIcon}
-                    tone="critical"
-                    onClick={() => props.onRemove()}
-                  />
-                </Menu>
-              }
-            />
-          </div>
+          {/* Overflow menu — 33px */}
+          <Box style={{ width: PROCUREMENT_COL_WIDTHS.menu }}>
+            <div onClick={(e) => e.stopPropagation()}>
+              <MenuButton
+                id={`overflow-${value?._key}`}
+                button={<Button icon={EllipsisVerticalIcon} mode="bleed" padding={2} />}
+                menu={
+                  <Menu>
+                    <MenuItem text="Edit" icon={EditIcon} onClick={() => props.onOpen()} />
+                    <MenuItem
+                      text="Remove"
+                      icon={TrashIcon}
+                      tone="critical"
+                      onClick={() => props.onRemove()}
+                    />
+                  </Menu>
+                }
+              />
+            </div>
+          </Box>
         </Flex>
-      </Card>
+      </Box>
     </div>
   )
 }

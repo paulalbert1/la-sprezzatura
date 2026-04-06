@@ -96,10 +96,15 @@ select,
   --input-border-color: #E2DFDC !important;
 }
 
-/* Rich text toolbar */
-[data-ui="Toolbar"],
-[data-ui="MenuButton"] {
+/* Rich text toolbar — scoped to Toolbar only, NOT all MenuButton elements.
+   (Global [data-ui="MenuButton"] would override tone colors on status dropdowns.) */
+[data-ui="Toolbar"] {
   --card-bg-color: #F0EEEB !important;
+}
+
+/* Procurement table row hover */
+[data-procurement-row]:hover {
+  background-color: rgba(0, 0, 0, 0.025);
 }
 
 /* ===== SIDEBAR / PANE LIST — match main bg ===== */
@@ -112,6 +117,13 @@ select,
 [data-testid="pane-header"] {
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
+}
+
+/* ===== DOCUMENT EDITOR WIDTH ===== */
+/* Sanity Studio's FormContainer is hardcoded to max-width: 640px.
+   Override to fill the available document pane width instead. */
+[class*='FormContainer'] {
+  max-width: 900px !important;
 }
 
 /* ===== DIALOG BACKDROP — gray overlay (Phase 23, EDIT-01) ===== */

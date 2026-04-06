@@ -17,6 +17,7 @@ import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
 import { DependencyPreview } from "../components/gantt/DependencyPreview";
 import { ProcurementListItem } from "../components/ProcurementListItem";
+import { ProcurementTableInput } from "../components/ProcurementTableInput";
 
 export const project = defineType({
   name: "project",
@@ -404,6 +405,9 @@ export const project = defineType({
       title: "Procurement Items",
       type: "array",
       group: "procurement",
+      components: {
+        input: ProcurementTableInput,
+      },
       hidden: ({ document }) =>
         document?.engagementType !== "full-interior-design",
       of: [
