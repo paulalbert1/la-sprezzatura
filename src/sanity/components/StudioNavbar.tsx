@@ -11,6 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Flex, Button, Card, Tooltip, Box, Text } from "@sanity/ui";
 import {
   DocumentsIcon,
+  ImageIcon,
   UsersIcon,
   CogIcon,
   ComponentIcon,
@@ -25,6 +26,7 @@ interface NavbarProps {
 
 const DOC_TYPES = [
   { id: "project", title: "Projects", icon: DocumentsIcon, path: "/structure/project" },
+  { id: "portfolioProject", title: "Portfolio", icon: ImageIcon, path: "/structure/portfolioProject" },
   { id: "client", title: "Clients", icon: UsersIcon, path: "/structure/client" },
   { id: "contractor", title: "Contractors", icon: ComponentIcon, path: "/structure/contractor" },
   { id: "service", title: "Services", icon: UlistIcon, path: "/structure/service" },
