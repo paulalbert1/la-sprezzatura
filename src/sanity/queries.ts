@@ -498,10 +498,7 @@ export const SEND_UPDATE_PROJECT_QUERY = `
       name, date, completed
     },
     ...select(engagementType == "full-interior-design" => {
-      "procurementItems": procurementItems[] {
-        name, status, installDate, retailPrice,
-        "savings": retailPrice - clientCost
-      }
+      "procurementItems": procurementItems[] { status }
     }),
     artifacts[] {
       _key, artifactType, customTypeName,
