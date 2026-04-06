@@ -434,3 +434,107 @@ describe("project schema (Phase 15 schedule extensions)", () => {
     expect(expectedDeliveryIdx).toBeLessThan(installDateIdx);
   });
 });
+
+describe("project schema (Phase 22 procurement extensions)", () => {
+  function getProcurementItemFields() {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as { name: string; type: string }[] | undefined;
+  }
+
+  // PROC-01: manufacturer field
+  it('procurementItem has "manufacturer" field of type "string"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const mfr = fields!.find((f) => f.name === "manufacturer");
+    expect(mfr).toBeDefined();
+    expect(mfr!.type).toBe("string");
+  });
+
+  // PROC-01: quantity field
+  it('procurementItem has "quantity" field of type "number"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const qty = fields!.find((f) => f.name === "quantity");
+    expect(qty).toBeDefined();
+    expect(qty!.type).toBe("number");
+  });
+
+  // PROC-01: notes field
+  it('procurementItem has "notes" field of type "text"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const notes = fields!.find((f) => f.name === "notes");
+    expect(notes).toBeDefined();
+    expect(notes!.type).toBe("text");
+  });
+
+  // PROC-02: netPrice field
+  it('procurementItem has "netPrice" field of type "number"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const net = fields!.find((f) => f.name === "netPrice");
+    expect(net).toBeDefined();
+    expect(net!.type).toBe("number");
+  });
+
+  // PROC-03: files array field
+  it('procurementItem has "files" field of type "array"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const files = fields!.find((f) => f.name === "files");
+    expect(files).toBeDefined();
+    expect(files!.type).toBe("array");
+  });
+
+  // PROC-03: files array member has label and file sub-fields
+  it("files array members have label (string) and file (string) sub-fields", () => {
+    const fields = getProcurementItemFields();
+    const filesField = fields!.find((f) => f.name === "files");
+    const ofArray = (filesField as any)?.of;
+    expect(ofArray).toBeDefined();
+    expect(ofArray.length).toBeGreaterThan(0);
+    const memberFields = ofArray[0].fields as { name: string; type: string }[];
+    expect(memberFields).toBeDefined();
+    const labelField = memberFields.find((f) => f.name === "label");
+    expect(labelField).toBeDefined();
+    expect(labelField!.type).toBe("string");
+    const fileField = memberFields.find((f) => f.name === "file");
+    expect(fileField).toBeDefined();
+    expect(fileField!.type).toBe("string");
+  });
+
+  // D-01: status options have 6 stages, first is not-yet-ordered
+  it("status field has 6 options starting with not-yet-ordered", () => {
+    const fields = getProcurementItemFields();
+    const statusField = fields!.find((f) => f.name === "status");
+    expect(statusField).toBeDefined();
+    const list = (statusField as any)?.options?.list as { value: string; title: string }[];
+    expect(list).toBeDefined();
+    expect(list.length).toBe(6);
+    expect(list[0].value).toBe("not-yet-ordered");
+    expect(list[0].title).toBe("Not Yet Ordered");
+    // Verify "pending" is gone
+    const pending = list.find((item) => item.value === "pending");
+    expect(pending).toBeUndefined();
+  });
+
+  // D-01: initialValue is not-yet-ordered (not pending)
+  it('status field has initialValue "not-yet-ordered"', () => {
+    const fields = getProcurementItemFields();
+    const statusField = fields!.find((f) => f.name === "status");
+    expect((statusField as any)?.initialValue).toBe("not-yet-ordered");
+  });
+
+  // Field ordering per UI-SPEC: manufacturer before status, quantity after status, netPrice after clientCost
+  it("field ordering matches UI-SPEC contract", () => {
+    const fields = getProcurementItemFields();
+    const names = fields!.map((f) => f.name);
+    expect(names.indexOf("manufacturer")).toBeLessThan(names.indexOf("status"));
+    expect(names.indexOf("status")).toBeLessThan(names.indexOf("quantity"));
+    expect(names.indexOf("clientCost")).toBeLessThan(names.indexOf("netPrice"));
+    expect(names.indexOf("netPrice")).toBeLessThan(names.indexOf("orderDate"));
+    expect(names.indexOf("trackingNumber")).toBeLessThan(names.indexOf("files"));
+    expect(names.indexOf("files")).toBeLessThan(names.indexOf("notes"));
+  });
+});
