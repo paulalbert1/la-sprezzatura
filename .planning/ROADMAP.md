@@ -533,6 +533,11 @@ Phases execute in numeric order: 22 -> 23 -> 24
   1. Liz visits `/admin/login`, enters her email, receives a magic-link, clicks it, and is redirected to `/admin/dashboard` with a valid session cookie
   2. Any unauthenticated request to `/admin/*` (except `/admin/login`) redirects to `/admin/login`
   3. The admin layout renders a left sidebar with nav sections (Projects, Clients, Contractors, Rendering, Settings) and a top bar — styled with the portal's warm neutral palette, not Sanity's chrome
+**Plans**: 2 plans
+
+Plans:
+- [ ] 25-01-PLAN.md -- Auth infrastructure: Sanity Studio route reclaim, session/middleware/action/verify admin role extension, login page, logout route, tests
+- [ ] 25-02-PLAN.md -- Layout shell: AdminLayout with sidebar + top bar, AdminNav with Lucide icons, dashboard with summary cards and quick links
 
 ### Phase 26: Project List + Overview
 **Goal**: Liz can view all projects in a filterable list and open any project's overview page with links to sub-sections
@@ -583,7 +588,7 @@ Phase 25 → 26 → (27, 28, 29 parallel) → 30 → 31
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 25. Admin Shell + Auth | v5.0 | 0/TBD | Not started | - |
+| 25. Admin Shell + Auth | v5.0 | 0/2 | Planning complete | - |
 | 26. Project List + Overview | v5.0 | 0/TBD | Not started | - |
 | 27. Procurement Editor | v5.0 | 0/TBD | Not started | - |
 | 28. Artifacts + Schedule | v5.0 | 0/TBD | Not started | - |
