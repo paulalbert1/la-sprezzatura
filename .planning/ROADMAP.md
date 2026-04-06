@@ -10,6 +10,7 @@
 - 📋 **v4.0 Project Schedule** - Phases 15-17 (planned)
 - ✅ **v4.1 Studio UI Polish** - Phases 18-20 (completed 2026-04-06)
 - 🚧 **v4.2 Procurement Management** - Phases 22-24 (in progress)
+- 📋 **v5.0 Custom Admin** - Phases 25-31 (planned 2026-04-06)
 
 ## Phases
 
@@ -439,7 +440,7 @@ Plans:
 **Milestone Goal:** Add procurement tracking to admin projects in Sanity Studio -- item management with status pipeline, pricing, file uploads, tracking, and overdue alerts -- with downstream updates to the client portal and Send Update email.
 
 - [x] **Phase 22: Procurement Foundation** - CSS audit of studio.css Badge selectors, schema expansion (manufacturer, quantity, notes, files, net price), and status color constants (completed 2026-04-06)
-- [x] **Phase 23: Custom List UI** - components.item wrapper with StatusBadge dropdown, components.preview with overdue highlighting and metadata, drag handles, overflow menu, and edit pane CSS fix (completed 2026-04-06)
+- [~] **Phase 23: Custom List UI** - ABANDONED 2026-04-06: Studio custom list UI work is superseded by v5.0 Custom Admin (Sanity Studio being retired). Visual/interaction design preserved in `.planning/references/v5-custom-admin-plan.md` for Phase 27 carry-forward.
 - [ ] **Phase 24: Portal Integration** - Client portal procurement table update with new schema fields and Send Update email procurement summary section
 
 ### Phase 22: Procurement Foundation
@@ -478,11 +479,16 @@ Plans:
 
 ### Phase 24: Portal Integration
 **Goal**: The client portal procurement table reflects the updated schema fields (manufacturer, quantity) and the Send Update email includes a procurement summary section -- completing the downstream consumer updates for the new procurement data
-**Depends on**: Phase 23
+**Depends on**: Phase 22 (Phase 23 abandoned; Phase 22 schema is sufficient)
 **Requirements**: PORT-01, PORT-02
 **Success Criteria** (what must be TRUE):
   1. A client viewing their project on the portal sees procurement items with manufacturer name and quantity displayed alongside existing fields (item name, status, dates) -- netPrice is never visible on the portal
   2. Liz sends a project update email via Send Update and the email includes a procurement summary showing item count by status and any overdue items flagged -- the procurement section only appears when the project has procurement items
+**Plans**: 2 plans
+
+Plans:
+- [ ] 24-01-PLAN.md -- Portal table: manufacturer/quantity sub-line, status value alignment with PROCUREMENT_STAGES
+- [ ] 24-02-PLAN.md -- Send Update email: status-count summary block, remove savings/dates, simplify GROQ
 
 ## Progress (v4.2)
 
@@ -492,8 +498,8 @@ Phases execute in numeric order: 22 -> 23 -> 24
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 22. Procurement Foundation | v4.2 | 2/2 | Complete   | 2026-04-06 |
-| 23. Custom List UI | v4.2 | 2/2 | Complete   | 2026-04-06 |
-| 24. Portal Integration | v4.2 | 0/TBD | Not started | - |
+| 23. Custom List UI | v4.2 | 0/2 | Abandoned  | 2026-04-06 |
+| 24. Portal Integration | v4.2 | 0/2 | Not started | - |
 
 ---
 *v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
@@ -503,3 +509,87 @@ Phases execute in numeric order: 22 -> 23 -> 24
 *Phase 21 added: 2026-04-05 (Portal UX Controls — stepper, email action, date picker)*
 
 *v4.2 roadmap created: 2026-04-05 (3 phases, 13 requirements mapped)*
+
+---
+
+### v5.0 Custom Admin
+
+**Milestone Goal:** Replace Sanity Studio with a purpose-built admin app at `/admin/*`. Sanity Content Lake (schemas, GROQ API, write client, image pipeline) stays. Studio UI is retired. Gives Liz a branded, workflow-appropriate management interface and establishes the foundation for the multi-tenant SaaS path.
+
+**Strategic reference:** `.planning/references/v5-custom-admin-plan.md`
+
+- [ ] **Phase 25: Admin Shell + Auth** - Magic-link login, JWT session, AdminLayout with sidebar nav, middleware protection for `/admin/*`
+- [ ] **Phase 26: Project List + Overview** - Filterable project table, project overview page, core field editing
+- [ ] **Phase 27: Procurement Editor** - Procurement table editor with status badge dropdown, overdue detection, tracking links (carry-forward from Phase 23 design)
+- [ ] **Phase 28: Artifacts + Schedule** - Artifact version manager, Gantt schedule view relocated from Studio
+- [ ] **Phase 29: Client + Contractor CRUD** - Create/edit forms for clients and contractors
+- [ ] **Phase 30: Rendering Tool Relocation** - Move AI rendering tool from Studio custom view to `/admin/rendering/*`
+- [ ] **Phase 31: Settings + Studio Retirement** - Site settings editor, send-update relocation, Studio route removal
+
+### Phase 25: Admin Shell + Auth
+**Goal**: Liz can navigate to `/admin/login`, receive a magic-link email, and land in an authenticated admin dashboard with sidebar navigation — no content yet, just a working shell
+**Depends on**: Phase 24
+**Success Criteria** (what must be TRUE):
+  1. Liz visits `/admin/login`, enters her email, receives a magic-link, clicks it, and is redirected to `/admin/dashboard` with a valid session cookie
+  2. Any unauthenticated request to `/admin/*` (except `/admin/login`) redirects to `/admin/login`
+  3. The admin layout renders a left sidebar with nav sections (Projects, Clients, Contractors, Rendering, Settings) and a top bar — styled with the portal's warm neutral palette, not Sanity's chrome
+
+### Phase 26: Project List + Overview
+**Goal**: Liz can view all projects in a filterable list and open any project's overview page with links to sub-sections
+**Depends on**: Phase 25
+**Success Criteria** (what must be TRUE):
+  1. `/admin/projects` shows all projects with pipeline stage filter pills and displays title, stage, and engagement type for each
+  2. Clicking a project opens `/admin/projects/[projectId]` showing core fields and nav links to Procurement, Schedule, Artifacts, Send Update
+
+### Phase 27: Procurement Editor
+**Goal**: Liz can add, edit, and update procurement items for a project entirely within the custom admin — no Studio required
+**Depends on**: Phase 26
+**Success Criteria** (what must be TRUE):
+  1. Liz opens a project's procurement page and sees all items with status badges, install dates, and tracking info matching the Phase 23 visual spec
+  2. Changing an item's status via dropdown persists to Sanity immediately; overdue items (past install date, non-delivered) show red date text
+
+### Phase 28: Artifacts + Schedule
+**Goal**: Liz can manage artifact versions and view/edit the project schedule from the admin
+**Depends on**: Phase 26
+**Success Criteria** (what must be TRUE):
+  1. Liz can upload a new artifact version, set it as current, and see the version history on the artifacts page
+  2. The Gantt schedule renders correctly in the admin and Liz can edit schedule item dates
+
+### Phase 29: Client + Contractor CRUD
+**Goal**: Liz can create and edit client and contractor records from the admin
+**Depends on**: Phase 26
+**Success Criteria** (what must be TRUE):
+  1. Liz can create a new client (name, email, phone) and it appears in Sanity with the correct schema shape
+  2. Liz can edit a contractor's trades list and the change persists
+
+### Phase 30: Rendering Tool Relocation
+**Goal**: The AI rendering tool is accessible at `/admin/rendering/*` and no longer requires Studio
+**Depends on**: Phase 25
+**Success Criteria** (what must be TRUE):
+  1. Liz can start a new rendering session, upload reference images, and generate renderings from `/admin/rendering/new`
+  2. Existing sessions are listed at `/admin/rendering` and each session's history is viewable
+
+### Phase 31: Settings + Studio Retirement
+**Goal**: Site settings and Send Update are available in the admin; Studio route is removed from production
+**Depends on**: Phases 27, 28, 29, 30 (all admin surfaces complete)
+**Success Criteria** (what must be TRUE):
+  1. Liz can edit site settings (contact info, social links) and save via the admin settings page
+  2. The `/studio` route returns 404 (or a deprecation redirect) in production
+
+## Progress (v5.0)
+
+**Execution Order:**
+Phase 25 → 26 → (27, 28, 29 parallel) → 30 → 31
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 25. Admin Shell + Auth | v5.0 | 0/TBD | Not started | - |
+| 26. Project List + Overview | v5.0 | 0/TBD | Not started | - |
+| 27. Procurement Editor | v5.0 | 0/TBD | Not started | - |
+| 28. Artifacts + Schedule | v5.0 | 0/TBD | Not started | - |
+| 29. Client + Contractor CRUD | v5.0 | 0/TBD | Not started | - |
+| 30. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
+| 31. Settings + Studio Retirement | v5.0 | 0/TBD | Not started | - |
+
+---
+*v5.0 roadmap created: 2026-04-06 (7 phases — Studio retirement, custom admin build)*
