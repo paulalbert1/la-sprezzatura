@@ -22,7 +22,7 @@ export function SpawnPortfolioAction(props: DocumentActionProps) {
       const cleanId = (doc._id as string).replace(/^drafts\./, "");
       client
         .fetch(
-          `count(*[_type == "portfolioProject" && sourceAdminProjectId == $id]) > 0`,
+          `count(*[_type == "portfolioProject" && sourceAdminProject._ref == $id]) > 0`,
           { id: cleanId },
         )
         .then(setAlreadyExists);

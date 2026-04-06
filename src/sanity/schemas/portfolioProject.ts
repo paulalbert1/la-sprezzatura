@@ -74,33 +74,6 @@ export const portfolioProject = defineType({
       },
     }),
     defineField({
-      name: "challenge",
-      title: "Design Challenge",
-      type: "array",
-      of: [{ type: "block" }],
-    }),
-    defineField({
-      name: "approach",
-      title: "Our Approach",
-      type: "array",
-      of: [{ type: "block" }],
-    }),
-    defineField({
-      name: "outcome",
-      title: "The Result",
-      type: "array",
-      of: [{ type: "block" }],
-    }),
-    defineField({
-      name: "testimonial",
-      title: "Client Testimonial",
-      type: "object",
-      fields: [
-        defineField({ name: "quote", title: "Quote", type: "text" }),
-        defineField({ name: "author", title: "Client Name", type: "string" }),
-      ],
-    }),
-    defineField({
       name: "completionDate",
       title: "Completion Date",
       type: "date",
@@ -117,11 +90,18 @@ export const portfolioProject = defineType({
       type: "number",
     }),
     defineField({
-      name: "sourceAdminProjectId",
+      name: "published",
+      title: "Published",
+      type: "boolean",
+      initialValue: false,
+      description: "Show this project on the public portfolio page",
+    }),
+    defineField({
+      name: "sourceAdminProject",
       title: "Source Admin Project",
-      type: "string",
-      readOnly: true,
-      description: "ID of the admin project this was created from",
+      type: "reference",
+      to: [{ type: "project" }],
+      description: "The admin project this portfolio entry is based on",
     }),
   ],
   preview: {

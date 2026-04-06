@@ -84,27 +84,12 @@ describe("buildPortfolioPayload", () => {
     expect(result.roomType).toBe("full-home");
   });
 
-  it("copies challenge (rich text array) from admin project", () => {
+  it("does NOT copy challenge, approach, outcome, or testimonial", () => {
     const result = buildPortfolioPayload(mockAdminProject, []);
-    expect(result.challenge).toEqual(mockAdminProject.challenge);
-  });
-
-  it("copies approach (rich text array) from admin project", () => {
-    const result = buildPortfolioPayload(mockAdminProject, []);
-    expect(result.approach).toEqual(mockAdminProject.approach);
-  });
-
-  it("copies outcome (rich text array) from admin project", () => {
-    const result = buildPortfolioPayload(mockAdminProject, []);
-    expect(result.outcome).toEqual(mockAdminProject.outcome);
-  });
-
-  it("copies testimonial (object with quote, author) from admin project", () => {
-    const result = buildPortfolioPayload(mockAdminProject, []);
-    expect(result.testimonial).toEqual({
-      quote: "Amazing work",
-      author: "Jane Doe",
-    });
+    expect(result.challenge).toBeUndefined();
+    expect(result.approach).toBeUndefined();
+    expect(result.outcome).toBeUndefined();
+    expect(result.testimonial).toBeUndefined();
   });
 
   it("copies completionDate from admin project", () => {
@@ -122,9 +107,17 @@ describe("buildPortfolioPayload", () => {
     expect(result.order).toBe(1);
   });
 
-  it("sets sourceAdminProjectId to admin project _id", () => {
+  it("sets sourceAdminProject as a Sanity reference to admin project _id", () => {
     const result = buildPortfolioPayload(mockAdminProject, []);
-    expect(result.sourceAdminProjectId).toBe("project-123");
+    expect(result.sourceAdminProject).toEqual({
+      _type: "reference",
+      _ref: "project-123",
+    });
+  });
+
+  it("sets published to false", () => {
+    const result = buildPortfolioPayload(mockAdminProject, []);
+    expect(result.published).toBe(false);
   });
 
   it("sets tags to empty array", () => {

@@ -72,45 +72,11 @@ describe("portfolioProject schema", () => {
     expect(values).toContain("full-home");
   });
 
-  it('has field "challenge" of type "array" (of block)', () => {
-    const field = portfolioProject.fields?.find((f) => f.name === "challenge");
-    expect(field).toBeDefined();
-    expect(field?.type).toBe("array");
-    const ofArray = (field as any)?.of;
-    expect(ofArray).toBeDefined();
-    expect(ofArray[0].type).toBe("block");
-  });
-
-  it('has field "approach" of type "array" (of block)', () => {
-    const field = portfolioProject.fields?.find((f) => f.name === "approach");
-    expect(field).toBeDefined();
-    expect(field?.type).toBe("array");
-    const ofArray = (field as any)?.of;
-    expect(ofArray).toBeDefined();
-    expect(ofArray[0].type).toBe("block");
-  });
-
-  it('has field "outcome" of type "array" (of block)', () => {
-    const field = portfolioProject.fields?.find((f) => f.name === "outcome");
-    expect(field).toBeDefined();
-    expect(field?.type).toBe("array");
-    const ofArray = (field as any)?.of;
-    expect(ofArray).toBeDefined();
-    expect(ofArray[0].type).toBe("block");
-  });
-
-  it('has field "testimonial" of type "object" with subfields quote and author', () => {
-    const field = portfolioProject.fields?.find((f) => f.name === "testimonial");
-    expect(field).toBeDefined();
-    expect(field?.type).toBe("object");
-    const subfields = (field as any)?.fields;
-    expect(subfields).toBeDefined();
-    const quoteField = subfields.find((f: any) => f.name === "quote");
-    expect(quoteField).toBeDefined();
-    expect(quoteField.type).toBe("text");
-    const authorField = subfields.find((f: any) => f.name === "author");
-    expect(authorField).toBeDefined();
-    expect(authorField.type).toBe("string");
+  it('does NOT have fields "challenge", "approach", "outcome", "testimonial"', () => {
+    expect(portfolioProject.fields?.find((f) => f.name === "challenge")).toBeUndefined();
+    expect(portfolioProject.fields?.find((f) => f.name === "approach")).toBeUndefined();
+    expect(portfolioProject.fields?.find((f) => f.name === "outcome")).toBeUndefined();
+    expect(portfolioProject.fields?.find((f) => f.name === "testimonial")).toBeUndefined();
   });
 
   it('has field "completionDate" of type "date"', () => {
@@ -131,11 +97,16 @@ describe("portfolioProject schema", () => {
     expect(field?.type).toBe("number");
   });
 
-  it('has field "sourceAdminProjectId" of type "string" with readOnly true', () => {
-    const field = portfolioProject.fields?.find((f) => f.name === "sourceAdminProjectId");
+  it('has field "published" of type "boolean"', () => {
+    const field = portfolioProject.fields?.find((f) => f.name === "published");
     expect(field).toBeDefined();
-    expect(field?.type).toBe("string");
-    expect((field as any)?.readOnly).toBe(true);
+    expect(field?.type).toBe("boolean");
+  });
+
+  it('has field "sourceAdminProject" of type "reference"', () => {
+    const field = portfolioProject.fields?.find((f) => f.name === "sourceAdminProject");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("reference");
   });
 
   it('does NOT have a field named "style" (D-04)', () => {
