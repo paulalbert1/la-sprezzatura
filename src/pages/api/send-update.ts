@@ -184,7 +184,7 @@ export const POST: APIRoute = async ({ request }) => {
         _id, title, engagementType,
         clients[] { client-> { _id, name, email } },
         milestones[] | order(date asc) { name, date, completed },
-        select(engagementType == "full-interior-design" => {
+        ...select(engagementType == "full-interior-design" => {
           "procurementItems": procurementItems[] { status }
         }),
         artifacts[] {
