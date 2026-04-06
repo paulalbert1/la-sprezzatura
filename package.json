@@ -34,6 +34,7 @@
     "date-fns": "^4.1.0",
     "frappe-gantt": "^1.2.2",
     "gsap": "^3.14.2",
+    "lucide-react": "^1.7.0",
     "pdfkit": "^0.18.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

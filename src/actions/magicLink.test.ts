@@ -51,4 +51,22 @@ describe("requestMagicLink action", () => {
   it("sets token TTL to 900 seconds (15 minutes)", () => {
     expect(actionsSource).toContain("ex: 900");
   });
+
+  // ---- Admin email detection tests (Phase 25 Task 2) ----
+
+  it("checks ADMIN_EMAIL environment variable for admin detection", () => {
+    expect(actionsSource).toContain("ADMIN_EMAIL");
+  });
+
+  it("stores admin token with role 'admin' in Redis", () => {
+    expect(actionsSource).toMatch(/role:\s*['"]admin['"]/);
+  });
+
+  it("sends admin-specific email with studio dashboard subject", () => {
+    expect(actionsSource).toContain("Your La Sprezzatura Studio Access");
+  });
+
+  it("admin email CTA says Access Your Dashboard", () => {
+    expect(actionsSource).toContain("Access Your Dashboard");
+  });
 });
