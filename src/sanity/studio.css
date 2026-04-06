@@ -113,3 +113,10 @@ select,
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
 }
+
+/* ===== DIALOG BACKDROP — gray overlay (Phase 23, EDIT-01) ===== */
+/* Sanity UI Dialog sets background via --card-backdrop-color but
+   the global [data-ui] override breaks it. Restore explicitly. */
+[data-ui="Dialog"] {
+  background: rgba(0, 0, 0, 0.4) !important;
+}

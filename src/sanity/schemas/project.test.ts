@@ -538,3 +538,46 @@ describe("project schema (Phase 22 procurement extensions)", () => {
     expect(names.indexOf("files")).toBeLessThan(names.indexOf("notes"));
   });
 });
+
+describe("project schema (Phase 23 custom list UI)", () => {
+  function getProcurementItemFields() {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as { name: string; type: string }[] | undefined;
+  }
+
+  function getProcurementItemMember() {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0] as any;
+  }
+
+  // EDIT-02: trackingUrl field exists
+  it('procurementItem has "trackingUrl" field of type "string"', () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const trackingUrl = fields!.find((f) => f.name === "trackingUrl");
+    expect(trackingUrl).toBeDefined();
+    expect(trackingUrl!.type).toBe("string");
+  });
+
+  // EDIT-02: trackingUrl appears after trackingNumber and before files
+  it("trackingUrl appears after trackingNumber and before files in field order", () => {
+    const fields = getProcurementItemFields();
+    const names = fields!.map((f) => f.name);
+    const trackingNumberIdx = names.indexOf("trackingNumber");
+    const trackingUrlIdx = names.indexOf("trackingUrl");
+    const filesIdx = names.indexOf("files");
+    expect(trackingUrlIdx).toBeGreaterThan(trackingNumberIdx);
+    expect(trackingUrlIdx).toBeLessThan(filesIdx);
+  });
+
+  // D-14: components.item is registered
+  it("procurementItem has components.item defined", () => {
+    const member = getProcurementItemMember();
+    expect(member).toBeDefined();
+    expect(member.components).toBeDefined();
+    expect(member.components.item).toBeDefined();
+    expect(typeof member.components.item).toBe("function");
+  });
+});

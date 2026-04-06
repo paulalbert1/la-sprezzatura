@@ -16,6 +16,7 @@ import { NetPriceDisplay } from "../components/NetPriceDisplay";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
 import { DependencyPreview } from "../components/gantt/DependencyPreview";
+import { ProcurementListItem } from "../components/ProcurementListItem";
 
 export const project = defineType({
   name: "project",
@@ -409,6 +410,9 @@ export const project = defineType({
         defineArrayMember({
           type: "object",
           name: "procurementItem",
+          components: {
+            item: ProcurementListItem,
+          },
           fields: [
             // 1. Identity
             defineField({
@@ -489,7 +493,14 @@ export const project = defineType({
               title: "Tracking Number",
               type: "string",
             }),
-            // 12. Files (NEW -- PROC-03)
+            // 12. Tracking URL (NEW -- LIST-05)
+            defineField({
+              name: "trackingUrl",
+              title: "Tracking URL",
+              type: "string",
+              description: "Full tracking URL (e.g., https://www.fedex.com/...)",
+            }),
+            // 13. Files (NEW -- PROC-03) (was 12)
             defineField({
               name: "files",
               title: "Files",
@@ -522,7 +533,7 @@ export const project = defineType({
                 }),
               ],
             }),
-            // 13. Notes (NEW -- PROC-01)
+            // 14. Notes (NEW -- PROC-01) (was 13)
             defineField({
               name: "notes",
               title: "Notes",
