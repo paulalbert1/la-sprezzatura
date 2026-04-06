@@ -18,18 +18,23 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish, DNS cutover | 9-12 |
 | v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability, step navigation | 13-? |
 | v4.0 Project Schedule | Interactive Gantt chart in Sanity Studio for project sequencing | 15-? |
+| v4.1 Studio UI Polish | Visual/UX audit and fixes across Sanity Studio | 18-20 |
+| v4.2 Procurement Management | Item tracking with status pipeline, pricing, file uploads | 21-? |
 | v5.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
 
-## Current Milestone: v4.1 Studio UI Polish
+## Current Milestone: v4.2 Procurement Management
 
-**Goal:** Audit and fix all visual/UX issues in Sanity Studio — colors, contrast, fonts, layout consistency, and Gantt chart cleanup — so every screen looks intentional and professional.
+**Goal:** Add procurement tracking to admin projects in Sanity Studio — item management with status pipeline, pricing, file uploads, tracking, and overdue alerts.
 
 **Target features:**
-- Studio theme consistency — light palette fully applied to navbar, form backgrounds, active states
-- Contrast/readability fixes — Portal Token and any other black-on-black or unreadable fields
-- Font consistency — Inter/sans-serif everywhere, no serif leaks
-- Gantt chart polish — labels, scroll behavior, cleanup
-- Layout reliability — sidebar hiding, tab visual hierarchy
+- Procurement schema (item name, manufacturer, quantity, retail/client/net price, files, status, dates, tracking number)
+- 5-stage status pipeline: Ordered → In-transit → Warehouse → Delivered → Installed
+- Colored dropdown status badges on list items
+- Procurement list with drag-handle reordering
+- Overdue date highlighting (red when past expected delivery)
+- Tracking links as gray monospace metadata
+- Edit pane for item details and file uploads
+- Gray background overlay CSS fix for edit pane
 
 ## Requirements
 
@@ -147,4 +152,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Milestone v4.0 (Project Schedule) started*
+*Last updated: 2026-04-05 — Milestone v4.2 (Procurement Management) started*
