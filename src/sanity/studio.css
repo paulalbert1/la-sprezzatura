@@ -79,8 +79,7 @@ button[data-tone="primary"][data-ui="Button"]:not([mode="bleed"]):not([mode="gho
 
 /* ===== STATUS BADGES (Published/Draft) — subtle pills ===== */
 [data-ui="StatusButton"],
-[data-testid="review-changes-button"],
-[data-ui="Badge"] {
+[data-testid="review-changes-button"] {
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
 }

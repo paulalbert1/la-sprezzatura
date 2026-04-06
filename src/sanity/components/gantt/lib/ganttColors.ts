@@ -38,7 +38,7 @@ export function getContractorColor(index: number): string {
 
 /** Procurement status to color mapping */
 export const PROCUREMENT_STATUS_COLORS: Record<ProcurementStatus, string> = {
-  pending: "#9CA3AF", // gray-400 (muted)
+  "not-yet-ordered": "#9CA3AF", // gray-400 (muted)
   ordered: "#F59E0B", // amber-500
   warehouse: "#F59E0B", // amber-500 (same as ordered)
   "in-transit": "#F59E0B", // amber-500 (same as ordered)
@@ -50,6 +50,6 @@ export const PROCUREMENT_STATUS_COLORS: Record<ProcurementStatus, string> = {
 export function getProcurementStatusColor(status: string): string {
   return (
     PROCUREMENT_STATUS_COLORS[status as ProcurementStatus] ||
-    PROCUREMENT_STATUS_COLORS.pending
+    PROCUREMENT_STATUS_COLORS["not-yet-ordered"]
   );
 }
