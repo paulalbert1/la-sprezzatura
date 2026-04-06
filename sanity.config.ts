@@ -40,8 +40,10 @@ export default defineConfig({
                   .documentId("siteSettings"),
               ),
             S.divider(),
-            // Portfolio Projects
-            S.documentTypeListItem("project").title("Portfolio Projects"),
+            // Projects (admin/operational)
+            S.documentTypeListItem("project").title("Projects"),
+            // Portfolio (curated public-facing)
+            S.documentTypeListItem("portfolioProject").title("Portfolio"),
             // Clients
             S.documentTypeListItem("client").title("Clients"),
             // Contractors
