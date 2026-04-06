@@ -210,11 +210,12 @@ describe("GROQ query strings", () => {
       expect(SEND_UPDATE_PROJECT_QUERY).toContain("procurementItems");
     });
 
-    it("computes savings from retailPrice - clientCost but does NOT expose clientCost directly", () => {
-      expect(SEND_UPDATE_PROJECT_QUERY).toContain('"savings"');
-      expect(SEND_UPDATE_PROJECT_QUERY).toContain("retailPrice - clientCost");
-      const withoutSavings = SEND_UPDATE_PROJECT_QUERY.replace(/retailPrice\s*-\s*clientCost/, "");
-      expect(withoutSavings).not.toContain("clientCost");
+    it("fetches only status for procurement items (no prices, savings, or dates)", () => {
+      expect(SEND_UPDATE_PROJECT_QUERY).toContain("procurementItems[] { status }");
+      expect(SEND_UPDATE_PROJECT_QUERY).not.toContain("retailPrice");
+      expect(SEND_UPDATE_PROJECT_QUERY).not.toContain("clientCost");
+      expect(SEND_UPDATE_PROJECT_QUERY).not.toContain('"savings"');
+      expect(SEND_UPDATE_PROJECT_QUERY).not.toContain("installDate");
     });
 
     it("includes artifacts with _key, artifactType, hasApproval", () => {
