@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Stack, Text, Button, Flex, Spinner, Card } from "@sanity/ui";
+import { DocumentIcon } from "@sanity/icons";
 import { set, unset, type StringInputProps } from "sanity";
 import { upload } from "@vercel/blob/client";
 
@@ -47,22 +48,66 @@ export function BlobFileInput(props: StringInputProps) {
     setErrorMessage("");
   }, []);
 
-  // Uploaded state: show filename and remove button
+  const isImageFile = (pathname: string): boolean => {
+    const ext = pathname.split(".").pop()?.toLowerCase() ?? "";
+    return ["jpg", "jpeg", "png", "webp"].includes(ext);
+  };
+
+  const getServeUrl = (pathname: string): string => {
+    const token = (import.meta as any).env?.SANITY_STUDIO_API_SECRET || "";
+    return `/api/blob-serve?path=${encodeURIComponent(pathname)}&source=studio&token=${encodeURIComponent(token)}`;
+  };
+
+  // Uploaded state: show thumbnail/icon and remove button
   if (value) {
     const filename = value.split("/").pop() || value;
     const displayName =
       filename.length > 40 ? `${filename.slice(0, 37)}...` : filename;
+    const serveUrl = getServeUrl(value);
+    const isImage = isImageFile(value);
+
     return (
       <Stack space={3}>
-        <Flex gap={2} align="center">
-          <Text size={1}>{displayName}</Text>
-          <Button
-            text="Remove"
-            tone="critical"
-            mode="ghost"
-            fontSize={1}
-            onClick={handleRemove}
-          />
+        <Flex gap={3} align="center">
+          {isImage ? (
+            <a
+              href={serveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ flexShrink: 0 }}
+            >
+              <img
+                src={serveUrl}
+                alt={filename}
+                style={{
+                  width: 48,
+                  height: 48,
+                  objectFit: "cover",
+                  borderRadius: 4,
+                  display: "block",
+                }}
+              />
+            </a>
+          ) : (
+            <a
+              href={serveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ flexShrink: 0, display: "flex", alignItems: "center" }}
+            >
+              <DocumentIcon style={{ fontSize: 24 }} />
+            </a>
+          )}
+          <Flex direction="column" gap={2} style={{ minWidth: 0 }}>
+            <Text size={1}>{displayName}</Text>
+            <Button
+              text="Remove"
+              tone="critical"
+              mode="ghost"
+              fontSize={1}
+              onClick={handleRemove}
+            />
+          </Flex>
         </Flex>
       </Stack>
     );

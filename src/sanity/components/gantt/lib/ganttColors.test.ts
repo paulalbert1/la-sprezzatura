@@ -37,8 +37,8 @@ describe("CATEGORY_COLORS", () => {
 });
 
 describe("getProcurementStatusColor", () => {
-  it("returns expected color for 'pending'", () => {
-    const color = getProcurementStatusColor("pending");
+  it("returns expected color for 'not-yet-ordered'", () => {
+    const color = getProcurementStatusColor("not-yet-ordered");
     expect(color).toBeTruthy();
     expect(typeof color).toBe("string");
     expect(color).toMatch(/^#[0-9A-Fa-f]{6}$/);

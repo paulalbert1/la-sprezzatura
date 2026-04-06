@@ -8,6 +8,8 @@
 - 📋 **v3.0 AI Rendering & Go-Live** - Phases 9-12 (planned)
 - 📋 **v3.1 Rendering Tool Polish** - Phases 13-14 (planned)
 - 📋 **v4.0 Project Schedule** - Phases 15-17 (planned)
+- ✅ **v4.1 Studio UI Polish** - Phases 18-20 (completed 2026-04-06)
+- 🚧 **v4.2 Procurement Management** - Phases 22-24 (in progress)
 
 ## Phases
 
@@ -363,6 +365,141 @@ Phases execute in numeric order: 15 -> 16 -> 17
 | 16. Drag-and-Drop, Write-back, Undo, and Tooltips | v4.0 | 0/TBD | Not started | - |
 | 17. Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars | v4.0 | 0/TBD | Not started | - |
 
+### v4.1 Studio UI Polish
+
+**Milestone Goal:** Audit and fix all visual/UX issues in Sanity Studio — colors, contrast, fonts, layout consistency, Gantt chart cleanup, and introduce Portfolio Project type for client-facing project narratives.
+
+- [x] **Phase 18: Visual Audit & Theme Fix** - Playwright-driven audit of every Sanity Studio screen, fix all theme/contrast/font issues, make Editor/Timeline tabs visually distinct (completed 2026-04-05)
+- [x] **Phase 19: Gantt & Layout Polish** - Fix Gantt labels, scroll behavior, remove test page, reliable sidebar hiding (completed 2026-04-05)
+- [x] **Phase 20: Portfolio Project Type** - New portfolioProject schema, "Create Portfolio Version" spawn button on admin projects, image selection modal (completed 2026-04-06)
+
+### Phase 18: Visual Audit & Theme Fix
+**Goal**: Use Playwright to screenshot every Studio screen, identify all color/contrast/font issues, and fix them in studio.css/studioTheme.ts
+**Requirements**: THEME-01, THEME-02, THEME-03, THEME-04, THEME-05, LAYOUT-02
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18-PLAN-1-playwright-audit.md -- Screenshot all Studio screens via Playwright MCP, produce structured audit findings document with CSS selectors and fix recommendations
+- [ ] 18-PLAN-2-theme-fixes.md -- Apply all CSS fixes from audit findings to studio.css, re-screenshot to verify, user visual approval
+
+**Success Criteria**:
+  1. Playwright screenshots of navbar, editor, all form groups show consistent warm off-white palette
+  2. Portal Token field is clearly readable (light bg, dark text)
+  3. No serif fonts visible anywhere in Studio
+  4. Active/selected tab states are visually consistent
+  5. Editor/Timeline tabs are visually distinct from form group tabs
+
+### Phase 19: Gantt & Layout Polish
+**Goal**: Fix remaining Gantt chart rendering issues and make sidebar pane hiding reliable
+**Depends on**: Phase 18
+**Requirements**: GANTT-01, GANTT-02, GANTT-03, GANTT-04, LAYOUT-01
+**Plans**: 2 plans
+
+Plans:
+- [x] 19-01-PLAN.md -- Gantt label visibility CSS, smart scroll logic with tests, delete test page
+- [x] 19-02-PLAN.md -- CSS-first pane hiding, MutationObserver replacing setInterval polling
+
+**Success Criteria**:
+  1. Every task bar has a visible label (verified via Playwright)
+  2. Chart loads with first task visible, not empty space
+  3. gantt-test.astro is deleted
+  4. If today falls within the project range, chart scrolls to show today in context
+  5. Content type list pane stays hidden across tab switches and navigation
+
+### Phase 20: Portfolio Project Type
+**Goal**: Create a new portfolioProject schema type with spawn workflow from admin projects
+**Depends on**: Phase 18 (theme must be consistent before adding new document type)
+**Requirements**: PORT-01, PORT-02, PORT-03, PORT-04, PORT-05
+**Success Criteria**:
+  1. portfolioProject schema exists with title, location, description, tags, images fields
+  2. "Create Portfolio Version" button visible on admin projects only after Client Sign-off is complete
+  3. Spawn modal asks about photography; if yes, user selects images to copy
+  4. Title, location, description auto-copied from admin project
+  5. Portfolio project created as independent document with sourceAdminProjectId reference
+**Plans**: 3 plans
+
+Plans:
+- [x] 20-01-PLAN.md -- portfolioProject schema, field copy utility, and tests
+- [x] 20-02-PLAN.md -- Studio sidebar rename, Portfolio list item, and navbar tab
+- [x] 20-03-PLAN.md -- SpawnPortfolioAction document action with multi-step dialog and registration
+
+
+### Phase 21: Portal UX Controls
+**Goal**: Replace dropdown controls with purpose-built UX components — pipeline stepper, wider portal token with email action, date-time picker with mark-complete button
+**Depends on**: Phase 18 (theme must be consistent first)
+**Success Criteria**:
+  1. Pipeline Stage shows as a horizontal stepper (Discovery → Concept → Design Dev → Procurement → Installation → Closeout) with completed/current/future states, clickable to advance — dropdown fallback on narrow widths
+  2. Portal Token field is wider (full-width) with a mail icon button that fires an email to the client's contact email
+  3. Completed At field has a date+time picker (not plain text input) and a "Mark as Completed" button that sets the date and transitions Project Status
+  4. Project Status uses a visual control consistent with the pipeline stepper rather than a plain dropdown
+
+
+### v4.2 Procurement Management
+
+**Milestone Goal:** Add procurement tracking to admin projects in Sanity Studio -- item management with status pipeline, pricing, file uploads, tracking, and overdue alerts -- with downstream updates to the client portal and Send Update email.
+
+- [x] **Phase 22: Procurement Foundation** - CSS audit of studio.css Badge selectors, schema expansion (manufacturer, quantity, notes, files, net price), and status color constants (completed 2026-04-06)
+- [ ] **Phase 23: Custom List UI** - components.item wrapper with StatusBadge dropdown, components.preview with overdue highlighting and metadata, drag handles, overflow menu, and edit pane CSS fix
+- [ ] **Phase 24: Portal Integration** - Client portal procurement table update with new schema fields and Send Update email procurement summary section
+
+### Phase 22: Procurement Foundation
+**Goal**: The studio.css Badge selectors are narrowed so tone-based colors work correctly, the procurement schema includes all new fields (manufacturer, quantity, notes, files), net price computes at render time, and a shared status constants module provides the single source of truth for the 6-stage pipeline colors
+**Depends on**: Phase 20 (v4.1 complete)
+**Requirements**: PROC-01, PROC-02, PROC-03
+**Success Criteria** (what must be TRUE):
+  1. Liz opens a project in Sanity Studio and sees manufacturer, quantity, and notes fields on each procurement item -- all editable and persisted on save
+  2. Each procurement item shows a net price value (retailPrice minus clientCost) that updates live when either price field changes -- no net price field exists in the schema or API responses
+  3. Procurement items support multiple named file attachments (spec sheets, receipts, COM forms) uploaded via the existing BlobFileInput component -- files are downloadable after upload
+  4. A Sanity Badge component rendered in Studio displays the correct tone color (green for Delivered, red for critical states) rather than being overridden to warm gray by global studio.css selectors
+**Plans**: 2 plans
+
+Plans:
+- [x] 22-01-PLAN.md -- Status constants module, CSS Badge fix, Gantt type sync
+- [x] 22-02-PLAN.md -- Schema field extensions, NetPriceDisplay component, BlobFileInput thumbnails
+
+**UI hint**: yes
+
+### Phase 23: Custom List UI
+**Goal**: Procurement items display as an interactive custom list in Sanity Studio -- each item shows a colored status badge dropdown for inline status changes, overdue dates in red, tracking links as gray monospace metadata, drag handles for reordering, a three-dot overflow menu, and the edit pane opens with a correctly styled gray overlay
+**Depends on**: Phase 22
+**Requirements**: LIST-01, LIST-02, LIST-03, LIST-04, LIST-05, LIST-06, EDIT-01, EDIT-02
+**Success Criteria** (what must be TRUE):
+  1. Liz clicks the colored status badge on a procurement item and a dropdown menu appears with all 5 pipeline stages (Ordered, In-transit, Warehouse, Delivered, Installed); selecting a new status updates the badge color and persists the change without opening the edit dialog
+  2. A procurement item whose expected delivery date is in the past (and status is not Delivered or Installed) shows the date in red text -- items with future dates or completed statuses show normal date styling
+  3. Liz drags a procurement item by its handle to reorder the list; the new order persists on save; the three-dot overflow menu on each item provides actions (edit, remove) without conflicting with the status badge
+  4. Liz clicks a procurement item to open the edit pane and sees all fields (name, manufacturer, quantity, prices, dates, status, tracking, files, notes) with a gray background overlay behind the dialog -- not the previous transparent/broken overlay
+  5. Tracking numbers display as gray monospace text below the item metadata; hovering darkens the text; tracking links with a URL are clickable
+**Plans**: 2 plans
+
+Plans:
+- [ ] 23-PLAN-01.md -- Schema extensions (trackingUrl field, component registration) and dialog backdrop CSS fix
+- [ ] 23-PLAN-02.md -- ProcurementListItem interactive component with status dropdown, overdue dates, tracking links, overflow menu
+**UI hint**: yes
+
+### Phase 24: Portal Integration
+**Goal**: The client portal procurement table reflects the updated schema fields (manufacturer, quantity) and the Send Update email includes a procurement summary section -- completing the downstream consumer updates for the new procurement data
+**Depends on**: Phase 23
+**Requirements**: PORT-01, PORT-02
+**Success Criteria** (what must be TRUE):
+  1. A client viewing their project on the portal sees procurement items with manufacturer name and quantity displayed alongside existing fields (item name, status, dates) -- netPrice is never visible on the portal
+  2. Liz sends a project update email via Send Update and the email includes a procurement summary showing item count by status and any overdue items flagged -- the procurement section only appears when the project has procurement items
+
+## Progress (v4.2)
+
+**Execution Order:**
+Phases execute in numeric order: 22 -> 23 -> 24
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 22. Procurement Foundation | v4.2 | 2/2 | Complete   | 2026-04-06 |
+| 23. Custom List UI | v4.2 | 0/2 | Planning complete | - |
+| 24. Portal Integration | v4.2 | 0/TBD | Not started | - |
+
 ---
 *v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
 *Phase 15 plans created: 2026-04-04 (3 plans in 2 waves -- Plans 1-2 parallel, Plan 3 sequential)*
+*v4.1 roadmap created: 2026-04-05 (3 phases, 16 requirements mapped)*
+*Phase 18 plans created: 2026-04-05 (2 plans in 2 waves -- audit then fix, sequential)*
+*Phase 21 added: 2026-04-05 (Portal UX Controls — stepper, email action, date picker)*
+
+*v4.2 roadmap created: 2026-04-05 (3 phases, 13 requirements mapped)*
