@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-06T16:05:54.869Z",
+  "phase": "23",
+  "phase_name": "custom-list-ui",
+  "phase_dir": ".planning/phases/23-custom-list-ui",
+  "plan": 2,
+  "task": 3,
+  "total_tasks": 3,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "23-01-T1", "name": "Add trackingUrl field + register ProcurementListItem", "status": "done", "commit": "59845cb"},
+    {"id": "23-01-T2", "name": "Create ProcurementListItem stub component", "status": "done", "commit": "59845cb"},
+    {"id": "23-01-T3", "name": "Dialog backdrop CSS + schema tests", "status": "done", "commit": "59845cb"},
+    {"id": "23-02-T1", "name": "Full interactive ProcurementListItem component", "status": "done", "commit": "94ae074"},
+    {"id": "23-02-T2", "name": "Unit tests for isOverdue logic", "status": "done", "commit": "bfbb976"}
+  ],
+  "remaining_tasks": [
+    {"id": "23-02-T3", "name": "Visual verification in Sanity Studio (checkpoint:human-verify)", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Human must visually verify interactive component in Sanity Studio at /admin", "type": "human_action", "workaround": "none — required for plan completion"}
+  ],
+  "human_actions_pending": [
+    {"action": "Open http://localhost:4323/admin, navigate to a project with engagementType full-interior-design, verify all 12 items in 23-02-PLAN.md Task 3 checklist", "context": "checkpoint:human-verify for the ProcurementListItem interactive component", "blocking": true}
+  ],
+  "decisions": [
+    {"decision": "renderDefault hidden in absolute-positioned zero-height div", "rationale": "Preserves Sanity DnD sortable context while showing custom row layout", "phase": "23"},
+    {"decision": "trackingUrl only renders as link when starts with http/https", "rationale": "Defense in depth against javascript: protocol injection", "phase": "23"},
+    {"decision": "isOverdue exported as pure function", "rationale": "Enables unit testing without Sanity Studio runtime", "phase": "23"}
+  ],
+  "uncommitted_files": [],
+  "next_action": "User approves visual verification checkpoint in Sanity Studio, then run gsd-verifier for Phase 23",
+  "context_notes": "All automated work done. 56 Phase 23 tests pass. Wave 2 executor had a worktree stale-base issue that was caught and fixed (commit 116725d). Dev server is running at localhost:4323."
+}
