@@ -38,13 +38,13 @@ export default defineConfig({
               "production",
             useCdn: false,
             apiVersion: "2025-12-15",
-            studioBasePath: "/admin",
+            studioBasePath: "/studio",
           }),
         ]
       : []),
     react(),
     sitemap({
-      filter: (page) => !page.includes("/admin") && !page.includes("/portal"),
+      filter: (page) => !page.includes("/admin") && !page.includes("/portal") && !page.includes("/studio"),
     }),
   ],
   fonts: [

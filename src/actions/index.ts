@@ -247,6 +247,80 @@ export const server = {
         });
       }
 
+      // Admin detection -- before client/contractor lookup
+      const adminEmail = import.meta.env.ADMIN_EMAIL;
+      if (adminEmail && input.email.toLowerCase() === adminEmail.toLowerCase()) {
+        const token = generatePortalToken(32);
+        await redis.set(`magic:${token}`, JSON.stringify({
+          entityId: input.email.toLowerCase(),
+          role: 'admin',
+        }), { ex: 900 });
+
+        // Send magic link email (customized for admin)
+        const baseUrl = import.meta.env.SITE || "https://lasprezz.com";
+        const magicLink = `${baseUrl}/portal/verify?token=${token}`;
+
+        const apiKey = import.meta.env.RESEND_API_KEY;
+        if (apiKey) {
+          const { Resend } = await import("resend");
+          const resend = new Resend(apiKey);
+
+          const adminMagicLinkHtml = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"></head>
+            <body style="margin:0;padding:0;background-color:#FAF8F5;font-family:system-ui,sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;">
+                <tr>
+                  <td style="padding:32px 32px 24px;text-align:center;">
+                    <p style="margin:0;font-size:11px;color:#8A8478;text-transform:uppercase;letter-spacing:0.2em;">La Sprezzatura</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background-color:#FFFFFF;padding:40px 32px;">
+                    <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-weight:300;font-size:24px;color:#2C2926;text-align:center;">
+                      Your Studio Dashboard Access
+                    </h1>
+                    <p style="margin:0 0 24px;font-size:16px;color:#2C2926;line-height:1.7;text-align:center;">
+                      Click the button below to access your studio dashboard. This link expires in 15 minutes and can only be used once.
+                    </p>
+                    <div style="text-align:center;margin:32px 0;">
+                      <a href="${magicLink}"
+                         style="display:inline-block;background-color:#C4836A;color:#FFFFFF;text-decoration:none;padding:16px 32px;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;">
+                        Access Your Dashboard
+                      </a>
+                    </div>
+                    <p style="margin:24px 0 0;font-size:14px;color:#8A8478;text-align:center;line-height:1.6;">
+                      If the button doesn't work, copy and paste this link:<br>
+                      <span style="color:#8A8478;word-break:break-all;">${magicLink}</span>
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:24px 32px;text-align:center;">
+                    <p style="margin:0;font-size:12px;color:#B8B0A4;line-height:1.6;">
+                      This is an automated message from La Sprezzatura. If you didn't request this link, you can safely ignore this email.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+          `;
+
+          await resend.emails.send({
+            from: "La Sprezzatura <noreply@send.lasprezz.com>",
+            to: [input.email.toLowerCase()],
+            subject: "Your La Sprezzatura Studio Access",
+            html: adminMagicLinkHtml,
+          });
+        } else {
+          console.log("[MagicLink] No RESEND_API_KEY set. Magic link token:", token);
+        }
+
+        return { success: true };
+      }
+
       // Look up client in Sanity -- NEVER reveal whether email exists
       const client = await getClientByEmail(input.email.toLowerCase());
 

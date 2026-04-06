@@ -11,7 +11,7 @@ const SESSION_TTL = 2592000; // 30 days in seconds
  */
 export interface SessionData {
   entityId: string;
-  role: 'client' | 'contractor' | 'building_manager';
+  role: 'client' | 'contractor' | 'building_manager' | 'admin';
 }
 
 /**

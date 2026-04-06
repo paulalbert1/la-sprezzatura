@@ -8,10 +8,25 @@ const PUBLIC_PATHS = [
   "/workorder/verify",
   "/building/login",
   "/building/verify",
+  "/admin/login",
 ];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+
+  // Admin routes
+  if (pathname.startsWith("/admin")) {
+    if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return next();
+
+    const session = await getSession(context.cookies);
+    if (!session || session.role !== "admin") {
+      return context.redirect("/admin/login");
+    }
+
+    context.locals.adminEmail = session.entityId;
+    context.locals.role = session.role;
+    return next();
+  }
 
   // Client portal routes
   if (pathname.startsWith("/portal")) {
