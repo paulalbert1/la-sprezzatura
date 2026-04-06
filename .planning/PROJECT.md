@@ -18,23 +18,19 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish, DNS cutover | 9-12 |
 | v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability, step navigation | 13-? |
 | v4.0 Project Schedule | Interactive Gantt chart in Sanity Studio for project sequencing | 15-? |
-| v4.1 Studio UI Polish | Visual/UX audit and fixes across Sanity Studio | 18-20 |
-| v4.2 Procurement Management | Item tracking with status pipeline, pricing, file uploads | 21-? |
 | v5.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
 
-## Current Milestone: v4.2 Procurement Management
+## Current Milestone: v4.0 Project Schedule (Gantt Chart)
 
-**Goal:** Add procurement tracking to admin projects in Sanity Studio — item management with status pipeline, pricing, file uploads, tracking, and overdue alerts.
+**Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects.
 
 **Target features:**
-- Procurement schema (item name, manufacturer, quantity, retail/client/net price, files, status, dates, tracking number)
-- 5-stage status pipeline: Ordered → In-transit → Warehouse → Delivered → Installed
-- Colored dropdown status badges on list items
-- Procurement list with drag-handle reordering
-- Overdue date highlighting (red when past expected delivery)
-- Tracking links as gray monospace metadata
-- Edit pane for item details and file uploads
-- Gray background overlay CSS fix for edit pane
+- Gantt chart tab on the project document in Sanity Studio
+- Rows for: contractor assignments, procurement items, milestones, and custom ad-hoc events
+- Interactive drag-and-drop to reschedule items (dates sync back to Sanity)
+- Timeline scale control (week/month view)
+- Color-coded by user role (contractor identity, not item category)
+- Custom events schema (vacate office, walkthrough, punch list, etc.)
 
 ## Requirements
 
@@ -152,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-05 — Milestone v4.2 (Procurement Management) started*
+*Last updated: 2026-04-04 — Milestone v4.0 (Project Schedule) started*

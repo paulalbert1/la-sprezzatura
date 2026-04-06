@@ -85,9 +85,7 @@ button[data-tone="primary"][data-ui="Button"]:not([mode="bleed"]):not([mode="gho
   --card-fg-color: #0F172A !important;
 }
 
-/* ===== INPUT FIELDS — white bg, visible border + shadow for contrast ===== */
-/* CSS variables don't propagate through Sanity's styled-components,
-   so we use direct properties on both the wrapper and the element. */
+/* ===== INPUT FIELDS — white bg for contrast ===== */
 input,
 textarea,
 select,
@@ -96,41 +94,13 @@ select,
 [data-ui="Select"] {
   --input-bg-color: #FFFFFF !important;
   --input-fg-color: #0F172A !important;
-  --input-border-color: #D6D3D1 !important;
-  background-color: #FFFFFF !important;
-  color: #0F172A !important;
-  border-color: #D6D3D1 !important;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06) !important;
-}
-/* Sanity's rich text editor (PTE) textarea needs separate targeting */
-[data-testid="pt-editor"] [contenteditable],
-[data-ui="TextArea"] textarea,
-[data-ui="TextInput"] input {
-  background-color: #FFFFFF !important;
-  color: #0F172A !important;
-}
-/* Select dropdown text must be dark — styled-components overrides CSS variables */
-select,
-[data-ui="Select"] select {
-  color: #0F172A !important;
-  -webkit-text-fill-color: #0F172A !important;
+  --input-border-color: #E2DFDC !important;
 }
 
 /* Rich text toolbar */
 [data-ui="Toolbar"],
 [data-ui="MenuButton"] {
   --card-bg-color: #F0EEEB !important;
-}
-
-/* ===== LAYOUT-01: HIDE FIRST STRUCTURE PANE (Content type list) ===== */
-/* CSS-first approach: hides before JS runs, preventing any flash.
-   The StudioNavbar tabs replace this pane's navigation function. */
-[data-pane-index="0"] {
-  display: none !important;
-}
-/* Hide the divider/resizer that follows the first pane */
-[data-pane-index="0"] + * {
-  display: none !important;
 }
 
 /* ===== SIDEBAR / PANE LIST — match main bg ===== */
@@ -143,73 +113,4 @@ select,
 [data-testid="pane-header"] {
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
-}
-
-/* ===== THEME-05 / D-03: NAVBAR DOC TYPE TABS — AMBER UNDERLINE ===== */
-/* Active doc type tab in StudioNavbar: amber bottom border.
-   Uses data-active attribute set by StudioNavbar on the active button. */
-[data-ui="Button"][data-active] {
-  border-bottom: 2px solid #D97706 !important;
-  --card-bg-color: transparent !important;
-  --card-fg-color: #D97706 !important;
-  --card-border-color: transparent !important;
-  border-radius: 0 !important;
-  background-color: transparent !important;
-}
-/* Inactive doc type tabs in the StudioNavbar Card: transparent bottom border */
-[data-ui="Card"][data-tone="default"] > [data-ui="Flex"] > [data-ui="Button"]:not([data-active]) {
-  border-bottom: 2px solid transparent !important;
-  border-radius: 0 !important;
-}
-
-/* ===== THEME-05 / D-03: DOCUMENT LIST — AMBER LEFT BORDER ON SELECTED ===== */
-/* Selected list items use data-selected (empty attribute) on PreviewCard */
-[data-ui="PreviewCard"][data-selected] {
-  border-left: 2px solid #D97706 !important;
-  --card-bg-color: #F0EEEB !important;
-}
-
-/* ===== THEME-05 / D-03: FORM GROUP TABS — GRAY BG ONLY, NO AMBER ===== */
-/* Form group tabs (Content, Client Portal, Milestones, etc.) — subtle gray fill */
-[data-testid^="group-tab-"][aria-selected="true"],
-[data-testid="group-tab-all-fields"][aria-selected="true"] {
-  background-color: #F0EEEB !important;
-  --card-bg-color: #F0EEEB !important;
-  --card-fg-color: #0F172A !important;
-  border-color: #E2DFDC !important;
-  border-bottom-color: #E2DFDC !important;
-}
-/* Inactive form group tabs: muted text, no border */
-[data-testid^="group-tab-"][aria-selected="false"],
-[data-testid="group-tab-all-fields"][aria-selected="false"] {
-  background-color: transparent !important;
-  --card-bg-color: transparent !important;
-  --card-fg-color: #78716C !important;
-  border-color: transparent !important;
-}
-
-/* ===== NESTED OBJECT DIALOG — warm overlay instead of gray ===== */
-/* Sanity's default overlay is rgba(238,237,237,0.5) which clashes with warm theme */
-[data-testid="nested-object-dialog"] {
-  background: rgba(120, 113, 108, 0.15) !important;
-}
-
-/* ===== LAYOUT-02 / D-01: VIEW TABS (EDITOR/TIMELINE) — AMBER UNDERLINE ===== */
-/* View tabs use data-ui="Tab" with data-selected and role="tab",
-   but are NOT form group tabs (no data-testid="group-tab-*").
-   Target: Tab elements with data-selected that lack a group-tab testid. */
-[data-ui="Tab"][data-selected]:not([data-testid^="group-tab-"]):not([data-testid="group-tab-all-fields"]) {
-  border-bottom: 2px solid #D97706 !important;
-  --card-fg-color: #D97706 !important;
-  font-weight: 600 !important;
-  border-radius: 0 !important;
-  background-color: transparent !important;
-  --card-bg-color: transparent !important;
-}
-/* Inactive view tabs: no underline, muted text */
-[data-ui="Tab"][role="tab"]:not([data-selected]):not([data-testid^="group-tab-"]):not([data-testid="group-tab-all-fields"]) {
-  border-bottom: 2px solid transparent !important;
-  --card-fg-color: #78716C !important;
-  font-weight: 400 !important;
-  border-radius: 0 !important;
 }

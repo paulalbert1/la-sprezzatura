@@ -11,7 +11,6 @@ import { useEffect, useState, useCallback } from "react";
 import { Flex, Button, Card, Tooltip, Box, Text } from "@sanity/ui";
 import {
   DocumentsIcon,
-  ImageIcon,
   UsersIcon,
   CogIcon,
   ComponentIcon,
@@ -26,7 +25,6 @@ interface NavbarProps {
 
 const DOC_TYPES = [
   { id: "project", title: "Projects", icon: DocumentsIcon, path: "/structure/project" },
-  { id: "portfolioProject", title: "Portfolio", icon: ImageIcon, path: "/structure/portfolioProject" },
   { id: "client", title: "Clients", icon: UsersIcon, path: "/structure/client" },
   { id: "contractor", title: "Contractors", icon: ComponentIcon, path: "/structure/contractor" },
   { id: "service", title: "Services", icon: UlistIcon, path: "/structure/service" },
@@ -144,27 +142,20 @@ export function StudioNavbar(props: NavbarProps) {
       // localStorage might be unavailable
     }
 
-    // Hide first pane — CSS handles initial hide (studio.css),
-    // MutationObserver keeps it hidden after Sanity re-renders on navigation
-    hideFirstPane();
+    // Hide first pane — retry on multiple timings
+    const timers = [
+      setTimeout(hideFirstPane, 100),
+      setTimeout(hideFirstPane, 500),
+      setTimeout(hideFirstPane, 1500),
+      setTimeout(hideFirstPane, 3000),
+    ];
 
-    const observer = new MutationObserver(() => {
-      hideFirstPane();
-    });
-
-    requestAnimationFrame(() => {
-      const target = document.querySelector('[data-testid="structure-tool"]')
-        || document.body;
-      observer.observe(target, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['data-pane-index', 'style', 'hidden'],
-      });
-    });
+    // Keep checking periodically (every 2s) in case pane re-renders on navigation
+    const interval = setInterval(hideFirstPane, 2000);
 
     return () => {
-      observer.disconnect();
+      timers.forEach(clearTimeout);
+      clearInterval(interval);
     };
   }, []);
 
@@ -209,7 +200,6 @@ export function StudioNavbar(props: NavbarProps) {
                 tone={isActive ? "primary" : "default"}
                 fontSize={1}
                 padding={2}
-                data-active={isActive ? "" : undefined}
                 onClick={() => {
                   window.location.href = `/admin/structure/${type.id}`;
                 }}

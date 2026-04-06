@@ -12,7 +12,6 @@ import "./frappe-gantt.css";
 import "./gantt.css";
 
 import type { GanttTask, GanttLink } from "./lib/ganttTypes";
-import { computeSmartScrollTarget } from "./lib/ganttScroll";
 
 interface GanttChartProps {
   tasks: GanttTask[];
@@ -112,7 +111,7 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
         column_width: 45,
         arrow_curve: 5,
         today_button: true,
-        scroll_to: "today",
+        scroll_to: "start",
         infinite_padding: false,
         auto_move_label: true,
         lines: "both",
@@ -146,13 +145,11 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
           }
         },
       });
-    // Force container to match SVG height + smart scroll correction.
+    // Force container to match SVG height.
     // Frappe's CSS uses `height: var(--gv-grid-height)` which overrides inline styles.
     // Set the CSS variable on the element after Frappe finishes rendering.
     resizeTimer = setTimeout(() => {
       if (!containerRef.current) return;
-
-      // --- Existing: Fix container height to match SVG ---
       const svg = containerRef.current.querySelector('svg.gantt');
       if (svg) {
         const svgHeight = svg.getAttribute('height');
@@ -163,39 +160,7 @@ export function GanttChart({ tasks, links }: GanttChartProps) {
           containerRef.current.style.height = h;
         }
       }
-
-      // --- Smart scroll correction (GANTT-02 + GANTT-04) ---
-      // If Frappe's scroll_to:"today" worked, scrollLeft > 0. Only intervene if it didn't.
-      if (containerRef.current.scrollLeft > 0) return;
-
-      const targetIdx = computeSmartScrollTarget(tasks, new Date());
-      if (targetIdx === null) return;
-
-      // Find the target task's bar element in the SVG
-      const allBars = containerRef.current.querySelectorAll('.bar-wrapper');
-      const targetBar = allBars[targetIdx] as SVGGElement | undefined;
-
-      if (targetBar) {
-        const bbox = targetBar.getBBox();
-        // 100px left padding for context when scrolling to active/upcoming task
-        // 50px padding when scrolling to first task (targetIdx === 0 and all tasks past)
-        const padding = targetIdx === 0 ? 50 : 100;
-        containerRef.current.scrollTo({
-          left: Math.max(0, bbox.x - padding),
-          behavior: 'smooth',
-        });
-      } else {
-        // Fallback: scroll to first bar if target not found
-        const firstBar = containerRef.current.querySelector('.bar-wrapper') as SVGGElement | null;
-        if (firstBar) {
-          const bbox = firstBar.getBBox();
-          containerRef.current.scrollTo({
-            left: Math.max(0, bbox.x - 50),
-            behavior: 'smooth',
-          });
-        }
-      }
-    }, 250);
+    }, 200);
 
     } catch (err) {
       console.error("[GanttChart] Frappe Gantt init error:", err);
