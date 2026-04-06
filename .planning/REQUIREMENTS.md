@@ -63,25 +63,25 @@ Requirements for Procurement Management milestone. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROC-01 | TBD | Pending |
-| PROC-02 | TBD | Pending |
-| PROC-03 | TBD | Pending |
-| LIST-01 | TBD | Pending |
-| LIST-02 | TBD | Pending |
-| LIST-03 | TBD | Pending |
-| LIST-04 | TBD | Pending |
-| LIST-05 | TBD | Pending |
-| LIST-06 | TBD | Pending |
-| EDIT-01 | TBD | Pending |
-| EDIT-02 | TBD | Pending |
-| PORT-01 | TBD | Pending |
-| PORT-02 | TBD | Pending |
+| PROC-01 | Phase 22 | Pending |
+| PROC-02 | Phase 22 | Pending |
+| PROC-03 | Phase 22 | Pending |
+| LIST-01 | Phase 23 | Pending |
+| LIST-02 | Phase 23 | Pending |
+| LIST-03 | Phase 23 | Pending |
+| LIST-04 | Phase 23 | Pending |
+| LIST-05 | Phase 23 | Pending |
+| LIST-06 | Phase 23 | Pending |
+| EDIT-01 | Phase 23 | Pending |
+| EDIT-02 | Phase 23 | Pending |
+| PORT-01 | Phase 24 | Pending |
+| PORT-02 | Phase 24 | Pending |
 
 **Coverage:**
 - v4.2 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-05*
-*Last updated: 2026-04-05 after milestone v4.2 initialization*
+*Last updated: 2026-04-05 after v4.2 roadmap creation*
