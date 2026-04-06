@@ -49,12 +49,13 @@ Exceptions: Image thumbnail grid uses `gap={3}` (12px) for tighter visual densit
 
 All typography within the spawn modal uses `@sanity/ui` `Text` and `Heading` components with their `size` prop. Inline styles follow the established `sendUpdate.tsx` pattern for dialog content.
 
+Exactly 3 sizes, exactly 2 weights:
+
 | Role | Size | Weight | Line Height | Implementation |
 |------|------|--------|-------------|----------------|
-| Body | 14px | 400 (regular) | 1.5 | `<Text size={2}>` or `fontSize: "14px"` inline |
-| Label | 13px | 500 (medium) | 1.4 | `<Text size={1}>` or `fontSize: "13px"` with `fontWeight: 500` inline |
-| Heading | 16px | 600 (semibold) | 1.2 | Dialog `header` prop (rendered by Sanity's Dialog chrome) |
-| Caption | 12px | 500 (medium) | 1.3 | `<Text size={0}>` — image labels ("Hero", "Photo 2"), helper text |
+| Caption | 12px | 400 (regular) | 1.3 | `<Text size={0}>` — image labels ("Hero", "Photo 2"), helper text, select all/none button text |
+| Body / Label | 14px | 400 (regular) | 1.5 | `<Text size={2}>` — question text, checkbox labels, status messages, button text |
+| Heading | 16px | 600 (semibold) | 1.2 | Dialog `header` prop (rendered by Sanity's Dialog chrome), section headings like "Select images to include" |
 
 ---
 
@@ -66,7 +67,7 @@ All colors derive from the existing warm stone palette in `studioTheme.ts` and `
 |------|-------|-------|
 | Dominant (60%) | #FAF5F2 (warm off-white) | Dialog background (inherits from Studio theme), modal surface |
 | Secondary (30%) | #F0EEEB (warm gray) | Selected image card background, preview section background, photography question card |
-| Accent (10%) | #D97706 (amber/gold) | Hero star badge, "Create" primary CTA button background, selected image card border |
+| Accent (10%) | #D97706 (amber/gold) | Hero star badge, "Create Portfolio Version" primary CTA button background, selected image card border |
 | Destructive | #EF4444 (red-500) | Error state banner only (creation failure) |
 
 Accent reserved for:
@@ -84,6 +85,8 @@ Additional semantic colors:
 ## Component Inventory
 
 ### Spawn Dialog (multi-step modal)
+
+**Focal points:** The photography question text ("Has this project been professionally photographed?") is the primary visual anchor of Step 1. The image thumbnail grid is the primary visual anchor of Step 2. The spinner is the sole focal point of Step 3.
 
 **Step 1: Photography Question**
 
@@ -105,7 +108,7 @@ Additional semantic colors:
 | Image card | `<Card padding={2} radius={2} border>` | `tone="primary"` when selected, `tone="default"` when not |
 | Thumbnail | `<img>` | 150x150px via `imageUrlBuilder`, `fit("crop")`, `auto("format")`, `border-radius: 4px`, `cursor: pointer` |
 | Hero badge | `<StarFilledIcon>` | Absolute positioned top-left, color `#D97706`, over hero image only |
-| Image label | `<Text size={1}>` | "Hero" for index 0, "Photo {n}" for others |
+| Image label | `<Text size={0}>` | "Hero" for index 0, "Photo {n}" for others |
 | Checkbox | Native `<input type="checkbox">` | Follows `sendUpdate.tsx` pattern — checked/onChange controlled |
 | Checkbox row | `<Flex align="center" gap={2} marginTop={2}>` | Checkbox + label inline |
 
@@ -120,7 +123,7 @@ Additional semantic colors:
 
 | Element | Component | Props/Style |
 |---------|-----------|-------------|
-| Cancel button | `<Button>` | `text="Cancel"`, `mode="ghost"`, `tone="default"` |
+| Cancel button | `<Button>` | `text="Cancel Creation"`, `mode="ghost"`, `tone="default"` |
 | Create button | `<Button>` | `text="Create Portfolio Version"`, `tone="positive"`, `disabled` during creation |
 | Button container | `<Flex gap={3} justify="flex-end">` | Right-aligned, consistent gap |
 
@@ -160,7 +163,7 @@ Additional semantic colors:
 | User clicks "Create Portfolio Version" | Transition to Step 3 (creating). Spinner + status text. Button disabled. |
 | Creation succeeds | Dialog closes. Success toast: "Portfolio version created". Navigate to new document via `window.location.href = /admin/structure/portfolioProject;{newDocId}` |
 | Creation fails | Error banner shown in dialog (red). Button re-enabled. User can retry. |
-| User clicks Cancel (any step) | Dialog closes. No changes made. |
+| User clicks "Cancel Creation" (any step) | Dialog closes. No changes made. |
 
 ### Document Action Visibility
 
@@ -187,6 +190,7 @@ Additional semantic colors:
 | Select None button | "Select None" |
 | Hero badge label | "Hero" |
 | Gallery image label | "Photo {n}" (where n = 1-based index excluding hero) |
+| Cancel button | "Cancel Creation" |
 | Creating state | "Creating portfolio version..." |
 | Success toast | "Portfolio version created" |
 | Error state heading | "Unable to create portfolio version" |
