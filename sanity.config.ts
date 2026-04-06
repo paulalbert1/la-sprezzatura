@@ -7,6 +7,7 @@ import { ReopenProjectAction } from "./src/sanity/actions/reopenProject";
 import { SendWorkOrderAccessAction } from "./src/sanity/actions/sendWorkOrderAccess";
 import { SendBuildingAccessAction } from "./src/sanity/actions/sendBuildingAccess";
 import { SendUpdateAction } from "./src/sanity/actions/sendUpdate";
+import { SpawnPortfolioAction } from "./src/sanity/actions/spawnPortfolioProject";
 import { renderingTool } from "./src/sanity/components/rendering/RenderingToolPlugin";
 import { getDefaultDocumentNode } from "./src/sanity/structure";
 import { studioTheme } from "./src/sanity/studioTheme";
@@ -68,6 +69,7 @@ export default defineConfig({
           ReopenProjectAction,
           SendBuildingAccessAction,
           SendUpdateAction,
+          SpawnPortfolioAction,
         ];
       }
       if (context.schemaType === "contractor") {
