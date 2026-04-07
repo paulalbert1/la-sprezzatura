@@ -572,7 +572,14 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Liz can upload a new artifact version, set it as current, and see the version history on the artifacts page
   2. The Gantt schedule renders correctly in the admin and Liz can edit schedule item dates
+**Plans:** 5 plans
 
+Plans:
+- [ ] 28-01-PLAN.md -- Relocate shared Gantt code to src/lib/gantt/
+- [ ] 28-02-PLAN.md -- Artifact API routes and GROQ query
+- [ ] 28-03-PLAN.md -- ArtifactManager React island and artifacts Astro page
+- [ ] 28-04-PLAN.md -- Schedule API routes and GROQ query
+- [ ] 28-05-PLAN.md -- ScheduleEditor React island, schedule Astro page, and visual verification
 ### Phase 29: Client + Contractor CRUD
 **Goal**: Liz can create and edit client and contractor records from the admin
 **Depends on**: Phase 26

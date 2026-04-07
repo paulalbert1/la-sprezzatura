@@ -151,7 +151,7 @@ Mobile (<768px):
 
 ```
 +----------------------------------------------------------+
-| [Badge]  Type Label                          [ChevronUp] |
+| [Badge]  Type Label                [Trash2] [ChevronUp]  |
 |                                                          |
 | --- Upload New Version ---                               |
 | [Drop zone or file input]                                |
@@ -221,7 +221,7 @@ Each entry is a compact row:
 
 #### Remove Artifact Confirmation (D-03)
 
-- Trigger: small `Trash2` icon button in expanded card header, `text-stone-light hover:text-red-600 transition-colors`
+- Trigger: small `Trash2` icon button in expanded card header, `text-stone-light hover:text-red-600 transition-colors`, `aria-label="Remove artifact"`
 - Dialog: follows ProcurementEditor confirmation pattern exactly:
   - Backdrop: `fixed inset-0 bg-black/30 z-50`
   - Container: `fixed inset-0 z-[60] flex items-center justify-center`
@@ -271,14 +271,14 @@ Popover appears anchored near the clicked bar/marker, positioned using bar `getB
 | End Date                           |
 | [date picker input]                |
 |                                    |
-| [Save]                             |
+| [Save Dates]                       |
 +------------------------------------+
 ```
 
 - Container: `absolute bg-white rounded-xl shadow-xl border border-stone-light/20 p-4 z-40` min-width 280px, max-width 360px
 - Header: `flex items-center justify-between mb-3`
   - Title: `text-sm font-semibold font-body text-charcoal` -- shows item category + name
-  - Close button: `X` icon 16px, `text-stone-light hover:text-charcoal transition-colors`
+  - Close button: `X` icon 16px, `text-stone-light hover:text-charcoal transition-colors`, `aria-label="Close"`
 - Labels: `text-xs uppercase tracking-widest text-stone font-body mb-2 block` (established `labelClasses` pattern)
 - Date inputs: `inputClasses` pattern with `type="date"`
 - Save button: `bg-terracotta text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-terracotta-light transition-colors w-full`
@@ -302,7 +302,7 @@ Popover appears anchored near the clicked bar/marker, positioned using bar `getB
 Same confirmation dialog pattern as Remove Artifact:
 - Heading: "Delete {Event Name}?"
 - Body: "This event will be permanently removed from the schedule."
-- Cancel: "Cancel"
+- Cancel: "Keep Event"
 - Confirm: "Delete" (red button)
 
 #### Create Event via Empty Space Click (D-14)
@@ -336,6 +336,7 @@ When user clicks empty space on the Gantt timeline, `on_date_click` fires with a
 - Name field required (validated on submit -- red border `border-red-400` if empty)
 - Create button: terracotta CTA pattern -- "Create Event"
 - Start date pre-filled from `on_date_click` dateString
+- Close button: `X` icon 16px, `text-stone-light hover:text-charcoal transition-colors`, `aria-label="Close"`
 
 #### Gantt Legend
 
@@ -346,7 +347,7 @@ Below the Gantt chart, a legend row showing color assignments:
 ```
 
 - Layout: `flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs text-stone font-body`
-- Color swatch: `w-3 h-3 rounded-full inline-block mr-1.5` with the contractor/category color as `backgroundColor`
+- Color swatch: `w-3 h-3 rounded-full inline-block mr-2` with the contractor/category color as `backgroundColor`
 - Contractor names from data; category labels are static strings
 
 #### Drag-and-Drop (D-10)
@@ -383,7 +384,7 @@ Below the Gantt chart, a legend row showing color assignments:
 | Set current button | "Set as Current" |
 | Signed upload CTA | "Upload Signed Contract" |
 | Create event button | "Create Event" |
-| Save popover button | "Save" |
+| Save popover button | "Save Dates" |
 | Empty state heading (Artifacts) | "No artifacts yet" |
 | Empty state body (Artifacts) | "Add your first artifact to start managing project documents." |
 | Empty state CTA (Artifacts) | "Add Artifact" (terracotta button with Plus icon) |
@@ -393,7 +394,7 @@ Below the Gantt chart, a legend row showing color assignments:
 | Error state (save failed) | "Could not save changes. Check your connection and try again." |
 | Error state (load failed) | Redirect to `/admin/projects` (handled by Astro page SSR, no error UI needed) |
 | Destructive: Remove artifact | Heading: "Remove {Type Label}?" Body: "This artifact and all its versions will be permanently removed." Cancel: "Keep Artifact" Confirm: "Remove" |
-| Destructive: Delete event | Heading: "Delete {Event Name}?" Body: "This event will be permanently removed from the schedule." Cancel: "Cancel" Confirm: "Delete" |
+| Destructive: Delete event | Heading: "Delete {Event Name}?" Body: "This event will be permanently removed from the schedule." Cancel: "Keep Event" Confirm: "Delete" |
 | Procurement popover (read-only) | "Procurement dates are managed in the Procurement editor." with "Go to Procurement" link |
 | Upload progress | "Uploading..." (replaces button text during upload) |
 | Version count | "{N} version{s}" (pluralized) |
@@ -457,7 +458,7 @@ Below the Gantt chart, a legend row showing color assignments:
 
 ### Remove Artifact
 
-1. User clicks `Trash2` icon in expanded card header
+1. User clicks `Trash2` icon button (`aria-label="Remove artifact"`) in expanded card header
 2. Confirmation dialog appears (fixed overlay pattern from ProcurementEditor)
 3. User clicks "Remove" to confirm or "Keep Artifact" to cancel
 4. API call: `POST /api/admin/artifact-crud` with action "remove", projectId, artifactKey
@@ -471,7 +472,7 @@ Below the Gantt chart, a legend row showing color assignments:
 3. Parse task `id` format `"category:_key"` to determine item type
 4. Popover appears anchored near the bar (positioned via `getBoundingClientRect()` offset)
 5. Popover shows appropriate fields for the item type (see popover variants table)
-6. User edits fields and clicks "Save"
+6. User edits fields and clicks "Save Dates"
 7. API call: `POST /api/admin/schedule-date` with category, _key, updated fields
 8. On success: popover closes, Gantt refreshes with updated data
 9. Clicking outside the popover or pressing Escape closes it without saving
@@ -502,7 +503,7 @@ Below the Gantt chart, a legend row showing color assignments:
 
 1. Click outside popover: closes without saving
 2. Press Escape: closes without saving
-3. Click close (X) button: closes without saving
+3. Click close (X) button (`aria-label="Close"`): closes without saving
 4. These all reset popover state to null
 
 ---
