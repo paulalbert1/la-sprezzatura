@@ -54,9 +54,11 @@ All typography inherits from `global.css` base styles. Headings use `font-headin
 | Body | 14px (text-sm) | 400 (font-normal) | 1.5 | DM Sans |
 | Label | 12px (text-xs) | 400 (font-normal) | 1.5 | DM Sans, uppercase tracking-widest |
 | Heading | 20px (text-xl) | 600 (font-semibold) | 1.2 | DM Sans (admin page titles use body font per existing AdminLayout pattern) |
-| Display | 24px (text-2xl) | 300 (font-light) | 1.2 | Cormorant Garamond (project name on overview page) |
+| Display | 24px (text-2xl) | 400 (font-normal) | 1.2 | Cormorant Garamond (project name on overview page) |
 
-**Rationale:** The existing AdminLayout top bar uses `text-xl font-semibold font-body` for page titles. Dashboard summary card values use `text-xl font-heading`. This phase follows both patterns: DM Sans semibold for functional headings, Cormorant Garamond light for the project display name.
+**Weights declared: 2 total — 400 (font-normal) and 600 (font-semibold).** Cormorant Garamond at 400 weight still reads as editorial at 24px due to the typeface's inherent contrast and serif structure.
+
+**Rationale:** The existing AdminLayout top bar uses `text-xl font-semibold font-body` for page titles. Dashboard summary card values use `text-xl font-heading`. This phase follows both patterns: DM Sans semibold for functional headings, Cormorant Garamond normal for the project display name.
 
 ---
 
@@ -103,6 +105,14 @@ Badges on the project list use warm, muted tones consistent with the interior de
 
 ## Component Inventory
 
+### Visual Focal Points
+
+| Page | Primary Visual Anchor |
+|------|-----------------------|
+| Project List (`/admin/projects`) | The project title column -- the leftmost, flex-grow column that draws the eye and serves as the primary navigation target |
+| Project Overview (`/admin/projects/[projectId]`) | The project display name in Cormorant Garamond 24px -- the largest text element on the page |
+| Edit Project (`/admin/projects/[projectId]/edit`) | The "Save Changes" button -- the primary action target, styled in terracotta accent |
+
 ### Page 1: Project List (`/admin/projects`)
 
 **File:** `src/pages/admin/projects/index.astro` (SSR, `prerender = false`)
@@ -122,7 +132,7 @@ A table layout is chosen over a card grid because:
 [ All ] [ Discovery ] [ Concept ] [ Design Development ] [ Procurement ] [ Installation ] [ Closeout ]
 ```
 
-- Position: Above the table, left-aligned, with `gap-3` (12px) between pills
+- Position: Above the table, left-aligned, with `gap-2` (8px) between pills
 - Active pill: `bg-charcoal text-white border-charcoal` (matches existing FilterPills.astro pattern)
 - Inactive pill: `bg-cream-dark text-charcoal border-stone-light hover:bg-charcoal hover:text-white hover:border-charcoal`
 - Shape: `rounded-full px-5 py-2`
@@ -173,7 +183,7 @@ A table layout is chosen over a card grid because:
 +----------------------------------------------------------------+
 ```
 
-- Project name: `text-2xl font-heading font-light text-charcoal` (Display role)
+- Project name: `text-2xl font-heading font-normal text-charcoal` (Display role)
 - Engagement type: `text-sm text-stone font-body`
 - Project status badge: inline after engagement type, same badge styling as list
 - Pipeline stage badge: inline after status badge, same badge styling as list
@@ -246,8 +256,8 @@ Single-column form with 16px (`gap-4`) between fields, inside a `max-w-xl` conta
 | Text input | `w-full px-4 py-3 bg-cream-dark border border-stone-light/30 rounded-lg text-sm font-body text-charcoal focus:border-terracotta focus:outline-none transition-colors` |
 | Select | Same as text input, plus `appearance-none` with custom chevron |
 | Save button | `bg-terracotta text-white text-xs uppercase tracking-widest font-body px-6 py-3 rounded-lg hover:bg-terracotta-light transition-colors` |
-| Cancel link | `text-sm text-stone hover:text-charcoal transition-colors font-body` |
-| Button row | `flex items-center gap-4 mt-8`, Save left, Cancel right via `ml-auto` |
+| Discard link | `text-sm text-stone hover:text-charcoal transition-colors font-body` |
+| Button row | `flex items-center gap-4 mt-8`, Save left, Discard right via `ml-auto` |
 
 ### Breadcrumb Component
 
@@ -289,7 +299,7 @@ Projects  >  Flower Hill Office
 | Filter "All" pill label | "All" |
 | Breadcrumb separator | ">" (right angle bracket, not a chevron icon) |
 | Save button (edit form) | "Save Changes" |
-| Cancel link (edit form) | "Cancel" |
+| Discard link (edit form) | "Discard Changes" |
 | Save success feedback | "Project updated" (brief inline message above the form, auto-dismiss after 3 seconds) |
 | Save error feedback | "Unable to save. Please try again." |
 | Empty client field | "No client assigned" (shown in list table when project has no clients) |
@@ -330,7 +340,7 @@ Projects  >  Flower Hill Office
 5. React island patches the project document via `writeClient.patch(projectId).set({...}).commit()`
 6. On success: show "Project updated" message, then redirect back to overview page after 1.5 seconds
 7. On error: show "Unable to save. Please try again." message inline above the form
-8. "Cancel" link navigates back to overview page without saving (standard `<a>` to `/admin/projects/[projectId]`)
+8. "Discard Changes" link navigates back to overview page without saving (standard `<a>` to `/admin/projects/[projectId]`)
 
 ### Breadcrumb Navigation
 
