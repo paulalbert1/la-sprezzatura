@@ -1,0 +1,32 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import ArtifactManager from "../../../../components/admin/ArtifactManager.tsx";
+import { getAdminArtifactData } from "../../../../sanity/queries";
+
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/admin/projects");
+}
+
+const data = await getAdminArtifactData(projectId);
+if (!data) {
+  return Astro.redirect("/admin/projects");
+}
+
+const breadcrumbs = [
+  { label: "Projects", href: "/admin/projects" },
+  { label: data.title, href: `/admin/projects/${projectId}` },
+  { label: "Artifacts" },
+];
+---
+
+<AdminLayout title={data.title + " — Artifacts"} pageTitle="Artifacts" breadcrumbs={breadcrumbs}>
+  <ArtifactManager
+    client:load
+    artifacts={data.artifacts || []}
+    projectId={projectId}
+    projectTitle={data.title}
+  />
+</AdminLayout>
