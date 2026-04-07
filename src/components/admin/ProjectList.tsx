@@ -180,7 +180,7 @@ export default function ProjectList({ projects }: ProjectListProps) {
                       {project.clientName || "No client assigned"}
                     </td>
                     <td className="py-3 text-sm text-stone">
-                      {formatLabel(project.engagementType)}
+                      {formatLabel(project.engagementType || "")}
                     </td>
                     <td className="py-3 text-center">
                       <span
