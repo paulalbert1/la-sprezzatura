@@ -520,7 +520,7 @@ Phases execute in numeric order: 22 -> 23 -> 24
 
 - [x] **Phase 25: Admin Shell + Auth** - Magic-link login, JWT session, AdminLayout with sidebar nav, middleware protection for `/admin/*` (completed 2026-04-06)
 - [x] **Phase 26: Project List + Overview** - Filterable project table, project overview page, core field editing (completed 2026-04-07)
-- [ ] **Phase 27: Procurement Editor** - Procurement table editor with status badge dropdown, overdue detection, tracking links (carry-forward from Phase 23 design)
+- [x] **Phase 27: Procurement Editor** - Procurement table editor with status badge dropdown, overdue detection, tracking links (carry-forward from Phase 23 design) (completed 2026-04-07)
 - [ ] **Phase 28: Artifacts + Schedule** - Artifact version manager, Gantt schedule view relocated from Studio
 - [ ] **Phase 29: Client + Contractor CRUD** - Create/edit forms for clients and contractors
 - [ ] **Phase 30: Rendering Tool Relocation** - Move AI rendering tool from Studio custom view to `/admin/rendering/*`
@@ -559,13 +559,13 @@ Plans:
   1. Liz opens a project's procurement page and sees all items with status badges, install dates, and tracking info matching the Phase 23 visual spec
   2. Changing an item's status via dropdown persists to Sanity immediately; overdue items (past install date, non-delivered) show red date text
 
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 27-01-PLAN.md -- Shared utilities (isOverdue extraction, carrierFromUrl, GROQ query) with tests
-- [ ] 27-02-PLAN.md -- API routes (status update, item CRUD, file upload) with auth guards and tests
-- [ ] 27-03-PLAN.md -- SSR Astro page and ProcurementEditor React island (table, status dropdown, slide-out panel, file upload, confirmation dialog)
-- [ ] 27-04-PLAN.md -- Visual and functional verification checkpoint
+- [x] 27-01-PLAN.md -- Shared utilities (isOverdue extraction, carrierFromUrl, GROQ query) with tests
+- [x] 27-02-PLAN.md -- API routes (status update, item CRUD, file upload) with auth guards and tests
+- [x] 27-03-PLAN.md -- SSR Astro page and ProcurementEditor React island (table, status dropdown, slide-out panel, file upload, confirmation dialog)
+- [x] 27-04-PLAN.md -- Visual and functional verification checkpoint
 ### Phase 28: Artifacts + Schedule
 **Goal**: Liz can manage artifact versions and view/edit the project schedule from the admin
 **Depends on**: Phase 26
@@ -603,7 +603,7 @@ Phase 25 → 26 → (27, 28, 29 parallel) → 30 → 31
 |-------|-----------|----------------|--------|-----------|
 | 25. Admin Shell + Auth | v5.0 | 2/2 | Complete   | 2026-04-06 |
 | 26. Project List + Overview | v5.0 | 3/3 | Complete    | 2026-04-07 |
-| 27. Procurement Editor | v5.0 | 0/TBD | Not started | - |
+| 27. Procurement Editor | v5.0 | 4/4 | Complete    | 2026-04-07 |
 | 28. Artifacts + Schedule | v5.0 | 0/TBD | Not started | - |
 | 29. Client + Contractor CRUD | v5.0 | 0/TBD | Not started | - |
 | 30. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
