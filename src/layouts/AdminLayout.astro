@@ -5,12 +5,18 @@ import AdminNav from "../components/admin/AdminNav.tsx";
 
 export const prerender = false;
 
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
 interface Props {
   title: string;
   pageTitle: string;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
-const { title, pageTitle } = Astro.props;
+const { title, pageTitle, breadcrumbs } = Astro.props;
 const currentPath = Astro.url.pathname;
 ---
 
@@ -34,7 +40,26 @@ const currentPath = Astro.url.pathname;
     <div class="ml-60 min-h-screen flex flex-col">
       {/* Top bar (per D-10) */}
       <header class="bg-cream border-b border-stone-light/30 px-6 py-4 flex items-center justify-between">
-        <h1 class="text-xl font-semibold font-body text-charcoal">{pageTitle}</h1>
+        {breadcrumbs && breadcrumbs.length > 0 ? (
+          <nav aria-label="Breadcrumb">
+            <ol class="flex items-center">
+              {breadcrumbs.map((item, index) => (
+                <>
+                  {index > 0 && <li aria-hidden="true"><span class="text-stone-light mx-2">/</span></li>}
+                  <li>
+                    {item.href ? (
+                      <a href={item.href} class="text-sm text-stone hover:text-terracotta transition-colors font-body">{item.label}</a>
+                    ) : (
+                      <span class="text-sm text-charcoal font-body" aria-current="page">{item.label}</span>
+                    )}
+                  </li>
+                </>
+              ))}
+            </ol>
+          </nav>
+        ) : (
+          <h1 class="text-xl font-semibold font-body text-charcoal">{pageTitle}</h1>
+        )}
         <a
           href="/admin/logout"
           class="text-sm text-stone hover:text-charcoal transition-colors font-body"

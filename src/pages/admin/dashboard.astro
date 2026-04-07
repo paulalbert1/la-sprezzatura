@@ -2,8 +2,10 @@
 export const prerender = false;
 
 import AdminLayout from "../../layouts/AdminLayout.astro";
+import { getActiveProjectCount } from "../../sanity/queries";
 
 const adminName = import.meta.env.ADMIN_NAME || "Liz";
+const activeCount = await getActiveProjectCount();
 ---
 
 <AdminLayout title="Dashboard | La Sprezzatura" pageTitle="Dashboard">
@@ -16,7 +18,7 @@ const adminName = import.meta.env.ADMIN_NAME || "Liz";
   <div class="grid grid-cols-3 gap-8">
     <div class="bg-cream-dark p-6 rounded-xl border border-stone-light/20">
       <p class="text-sm font-body text-stone mb-2">Active Projects</p>
-      <p class="text-xl font-heading text-charcoal">--</p>
+      <p class="text-xl font-heading text-charcoal">{activeCount}</p>
     </div>
     <div class="bg-cream-dark p-6 rounded-xl border border-stone-light/20">
       <p class="text-sm font-body text-stone mb-2">Pending Orders</p>
