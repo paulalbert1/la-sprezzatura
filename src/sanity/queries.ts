@@ -680,3 +680,37 @@ export const ALL_CLIENTS_QUERY = `
 export async function getAllClients() {
   return sanityClient.fetch(ALL_CLIENTS_QUERY);
 }
+
+// -- Phase 27: Admin Procurement Queries --
+
+// Admin procurement data -- includes clientCost (admin-only field, not in portal queries)
+const ADMIN_PROCUREMENT_QUERY = `
+  *[_type == "project" && _id == $projectId][0] {
+    _id,
+    title,
+    "procurementItems": procurementItems[] {
+      _key,
+      name,
+      manufacturer,
+      status,
+      quantity,
+      retailPrice,
+      clientCost,
+      orderDate,
+      expectedDeliveryDate,
+      installDate,
+      trackingNumber,
+      trackingUrl,
+      files[] {
+        _key,
+        label,
+        file
+      },
+      notes
+    }
+  }
+`;
+
+export async function getAdminProcurementData(projectId: string) {
+  return sanityClient.fetch(ADMIN_PROCUREMENT_QUERY, { projectId });
+}
