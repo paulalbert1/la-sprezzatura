@@ -116,7 +116,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   // For milestones, also update isComplete if provided
   if (category === "milestone" && typeof isComplete === "boolean") {
-    setObj[`milestones[_key=="${_key}"].isComplete`] = isComplete;
+    setObj[`milestones[_key=="${_key}"].completed`] = isComplete;
   }
 
   try {
