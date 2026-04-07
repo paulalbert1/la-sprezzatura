@@ -54,7 +54,7 @@ export interface ResolvedContractor {
 }
 
 /** Procurement item status values — derived from shared constants */
-import type { ProcurementStageKey } from "../../../../lib/procurementStages";
+import type { ProcurementStageKey } from "../procurementStages";
 
 export type ProcurementStatus = ProcurementStageKey;
 
