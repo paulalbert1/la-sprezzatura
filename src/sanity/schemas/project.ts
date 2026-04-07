@@ -10,14 +10,10 @@ import {
   ClockIcon,
 } from "@sanity/icons";
 import { generatePortalToken } from "../../lib/generateToken";
-import { getProcurementOptionsList } from "../../lib/procurementStages";
 import { BlobFileInput } from "../components/BlobFileInput";
-import { NetPriceDisplay } from "../components/NetPriceDisplay";
 import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
 import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
 import { DependencyPreview } from "../components/gantt/DependencyPreview";
-import { ProcurementListItem } from "../components/ProcurementListItem";
-import { ProcurementTableInput } from "../components/ProcurementTableInput";
 
 export const project = defineType({
   name: "project",
@@ -405,51 +401,58 @@ export const project = defineType({
       title: "Procurement Items",
       type: "array",
       group: "procurement",
-      components: {
-        input: ProcurementTableInput,
-      },
       hidden: ({ document }) =>
         document?.engagementType !== "full-interior-design",
       of: [
         defineArrayMember({
           type: "object",
           name: "procurementItem",
-          components: {
-            item: ProcurementListItem,
-          },
           fields: [
-            // 1. Identity
             defineField({
               name: "name",
               title: "Item Name",
               type: "string",
               validation: (r) => r.required(),
             }),
-            // 2. Manufacturer (NEW -- PROC-01)
-            defineField({
-              name: "manufacturer",
-              title: "Manufacturer",
-              type: "string",
-            }),
-            // 3. Status (RENAMED -- D-01)
             defineField({
               name: "status",
               title: "Status",
               type: "string",
               options: {
-                list: getProcurementOptionsList(),
+                list: [
+                  { title: "Pending", value: "pending" },
+                  { title: "Ordered", value: "ordered" },
+                  { title: "Warehouse", value: "warehouse" },
+                  { title: "In Transit", value: "in-transit" },
+                  { title: "Delivered", value: "delivered" },
+                  { title: "Installed", value: "installed" },
+                ],
               },
-              initialValue: "not-yet-ordered",
+              initialValue: "pending",
             }),
-            // 4. Quantity (NEW -- PROC-01)
             defineField({
-              name: "quantity",
-              title: "Quantity",
-              type: "number",
-              validation: (r) => r.integer().min(1),
-              initialValue: 1,
+              name: "orderDate",
+              title: "Order Date",
+              type: "date",
             }),
-            // 5. Retail Price (existing)
+            defineField({
+              name: "expectedDeliveryDate",
+              title: "Expected Delivery Date",
+              type: "date",
+            }),
+            defineField({
+              name: "installDate",
+              title: "Install Date",
+              type: "date",
+            }),
+            defineField({
+              name: "clientCost",
+              title: "Client Cost (cents)",
+              type: "number",
+              validation: (r) => r.integer().min(0),
+              description:
+                "Amount in cents (e.g., 1999 = $19.99). Never shown to clients.",
+            }),
             defineField({
               name: "retailPrice",
               title: "Retail/MSRP Price (cents)",
@@ -457,92 +460,10 @@ export const project = defineType({
               validation: (r) => r.integer().min(0),
               description: "Amount in cents. Shown to clients as MSRP.",
             }),
-            // 6. Client Cost (existing)
-            defineField({
-              name: "clientCost",
-              title: "Client Cost (cents)",
-              type: "number",
-              validation: (r) => r.integer().min(0),
-              description: "Amount in cents (e.g., 1999 = $19.99). Never shown to clients.",
-            }),
-            // 7. Net Price (NEW computed -- PROC-02)
-            defineField({
-              name: "netPrice",
-              title: "Net Price",
-              type: "number",
-              readOnly: true,
-              components: { input: NetPriceDisplay },
-            }),
-            // 8. Order Date (existing)
-            defineField({
-              name: "orderDate",
-              title: "Order Date",
-              type: "date",
-            }),
-            // 9. Expected Delivery Date (existing)
-            defineField({
-              name: "expectedDeliveryDate",
-              title: "Expected Delivery Date",
-              type: "date",
-            }),
-            // 10. Install Date (existing)
-            defineField({
-              name: "installDate",
-              title: "Install Date",
-              type: "date",
-            }),
-            // 11. Tracking Number (existing)
             defineField({
               name: "trackingNumber",
               title: "Tracking Number",
               type: "string",
-            }),
-            // 12. Tracking URL (NEW -- LIST-05)
-            defineField({
-              name: "trackingUrl",
-              title: "Tracking URL",
-              type: "string",
-              description: "Full tracking URL (e.g., https://www.fedex.com/...)",
-            }),
-            // 13. Files (NEW -- PROC-03) (was 12)
-            defineField({
-              name: "files",
-              title: "Files",
-              type: "array",
-              of: [
-                defineArrayMember({
-                  type: "object",
-                  fields: [
-                    defineField({
-                      name: "label",
-                      title: "Label",
-                      type: "string",
-                      description: 'e.g., "COM form -- Kravet", "Receipt 04/01"',
-                    }),
-                    defineField({
-                      name: "file",
-                      title: "File",
-                      type: "string",
-                      description: "Vercel Blob pathname",
-                      components: { input: BlobFileInput },
-                    }),
-                  ],
-                  preview: {
-                    select: { title: "label", subtitle: "file" },
-                    prepare: ({ title, subtitle }) => ({
-                      title: title || "Untitled file",
-                      subtitle: subtitle ? subtitle.split("/").pop() : "No file",
-                    }),
-                  },
-                }),
-              ],
-            }),
-            // 14. Notes (NEW -- PROC-01) (was 13)
-            defineField({
-              name: "notes",
-              title: "Notes",
-              type: "text",
-              rows: 3,
             }),
           ],
           preview: {

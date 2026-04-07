@@ -79,7 +79,8 @@ button[data-tone="primary"][data-ui="Button"]:not([mode="bleed"]):not([mode="gho
 
 /* ===== STATUS BADGES (Published/Draft) — subtle pills ===== */
 [data-ui="StatusButton"],
-[data-testid="review-changes-button"] {
+[data-testid="review-changes-button"],
+[data-ui="Badge"] {
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
 }
@@ -96,15 +97,10 @@ select,
   --input-border-color: #E2DFDC !important;
 }
 
-/* Rich text toolbar — scoped to Toolbar only, NOT all MenuButton elements.
-   (Global [data-ui="MenuButton"] would override tone colors on status dropdowns.) */
-[data-ui="Toolbar"] {
+/* Rich text toolbar */
+[data-ui="Toolbar"],
+[data-ui="MenuButton"] {
   --card-bg-color: #F0EEEB !important;
-}
-
-/* Procurement table row hover */
-[data-procurement-row]:hover {
-  background-color: rgba(0, 0, 0, 0.025);
 }
 
 /* ===== SIDEBAR / PANE LIST — match main bg ===== */
@@ -117,18 +113,4 @@ select,
 [data-testid="pane-header"] {
   --card-bg-color: #F0EEEB !important;
   --card-fg-color: #0F172A !important;
-}
-
-/* ===== DOCUMENT EDITOR WIDTH ===== */
-/* Sanity Studio's FormContainer is hardcoded to max-width: 640px.
-   Override to fill the available document pane width instead. */
-[class*='FormContainer'] {
-  max-width: 900px !important;
-}
-
-/* ===== DIALOG BACKDROP — gray overlay (Phase 23, EDIT-01) ===== */
-/* Sanity UI Dialog sets background via --card-backdrop-color but
-   the global [data-ui] override breaks it. Restore explicitly. */
-[data-ui="Dialog"] {
-  background: rgba(0, 0, 0, 0.4) !important;
 }

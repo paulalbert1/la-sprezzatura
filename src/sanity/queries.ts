@@ -226,9 +226,7 @@ export const PROJECT_DETAIL_QUERY = `
         installDate,
         retailPrice,
         "savings": retailPrice - clientCost,
-        trackingNumber,
-        manufacturer,
-        quantity
+        trackingNumber
       },
       "contractors": contractors[] {
         "name": contractor->name,
@@ -498,7 +496,10 @@ export const SEND_UPDATE_PROJECT_QUERY = `
       name, date, completed
     },
     ...select(engagementType == "full-interior-design" => {
-      "procurementItems": procurementItems[] { status }
+      "procurementItems": procurementItems[] {
+        name, status, installDate, retailPrice,
+        "savings": retailPrice - clientCost
+      }
     }),
     artifacts[] {
       _key, artifactType, customTypeName,
@@ -624,93 +625,42 @@ export const RENDERING_SETTINGS_QUERY = `
   }
 `;
 
-// -- Phase 26: Admin Project Queries --
+// -- Phase 28: Admin Artifact Queries --
 
-// GROQ: All projects for admin list view (no portal/client scoping)
-export const ADMIN_PROJECTS_QUERY = `
-  *[_type == "project"] | order(title asc) {
-    _id,
-    title,
-    pipelineStage,
-    engagementType,
-    projectStatus,
-    "clientName": clients[isPrimary == true][0].client->name
-  }
-`;
-
-export async function getAdminProjects() {
-  return sanityClient.fetch(ADMIN_PROJECTS_QUERY);
-}
-
-// GROQ: Single project detail for admin overview/edit
-export const ADMIN_PROJECT_DETAIL_QUERY = `
+// GROQ: Admin artifact data for the artifact manager
+const ADMIN_ARTIFACT_QUERY = `
   *[_type == "project" && _id == $projectId][0] {
     _id,
     title,
-    pipelineStage,
-    engagementType,
-    projectStatus,
-    "clientName": clients[isPrimary == true][0].client->name,
-    "clientId": clients[isPrimary == true][0].client->_id,
-    "procurementCount": count(procurementItems),
-    "milestoneCount": count(milestones),
-    "artifactCount": count(artifacts),
-    "lastUpdateSentAt": updateLog | order(sentAt desc) [0].sentAt
-  }
-`;
-
-export async function getAdminProjectDetail(projectId: string) {
-  return sanityClient.fetch(ADMIN_PROJECT_DETAIL_QUERY, { projectId });
-}
-
-// GROQ: Count of active projects (for dashboard card)
-export const ACTIVE_PROJECT_COUNT_QUERY = `
-  count(*[_type == "project" && projectStatus == "active"])
-`;
-
-export async function getActiveProjectCount() {
-  return sanityClient.fetch(ACTIVE_PROJECT_COUNT_QUERY);
-}
-
-// GROQ: All clients for admin dropdowns
-export const ALL_CLIENTS_QUERY = `
-  *[_type == "client"] | order(name asc) { _id, name }
-`;
-
-export async function getAllClients() {
-  return sanityClient.fetch(ALL_CLIENTS_QUERY);
-}
-
-// -- Phase 27: Admin Procurement Queries --
-
-// Admin procurement data -- includes clientCost (admin-only field, not in portal queries)
-const ADMIN_PROCUREMENT_QUERY = `
-  *[_type == "project" && _id == $projectId][0] {
-    _id,
-    title,
-    "procurementItems": procurementItems[] {
+    "artifacts": artifacts[] {
       _key,
-      name,
-      manufacturer,
-      status,
-      quantity,
-      retailPrice,
-      clientCost,
-      orderDate,
-      expectedDeliveryDate,
-      installDate,
-      trackingNumber,
-      trackingUrl,
-      files[] {
-        _key,
-        label,
-        file
+      artifactType,
+      customTypeName,
+      currentVersionKey,
+      "signedFile": signedFile {
+        "asset": asset-> { url, originalFilename }
       },
-      notes
+      "versions": versions[] {
+        _key,
+        "file": file {
+          "asset": asset-> { url, originalFilename, mimeType, size }
+        },
+        uploadedAt,
+        note
+      },
+      "decisionLog": decisionLog[] {
+        _key, action, versionKey, clientId, clientName, feedback, timestamp
+      },
+      "investmentSummary": investmentSummary {
+        tiers[] { _key, name, description, lineItems[] { _key, name, price } },
+        selectedTierKey,
+        eagerness,
+        reservations
+      }
     }
   }
 `;
 
-export async function getAdminProcurementData(projectId: string) {
-  return sanityClient.fetch(ADMIN_PROCUREMENT_QUERY, { projectId });
+export async function getAdminArtifactData(projectId: string) {
+  return sanityClient.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
 }

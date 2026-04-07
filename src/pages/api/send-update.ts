@@ -3,7 +3,27 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { sanityWriteClient } from "../../sanity/writeClient";
 import { generatePortalToken } from "../../lib/generateToken";
-import { PROCUREMENT_STAGES } from "../../lib/procurementStages";
+import { formatCurrency } from "../../lib/formatCurrency";
+
+function formatStatusText(status: string): string {
+  return status.charAt(0).toUpperCase() + status.slice(1).replace(/-/g, " ");
+}
+
+function getStatusColor(status: string): string {
+  switch (status) {
+    case "ordered":
+    case "warehouse":
+    case "in-transit":
+      return "#C4836A"; // terracotta
+    case "pending":
+      return "#8A8478"; // stone
+    case "delivered":
+    case "installed":
+      return "#059669"; // emerald
+    default:
+      return "#8A8478";
+  }
+}
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -64,32 +84,36 @@ function buildSendUpdateEmail(
       </div>`;
   }
 
-  // Procurement summary section
+  // Procurement section
   let procurementHtml = "";
   if (showProcurement && project.procurementItems?.length > 0) {
-    // Count items per status stage, normalizing legacy "pending" to "not-yet-ordered"
-    const statusCounts: Record<string, number> = {};
-    for (const item of project.procurementItems) {
-      const status = item.status === "pending" ? "not-yet-ordered" : (item.status || "not-yet-ordered");
-      statusCounts[status] = (statusCounts[status] || 0) + 1;
-    }
-
-    // Build rows in pipeline order, only for stages with items
-    const rows = PROCUREMENT_STAGES
-      .filter((stage) => (statusCounts[stage.value] || 0) > 0)
-      .map((stage) => {
-        const count = statusCounts[stage.value];
-        return `
+    const rows = project.procurementItems
+      .map(
+        (item: any) => `
         <tr>
           <td style="padding:8px 12px;font-size:14px;color:#2C2926;border-bottom:1px solid #F0ECE6;">
-            ${stage.title}
+            ${item.name || "Untitled"}
+          </td>
+          <td style="padding:8px 12px;font-size:14px;border-bottom:1px solid #F0ECE6;text-align:center;">
+            <span style="color:${getStatusColor(item.status || "pending")};">${formatStatusText(item.status || "pending")}</span>
           </td>
           <td style="padding:8px 12px;font-size:14px;color:#8A8478;border-bottom:1px solid #F0ECE6;text-align:right;">
-            ${count} ${count === 1 ? "item" : "items"}
+            ${item.installDate ? formatDate(item.installDate) : ""}
           </td>
-        </tr>`;
-      })
+        </tr>`,
+      )
       .join("");
+
+    // Compute total savings
+    const totalSavings = project.procurementItems.reduce(
+      (sum: number, item: any) => sum + (item.savings || 0),
+      0,
+    );
+
+    const savingsLine =
+      totalSavings > 0
+        ? `<p style="margin:8px 0 0;font-size:14px;color:#059669;font-weight:500;">You saved ${formatCurrency(totalSavings)} vs. retail</p>`
+        : "";
 
     procurementHtml = `
       <div style="margin:24px 0;">
@@ -97,8 +121,14 @@ function buildSendUpdateEmail(
           Procurement
         </h2>
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr>
+            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:left;border-bottom:2px solid #E5E2DE;">Item</th>
+            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:center;border-bottom:2px solid #E5E2DE;">Status</th>
+            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:right;border-bottom:2px solid #E5E2DE;">Install Date</th>
+          </tr>
           ${rows}
         </table>
+        ${savingsLine}
       </div>`;
   }
 
@@ -184,8 +214,11 @@ export const POST: APIRoute = async ({ request }) => {
         _id, title, engagementType,
         clients[] { client-> { _id, name, email } },
         milestones[] | order(date asc) { name, date, completed },
-        ...select(engagementType == "full-interior-design" => {
-          "procurementItems": procurementItems[] { status }
+        select(engagementType == "full-interior-design" => {
+          "procurementItems": procurementItems[] {
+            name, status, installDate, retailPrice,
+            "savings": retailPrice - clientCost
+          }
         }),
         artifacts[] {
           _key, artifactType, customTypeName,
