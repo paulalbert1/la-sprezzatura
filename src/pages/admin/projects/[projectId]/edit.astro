@@ -1,0 +1,33 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import ProjectEditForm from "../../../../components/admin/ProjectEditForm.tsx";
+import { getAdminProjectDetail, getAllClients } from "../../../../sanity/queries";
+
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/admin/projects");
+}
+
+const [project, clients] = await Promise.all([
+  getAdminProjectDetail(projectId),
+  getAllClients(),
+]);
+
+if (!project) {
+  return Astro.redirect("/admin/projects");
+}
+
+const breadcrumbs = [
+  { label: "Projects", href: "/admin/projects" },
+  { label: project.title, href: "/admin/projects/" + project._id },
+  { label: "Edit" },
+];
+---
+
+<AdminLayout title={"Edit " + project.title + " | La Sprezzatura"} pageTitle={"Edit " + project.title} breadcrumbs={breadcrumbs}>
+  <div class="max-w-xl">
+    <ProjectEditForm client:load project={project} clients={clients} />
+  </div>
+</AdminLayout>
