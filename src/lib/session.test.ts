@@ -76,10 +76,4 @@ describe("session module", () => {
     expect(sessionSource).toContain("'contractor'");
     expect(sessionSource).toContain("'building_manager'");
   });
-
-  // ---- Admin role tests (Phase 25 Task 2) ----
-
-  it("SessionData role type includes admin", () => {
-    expect(sessionSource).toContain("'admin'");
-  });
 });

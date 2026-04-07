@@ -148,4 +148,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-07 — Phase 27 (Procurement Editor) complete — full CRUD in custom admin*
+*Last updated: 2026-04-04 — Milestone v4.0 (Project Schedule) started*

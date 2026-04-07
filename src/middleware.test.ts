@@ -91,28 +91,4 @@ describe("middleware", () => {
   it("sets context.locals.buildingManagerEmail for building manager routes", () => {
     expect(middlewareSource).toContain("context.locals.buildingManagerEmail");
   });
-
-  // ---- Admin middleware tests (Phase 25 Task 2) ----
-
-  it("allows /admin/login without session check", () => {
-    expect(middlewareSource).toContain("/admin/login");
-  });
-
-  it("routes /admin/* to admin role check", () => {
-    expect(middlewareSource).toContain('"/admin"');
-  });
-
-  it("checks session.role for admin routes", () => {
-    expect(middlewareSource).toMatch(
-      /session\.role\s*!==\s*["']admin["']/,
-    );
-  });
-
-  it("redirects to /admin/login for unauthenticated admin requests", () => {
-    expect(middlewareSource).toContain('redirect("/admin/login")');
-  });
-
-  it("sets context.locals.adminEmail for admin routes", () => {
-    expect(middlewareSource).toContain("context.locals.adminEmail");
-  });
 });

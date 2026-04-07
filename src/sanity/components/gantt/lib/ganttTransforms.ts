@@ -127,7 +127,7 @@ export function procurementToTask(
     open: true,
     progress: 0,
     _category: "procurement",
-    _status: item.status || "not-yet-ordered",
+    _status: item.status || "pending",
   };
 }
 

@@ -44,11 +44,6 @@ if (tokenData.dualRole) {
 // Single role: create session and redirect to appropriate dashboard
 const role = tokenData.role || 'client';
 await createSession(Astro.cookies, tokenData.entityId, role);
-const dashboardMap: Record<string, string> = {
-  admin: '/admin/dashboard',
-  contractor: '/workorder/dashboard',
-  building_manager: '/building/dashboard',
-};
-const dashboard = dashboardMap[role] || '/portal/dashboard';
+const dashboard = role === 'contractor' ? '/workorder/dashboard' : '/portal/dashboard';
 return Astro.redirect(dashboard);
 ---

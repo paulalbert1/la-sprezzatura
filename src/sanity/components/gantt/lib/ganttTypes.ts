@@ -53,10 +53,14 @@ export interface ResolvedContractor {
   }>;
 }
 
-/** Procurement item status values — derived from shared constants */
-import type { ProcurementStageKey } from "../../../../lib/procurementStages";
-
-export type ProcurementStatus = ProcurementStageKey;
+/** Procurement item status values */
+export type ProcurementStatus =
+  | "pending"
+  | "ordered"
+  | "warehouse"
+  | "in-transit"
+  | "delivered"
+  | "installed";
 
 /** The Sanity project document data shape used by the Gantt view */
 export interface SanityProjectData {
