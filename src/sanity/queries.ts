@@ -664,3 +664,24 @@ const ADMIN_ARTIFACT_QUERY = `
 export async function getAdminArtifactData(projectId: string) {
   return sanityClient.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
 }
+
+// -- Phase 28: Admin Schedule Queries --
+
+// GROQ: Admin schedule data for the Gantt editor
+const ADMIN_SCHEDULE_QUERY = `
+  *[_type == "project" && _id == $projectId][0] {
+    _id,
+    title,
+    engagementType,
+    isCommercial,
+    contractors[]{ ..., contractor->{_id, name, company, trades} },
+    milestones,
+    procurementItems[] { _key, name, status, installDate, orderDate, expectedDeliveryDate },
+    customEvents,
+    scheduleDependencies
+  }
+`;
+
+export async function getAdminScheduleData(projectId: string) {
+  return sanityClient.fetch(ADMIN_SCHEDULE_QUERY, { projectId });
+}
