@@ -70,6 +70,8 @@ All typography uses the project's established font families from `global.css`. A
 
 All colors use the project's established Tailwind theme tokens defined in `src/styles/global.css`.
 
+**Focal point:** The "Add Item" button in terracotta fill (`bg-terracotta text-white`) positioned above the table is the primary visual anchor on the page.
+
 | Role | Value | Tailwind Class | Usage |
 |------|-------|----------------|-------|
 | Dominant (60%) | `#FAF8F5` | `bg-cream` | Page background, panel background, table background |
@@ -153,7 +155,7 @@ Badge shape: `inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitesp
 | Status | 140px (`w-[140px]`) | center | Clickable badge with dropdown (D-01) |
 | Expected Delivery | 120px (`w-[120px]`) | right | Date formatted as "MMM d" via date-fns `format()`. Red if overdue (D-05). Em dash if not set. |
 | Carrier | 80px (`w-20`) | center | Carrier icon linked to trackingUrl (D-06). Gray monospace tracking number if no URL. Empty if neither. |
-| Actions | 48px (`w-12`) | center | Three-dot overflow menu icon (MoreVertical from lucide-react) |
+| Actions | 48px (`w-12`) | center | Three-dot overflow menu icon (MoreVertical from lucide-react, `aria-label="Item actions"`) |
 
 **Table sorting (Claude's discretion):** Sort by status pipeline order (ascending: not-yet-ordered first, installed last) using the `STATUS_PRIORITY` map from `ProcurementTable.astro`. This puts actionable items at the top.
 
@@ -198,7 +200,7 @@ Badge shape: `inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitesp
 |    Files (upload zone)                     |
 |    Notes (textarea)                        |
 |                                            |
-|  [Save Item]  [Cancel]                     |
+|  [Save Item]  [Discard Changes]            |
 +--------------------------------------------+
 ```
 
@@ -206,7 +208,7 @@ Badge shape: `inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitesp
 
 **Panel body:** `overflow-y-auto flex-1 px-6 py-6`. Form fields stack vertically with `gap-4` (16px).
 
-**Panel footer:** `px-6 py-4 border-t border-stone-light/30 flex items-center gap-4`. "Save Item" button left, "Cancel" text link right.
+**Panel footer:** `px-6 py-4 border-t border-stone-light/30 flex items-center gap-4`. "Save Item" button left, "Discard Changes" text link right.
 
 **Backdrop:** `fixed inset-0 bg-black/30 z-40`. Click on backdrop closes the panel.
 
@@ -260,7 +262,7 @@ All form inputs follow the established pattern from `ProjectEditForm.tsx`:
 
 ### Overflow Menu (D-09)
 
-**Trigger:** `MoreVertical` icon (lucide-react), 16px, `text-stone hover:text-charcoal cursor-pointer transition-colors`
+**Trigger:** `MoreVertical` icon (lucide-react), 16px, `text-stone hover:text-charcoal cursor-pointer transition-colors`, `aria-label="Item actions"`
 
 **Menu:** Positioned absolutely below-left of the trigger. `bg-white rounded-lg shadow-lg border border-stone-light/30 py-1 z-30 min-w-[140px]`
 
@@ -280,7 +282,7 @@ All form inputs follow the established pattern from `ProjectEditForm.tsx`:
 - Heading: `text-sm font-semibold font-body text-charcoal` -- "Remove [Item Name]?"
 - Body: `text-sm text-stone font-body mt-2` -- "This item and its files will be permanently removed."
 - Button row: `flex items-center gap-3 mt-6 justify-end`
-  - Cancel: `text-sm text-stone hover:text-charcoal font-body transition-colors cursor-pointer`
+  - Keep Item: `text-sm text-stone hover:text-charcoal font-body transition-colors cursor-pointer`
   - Remove: `bg-red-600 text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-red-700 transition-colors`
 
 ### Carrier Icon Links (D-06)
@@ -315,7 +317,7 @@ All form inputs follow the established pattern from `ProjectEditForm.tsx`:
 | Panel heading (edit) | "Edit [Item Name]" (interpolated with actual item name) |
 | Save button (add) | "Add Item" |
 | Save button (edit) | "Save Changes" |
-| Cancel link | "Cancel" |
+| Discard link (panel footer) | "Discard Changes" |
 | Empty state heading | "No procurement items yet" |
 | Empty state body | "Add your first item to start tracking procurement for this project." |
 | Empty state CTA | "Add Item" (same styling as primary CTA, centered below empty state text) |
@@ -326,7 +328,7 @@ All form inputs follow the established pattern from `ProjectEditForm.tsx`:
 | Success: item updated | "Changes saved" |
 | Success: item removed | "Item removed" |
 | Success: status changed | (no toast -- optimistic badge update is the feedback) |
-| Destructive: remove item | Dialog heading: "Remove [Item Name]?" / Dialog body: "This item and its files will be permanently removed." / Confirm button: "Remove" / Cancel: "Cancel" |
+| Destructive: remove item | Dialog heading: "Remove [Item Name]?" / Dialog body: "This item and its files will be permanently removed." / Confirm button: "Remove" / Dismiss button: "Keep Item" |
 | File upload zone | "Drop files here or click to browse" |
 | File label placeholder | "Add label..." |
 | Tracking URL placeholder | "https://www.fedex.com/..." |
@@ -391,10 +393,10 @@ Messages appear at the top of the slide-out panel body (for panel actions) or at
 2. Menu appears with "Edit" and "Remove" options
 3. User clicks "Remove"
 4. Confirmation dialog appears centered on screen with backdrop
-5. Dialog shows: "Remove [Item Name]?" with body text and Cancel/Remove buttons
+5. Dialog shows: "Remove [Item Name]?" with body text and "Keep Item" / "Remove" buttons
 6. User clicks "Remove": dialog closes, API call fires, item removed from local state optimistically
 7. On API error: item re-added to local state, error message shown
-8. User clicks "Cancel" or backdrop: dialog closes, no action
+8. User clicks "Keep Item" or backdrop: dialog closes, no action
 
 ### Keyboard Accessibility
 
@@ -407,7 +409,7 @@ Messages appear at the top of the slide-out panel body (for panel actions) or at
 | Menu item | Enter/Space | Activate (Edit or Remove) |
 | Menu | Escape | Close |
 | Slide-out panel | Escape | Close panel |
-| Confirmation dialog | Escape | Close (cancel) |
+| Confirmation dialog | Escape | Close (keep item) |
 | File drop zone | Enter/Space | Open file picker |
 | All buttons | Tab | Focusable in DOM order |
 
