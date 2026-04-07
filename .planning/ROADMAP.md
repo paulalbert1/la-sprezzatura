@@ -559,6 +559,13 @@ Plans:
   1. Liz opens a project's procurement page and sees all items with status badges, install dates, and tracking info matching the Phase 23 visual spec
   2. Changing an item's status via dropdown persists to Sanity immediately; overdue items (past install date, non-delivered) show red date text
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 27-01-PLAN.md -- Shared utilities (isOverdue extraction, carrierFromUrl, GROQ query) with tests
+- [ ] 27-02-PLAN.md -- API routes (status update, item CRUD, file upload) with auth guards and tests
+- [ ] 27-03-PLAN.md -- SSR Astro page and ProcurementEditor React island (table, status dropdown, slide-out panel, file upload, confirmation dialog)
+- [ ] 27-04-PLAN.md -- Visual and functional verification checkpoint
 ### Phase 28: Artifacts + Schedule
 **Goal**: Liz can manage artifact versions and view/edit the project schedule from the admin
 **Depends on**: Phase 26
