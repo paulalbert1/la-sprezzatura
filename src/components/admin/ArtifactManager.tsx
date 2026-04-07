@@ -469,16 +469,13 @@ export default function ArtifactManager({
                 className={`bg-cream-dark border border-stone-light/20 rounded-lg transition-colors ${
                   isProposal ? "md:col-span-2" : ""
                 } ${isExpanded ? "p-6" : "p-4 cursor-pointer hover:border-stone-light/40"}`}
+                onClick={!isExpanded ? () => setExpandedKey(item._key) : undefined}
               >
                 {/* Card Header */}
                 <div
                   className="flex items-center justify-between"
-                  onClick={() =>
-                    isExpanded
-                      ? setExpandedKey(null)
-                      : setExpandedKey(item._key)
-                  }
-                  style={{ cursor: "pointer" }}
+                  onClick={isExpanded ? () => setExpandedKey(null) : undefined}
+                  style={isExpanded ? { cursor: "pointer" } : undefined}
                 >
                   <div className="flex items-center gap-2">
                     <span
@@ -521,10 +518,19 @@ export default function ArtifactManager({
                 {/* Collapsed Content */}
                 {!isExpanded && (
                   <>
-                    <p className="text-sm font-body text-charcoal mt-2 truncate">
-                      {currentVersion?.file?.asset?.originalFilename ||
-                        "No file"}
-                    </p>
+                    {currentVersion?.file?.asset?.url ? (
+                      <a
+                        href={currentVersion.file.asset.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-body text-terracotta hover:text-terracotta-light transition-colors mt-2 truncate block"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {currentVersion.file.asset.originalFilename || "Download"}
+                      </a>
+                    ) : (
+                      <p className="text-sm font-body text-charcoal mt-2 truncate">No file</p>
+                    )}
                     <p className="text-xs text-stone font-body mt-1">
                       {item.versions.length} version
                       {item.versions.length !== 1 ? "s" : ""} - Updated{" "}
@@ -651,10 +657,18 @@ export default function ArtifactManager({
                                   : "opacity-60 pl-3"
                               }
                             >
-                              <p className="text-sm font-body text-charcoal truncate">
-                                {version.file?.asset?.originalFilename ||
-                                  "File"}
-                              </p>
+                              {version.file?.asset?.url ? (
+                                <a
+                                  href={version.file.asset.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm font-body text-terracotta hover:text-terracotta-light transition-colors truncate block"
+                                >
+                                  {version.file.asset.originalFilename || "Download"}
+                                </a>
+                              ) : (
+                                <p className="text-sm font-body text-charcoal truncate">File</p>
+                              )}
                               <p className="text-xs text-stone font-body">
                                 {format(
                                   new Date(version.uploadedAt),
