@@ -89,7 +89,14 @@ export default function ArtifactManager({
   projectId,
   projectTitle,
 }: ArtifactManagerProps) {
-  const [items, setItems] = useState<Artifact[]>(initialArtifacts);
+  const [items, setItems] = useState<Artifact[]>(
+    (initialArtifacts || []).map((a) => ({
+      ...a,
+      versions: a.versions || [],
+      decisionLog: a.decisionLog || [],
+      notes: a.notes || [],
+    })),
+  );
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState(false);
