@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isOverdue } from '../../../lib/isOverdue'
+import { isOverdue } from './isOverdue'
 
 describe('isOverdue', () => {
   const pastDate = '2020-01-01'

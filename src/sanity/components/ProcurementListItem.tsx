@@ -7,6 +7,7 @@ import {
   PROCUREMENT_STAGE_META,
   type ProcurementStageKey,
 } from '../../lib/procurementStages'
+import { isOverdue } from '../../lib/isOverdue'
 
 /**
  * Explicit status pill colors — bypasses @sanity/ui theming entirely.
@@ -44,23 +45,6 @@ interface ProcurementItemValue {
   expectedDeliveryDate?: string
   trackingNumber?: string
   trackingUrl?: string
-}
-
-/**
- * Determines whether a procurement item is overdue.
- *
- * Overdue = expectedDeliveryDate is in the past AND status is not
- * "delivered" or "installed" (D-09, LIST-02).
- *
- * Exported for unit testing.
- */
-export function isOverdue(
-  expectedDeliveryDate: string | undefined,
-  status: string | undefined,
-): boolean {
-  if (!expectedDeliveryDate) return false
-  if (status === 'delivered' || status === 'installed') return false
-  return new Date(expectedDeliveryDate) < new Date()
 }
 
 /**
