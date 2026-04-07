@@ -36,6 +36,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       const type = formData.get("type") as string;
       const file = formData.get("file");
       const note = (formData.get("note") as string) || "";
+      const customTypeName = (formData.get("customTypeName") as string) || "";
 
       if (!projectId || !type) {
         return new Response(
@@ -80,6 +81,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         _key: artifactKey,
         _type: "artifact",
         artifactType: type,
+        ...(customTypeName && { customTypeName }),
         currentVersionKey: versionKey,
         versions: [
           {

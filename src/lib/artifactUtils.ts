@@ -85,7 +85,7 @@ export const ARTIFACT_TYPES = [
 export const ARTIFACT_LABELS: Record<string, string> = {
   proposal: "Proposal",
   "floor-plan": "Floor Plan",
-  "design-board": "Design Board",
+  "design-board": "Design Concept",
   contract: "Contract",
   warranty: "Warranty",
   "close-document": "Close Document",
@@ -97,8 +97,8 @@ export const ARTIFACT_LABELS: Record<string, string> = {
  * For unknown types, returns the customName if provided, or title-cases the type.
  */
 export function getArtifactLabel(type: string, customName?: string): string {
-  if (ARTIFACT_LABELS[type]) return ARTIFACT_LABELS[type];
   if (customName) return customName;
+  if (ARTIFACT_LABELS[type]) return ARTIFACT_LABELS[type];
   return type.charAt(0).toUpperCase() + type.slice(1).replace(/-/g, " ");
 }
 

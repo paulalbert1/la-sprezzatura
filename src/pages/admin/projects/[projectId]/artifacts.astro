@@ -18,11 +18,11 @@ if (!data) {
 const breadcrumbs = [
   { label: "Projects", href: "/admin/projects" },
   { label: data.title, href: `/admin/projects/${projectId}` },
-  { label: "Artifacts" },
+  { label: "Documents" },
 ];
 ---
 
-<AdminLayout title={data.title + " — Artifacts"} pageTitle="Artifacts" breadcrumbs={breadcrumbs}>
+<AdminLayout title={data.title + " — Documents"} pageTitle="Documents" breadcrumbs={breadcrumbs}>
   <ArtifactManager
     client:load
     artifacts={data.artifacts || []}

@@ -85,12 +85,12 @@ function getActionIcon(action: string) {
 }
 
 export default function ArtifactManager({
-  artifacts: initialArtifacts,
+  artifacts: initialDocuments,
   projectId,
   projectTitle,
 }: ArtifactManagerProps) {
   const [items, setItems] = useState<Artifact[]>(
-    (initialArtifacts || []).map((a) => ({
+    (initialDocuments || []).map((a) => ({
       ...a,
       versions: a.versions || [],
       decisionLog: a.decisionLog || [],
@@ -116,6 +116,7 @@ export default function ArtifactManager({
 
   // Add form state
   const [addType, setAddType] = useState<string>(ARTIFACT_TYPES[0]);
+  const [addName, setAddName] = useState("");
   const [addFile, setAddFile] = useState<File | null>(null);
   const [addNote, setAddNote] = useState("");
   const [adding, setAdding] = useState(false);
@@ -255,7 +256,7 @@ export default function ArtifactManager({
     }
   }
 
-  // --- Add Artifact ---
+  // --- Add Document ---
   async function handleAddArtifact() {
     if (!addFile) return;
     setAdding(true);
@@ -265,6 +266,7 @@ export default function ArtifactManager({
     formData.append("action", "add");
     formData.append("projectId", projectId);
     formData.append("type", addType);
+    if (addName.trim()) formData.append("customTypeName", addName.trim());
     formData.append("file", addFile);
     formData.append("note", addNote);
 
@@ -279,6 +281,7 @@ export default function ArtifactManager({
       const newArtifact: Artifact = {
         _key: data.artifactKey,
         artifactType: addType,
+        customTypeName: addName.trim() || undefined,
         currentVersionKey: data.versionKey,
         versions: [
           {
@@ -309,6 +312,7 @@ export default function ArtifactManager({
       setShowAddForm(false);
       setAddFile(null);
       setAddNote("");
+      setAddName("");
       setAddType(ARTIFACT_TYPES[0]);
     } catch (err: any) {
       setError(err.message || "Failed to add artifact.");
@@ -347,17 +351,17 @@ export default function ArtifactManager({
   // --- Render ---
   return (
     <div>
-      {/* Page heading with Add Artifact button */}
+      {/* Page heading with Add Document button */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-heading font-normal text-charcoal">
-          Artifacts
+          Documents
         </h2>
         <button
           type="button"
           className={ctaClasses}
           onClick={() => setShowAddForm(true)}
         >
-          <Plus size={16} /> Add Artifact
+          <Plus size={16} /> Add Document
         </button>
       </div>
 
@@ -375,11 +379,11 @@ export default function ArtifactManager({
         </div>
       )}
 
-      {/* Add Artifact Form */}
+      {/* Add Document Form */}
       {showAddForm && (
         <div className="bg-cream-dark border border-stone-light/20 rounded-lg p-6 mb-6">
           <h3 className="text-sm font-semibold font-body text-charcoal mb-4">
-            Add New Artifact
+            Add New Document
           </h3>
           <div className="space-y-4">
             <div>
@@ -395,6 +399,16 @@ export default function ArtifactManager({
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className={labelClasses}>Name <span className="normal-case tracking-normal text-stone-light">(optional — e.g. "HVAC Warranty")</span></label>
+              <input
+                type="text"
+                className={inputClasses}
+                placeholder={ARTIFACT_LABELS[addType] || ""}
+                value={addName}
+                onChange={(e) => setAddName(e.target.value)}
+              />
             </div>
             <div>
               <label className={labelClasses}>File</label>
@@ -426,6 +440,7 @@ export default function ArtifactManager({
                   setShowAddForm(false);
                   setAddFile(null);
                   setAddNote("");
+                  setAddName("");
                   setAddType(ARTIFACT_TYPES[0]);
                 }}
               >
@@ -440,17 +455,17 @@ export default function ArtifactManager({
       {items.length === 0 && !showAddForm && (
         <div className="text-center py-12">
           <h3 className="text-sm font-semibold font-body text-charcoal">
-            No artifacts yet
+            No documents yet
           </h3>
           <p className="text-sm text-stone font-body mt-2">
-            Add your first artifact to start managing project documents.
+            Add your first document to get started.
           </p>
           <button
             type="button"
             className={`${ctaClasses} mt-4`}
             onClick={() => setShowAddForm(true)}
           >
-            <Plus size={16} /> Add Artifact
+            <Plus size={16} /> Add Document
           </button>
         </div>
       )}
@@ -467,7 +482,7 @@ export default function ArtifactManager({
               <div
                 key={item._key}
                 className={`bg-cream-dark border border-stone-light/20 rounded-lg transition-colors ${
-                  isProposal ? "md:col-span-2" : ""
+                  ""
                 } ${isExpanded ? "p-6" : "p-4 cursor-pointer hover:border-stone-light/40"}`}
                 onClick={!isExpanded ? () => setExpandedKey(item._key) : undefined}
               >
@@ -492,7 +507,7 @@ export default function ArtifactManager({
                       <button
                         type="button"
                         className="text-stone-light hover:text-red-600 transition-colors"
-                        aria-label="Remove artifact"
+                        aria-label="Remove document"
                         onClick={(e) => {
                           e.stopPropagation();
                           setConfirmRemove({
@@ -757,7 +772,7 @@ export default function ArtifactManager({
                 Remove {confirmRemove.label}?
               </h3>
               <p className="text-sm text-stone font-body mt-2">
-                This artifact and all its versions will be permanently removed.
+                This document and all its versions will be permanently removed.
               </p>
               <div className="flex items-center justify-end gap-3 mt-4">
                 <button
@@ -765,7 +780,7 @@ export default function ArtifactManager({
                   className={secondaryBtnClasses}
                   onClick={() => setConfirmRemove(null)}
                 >
-                  Keep Artifact
+                  Keep Document
                 </button>
                 <button
                   type="button"
