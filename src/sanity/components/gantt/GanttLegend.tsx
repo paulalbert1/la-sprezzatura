@@ -7,8 +7,8 @@
  */
 
 import { Flex, Text } from "@sanity/ui";
-import { getContractorColor } from "./lib/ganttColors";
-import type { ResolvedContractor } from "./lib/ganttTypes";
+import { getContractorColor } from "../../../lib/gantt/ganttColors";
+import type { ResolvedContractor } from "../../../lib/gantt/ganttTypes";
 
 interface GanttLegendProps {
   contractors: ResolvedContractor[];

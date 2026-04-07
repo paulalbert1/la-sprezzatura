@@ -8,14 +8,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useClient } from "sanity";
-import { transformProjectToGanttTasks } from "../lib/ganttTransforms";
+import { transformProjectToGanttTasks } from "../../../../lib/gantt/ganttTransforms";
 import type {
   GanttTask,
   GanttLink,
   ScheduleConflict,
   ResolvedContractor,
   SanityProjectData,
-} from "../lib/ganttTypes";
+} from "../../../../lib/gantt/ganttTypes";
 
 const GANTT_QUERY = `*[_id == $docId || _id == "drafts." + $docId] | order(_id desc)[0]{
   contractors[]{ ..., contractor->{_id, name, company, trades} },
