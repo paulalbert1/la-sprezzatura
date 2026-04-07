@@ -624,3 +624,43 @@ export const RENDERING_SETTINGS_QUERY = `
     renderingExcludedUsers
   }
 `;
+
+// -- Phase 28: Admin Artifact Queries --
+
+// GROQ: Admin artifact data for the artifact manager
+const ADMIN_ARTIFACT_QUERY = `
+  *[_type == "project" && _id == $projectId][0] {
+    _id,
+    title,
+    "artifacts": artifacts[] {
+      _key,
+      artifactType,
+      customTypeName,
+      currentVersionKey,
+      "signedFile": signedFile {
+        "asset": asset-> { url, originalFilename }
+      },
+      "versions": versions[] {
+        _key,
+        "file": file {
+          "asset": asset-> { url, originalFilename, mimeType, size }
+        },
+        uploadedAt,
+        note
+      },
+      "decisionLog": decisionLog[] {
+        _key, action, versionKey, clientId, clientName, feedback, timestamp
+      },
+      "investmentSummary": investmentSummary {
+        tiers[] { _key, name, description, lineItems[] { _key, name, price } },
+        selectedTierKey,
+        eagerness,
+        reservations
+      }
+    }
+  }
+`;
+
+export async function getAdminArtifactData(projectId: string) {
+  return sanityClient.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
+}
