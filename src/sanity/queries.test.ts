@@ -11,6 +11,10 @@ import {
   PROJECT_DETAIL_QUERY,
   SITE_SETTINGS_QUERY,
   SEND_UPDATE_PROJECT_QUERY,
+  ADMIN_PROJECTS_QUERY,
+  ADMIN_PROJECT_DETAIL_QUERY,
+  ACTIVE_PROJECT_COUNT_QUERY,
+  ALL_CLIENTS_QUERY,
 } from "./queries";
 
 describe("GROQ query strings", () => {
@@ -227,6 +231,65 @@ describe("GROQ query strings", () => {
     it("includes lastUpdateSentAt from updateLog", () => {
       expect(SEND_UPDATE_PROJECT_QUERY).toContain("lastUpdateSentAt");
       expect(SEND_UPDATE_PROJECT_QUERY).toContain("updateLog");
+    });
+  });
+
+  // Phase 26: Admin Project Queries
+  describe("ADMIN_PROJECTS_QUERY", () => {
+    it("filters by project type", () => {
+      expect(ADMIN_PROJECTS_QUERY).toContain('_type == "project"');
+    });
+    it("does NOT contain portalEnabled filter (admin sees all)", () => {
+      expect(ADMIN_PROJECTS_QUERY).not.toContain("portalEnabled");
+    });
+    it("does NOT contain references($clientId) filter", () => {
+      expect(ADMIN_PROJECTS_QUERY).not.toContain("references($clientId)");
+    });
+    it("projects title, pipelineStage, engagementType, projectStatus", () => {
+      expect(ADMIN_PROJECTS_QUERY).toContain("title");
+      expect(ADMIN_PROJECTS_QUERY).toContain("pipelineStage");
+      expect(ADMIN_PROJECTS_QUERY).toContain("engagementType");
+      expect(ADMIN_PROJECTS_QUERY).toContain("projectStatus");
+    });
+    it("dereferences primary client name", () => {
+      expect(ADMIN_PROJECTS_QUERY).toContain("clients[isPrimary == true][0].client->name");
+    });
+  });
+
+  describe("ADMIN_PROJECT_DETAIL_QUERY", () => {
+    it("filters by _id == $projectId", () => {
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("_id == $projectId");
+    });
+    it("does NOT contain portalEnabled or references($clientId)", () => {
+      expect(ADMIN_PROJECT_DETAIL_QUERY).not.toContain("portalEnabled");
+      expect(ADMIN_PROJECT_DETAIL_QUERY).not.toContain("references($clientId)");
+    });
+    it("includes count projections for procurement, milestones, artifacts", () => {
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("count(procurementItems)");
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("count(milestones)");
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("count(artifacts)");
+    });
+    it("includes updateLog for lastUpdateSentAt", () => {
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("updateLog");
+      expect(ADMIN_PROJECT_DETAIL_QUERY).toContain("lastUpdateSentAt");
+    });
+  });
+
+  describe("ACTIVE_PROJECT_COUNT_QUERY", () => {
+    it("uses count() function", () => {
+      expect(ACTIVE_PROJECT_COUNT_QUERY).toContain("count(");
+    });
+    it("filters by projectStatus == active", () => {
+      expect(ACTIVE_PROJECT_COUNT_QUERY).toContain('projectStatus == "active"');
+    });
+  });
+
+  describe("ALL_CLIENTS_QUERY", () => {
+    it("filters by client type", () => {
+      expect(ALL_CLIENTS_QUERY).toContain('_type == "client"');
+    });
+    it("orders by name ascending", () => {
+      expect(ALL_CLIENTS_QUERY).toContain("order(name asc)");
     });
   });
 });
