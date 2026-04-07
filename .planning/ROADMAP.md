@@ -519,7 +519,7 @@ Phases execute in numeric order: 22 -> 23 -> 24
 **Strategic reference:** `.planning/references/v5-custom-admin-plan.md`
 
 - [x] **Phase 25: Admin Shell + Auth** - Magic-link login, JWT session, AdminLayout with sidebar nav, middleware protection for `/admin/*` (completed 2026-04-06)
-- [ ] **Phase 26: Project List + Overview** - Filterable project table, project overview page, core field editing
+- [x] **Phase 26: Project List + Overview** - Filterable project table, project overview page, core field editing (completed 2026-04-07)
 - [ ] **Phase 27: Procurement Editor** - Procurement table editor with status badge dropdown, overdue detection, tracking links (carry-forward from Phase 23 design)
 - [ ] **Phase 28: Artifacts + Schedule** - Artifact version manager, Gantt schedule view relocated from Studio
 - [ ] **Phase 29: Client + Contractor CRUD** - Create/edit forms for clients and contractors
@@ -548,9 +548,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 26-01-PLAN.md -- Data layer: admin GROQ queries (list, detail, count, clients), query tests, AdminLayout breadcrumb extension, dashboard Active Projects count wiring
-- [ ] 26-02-PLAN.md -- Project list: ProjectList React island with pipeline stage filter pills and table, projects/index.astro SSR page
-- [ ] 26-03-PLAN.md -- Project overview + edit: overview hub with sub-section cards, edit form with API route, ProjectEditForm React island
+- [x] 26-01-PLAN.md -- Data layer: admin GROQ queries (list, detail, count, clients), query tests, AdminLayout breadcrumb extension, dashboard Active Projects count wiring
+- [x] 26-02-PLAN.md -- Project list: ProjectList React island with pipeline stage filter pills and table, projects/index.astro SSR page
+- [x] 26-03-PLAN.md -- Project overview + edit: overview hub with sub-section cards, edit form with API route, ProjectEditForm React island
 
 ### Phase 27: Procurement Editor
 **Goal**: Liz can add, edit, and update procurement items for a project entirely within the custom admin — no Studio required
@@ -595,7 +595,7 @@ Phase 25 → 26 → (27, 28, 29 parallel) → 30 → 31
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 25. Admin Shell + Auth | v5.0 | 2/2 | Complete   | 2026-04-06 |
-| 26. Project List + Overview | v5.0 | 0/3 | Planning complete | - |
+| 26. Project List + Overview | v5.0 | 3/3 | Complete    | 2026-04-07 |
 | 27. Procurement Editor | v5.0 | 0/TBD | Not started | - |
 | 28. Artifacts + Schedule | v5.0 | 0/TBD | Not started | - |
 | 29. Client + Contractor CRUD | v5.0 | 0/TBD | Not started | - |
