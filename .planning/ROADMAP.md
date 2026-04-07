@@ -518,7 +518,7 @@ Phases execute in numeric order: 22 -> 23 -> 24
 
 **Strategic reference:** `.planning/references/v5-custom-admin-plan.md`
 
-- [ ] **Phase 25: Admin Shell + Auth** - Magic-link login, JWT session, AdminLayout with sidebar nav, middleware protection for `/admin/*`
+- [x] **Phase 25: Admin Shell + Auth** - Magic-link login, JWT session, AdminLayout with sidebar nav, middleware protection for `/admin/*` (completed 2026-04-06)
 - [ ] **Phase 26: Project List + Overview** - Filterable project table, project overview page, core field editing
 - [ ] **Phase 27: Procurement Editor** - Procurement table editor with status badge dropdown, overdue detection, tracking links (carry-forward from Phase 23 design)
 - [ ] **Phase 28: Artifacts + Schedule** - Artifact version manager, Gantt schedule view relocated from Studio
@@ -536,8 +536,8 @@ Phases execute in numeric order: 22 -> 23 -> 24
 **Plans**: 2 plans
 
 Plans:
-- [ ] 25-01-PLAN.md -- Auth infrastructure: Sanity Studio route reclaim, session/middleware/action/verify admin role extension, login page, logout route, tests
-- [ ] 25-02-PLAN.md -- Layout shell: AdminLayout with sidebar + top bar, AdminNav with Lucide icons, dashboard with summary cards and quick links
+- [x] 25-01-PLAN.md -- Auth infrastructure: Sanity Studio route reclaim, session/middleware/action/verify admin role extension, login page, logout route, tests
+- [x] 25-02-PLAN.md -- Layout shell: AdminLayout with sidebar + top bar, AdminNav with Lucide icons, dashboard with summary cards and quick links
 
 ### Phase 26: Project List + Overview
 **Goal**: Liz can view all projects in a filterable list and open any project's overview page with links to sub-sections
@@ -545,6 +545,12 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. `/admin/projects` shows all projects with pipeline stage filter pills and displays title, stage, and engagement type for each
   2. Clicking a project opens `/admin/projects/[projectId]` showing core fields and nav links to Procurement, Schedule, Artifacts, Send Update
+**Plans**: 3 plans
+
+Plans:
+- [ ] 26-01-PLAN.md -- Data layer: admin GROQ queries (list, detail, count, clients), query tests, AdminLayout breadcrumb extension, dashboard Active Projects count wiring
+- [ ] 26-02-PLAN.md -- Project list: ProjectList React island with pipeline stage filter pills and table, projects/index.astro SSR page
+- [ ] 26-03-PLAN.md -- Project overview + edit: overview hub with sub-section cards, edit form with API route, ProjectEditForm React island
 
 ### Phase 27: Procurement Editor
 **Goal**: Liz can add, edit, and update procurement items for a project entirely within the custom admin — no Studio required
@@ -588,8 +594,8 @@ Phase 25 → 26 → (27, 28, 29 parallel) → 30 → 31
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 25. Admin Shell + Auth | v5.0 | 0/2 | Planning complete | - |
-| 26. Project List + Overview | v5.0 | 0/TBD | Not started | - |
+| 25. Admin Shell + Auth | v5.0 | 2/2 | Complete   | 2026-04-06 |
+| 26. Project List + Overview | v5.0 | 0/3 | Planning complete | - |
 | 27. Procurement Editor | v5.0 | 0/TBD | Not started | - |
 | 28. Artifacts + Schedule | v5.0 | 0/TBD | Not started | - |
 | 29. Client + Contractor CRUD | v5.0 | 0/TBD | Not started | - |
