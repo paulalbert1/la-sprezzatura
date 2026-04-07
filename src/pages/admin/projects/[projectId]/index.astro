@@ -1,0 +1,111 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import { getAdminProjectDetail } from "../../../../sanity/queries";
+import { STAGE_META } from "../../../../lib/portalStages";
+import { format } from "date-fns";
+
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/admin/projects");
+}
+
+const project = await getAdminProjectDetail(projectId);
+if (!project) {
+  return Astro.redirect("/admin/projects");
+}
+
+const breadcrumbs = [
+  { label: "Projects", href: "/admin/projects" },
+  { label: project.title },
+];
+
+function formatLabel(slug: string): string {
+  return slug?.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()) || "";
+}
+
+const STAGE_BADGE_CLASSES: Record<string, string> = {
+  "discovery": "bg-stone-light/20 text-stone",
+  "concept": "bg-amber-50 text-amber-700",
+  "design-development": "bg-terracotta/10 text-terracotta",
+  "procurement": "bg-blue-50 text-blue-700",
+  "installation": "bg-orange-50 text-orange-700",
+  "closeout": "bg-emerald-50 text-emerald-700",
+};
+
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  "active": "bg-emerald-50 text-emerald-700",
+  "completed": "bg-stone-light/20 text-stone",
+  "reopened": "bg-amber-50 text-amber-700",
+};
+
+const cards = [
+  {
+    title: "Procurement",
+    summary: project.procurementCount > 0 ? `${project.procurementCount} items` : "No items yet",
+    href: `/admin/projects/${project._id}/procurement`,
+  },
+  {
+    title: "Schedule",
+    summary: project.milestoneCount > 0 ? `${project.milestoneCount} milestones` : "No milestones yet",
+    href: `/admin/projects/${project._id}/schedule`,
+  },
+  {
+    title: "Artifacts",
+    summary: project.artifactCount > 0 ? `${project.artifactCount} files` : "No files yet",
+    href: `/admin/projects/${project._id}/artifacts`,
+  },
+  {
+    title: "Send Update",
+    summary: project.lastUpdateSentAt
+      ? `Last sent: ${format(new Date(project.lastUpdateSentAt), "MMM d")}`
+      : "No updates sent",
+    href: `/admin/projects/${project._id}/update`,
+  },
+];
+---
+
+<AdminLayout title={project.title + " | La Sprezzatura"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
+  {/* Header section */}
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h2 class="text-2xl font-heading font-normal text-charcoal">{project.title}</h2>
+      <div class="flex items-center gap-3 mt-2">
+        <span class="text-sm text-stone font-body">{formatLabel(project.engagementType)}</span>
+        <span class={"inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitespace-nowrap " + (STATUS_BADGE_CLASSES[project.projectStatus] || "")}>
+          {formatLabel(project.projectStatus)}
+        </span>
+        <span class={"inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide whitespace-nowrap " + (STAGE_BADGE_CLASSES[project.pipelineStage] || "")}>
+          {STAGE_META[project.pipelineStage]?.title || formatLabel(project.pipelineStage)}
+        </span>
+      </div>
+      <p class="text-sm text-stone-light font-body mt-1">{project.clientName || "No client assigned"}</p>
+    </div>
+    <a
+      href={"/admin/projects/" + project._id + "/edit"}
+      class="bg-terracotta text-white text-xs uppercase tracking-widest font-body px-6 py-3 rounded-lg hover:bg-terracotta-light transition-colors"
+    >
+      Edit Project
+    </a>
+  </div>
+
+  {/* Sub-section navigation cards */}
+  <div class="grid grid-cols-2 gap-6">
+    {cards.map((card) => (
+      <a
+        href={card.href}
+        class="block bg-cream-dark border border-stone-light/20 rounded-xl p-6 hover:border-stone-light/40 transition-colors"
+      >
+        <p class="text-sm font-semibold font-body text-charcoal">{card.title}</p>
+        <p class="text-xs text-stone font-body mt-1">{card.summary}</p>
+        <div class="flex justify-end mt-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-light">
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </div>
+      </a>
+    ))}
+  </div>
+</AdminLayout>
