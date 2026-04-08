@@ -60,9 +60,9 @@
   ry: 6;
 }
 
-/* === Milestone: diamond (bar resized + rotated via JS post-process) === */
+/* === Milestone: invisible bar (diamond overlay added via JS) === */
 .gantt .bar-wrapper.gantt-cat-milestone .bar {
-  fill: #A8A29E !important;
+  fill: transparent !important;
   stroke: none !important;
   stroke-width: 0 !important;
 }
@@ -135,12 +135,11 @@
   fill: #854F0B !important;
 }
 
-/* === Completed milestone: diamond + greyed === */
+/* === Completed milestone: invisible bar (diamond overlay added via JS) === */
 .gantt .bar-wrapper.gantt-milestone-completed .bar {
-  fill: #D6D3D1 !important;
+  fill: transparent !important;
   stroke: none !important;
   stroke-width: 0 !important;
-  opacity: 0.7;
 }
 .gantt .bar-wrapper.gantt-milestone-completed .bar-progress,
 .gantt .bar-wrapper.gantt-milestone-completed .handle {

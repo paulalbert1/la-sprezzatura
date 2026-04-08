@@ -255,7 +255,7 @@ function AdminGanttChart({
       resizeTimer = setTimeout(() => {
         if (!containerRef.current) return;
 
-        // Transform milestone bars into true diamonds via SVG attributes
+        // Add diamond overlays for milestones (bar stays invisible at full width for arrow alignment)
         const milestoneWrappers = containerRef.current.querySelectorAll(
           ".bar-wrapper.gantt-cat-milestone, .bar-wrapper.gantt-milestone-completed",
         );
@@ -263,21 +263,37 @@ function AdminGanttChart({
           const bar = wrapper.querySelector(".bar") as SVGRectElement | null;
           if (!bar) continue;
           const x = parseFloat(bar.getAttribute("x") || "0");
+          const y = parseFloat(bar.getAttribute("y") || "0");
           const w = parseFloat(bar.getAttribute("width") || "0");
           const h = parseFloat(bar.getAttribute("height") || "28");
-          // Center a square diamond within the bar's area
-          const size = Math.min(h, 18);
           const cx = x + w / 2;
-          const cy = parseFloat(bar.getAttribute("y") || "0") + h / 2;
-          bar.setAttribute("width", String(size));
-          bar.setAttribute("height", String(size));
-          bar.setAttribute("x", String(cx - size / 2));
-          bar.setAttribute("y", String(cy - size / 2));
-          bar.setAttribute("rx", "2");
-          bar.setAttribute("ry", "2");
-          bar.style.transform = "rotate(45deg)";
-          bar.style.transformOrigin = "center";
-          bar.style.transformBox = "fill-box";
+          const cy = y + h / 2;
+          const size = 9;
+          const isCompleted = wrapper.classList.contains("gantt-milestone-completed");
+
+          // Create diamond polygon overlay
+          const diamond = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+          diamond.setAttribute("points", `${cx},${cy - size} ${cx + size},${cy} ${cx},${cy + size} ${cx - size},${cy}`);
+          diamond.setAttribute("fill", isCompleted ? "#D6D3D1" : "#A8A29E");
+          diamond.style.pointerEvents = "none";
+          wrapper.querySelector(".bar-group")?.appendChild(diamond);
+        }
+
+        // Make today highlight dotted via JS (CSS class may not match Frappe's rendering)
+        const todayEls = containerRef.current.querySelectorAll("rect[fill], line");
+        for (const el of todayEls) {
+          const fill = el.getAttribute("fill") || "";
+          const cls = el.getAttribute("class") || "";
+          if (cls.includes("today") || fill.toLowerCase().includes("8b1a1a") || fill === "var(--g-today-highlight)") {
+            el.setAttribute("opacity", "0.2");
+            if (el.tagName === "rect") {
+              // Convert today rect to dotted line appearance
+              el.setAttribute("stroke", "#8B1A1A");
+              el.setAttribute("stroke-dasharray", "3 3");
+              el.setAttribute("fill", "none");
+              el.setAttribute("stroke-width", "1.5");
+            }
+          }
         }
 
         // Fix container height
