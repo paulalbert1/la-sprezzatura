@@ -15,22 +15,21 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v1.0 MVP | Public site, portfolio, CMS, basic portal | 1-3 |
 | v2.0 Client Portal Foundation | Auth, client data, engagement types, core portal features | 5-6 |
 | v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 |
-| v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish, DNS cutover | 9-12 |
-| v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability, step navigation | 13-? |
-| v4.0 Project Schedule | Interactive Gantt chart in Sanity Studio for project sequencing | 15-? |
-| v5.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, admin dashboard, onboarding wizard | TBD |
+| v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish | 9-12 |
+| v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability | 13-14 |
+| v4.0 Project Schedule | Interactive Gantt chart for project sequencing | 15-17 |
+| v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 18-28 (foundation), 29+ (completion) |
+| v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD |
 
-## Current Milestone: v4.0 Project Schedule (Gantt Chart)
+## Current Milestone: v5.0 Admin Platform Completion
 
-**Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects.
+**Goal:** Complete the custom `/admin/*` app with all remaining management features so Sanity Studio can be fully retired.
 
 **Target features:**
-- Gantt chart tab on the project document in Sanity Studio
-- Rows for: contractor assignments, procurement items, milestones, and custom ad-hoc events
-- Interactive drag-and-drop to reschedule items (dates sync back to Sanity)
-- Timeline scale control (week/month view)
-- Color-coded by user role (contractor identity, not item category)
-- Custom events schema (vacate office, walkthrough, punch list, etc.)
+- Procurement editor — manage procurement items per project in admin
+- Client + contractor CRUD — create, edit, list clients and contractors
+- Rendering tool relocation — move AI rendering workflow from Sanity Studio to admin
+- Settings + Studio retirement — admin settings page, remove Studio dependency
 
 ## Requirements
 
@@ -61,17 +60,21 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
 - [ ] Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com
 
-### Active (v4.0 — Project Schedule)
+### Active (v5.0 — Admin Platform Completion)
 
-- [ ] Interactive Gantt chart tab on project document in Sanity Studio
-- [ ] Contractor assignment timeline bars (start/end dates, appointments)
-- [ ] Procurement item timeline (order → delivery → install)
-- [ ] Milestone markers on timeline
-- [ ] Custom events schema and timeline display (vacate, walkthrough, punch list, etc.)
-- [ ] Drag-and-drop rescheduling with Sanity field sync
-- [ ] Week/month view toggle
+- [ ] Procurement editor — manage procurement items per project in admin
+- [ ] Client + contractor CRUD — create, edit, list clients and contractors
+- [ ] Rendering tool relocation — move AI rendering workflow from Sanity Studio to admin
+- [ ] Settings + Studio retirement — admin settings page, remove Studio dependency
 
-### Planned (v5.0 — Linha Platform)
+### Deferred
+
+- [ ] Gantt drag-and-drop rescheduling with Sanity field sync (v4.0 Phase 16)
+- [ ] Gantt appointment sub-markers, overlap highlighting, procurement lifecycle bars (v4.0 Phase 17)
+- [ ] DNS cutover and go-live — all 4 domains to Cloudflare (v3.0 Phase 12)
+- [ ] AI rendering improvements — revisit later
+
+### Planned (v6.0 — Linha Platform)
 
 - [ ] Turborepo monorepo — packages/core, packages/portal, packages/rendering, templates/
 - [ ] La Sprezzatura migrated as reserved template
@@ -148,4 +151,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Milestone v4.0 (Project Schedule) started*
+*Last updated: 2026-04-08 — Milestone v5.0 (Admin Platform Completion) started*
