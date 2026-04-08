@@ -6,6 +6,7 @@ declare namespace App {
     clientId: string | undefined;
     contractorId: string | undefined;
     buildingManagerEmail: string | undefined;
-    role: 'client' | 'contractor' | 'building_manager' | undefined;
+    tenantId: string | undefined;
+    role: 'client' | 'contractor' | 'building_manager' | 'admin' | undefined;
   }
 }
