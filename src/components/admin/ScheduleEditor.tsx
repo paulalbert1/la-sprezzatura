@@ -680,6 +680,52 @@ export default function ScheduleEditor({
     }
   };
 
+  // -- Dependency handlers --
+
+  const handleAddDependency = async (target: string, source: string) => {
+    try {
+      const res = await fetch("/api/admin/schedule-dependency", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "add", projectId, source, target }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error);
+
+      setData((prev) => ({
+        ...prev,
+        scheduleDependencies: [
+          ...(prev.scheduleDependencies || []),
+          { _key: result.depKey, source, target, linkType: "e2s" },
+        ],
+      }));
+    } catch (err: any) {
+      setError(err.message || "Failed to add dependency");
+    }
+  };
+
+  const handleRemoveDependency = async (depKey: string) => {
+    try {
+      const res = await fetch("/api/admin/schedule-dependency", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove", projectId, depKey }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error);
+      }
+      setData((prev) => ({
+        ...prev,
+        scheduleDependencies: (prev.scheduleDependencies || []).filter(
+          (d: any) => d._key !== depKey,
+        ),
+      }));
+    } catch (err: any) {
+      setError(err.message || "Failed to remove dependency");
+    }
+  };
+
   // -- Update popover field helper --
 
   const updateField = (fieldName: string, value: any) => {
@@ -781,6 +827,46 @@ export default function ScheduleEditor({
                 onChange={(e) => updateField("endDate", e.target.value)}
               />
             </div>
+            {/* Depends on */}
+            {popover.type === "edit" && (
+              <div>
+                <label className={labelClasses}>Depends on</label>
+                {(data.scheduleDependencies || [])
+                  .filter((d: any) => d.target === popover.taskId)
+                  .map((dep: any) => {
+                    const sourceTask = tasks.find((t) => t.id === dep.source);
+                    return (
+                      <div key={dep._key} className="flex items-center justify-between text-xs font-body py-1">
+                        <span className="text-charcoal">{sourceTask?.text || dep.source}</span>
+                        <button
+                          type="button"
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveDependency(dep._key);
+                          }}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    );
+                  })}
+                <select
+                  className="w-full mt-1 px-2 py-1.5 bg-cream-dark border border-stone-light/30 rounded-md text-xs font-body text-charcoal focus:border-terracotta focus:outline-none"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) handleAddDependency(popover.taskId!, e.target.value);
+                  }}
+                >
+                  <option value="">Add predecessor...</option>
+                  {tasks
+                    .filter((t) => t.id !== popover.taskId && t._category !== "procurement")
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>{t.text}</option>
+                    ))}
+                </select>
+              </div>
+            )}
             {error && (
               <p className="text-xs text-red-600 font-body">{error}</p>
             )}
@@ -837,6 +923,46 @@ export default function ScheduleEditor({
                 Completed
               </label>
             </div>
+            {/* Depends on */}
+            {popover.type === "edit" && (
+              <div>
+                <label className={labelClasses}>Depends on</label>
+                {(data.scheduleDependencies || [])
+                  .filter((d: any) => d.target === popover.taskId)
+                  .map((dep: any) => {
+                    const sourceTask = tasks.find((t) => t.id === dep.source);
+                    return (
+                      <div key={dep._key} className="flex items-center justify-between text-xs font-body py-1">
+                        <span className="text-charcoal">{sourceTask?.text || dep.source}</span>
+                        <button
+                          type="button"
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveDependency(dep._key);
+                          }}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    );
+                  })}
+                <select
+                  className="w-full mt-1 px-2 py-1.5 bg-cream-dark border border-stone-light/30 rounded-md text-xs font-body text-charcoal focus:border-terracotta focus:outline-none"
+                  value=""
+                  onChange={(e) => {
+                    if (e.target.value) handleAddDependency(popover.taskId!, e.target.value);
+                  }}
+                >
+                  <option value="">Add predecessor...</option>
+                  {tasks
+                    .filter((t) => t.id !== popover.taskId && t._category !== "procurement")
+                    .map((t) => (
+                      <option key={t.id} value={t.id}>{t.text}</option>
+                    ))}
+                </select>
+              </div>
+            )}
             {error && (
               <p className="text-xs text-red-600 font-body">{error}</p>
             )}
@@ -939,6 +1065,46 @@ export default function ScheduleEditor({
               placeholder="Optional notes"
             />
           </div>
+          {/* Depends on (edit only) */}
+          {!isCreate && popover.type === "edit" && (
+            <div>
+              <label className={labelClasses}>Depends on</label>
+              {(data.scheduleDependencies || [])
+                .filter((d: any) => d.target === popover.taskId)
+                .map((dep: any) => {
+                  const sourceTask = tasks.find((t) => t.id === dep.source);
+                  return (
+                    <div key={dep._key} className="flex items-center justify-between text-xs font-body py-1">
+                      <span className="text-charcoal">{sourceTask?.text || dep.source}</span>
+                      <button
+                        type="button"
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveDependency(dep._key);
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  );
+                })}
+              <select
+                className="w-full mt-1 px-2 py-1.5 bg-cream-dark border border-stone-light/30 rounded-md text-xs font-body text-charcoal focus:border-terracotta focus:outline-none"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) handleAddDependency(popover.taskId!, e.target.value);
+                }}
+              >
+                <option value="">Add predecessor...</option>
+                {tasks
+                  .filter((t) => t.id !== popover.taskId && t._category !== "procurement")
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>{t.text}</option>
+                  ))}
+              </select>
+            </div>
+          )}
           {error && (
             <p className="text-xs text-red-600 font-body">{error}</p>
           )}
