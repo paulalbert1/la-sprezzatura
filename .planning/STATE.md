@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Client Portal Foundation
-status: executing
-stopped_at: Phase 28 UI-SPEC approved
-last_updated: "2026-04-08T02:36:11.368Z"
-last_activity: 2026-04-08
+status: milestone-ready
+stopped_at: Phase 28 complete, ready for new milestone
+last_updated: "2026-04-08T02:45:00.000Z"
+last_activity: 2026-04-08 -- Phase 28 executed with UX iteration
 progress:
   total_phases: 23
-  completed_phases: 13
-  total_plans: 57
-  completed_plans: 46
-  percent: 81
+  completed_phases: 19
+  total_plans: 62
+  completed_plans: 51
+  percent: 85
 ---
 
 # Project State
@@ -21,29 +21,28 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-05)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 28 — artifacts-schedule
+**Current focus:** Ready for new milestone — admin UX optimizations
 
 ## Current Position
 
-Phase: 28
-Plan: Not started
-Status: Executing Phase 28
-Last activity: 2026-04-08
+Phase: 28 (complete)
+Plan: 5/5 complete
+Status: Ready for new milestone
+Last activity: 2026-04-08 -- Phase 28 complete with extensive UX iteration
 
 **Next steps:**
 
-1. Discuss Phase 28 (Artifacts + Schedule)
-2. Plan and execute Phase 28
+1. `/gsd-new-milestone` — define next milestone for admin UX optimizations
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 57
+- Total plans completed: 51
 - Average duration: ~5 min
-- Total execution time: ~3.5 hours
+- Total execution time: ~4 hours
 
 ## Accumulated Context
 
@@ -58,6 +57,12 @@ Progress: [████████░░] 80%
 - [v5.0]: Sanity Studio retired -- replaced by custom admin at /admin/*; Content Lake (schemas, GROQ, write client, image pipeline) stays
 - [v5.0]: Phase 23 visual/interaction design carried forward into Phase 27 (procurement editor) -- see 23-UI-SPEC.md and 23-DISCUSSION-LOG.md
 - [v5.0]: isOverdue logic and unit tests from Phase 23 carry forward to ProcurementEditor.tsx
+- [v5.0-28]: Documents page uses bucket pattern (type sections with collapsible rows)
+- [v5.0-28]: Artifacts renamed to "Documents" in all user-facing text
+- [v5.0-28]: Design Board renamed to "Design Concept"
+- [v5.0-28]: Desaturated contractor color palette for Gantt chart
+- [v5.0-28]: Milestones render as diamond markers via JS post-processing
+- [v5.0-28]: Frappe Gantt has limitations requiring eventual custom replacement (see issue #1)
 
 ### Pending Todos
 
@@ -67,9 +72,10 @@ None.
 
 - DNS record audit needed for all 4 domains before cutover
 - Resend sandbox only delivers to account owner until domain verified
+- Frappe Gantt limitations: arrow alignment, today line, milestone rendering (issue #1)
 
 ## Session Continuity
 
-Last session: 2026-04-07T17:15:22.031Z
-Stopped at: Phase 28 UI-SPEC approved
-Resume file: .planning/phases/28-artifacts-schedule/28-UI-SPEC.md
+Last session: 2026-04-08T02:45:00.000Z
+Stopped at: Phase 28 complete, ready for new milestone
+Resume file: .planning/STATE.md
