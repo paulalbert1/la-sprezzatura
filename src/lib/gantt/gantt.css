@@ -67,6 +67,10 @@
   stroke-width: 0 !important;
   clip-path: polygon(50% 0%, calc(50% + 14px) 50%, 50% 100%, calc(50% - 14px) 50%);
 }
+.gantt .bar-wrapper.gantt-cat-milestone .bar-progress,
+.gantt .bar-wrapper.gantt-cat-milestone .handle {
+  display: none !important;
+}
 .gantt .bar-wrapper.gantt-cat-milestone .bar-label {
   fill: #57534E !important;
 }
@@ -140,6 +144,10 @@
   opacity: 0.7;
   clip-path: polygon(50% 0%, calc(50% + 14px) 50%, 50% 100%, calc(50% - 14px) 50%);
 }
+.gantt .bar-wrapper.gantt-milestone-completed .bar-progress,
+.gantt .bar-wrapper.gantt-milestone-completed .handle {
+  display: none !important;
+}
 .gantt .bar-wrapper.gantt-milestone-completed .bar-label {
   fill: #A8A29E !important;
 }
@@ -173,10 +181,12 @@
   stroke-dasharray: 4 2;
 }
 
-/* === Today line: dotted === */
+/* === Today line: dotted, behind bars === */
 .gantt .today-highlight {
-  stroke-dasharray: 4 3 !important;
-  opacity: 0.5;
+  stroke: #8B1A1A !important;
+  stroke-dasharray: 3 3 !important;
+  stroke-width: 1.5px !important;
+  opacity: 0.25 !important;
 }
 
 /* === Arrows === */

@@ -24,14 +24,16 @@ import {
 } from "../../lib/gantt/ganttColors";
 import { serializeSanityDate } from "../../lib/gantt/ganttDates";
 
-// -- Shared CSS class constants (per UI-SPEC) --
+// -- Shared CSS class constants (matching dialog mockup) --
 const inputClasses =
-  "w-full px-4 py-3 bg-cream-dark border border-stone-light/30 rounded-lg text-sm font-body text-charcoal focus:border-terracotta focus:outline-none transition-colors";
+  "w-full px-3 py-2 bg-white border border-[#d6d0c4] rounded-lg text-sm font-body text-charcoal focus:border-[#8a847c] focus:outline-none transition-colors";
 const selectClasses = inputClasses + " appearance-none";
 const labelClasses =
-  "text-xs uppercase tracking-widest text-stone font-body mb-2 block";
-const ctaClasses =
-  "bg-terracotta text-white text-xs uppercase tracking-widest font-body px-6 py-3 rounded-lg hover:bg-terracotta-light transition-colors inline-flex items-center gap-2";
+  "text-xs text-[#6b6560] font-body mb-1.5 block";
+const btnClasses =
+  "px-5 py-2 rounded-lg border border-[#d6d0c4] bg-white text-sm text-[#6b6560] font-body";
+const btnDeleteClasses =
+  "px-5 py-2 rounded-lg border border-[#e8c4c4] bg-[#fdf5f5] text-sm font-medium text-[#a33030] font-body";
 
 // -- Valid custom event categories (matches schema in project.ts) --
 const EVENT_CATEGORIES = [
@@ -998,7 +1000,7 @@ export default function ScheduleEditor({
                 } finally { setSaving(false); }
               }}
               disabled={saving}
-              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+              className={`${btnClasses} ${saving ? "opacity-50" : ""}`}
             >
               {saving ? "Creating..." : "Create Milestone"}
             </button>
@@ -1078,7 +1080,7 @@ export default function ScheduleEditor({
             <button
               onClick={handlePopoverSave}
               disabled={saving}
-              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+              className={`${btnClasses} ${saving ? "opacity-50" : ""}`}
             >
               {saving ? "Saving..." : "Save Dates"}
             </button>
@@ -1143,7 +1145,7 @@ export default function ScheduleEditor({
                     category: "milestone",
                   })
                 }
-                className="px-5 py-2 rounded-lg border border-[#e8c4c4] bg-[#fdf5f5] text-sm font-medium text-[#a33030] font-body"
+                className={btnDeleteClasses}
               >
                 Delete
               </button>
@@ -1240,7 +1242,7 @@ export default function ScheduleEditor({
             <button
               onClick={handleCreateEvent}
               disabled={saving}
-              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+              className={`${btnClasses} ${saving ? "opacity-50" : ""}`}
             >
               {saving ? "Creating..." : "Create Event"}
             </button>
@@ -1249,7 +1251,7 @@ export default function ScheduleEditor({
               <button
                 onClick={handlePopoverSave}
                 disabled={saving}
-                className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+                className={`${btnClasses} ${saving ? "opacity-50" : ""}`}
               >
                 {saving ? "Saving..." : "Save Dates"}
               </button>
@@ -1261,7 +1263,7 @@ export default function ScheduleEditor({
                     category: "event",
                   })
                 }
-                className="text-xs text-red-600 hover:text-red-700 font-body transition-colors mt-3"
+                className={`${btnDeleteClasses} mt-3`}
               >
                 Delete Event
               </button>
