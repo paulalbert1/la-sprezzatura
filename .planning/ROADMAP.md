@@ -378,7 +378,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 
 **Note:** Phases 18-28 were the v5.0 foundation (admin app scaffold, project detail, Gantt relocation, procurement UI, documents page). Phases 29-34 complete the platform.
 
-- [ ] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes
+- [x] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes (completed 2026-04-08)
 - [ ] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD
 - [ ] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation
 - [ ] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA
@@ -397,9 +397,9 @@ Phases execute in numeric order: 15 -> 16 -> 17
 **Plans**: 3 plans
 
 Plans:
-- [ ] 29-01-PLAN.md -- Tenant config, types, Sanity client factory, session extension, admin auth, and login API
-- [ ] 29-02-PLAN.md -- Middleware admin protection, env.d.ts update, admin login page UI, and visual verification
-- [ ] 29-03-PLAN.md -- Refactor admin API routes and queries to tenant client, dynamic AdminNav brand, hardcoded string audit
+- [x] 29-01-PLAN.md -- Tenant config, types, Sanity client factory, session extension, admin auth, and login API
+- [x] 29-02-PLAN.md -- Middleware admin protection, env.d.ts update, admin login page UI, and visual verification
+- [x] 29-03-PLAN.md -- Refactor admin API routes and queries to tenant client, dynamic AdminNav brand, hardcoded string audit
 
 ### Phase 30: Dashboard and Task Management
 **Goal**: The admin opens to a dashboard showing the health of all active projects at a glance -- overdue items, upcoming milestones, active deliveries, recent activity, and tasks -- with the ability to create and manage tasks per project
@@ -469,7 +469,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 29. Tenant-Aware Platform Foundation | v5.0 | 0/TBD | Not started | - |
+| 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
 | 30. Dashboard and Task Management | v5.0 | 0/TBD | Not started | - |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 0/TBD | Not started | - |
 | 32. Procurement Editor | v5.0 | 0/TBD | Not started | - |
