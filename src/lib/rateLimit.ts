@@ -14,3 +14,10 @@ export const contactRatelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(3, "1 m"),
   prefix: "ratelimit:contact",
 });
+
+// Admin login: 5 attempts per 15 minutes per IP
+export const adminLoginRatelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, "15 m"),
+  prefix: "ratelimit:admin-login",
+});

@@ -7,28 +7,34 @@ const SESSION_TTL = 2592000; // 30 days in seconds
 
 /**
  * Session data stored in Redis for authenticated users.
- * Supports multiple roles: client, contractor, building_manager.
+ * Supports multiple roles: client, contractor, building_manager, admin.
  */
 export interface SessionData {
   entityId: string;
-  role: 'client' | 'contractor' | 'building_manager';
+  role: 'client' | 'contractor' | 'building_manager' | 'admin';
+  tenantId?: string;  // Present when role === 'admin'
 }
 
 /**
  * Create a new session for an authenticated user.
- * Generates a random session token, stores JSON { entityId, role } in Redis
+ * Generates a random session token, stores JSON { entityId, role, tenantId? } in Redis
  * with 30-day TTL, and sets an httpOnly cookie on the response.
  *
  * The role parameter defaults to 'client' for backward compatibility with
  * existing call sites (e.g., portal/verify.astro).
+ *
+ * The optional tenantId parameter is used for admin sessions to scope
+ * data access to a specific tenant.
  */
 export async function createSession(
   cookies: AstroCookies,
   entityId: string,
   role: SessionData['role'] = 'client',
+  tenantId?: string,
 ): Promise<string> {
   const sessionToken = generatePortalToken(32);
   const sessionData: SessionData = { entityId, role };
+  if (tenantId) sessionData.tenantId = tenantId;
   await redis.set(`session:${sessionToken}`, JSON.stringify(sessionData), { ex: SESSION_TTL });
 
   cookies.set(COOKIE_NAME, sessionToken, {
