@@ -1,0 +1,40 @@
+---
+export const prerender = false;
+
+import { Font } from "astro:assets";
+import "../../styles/global.css";
+import AdminLoginForm from "../../components/admin/AdminLoginForm.tsx";
+
+// If already logged in as admin, redirect to dashboard
+import { getSession } from "../../lib/session";
+const session = await getSession(Astro.cookies);
+if (session?.role === "admin" && session.tenantId) {
+  return Astro.redirect("/admin/dashboard");
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <Font cssVariable="--font-heading" preload />
+    <Font cssVariable="--font-body" preload />
+    <title>Studio Login | La Sprezzatura</title>
+  </head>
+  <body class="bg-cream text-charcoal font-body min-h-screen flex items-center justify-center px-6">
+    <main class="w-full max-w-md text-center">
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
+        La Sprezzatura
+      </p>
+      <h1 class="font-heading text-4xl md:text-5xl font-normal text-charcoal mb-3">
+        Studio Login
+      </h1>
+      <p class="text-base text-stone font-body mb-10">
+        Sign in to manage your projects
+      </p>
+      <AdminLoginForm client:load />
+    </main>
+  </body>
+</html>
