@@ -55,5 +55,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
+  // Admin routes (pages and API)
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    if (pathname === "/admin/login" || pathname === "/api/admin/login") return next();
+
+    const session = await getSession(context.cookies);
+    if (!session || session.role !== "admin" || !session.tenantId) {
+      return context.redirect("/admin/login");
+    }
+
+    context.locals.tenantId = session.tenantId;
+    context.locals.role = session.role;
+    return next();
+  }
+
   return next();
 });
