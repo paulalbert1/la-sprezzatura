@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import "../styles/global.css";
 import AdminNav from "../components/admin/AdminNav.tsx";
+import { getTenantById } from "../lib/tenants";
 
 export const prerender = false;
 
@@ -18,6 +19,10 @@ interface Props {
 
 const { title, pageTitle, breadcrumbs } = Astro.props;
 const currentPath = Astro.url.pathname;
+
+const tenantId = Astro.locals.tenantId;
+const tenant = tenantId ? getTenantById(tenantId) : undefined;
+const businessName = tenant?.businessName ?? "Studio";
 ---
 
 <!doctype html>
@@ -33,7 +38,7 @@ const currentPath = Astro.url.pathname;
   <body class="bg-cream text-charcoal font-body min-h-screen">
     {/* Sidebar - fixed, full height, 240px wide */}
     <aside class="fixed left-0 top-0 h-screen w-60 bg-cream-dark border-r border-stone-light/30 px-6 py-12 z-10">
-      <AdminNav client:load currentPath={currentPath} />
+      <AdminNav client:load currentPath={currentPath} businessName={businessName} />
     </aside>
 
     {/* Main area - offset by sidebar width */}

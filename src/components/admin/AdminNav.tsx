@@ -34,13 +34,13 @@ function isActive(currentPath: string, href: string): boolean {
   return currentPath.startsWith(href);
 }
 
-export default function AdminNav({ currentPath }: { currentPath: string }) {
+export default function AdminNav({ currentPath, businessName }: { currentPath: string; businessName: string }) {
   return (
     <nav className="flex flex-col h-full">
       {/* Brand section */}
       <div className="mb-10">
         <p className="text-xs tracking-[0.2em] uppercase font-body text-charcoal">
-          La Sprezzatura
+          {businessName}
         </p>
         <p className="text-xs font-body text-stone-light mt-1">Studio</p>
       </div>
