@@ -1103,9 +1103,9 @@ export default function ScheduleEditor({
       const taskId = `milestone:${popover._key}`;
       return (
         <>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold font-body text-charcoal">
-              Edit Milestone: {popover.fields.name}
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-base font-semibold font-body text-charcoal">
+              {popover.fields.name}
             </h3>
             <button
               onClick={() => setPopover(null)}
@@ -1115,7 +1115,7 @@ export default function ScheduleEditor({
               <X size={16} />
             </button>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
               <label className={labelClasses}>Date</label>
               <input
@@ -1129,28 +1129,22 @@ export default function ScheduleEditor({
               <input
                 type="checkbox"
                 id="milestone-completed"
-                className="w-5 h-5 rounded border border-stone-light/30 accent-terracotta"
+                className="w-4 h-4 rounded border border-[#d6d0c4] accent-charcoal"
                 checked={popover.fields.completed || false}
                 onChange={(e) => updateField("completed", e.target.checked)}
               />
               <label
                 htmlFor="milestone-completed"
-                className="text-sm font-body text-charcoal"
+                className="text-sm font-body text-[#6b6560]"
               >
                 Completed
               </label>
             </div>
+            {renderDependencySection(taskId)}
             {error && (
               <p className="text-xs text-red-600 font-body">{error}</p>
             )}
-            <div className="flex items-center justify-between">
-              <button
-                onClick={handlePopoverSave}
-                disabled={saving}
-                className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
-              >
-                {saving ? "Saving..." : "Save"}
-              </button>
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() =>
                   setConfirmDelete({
@@ -1159,12 +1153,18 @@ export default function ScheduleEditor({
                     category: "milestone",
                   })
                 }
-                className="text-xs text-red-600 hover:text-red-700 font-body transition-colors"
+                className="px-5 py-2 rounded-lg border border-[#e8c4c4] bg-[#fdf5f5] text-sm font-medium text-[#a33030] font-body"
               >
                 Delete
               </button>
+              <button
+                onClick={handlePopoverSave}
+                disabled={saving}
+                className={`px-5 py-2 rounded-lg border border-[#d6d0c4] bg-white text-sm text-[#6b6560] font-body ${saving ? "opacity-50" : ""}`}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
             </div>
-            {renderDependencySection(taskId)}
           </div>
         </>
       );
@@ -1456,7 +1456,7 @@ export default function ScheduleEditor({
             />
             {/* Popover card */}
             <div
-              className="bg-white rounded-xl shadow-xl border border-stone-light/20 p-4 z-40"
+              className="bg-white rounded-[14px] border border-[#d6d0c4] p-6 z-40"
               style={{
                 position: "fixed",
                 top: popoverScreenPos.top,
@@ -1475,31 +1475,33 @@ export default function ScheduleEditor({
       {confirmDelete &&
         createPortal(
           <>
-            <div className="fixed inset-0 bg-black/30 z-50" />
-            <div className="fixed inset-0 z-[60] flex items-center justify-center">
-              <div className="bg-white rounded-xl p-6 shadow-xl max-w-sm w-full mx-auto">
-                <h3 className="text-sm font-semibold font-body text-charcoal">
+            <div className="fixed inset-0 bg-black/8 z-50" onClick={() => setConfirmDelete(null)} />
+            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+              <div className="bg-white rounded-[14px] border border-[#d6d0c4] p-6 w-[360px] pointer-events-auto">
+                <h3 className="text-base font-semibold font-body text-charcoal mb-2">
                   Delete {confirmDelete.name}?
                 </h3>
-                <p className="text-sm text-stone font-body mt-2">
-                  This event will be permanently removed from the schedule.
+                <p className="text-sm text-[#6b6560] font-body leading-relaxed mb-5">
+                  {confirmDelete.category === "milestone"
+                    ? "This milestone will be permanently removed from the schedule."
+                    : "This event will be permanently removed from the schedule."}
                 </p>
                 {error && (
-                  <p className="text-xs text-red-600 font-body mt-2">
+                  <p className="text-xs text-red-600 font-body mb-3">
                     {error}
                   </p>
                 )}
-                <div className="flex items-center justify-end gap-4 mt-4">
+                <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setConfirmDelete(null)}
-                    className="text-sm text-stone hover:text-charcoal font-body transition-colors"
+                    className="px-5 py-2 rounded-lg border border-[#d6d0c4] bg-white text-sm text-[#6b6560] font-body"
                   >
-                    Keep Event
+                    {confirmDelete.category === "milestone" ? "Keep Milestone" : "Keep Event"}
                   </button>
                   <button
                     onClick={handleDelete}
                     disabled={saving}
-                    className={`bg-red-600 text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-red-700 transition-colors ${saving ? "opacity-50" : ""}`}
+                    className={`px-5 py-2 rounded-lg border border-[#e8c4c4] bg-[#fdf5f5] text-sm font-medium text-[#a33030] font-body ${saving ? "opacity-50" : ""}`}
                   >
                     {saving ? "Deleting..." : "Delete"}
                   </button>
