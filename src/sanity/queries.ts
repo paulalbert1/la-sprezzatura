@@ -626,77 +626,165 @@ export const RENDERING_SETTINGS_QUERY = `
   }
 `;
 
-// -- Phase 28: Admin Artifact Queries --
+// -- Phase 30: Admin Dashboard Queries --
 
-// GROQ: Admin artifact data for the artifact manager
-const ADMIN_ARTIFACT_QUERY = `
-  *[_type == "project" && _id == $projectId][0] {
+// Active projects with pipeline stage and days-in-stage date
+const ADMIN_DASHBOARD_PROJECTS_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]] | order(title asc) {
     _id,
     title,
-    "artifacts": artifacts[] {
+    pipelineStage,
+    "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
+    projectStatus
+  }
+`;
+
+// Milestones from active projects (upcoming + overdue, sorted by date)
+const ADMIN_DASHBOARD_MILESTONES_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]] {
+    _id,
+    title,
+    "milestones": milestones[date != null] | order(date asc) {
       _key,
-      artifactType,
-      customTypeName,
-      currentVersionKey,
-      "signedFile": signedFile {
-        "asset": asset-> { url, originalFilename }
-      },
-      "versions": versions[] {
-        _key,
-        "file": file {
-          "asset": asset-> { url, originalFilename, mimeType, size }
-        },
-        uploadedAt,
-        note
-      },
-      "decisionLog": decisionLog[] {
-        _key, action, versionKey, clientId, clientName, feedback, timestamp
-      },
-      "investmentSummary": investmentSummary {
-        tiers[] { _key, name, description, lineItems[] { _key, name, price } },
-        selectedTierKey,
-        eagerness,
-        reservations
-      }
+      name,
+      date,
+      completed
+    }
+  }[count(milestones) > 0]
+`;
+
+// Active deliveries (ordered/warehouse/in-transit procurement items)
+const ADMIN_DASHBOARD_DELIVERIES_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]
+    && engagementType == "full-interior-design"] {
+    _id,
+    title,
+    "deliveries": procurementItems[status in ["ordered", "warehouse", "in-transit"]] {
+      _key,
+      name,
+      status,
+      expectedDeliveryDate,
+      trackingNumber
+    }
+  }[count(deliveries) > 0]
+`;
+
+// All tasks from active projects
+const ADMIN_DASHBOARD_TASKS_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]] {
+    _id,
+    title,
+    "tasks": tasks[] | order(completed asc, createdAt desc) {
+      _key,
+      description,
+      dueDate,
+      completed,
+      completedAt,
+      createdAt
+    }
+  }[count(tasks) > 0]
+`;
+
+// Recent activity across all active projects (15 most recent)
+const ADMIN_DASHBOARD_ACTIVITY_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]
+    && defined(activityLog) && count(activityLog) > 0] {
+    _id,
+    title,
+    "activities": activityLog[] | order(timestamp desc) [0...5] {
+      _key,
+      action,
+      description,
+      actor,
+      timestamp
     }
   }
 `;
 
-export async function getAdminArtifactData(client: SanityClient, projectId: string) {
-  return client.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
+/** Fetch all dashboard data in parallel using the tenant-scoped client */
+export async function getAdminDashboardData(client: SanityClient) {
+  const [projects, milestoneData, deliveryData, taskData, activityData] =
+    await Promise.all([
+      client.fetch(ADMIN_DASHBOARD_PROJECTS_QUERY),
+      client.fetch(ADMIN_DASHBOARD_MILESTONES_QUERY),
+      client.fetch(ADMIN_DASHBOARD_DELIVERIES_QUERY),
+      client.fetch(ADMIN_DASHBOARD_TASKS_QUERY),
+      client.fetch(ADMIN_DASHBOARD_ACTIVITY_QUERY),
+    ]);
+
+  // Flatten milestones from all projects, keeping project reference
+  const milestones = (milestoneData || []).flatMap((p: any) =>
+    (p.milestones || []).map((m: any) => ({
+      ...m,
+      projectId: p._id,
+      projectTitle: p.title,
+    })),
+  );
+
+  // Flatten deliveries
+  const deliveries = (deliveryData || []).flatMap((p: any) =>
+    (p.deliveries || []).map((d: any) => ({
+      ...d,
+      projectId: p._id,
+      projectTitle: p.title,
+    })),
+  );
+
+  // Flatten tasks
+  const tasks = (taskData || []).flatMap((p: any) =>
+    (p.tasks || []).map((t: any) => ({
+      ...t,
+      projectId: p._id,
+      projectTitle: p.title,
+    })),
+  );
+
+  // Flatten and sort activity, take top 15
+  const activities = (activityData || [])
+    .flatMap((p: any) =>
+      (p.activities || []).map((a: any) => ({
+        ...a,
+        projectId: p._id,
+        projectTitle: p.title,
+      })),
+    )
+    .sort((a: any, b: any) =>
+      (b.timestamp || "").localeCompare(a.timestamp || ""),
+    )
+    .slice(0, 15);
+
+  return {
+    activeProjects: projects || [],
+    milestones,
+    deliveries,
+    tasks,
+    recentActivity: activities,
+  };
 }
 
-// -- Phase 28: Admin Schedule Queries --
-
-// GROQ: Admin schedule data for the Gantt editor
-const ADMIN_SCHEDULE_QUERY = `
+// Admin project detail for dashboard navigation target
+const ADMIN_PROJECT_DETAIL_QUERY = `
   *[_type == "project" && _id == $projectId][0] {
     _id,
     title,
+    pipelineStage,
+    projectStatus,
     engagementType,
-    isCommercial,
-    contractors[]{ ..., contractor->{_id, name, company, trades} },
-    milestones,
-    procurementItems[] { _key, name, status, installDate, orderDate, expectedDeliveryDate },
-    customEvents,
-    scheduleDependencies
+    "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
+    "tasks": tasks[] | order(completed asc, createdAt desc) {
+      _key,
+      description,
+      dueDate,
+      completed,
+      completedAt,
+      createdAt
+    }
   }
 `;
 
-export async function getAdminScheduleData(client: SanityClient, projectId: string) {
-  return client.fetch(ADMIN_SCHEDULE_QUERY, { projectId });
-}
-
-// GROQ: All contractors for schedule "Add Contractor" dropdown
-const ALL_CONTRACTORS_QUERY = `
-  *[_type == "contractor"] | order(name asc) {
-    _id,
-    name,
-    company,
-    trades
-  }
-`;
-
-export async function getAllContractors(client: SanityClient) {
-  return client.fetch(ALL_CONTRACTORS_QUERY);
+export async function getAdminProjectDetail(
+  client: SanityClient,
+  projectId: string,
+) {
+  return client.fetch(ADMIN_PROJECT_DETAIL_QUERY, { projectId });
 }
