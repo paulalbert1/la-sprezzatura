@@ -286,13 +286,21 @@ export default function ScheduleEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
   const ganttContainerRef = useRef<HTMLDivElement>(null);
 
-  // Derive Gantt tasks and links from data
+  // Derive Gantt tasks and links from data, filtering completed milestones
   const { tasks, links } = useMemo(() => {
     const result = transformProjectToGanttTasks(data);
-    return { tasks: result.tasks, links: result.links };
-  }, [data]);
+    const filteredTasks = showCompleted
+      ? result.tasks
+      : result.tasks.filter((t) => !(t._category === "milestone" && t._completed));
+    const taskIds = new Set(filteredTasks.map((t) => t.id));
+    const filteredLinks = result.links.filter(
+      (l) => taskIds.has(l.source) && taskIds.has(l.target),
+    );
+    return { tasks: filteredTasks, links: filteredLinks };
+  }, [data, showCompleted]);
 
   // Close popover on Escape key
   useEffect(() => {
@@ -1052,6 +1060,15 @@ export default function ScheduleEditor({
       {/* Legend + Add Event button */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex-1">{renderLegend()}</div>
+        <label className="flex items-center gap-2 text-xs text-stone font-body shrink-0 cursor-pointer">
+          <input
+            type="checkbox"
+            className="w-4 h-4 rounded border border-stone-light/30 accent-terracotta"
+            checked={showCompleted}
+            onChange={(e) => setShowCompleted(e.target.checked)}
+          />
+          Show completed
+        </label>
         <button
           className={ctaClasses + " shrink-0 ml-4"}
           onClick={() => {
