@@ -410,8 +410,13 @@ Plans:
   2. An overdue alert banner appears at the top of the dashboard summarizing all overdue milestones and tasks across projects; the banner disappears when nothing is overdue
   3. The dashboard shows a recent activity feed with timestamps and actor names, and a tasks section with checkboxes that can be filtered by project
   4. The admin can create a task on a project with a description and optional due date, check it off as complete from either the dashboard or the project detail page, and overdue tasks appear highlighted in red in both locations
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 4 plans
+
+Plans:
+- [ ] 30-01-PLAN.md -- Sanity schema extensions (tasks[], activityLog[], pipelineStageChangedAt), dashboard GROQ queries, and dashboardUtils with tests
+- [ ] 30-02-PLAN.md -- Task API route (create + toggle) with activity logging and unit tests
+- [ ] 30-03-PLAN.md -- Dashboard Astro page with 5-card grid and DashboardTasksCard React island
+- [ ] 30-04-PLAN.md -- Project detail page with tasks section and visual verification
 
 ### Phase 31: Client, Contractor, and Portfolio Management
 **Goal**: The admin can manage the full lifecycle of clients and contractors -- create, edit, search, assign to projects, and view linked project history -- and curate which completed projects appear on the public portfolio
