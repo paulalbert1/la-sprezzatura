@@ -62,8 +62,8 @@ function getAllAdminFiles(): string[] {
       // File may not exist
     }
   }
-  // Exclude test files
-  return files.filter((f) => !f.includes(".test."));
+  // Exclude test files and login page (pre-auth, no tenant context available — D-14)
+  return files.filter((f) => !f.includes(".test.") && !f.endsWith("/admin/login.astro"));
 }
 
 function scanFile(
