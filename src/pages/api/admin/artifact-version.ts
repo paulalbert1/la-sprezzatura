@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
-import { sanityWriteClient } from "../../../sanity/writeClient";
+import { getTenantClient } from "../../../lib/tenantClient";
 import { generatePortalToken } from "../../../lib/generateToken";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
@@ -15,6 +15,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  if (!session.tenantId) {
+    return new Response(JSON.stringify({ error: "No tenant context" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const client = getTenantClient(session.tenantId);
 
   const contentType = request.headers.get("content-type") || "";
 
@@ -50,14 +58,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
       // Upload file to Sanity asset pipeline
       const buffer = Buffer.from(await file.arrayBuffer());
-      const asset = await sanityWriteClient.assets.upload("file", buffer, {
+      const asset = await client.assets.upload("file", buffer, {
         filename: file.name,
         contentType: file.type,
       });
 
       if (action === "upload-signed") {
         // Upload signed file for contract artifacts
-        await sanityWriteClient
+        await client
           .patch(projectId)
           .set({
             [`artifacts[_key=="${artifactKey}"].signedFile`]: {
@@ -95,7 +103,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         timestamp: new Date().toISOString(),
       };
 
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .append(`artifacts[_key=="${artifactKey}"].versions`, [version])
         .append(`artifacts[_key=="${artifactKey}"].decisionLog`, [logEntry])
@@ -142,7 +150,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    await sanityWriteClient
+    await client
       .patch(projectId)
       .set({
         [`artifacts[_key=="${artifactKey}"].currentVersionKey`]: versionKey,

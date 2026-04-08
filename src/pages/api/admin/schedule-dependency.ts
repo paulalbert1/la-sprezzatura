@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
-import { sanityWriteClient } from "../../../sanity/writeClient";
+import { getTenantClient } from "../../../lib/tenantClient";
 import { generatePortalToken } from "../../../lib/generateToken";
 
 /**
@@ -35,6 +35,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  if (!session.tenantId) {
+    return new Response(JSON.stringify({ error: "No tenant context" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const client = getTenantClient(session.tenantId);
 
   let body: ScheduleDependencyBody;
   try {
@@ -99,7 +107,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         linkType: resolvedLinkType,
       };
 
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .setIfMissing({ scheduleDependencies: [] })
         .append("scheduleDependencies", [dep])
@@ -122,7 +130,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         );
       }
 
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .unset([`scheduleDependencies[_key=="${depKey}"]`])
         .commit();

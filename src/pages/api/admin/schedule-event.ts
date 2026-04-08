@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
-import { sanityWriteClient } from "../../../sanity/writeClient";
+import { getTenantClient } from "../../../lib/tenantClient";
 import { generatePortalToken } from "../../../lib/generateToken";
 
 /**
@@ -57,6 +57,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  if (!session.tenantId) {
+    return new Response(JSON.stringify({ error: "No tenant context" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const client = getTenantClient(session.tenantId);
 
   let body: ScheduleEventBody;
   try {
@@ -125,7 +133,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         notes: fields.notes || "",
       };
 
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .setIfMissing({ customEvents: [] })
         .append("customEvents", [event])
@@ -176,7 +184,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
 
       if (Object.keys(setObj).length > 0) {
-        await sanityWriteClient.patch(projectId).set(setObj).commit();
+        await client.patch(projectId).set(setObj).commit();
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -196,7 +204,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         );
       }
 
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .unset([`customEvents[_key=="${eventKey}"]`])
         .commit();

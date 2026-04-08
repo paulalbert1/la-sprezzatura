@@ -4,15 +4,22 @@ export const prerender = false;
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import ScheduleEditor from "../../../../components/admin/ScheduleEditor.tsx";
 import { getAdminScheduleData, getAllContractors } from "../../../../sanity/queries";
+import { getTenantClient } from "../../../../lib/tenantClient";
 
 const projectId = Astro.params.projectId;
 if (!projectId) {
   return Astro.redirect("/admin/projects");
 }
 
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+
 const [data, allContractors] = await Promise.all([
-  getAdminScheduleData(projectId),
-  getAllContractors(),
+  getAdminScheduleData(client, projectId),
+  getAllContractors(client),
 ]);
 if (!data) {
   return Astro.redirect("/admin/projects");

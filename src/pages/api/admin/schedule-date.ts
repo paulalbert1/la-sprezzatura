@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
-import { sanityWriteClient } from "../../../sanity/writeClient";
+import { getTenantClient } from "../../../lib/tenantClient";
 
 /**
  * API route for updating schedule item dates (drag-and-drop + click-to-edit).
@@ -42,6 +42,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
+  if (!session.tenantId) {
+    return new Response(JSON.stringify({ error: "No tenant context" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const client = getTenantClient(session.tenantId);
+
   let body: ScheduleDateBody;
   try {
     body = await request.json();
@@ -75,7 +83,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         date: startDate || null,
         completed: false,
       };
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .setIfMissing({ milestones: [] })
         .append("milestones", [milestone])
@@ -101,7 +109,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         startDate: startDate || null,
         endDate: endDate || null,
       };
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .setIfMissing({ contractors: [] })
         .append("contractors", [assignment])
@@ -139,7 +147,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
     try {
-      await sanityWriteClient
+      await client
         .patch(projectId)
         .unset([`${deleteMapping.array}[_key=="${_key}"]`])
         .commit();
@@ -219,7 +227,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   try {
-    await sanityWriteClient.patch(projectId).set(setObj).commit();
+    await client.patch(projectId).set(setObj).commit();
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

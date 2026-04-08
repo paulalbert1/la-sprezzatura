@@ -4,13 +4,20 @@ export const prerender = false;
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import ArtifactManager from "../../../../components/admin/ArtifactManager.tsx";
 import { getAdminArtifactData } from "../../../../sanity/queries";
+import { getTenantClient } from "../../../../lib/tenantClient";
 
 const projectId = Astro.params.projectId;
 if (!projectId) {
   return Astro.redirect("/admin/projects");
 }
 
-const data = await getAdminArtifactData(projectId);
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+
+const data = await getAdminArtifactData(client, projectId);
 if (!data) {
   return Astro.redirect("/admin/projects");
 }

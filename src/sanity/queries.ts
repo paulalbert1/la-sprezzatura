@@ -1,4 +1,5 @@
 import { sanityClient } from "sanity:client";
+import type { SanityClient } from "@sanity/client";
 
 // Portfolio overview -- all published projects ordered by display order
 export async function getProjects() {
@@ -661,8 +662,8 @@ const ADMIN_ARTIFACT_QUERY = `
   }
 `;
 
-export async function getAdminArtifactData(projectId: string) {
-  return sanityClient.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
+export async function getAdminArtifactData(client: SanityClient, projectId: string) {
+  return client.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
 }
 
 // -- Phase 28: Admin Schedule Queries --
@@ -682,8 +683,8 @@ const ADMIN_SCHEDULE_QUERY = `
   }
 `;
 
-export async function getAdminScheduleData(projectId: string) {
-  return sanityClient.fetch(ADMIN_SCHEDULE_QUERY, { projectId });
+export async function getAdminScheduleData(client: SanityClient, projectId: string) {
+  return client.fetch(ADMIN_SCHEDULE_QUERY, { projectId });
 }
 
 // GROQ: All contractors for schedule "Add Contractor" dropdown
@@ -696,6 +697,6 @@ const ALL_CONTRACTORS_QUERY = `
   }
 `;
 
-export async function getAllContractors() {
-  return sanityClient.fetch(ALL_CONTRACTORS_QUERY);
+export async function getAllContractors(client: SanityClient) {
+  return client.fetch(ALL_CONTRACTORS_QUERY);
 }
