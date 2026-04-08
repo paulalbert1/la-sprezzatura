@@ -31,6 +31,12 @@ function normalizeArtifact(a: Artifact): Artifact {
   };
 }
 
+/** Only count artifacts that actually have uploaded files */
+function hasRealFile(a: Artifact): boolean {
+  const cv = getCurrentVersion(a);
+  return !!cv?.file?.asset?.url;
+}
+
 function formatFileSize(bytes: number): string {
   if (!bytes) return "";
   if (bytes < 1024) return `${bytes} B`;
@@ -38,7 +44,7 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// --- Version Row (inside expanded history) ---
+// --- Version Row ---
 function VersionRow({
   ver,
   isCurrent,
@@ -89,7 +95,7 @@ function VersionRow({
   );
 }
 
-// --- Document Row (single instance within a bucket) ---
+// --- Document Row ---
 function DocRow({
   artifact,
   typeKey,
@@ -110,9 +116,7 @@ function DocRow({
   const hasFile = !!cv?.file?.asset?.url;
   const olderVersions = artifact.versions.length > 1;
   const displayName =
-    artifact.customTypeName ||
-    cv?.file?.asset?.originalFilename ||
-    ARTIFACT_LABELS[typeKey] || "Untitled";
+    artifact.customTypeName || cv?.file?.asset?.originalFilename || "Untitled";
 
   function handleSaveName() {
     const trimmed = editName.trim();
@@ -124,7 +128,6 @@ function DocRow({
 
   return (
     <div className="border-b border-stone-light/10 last:border-b-0">
-      {/* Main row */}
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-cream-dark/50 transition-colors group"
         onClick={() => olderVersions && setExpanded(!expanded)}
@@ -161,7 +164,8 @@ function DocRow({
           <div className="text-[11px] text-stone-light font-body">
             {hasFile ? (
               <>
-                {cv!.file.asset.originalFilename} · v{artifact.versions.length} ·{" "}
+                {cv!.file.asset.originalFilename} · v
+                {artifact.versions.length} ·{" "}
                 {format(new Date(cv!.uploadedAt), "MMM d, yyyy")}
               </>
             ) : (
@@ -195,7 +199,6 @@ function DocRow({
           )}
         </div>
 
-        {/* Version count + chevron */}
         {olderVersions && (
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="text-[11px] text-stone-light font-body">
@@ -211,7 +214,6 @@ function DocRow({
         )}
       </div>
 
-      {/* Version history panel */}
       {expanded && olderVersions && (
         <div className="mx-4 mb-3 rounded-lg border border-stone-light/10 bg-cream-dark/30 overflow-hidden">
           <div className="px-3 py-1.5 text-[10px] font-semibold text-stone-light font-body uppercase tracking-wider border-b border-stone-light/10">
@@ -261,12 +263,14 @@ function TypeBucket({
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
-  onAddNew: () => void;
+  onAddNew: (name: string) => void;
   onUploadVersion: (artifactKey: string) => void;
   onRename: (artifactKey: string, name: string) => void;
 }) {
   const count = instances.length;
   const [expanded, setExpanded] = useState(count > 0);
+  const [addingName, setAddingName] = useState(false);
+  const [newName, setNewName] = useState("");
   const latestDate =
     count > 0
       ? instances
@@ -277,6 +281,21 @@ function TypeBucket({
               new Date(a.uploadedAt).getTime(),
           )[0]?.uploadedAt
       : null;
+
+  function handleSubmitName() {
+    const trimmed = newName.trim();
+    if (trimmed) {
+      onAddNew(trimmed);
+      setNewName("");
+      setAddingName(false);
+    }
+  }
+
+  function handleStartAdd() {
+    setExpanded(true);
+    setAddingName(true);
+    setNewName("");
+  }
 
   return (
     <div
@@ -292,7 +311,9 @@ function TypeBucket({
       {/* Bucket header */}
       <div
         className={`flex items-center gap-3 px-5 py-4 cursor-pointer select-none ${
-          expanded && count > 0 ? "border-b border-stone-light/10" : ""
+          expanded && (count > 0 || addingName)
+            ? "border-b border-stone-light/10"
+            : ""
         }`}
         onClick={() => setExpanded(!expanded)}
       >
@@ -320,7 +341,7 @@ function TypeBucket({
         />
       </div>
 
-      {/* Document list + add button */}
+      {/* Document list + add */}
       {expanded && (
         <div>
           {instances.map((artifact) => (
@@ -334,23 +355,69 @@ function TypeBucket({
             />
           ))}
 
-          {/* Add new document */}
-          {uploading ? (
-            <div className="flex items-center justify-center gap-2 py-3">
-              <RefreshCw size={14} className="text-terracotta animate-spin" />
-              <span className="text-xs text-stone font-body">Uploading...</span>
-            </div>
-          ) : (
-            <div
-              className={`flex items-center justify-center gap-1.5 cursor-pointer text-stone-light hover:text-stone transition-colors font-body text-xs ${
-                count > 0 ? "py-3" : "py-6"
-              }`}
-              onClick={onAddNew}
-            >
-              <Plus size={14} strokeWidth={1.5} />
-              <span>Add {label.toLowerCase()}</span>
+          {/* Inline name prompt for new document */}
+          {addingName && (
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-stone-light/10 bg-cream-dark/30">
+              <FileText size={16} className="text-stone-light shrink-0" />
+              <input
+                type="text"
+                className="flex-1 text-sm font-medium font-body text-charcoal bg-transparent border-b border-terracotta outline-none py-0"
+                placeholder={`e.g. "Design Services Agreement"`}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSubmitName();
+                  if (e.key === "Escape") {
+                    setAddingName(false);
+                    setNewName("");
+                  }
+                }}
+                autoFocus
+              />
+              <button
+                type="button"
+                className="text-[11px] text-stone font-body px-2.5 py-1 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors disabled:opacity-40"
+                disabled={!newName.trim()}
+                onClick={handleSubmitName}
+              >
+                Next
+              </button>
+              <button
+                type="button"
+                className="text-[11px] text-stone-light font-body px-2 py-1 hover:text-stone transition-colors"
+                onClick={() => {
+                  setAddingName(false);
+                  setNewName("");
+                }}
+              >
+                Cancel
+              </button>
             </div>
           )}
+
+          {/* Add button */}
+          {!addingName &&
+            (uploading ? (
+              <div className="flex items-center justify-center gap-2 py-3">
+                <RefreshCw
+                  size={14}
+                  className="text-terracotta animate-spin"
+                />
+                <span className="text-xs text-stone font-body">
+                  Uploading...
+                </span>
+              </div>
+            ) : (
+              <div
+                className={`flex items-center justify-center gap-1.5 cursor-pointer text-stone-light hover:text-stone transition-colors font-body text-xs ${
+                  count > 0 ? "py-3" : "py-6"
+                }`}
+                onClick={handleStartAdd}
+              >
+                <Plus size={14} strokeWidth={1.5} />
+                <span>Add {label.toLowerCase()}</span>
+              </div>
+            ))}
         </div>
       )}
     </div>
@@ -362,13 +429,15 @@ export default function ArtifactManager({
   artifacts: initialArtifacts,
   projectId,
 }: ArtifactManagerProps) {
+  // Filter out phantom artifacts (no versions / no files)
   const [docsByType, setDocsByType] = useState<Record<string, Artifact[]>>(
     () => {
       const map: Record<string, Artifact[]> = {};
       for (const type of ARTIFACT_TYPES) {
         map[type] = (initialArtifacts || [])
           .filter((a) => a.artifactType === type)
-          .map(normalizeArtifact);
+          .map(normalizeArtifact)
+          .filter(hasRealFile);
       }
       return map;
     },
@@ -381,6 +450,7 @@ export default function ArtifactManager({
   const uploadTargetRef = useRef<{
     type: string;
     artifactKey?: string;
+    customTypeName?: string;
   } | null>(null);
 
   const totalDocs = Object.values(docsByType).flat().length;
@@ -392,6 +462,7 @@ export default function ArtifactManager({
     typeKey: string,
     file: File,
     artifactKey?: string,
+    customTypeName?: string,
   ) {
     setUploading(artifactKey ? `${typeKey}:${artifactKey}` : typeKey);
     setError(null);
@@ -442,6 +513,9 @@ export default function ArtifactManager({
         formData.append("action", "add");
         formData.append("type", typeKey);
         formData.append("note", "");
+        if (customTypeName) {
+          formData.append("customTypeName", customTypeName);
+        }
         const res = await fetch("/api/admin/artifact-crud", {
           method: "POST",
           body: formData,
@@ -456,6 +530,7 @@ export default function ArtifactManager({
             {
               _key: data.artifactKey,
               artifactType: typeKey,
+              customTypeName: customTypeName || undefined,
               currentVersionKey: data.versionKey,
               versions: [
                 {
@@ -484,15 +559,20 @@ export default function ArtifactManager({
     }
   }
 
-  function triggerFilePicker(typeKey: string, artifactKey?: string) {
-    uploadTargetRef.current = { type: typeKey, artifactKey };
+  function triggerFilePicker(
+    typeKey: string,
+    artifactKey?: string,
+    customTypeName?: string,
+  ) {
+    uploadTargetRef.current = { type: typeKey, artifactKey, customTypeName };
     fileInputRef.current?.click();
   }
 
   function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     const target = uploadTargetRef.current;
-    if (file && target) uploadFile(target.type, file, target.artifactKey);
+    if (file && target)
+      uploadFile(target.type, file, target.artifactKey, target.customTypeName);
     e.target.value = "";
   }
 
@@ -504,13 +584,11 @@ export default function ArtifactManager({
   }
 
   async function handleRename(artifactKey: string, name: string) {
-    // Find which type this artifact belongs to
     const typeKey = Object.keys(docsByType).find((t) =>
       docsByType[t].some((a) => a._key === artifactKey),
     );
     if (!typeKey) return;
 
-    // Optimistic update
     setDocsByType((prev) => ({
       ...prev,
       [typeKey]: prev[typeKey].map((a) =>
@@ -518,7 +596,6 @@ export default function ArtifactManager({
       ),
     }));
 
-    // Save to Sanity
     try {
       const res = await fetch("/api/admin/artifact-crud", {
         method: "POST",
@@ -589,7 +666,7 @@ export default function ArtifactManager({
             }}
             onDragLeave={() => setDragOver(null)}
             onDrop={(e) => handleDrop(typeKey, e)}
-            onAddNew={() => triggerFilePicker(typeKey)}
+            onAddNew={(name) => triggerFilePicker(typeKey, undefined, name)}
             onUploadVersion={(artifactKey) =>
               triggerFilePicker(typeKey, artifactKey)
             }

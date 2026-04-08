@@ -129,12 +129,12 @@ export function isContractSigned(artifact: Artifact): boolean {
 }
 
 const BADGE_STYLES: Record<string, string> = {
-  contract: "bg-charcoal/10 text-charcoal",
-  "close-document": "bg-emerald-50 text-emerald-700",
-  warranty: "bg-stone-light/20 text-stone",
-  proposal: "bg-terracotta/10 text-terracotta",
-  "floor-plan": "bg-blue-50 text-blue-700",
-  "design-board": "bg-amber-50 text-amber-700",
+  proposal: "bg-[#FAEEDA] text-[#854F0B]",
+  "design-board": "bg-[#E1F5EE] text-[#085041]",
+  contract: "bg-[#E6F1FB] text-[#0C447C]",
+  warranty: "bg-[#EEEDFE] text-[#3C3489]",
+  "floor-plan": "bg-[#F1EFE8] text-[#444441]",
+  "close-document": "bg-[#FAECE7] text-[#712B13]",
 };
 
 /**
