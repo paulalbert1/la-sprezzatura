@@ -76,6 +76,7 @@ type PopoverState = {
 type ConfirmDeleteState = {
   key: string;
   name: string;
+  category: string;
 } | null;
 
 // -- Frappe Gantt helper functions (copied from base GanttChart) --
@@ -418,15 +419,11 @@ export default function ScheduleEditor({
   // -- Empty space click handler (D-14) --
 
   const handleEmptyClick = (dateStr: string) => {
-    const containerEl = ganttContainerRef.current;
-    let position = { top: 200, left: 200 };
-    if (containerEl) {
-      const containerRect = containerEl.getBoundingClientRect();
-      position = {
-        top: containerRect.height / 2,
-        left: containerRect.width / 3,
-      };
-    }
+    // Position popover near center of visible viewport, not container
+    const position = {
+      top: window.innerHeight / 3,
+      left: window.innerWidth / 3,
+    };
     setNameError(false);
     setPopover({
       type: "create",
@@ -616,36 +613,55 @@ export default function ScheduleEditor({
     }
   };
 
-  // -- Delete event handler (D-15) --
+  // -- Delete handler (events and milestones) --
 
-  const handleDeleteEvent = async () => {
+  const handleDelete = async () => {
     if (!confirmDelete) return;
     setSaving(true);
     setError(null);
 
     try {
-      const res = await fetch("/api/admin/schedule-event", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "delete",
-          projectId,
-          eventKey: confirmDelete.key,
-        }),
-      });
-
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error || "Failed to delete event");
+      if (confirmDelete.category === "event") {
+        const res = await fetch("/api/admin/schedule-event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "delete",
+            projectId,
+            eventKey: confirmDelete.key,
+          }),
+        });
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.error || "Failed to delete event");
+        }
+        setData((prev) => ({
+          ...prev,
+          customEvents: prev.customEvents.filter(
+            (e: any) => e._key !== confirmDelete.key,
+          ),
+        }));
+      } else if (confirmDelete.category === "milestone") {
+        const res = await fetch("/api/admin/schedule-date", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "delete",
+            projectId,
+            taskId: `milestone:${confirmDelete.key}`,
+          }),
+        });
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.error || "Failed to delete milestone");
+        }
+        setData((prev) => ({
+          ...prev,
+          milestones: prev.milestones.filter(
+            (m: any) => m._key !== confirmDelete.key,
+          ),
+        }));
       }
-
-      // Remove from local data
-      setData((prev) => ({
-        ...prev,
-        customEvents: prev.customEvents.filter(
-          (e: any) => e._key !== confirmDelete.key,
-        ),
-      }));
 
       setConfirmDelete(null);
       setPopover(null);
@@ -673,6 +689,11 @@ export default function ScheduleEditor({
 
   const getPopoverScreenPos = () => {
     if (!popover) return { top: 0, left: 0 };
+
+    // "create" popovers from Add Event button use viewport coordinates directly
+    if (popover.type === "create") return popover.position;
+
+    // "edit" popovers are positioned relative to the Gantt container
     const containerEl = ganttContainerRef.current;
     if (!containerEl) return popover.position;
 
@@ -758,7 +779,7 @@ export default function ScheduleEditor({
             <button
               onClick={handlePopoverSave}
               disabled={saving}
-              className={`bg-terracotta text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-terracotta-light transition-colors w-full ${saving ? "opacity-50" : ""}`}
+              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
             >
               {saving ? "Saving..." : "Save Dates"}
             </button>
@@ -811,13 +832,27 @@ export default function ScheduleEditor({
             {error && (
               <p className="text-xs text-red-600 font-body">{error}</p>
             )}
-            <button
-              onClick={handlePopoverSave}
-              disabled={saving}
-              className={`bg-terracotta text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-terracotta-light transition-colors w-full ${saving ? "opacity-50" : ""}`}
-            >
-              {saving ? "Saving..." : "Save Dates"}
-            </button>
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handlePopoverSave}
+                disabled={saving}
+                className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() =>
+                  setConfirmDelete({
+                    key: popover._key!,
+                    name: popover.fields.name,
+                    category: "milestone",
+                  })
+                }
+                className="text-xs text-red-600 hover:text-red-700 font-body transition-colors"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </>
       );
@@ -903,7 +938,7 @@ export default function ScheduleEditor({
             <button
               onClick={handleCreateEvent}
               disabled={saving}
-              className={`${ctaClasses} w-full justify-center ${saving ? "opacity-50" : ""}`}
+              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
             >
               {saving ? "Creating..." : "Create Event"}
             </button>
@@ -912,7 +947,7 @@ export default function ScheduleEditor({
               <button
                 onClick={handlePopoverSave}
                 disabled={saving}
-                className={`bg-terracotta text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-terracotta-light transition-colors w-full ${saving ? "opacity-50" : ""}`}
+                className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
               >
                 {saving ? "Saving..." : "Save Dates"}
               </button>
@@ -921,6 +956,7 @@ export default function ScheduleEditor({
                   setConfirmDelete({
                     key: popover._key!,
                     name: popover.fields.name,
+                    category: "event",
                   })
                 }
                 className="text-xs text-red-600 hover:text-red-700 font-body transition-colors mt-3"
@@ -1013,13 +1049,15 @@ export default function ScheduleEditor({
 
   return (
     <div>
-      {/* Add Event button */}
-      <div className="flex items-center justify-end mb-4">
+      {/* Legend + Add Event button */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1">{renderLegend()}</div>
         <button
-          className={ctaClasses}
-          onClick={() =>
-            handleEmptyClick(serializeSanityDate(new Date()) || "")
-          }
+          className={ctaClasses + " shrink-0 ml-4"}
+          onClick={() => {
+            const today = serializeSanityDate(new Date());
+            if (today) handleEmptyClick(today);
+          }}
         >
           <Plus size={16} /> Add Event
         </button>
@@ -1035,9 +1073,6 @@ export default function ScheduleEditor({
           onEmptyClick={handleEmptyClick}
         />
       </div>
-
-      {/* Legend */}
-      {renderLegend()}
 
       {/* Popover (portaled to body for z-index safety) */}
       {popover &&
@@ -1091,7 +1126,7 @@ export default function ScheduleEditor({
                     Keep Event
                   </button>
                   <button
-                    onClick={handleDeleteEvent}
+                    onClick={handleDelete}
                     disabled={saving}
                     className={`bg-red-600 text-white text-xs uppercase tracking-widest font-body px-4 py-2 rounded-lg hover:bg-red-700 transition-colors ${saving ? "opacity-50" : ""}`}
                   >

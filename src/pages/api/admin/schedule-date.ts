@@ -52,10 +52,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const { projectId, taskId, startDate, endDate, isComplete } = body;
+  const { projectId, taskId, startDate, endDate, isComplete, action } = body as any;
 
-  // Validate required fields
-  if (!projectId || !taskId || !startDate) {
+  if (!projectId || !taskId) {
     return new Response(
       JSON.stringify({ error: "Missing required fields" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
@@ -64,6 +63,47 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   // Parse taskId into category and _key
   const [category, _key] = taskId.split(":");
+
+  // Handle delete action
+  if (action === "delete") {
+    if (!_key) {
+      return new Response(
+        JSON.stringify({ error: "Missing item key" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    const deleteMapping = fieldMap[category];
+    if (!deleteMapping) {
+      return new Response(
+        JSON.stringify({ error: "Invalid category" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
+    }
+    try {
+      await sanityWriteClient
+        .patch(projectId)
+        .unset([`${deleteMapping.array}[_key=="${_key}"]`])
+        .commit();
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (err) {
+      console.error("Failed to delete schedule item:", err);
+      return new Response(
+        JSON.stringify({ error: "Failed to delete schedule item" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+  }
+
+  // Validate required fields for date update
+  if (!startDate) {
+    return new Response(
+      JSON.stringify({ error: "Missing startDate" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
   // Reject procurement -- procurement dates are read-only (D-08)
   if (category === "procurement") {
