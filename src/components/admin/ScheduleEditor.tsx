@@ -837,22 +837,12 @@ export default function ScheduleEditor({
 
   // -- Calculate fixed popover position for portal --
 
-  const getPopoverScreenPos = () => {
-    if (!popover) return { top: 0, left: 0 };
-
-    // "create" popovers from Add Event button use viewport coordinates directly
-    if (popover.type === "create") return popover.position;
-
-    // "edit" popovers are positioned relative to the Gantt container
-    const containerEl = ganttContainerRef.current;
-    if (!containerEl) return popover.position;
-
-    const containerRect = containerEl.getBoundingClientRect();
-    return {
-      top: containerRect.top + popover.position.top - containerEl.scrollTop,
-      left: containerRect.left + popover.position.left - containerEl.scrollLeft,
-    };
-  };
+  // All popovers render viewport-centered — simpler and always visible
+  const getPopoverScreenPos = () => ({
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  });
 
   // -- Dependency section for edit popovers --
 
@@ -1436,10 +1426,10 @@ export default function ScheduleEditor({
               className="bg-white rounded-[14px] border border-[#d6d0c4] p-6 z-40"
               style={{
                 position: "fixed",
-                top: popoverScreenPos.top,
-                left: popoverScreenPos.left,
-                minWidth: 280,
-                maxWidth: 360,
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 360,
               }}
             >
               {renderPopoverContent()}
