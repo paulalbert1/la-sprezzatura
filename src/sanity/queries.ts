@@ -685,3 +685,17 @@ const ADMIN_SCHEDULE_QUERY = `
 export async function getAdminScheduleData(projectId: string) {
   return sanityClient.fetch(ADMIN_SCHEDULE_QUERY, { projectId });
 }
+
+// GROQ: All contractors for schedule "Add Contractor" dropdown
+const ALL_CONTRACTORS_QUERY = `
+  *[_type == "contractor"] | order(name asc) {
+    _id,
+    name,
+    company,
+    trades
+  }
+`;
+
+export async function getAllContractors() {
+  return sanityClient.fetch(ALL_CONTRACTORS_QUERY);
+}

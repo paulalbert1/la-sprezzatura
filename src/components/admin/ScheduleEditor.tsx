@@ -8,7 +8,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { format } from "date-fns";
-import { X, Plus, Calendar, Trash2 } from "lucide-react";
+import { X, Plus, Calendar, Trash2, ChevronDown } from "lucide-react";
 
 // @ts-expect-error -- Frappe Gantt has no TypeScript declarations
 import Gantt from "frappe-gantt";
@@ -62,6 +62,7 @@ interface ScheduleEditorProps {
     scheduleDependencies: any[];
   };
   projectId: string;
+  allContractors?: Array<{ _id: string; name: string; company?: string; trades?: string[] }>;
 }
 
 type PopoverState = {
@@ -279,6 +280,7 @@ function AdminGanttChart({
 export default function ScheduleEditor({
   scheduleData,
   projectId,
+  allContractors = [],
 }: ScheduleEditorProps) {
   const [data, setData] = useState(scheduleData);
   const [popover, setPopover] = useState<PopoverState>(null);
@@ -286,13 +288,37 @@ export default function ScheduleEditor({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nameError, setNameError] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
   const ganttContainerRef = useRef<HTMLDivElement>(null);
 
-  // Derive Gantt tasks and links from data
+  // Close add menu on outside click
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setAddMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [addMenuOpen]);
+
+  // Derive Gantt tasks and links from data, filtering completed milestones
   const { tasks, links } = useMemo(() => {
     const result = transformProjectToGanttTasks(data);
-    return { tasks: result.tasks, links: result.links };
-  }, [data]);
+    const allTasks = result.tasks || result;
+    const allLinks = result.links || [];
+    const filteredTasks = showCompleted
+      ? allTasks
+      : allTasks.filter((t: any) => !(t._category === "milestone" && t._completed));
+    const taskIds = new Set(filteredTasks.map((t: any) => t.id));
+    const filteredLinks = allLinks.filter(
+      (l: any) => taskIds.has(l.source) && taskIds.has(l.target),
+    );
+    return { tasks: filteredTasks, links: filteredLinks };
+  }, [data, showCompleted]);
 
   // Close popover on Escape key
   useEffect(() => {
@@ -685,6 +711,130 @@ export default function ScheduleEditor({
     }
   };
 
+  // -- Dependency management --
+
+  const handleAddDependency = async (targetTaskId: string, sourceTaskId: string) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/schedule-dependency", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          projectId,
+          source: sourceTaskId,
+          target: targetTaskId,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Failed to add dependency");
+      }
+      const result = await res.json();
+      setData((prev) => ({
+        ...prev,
+        scheduleDependencies: [
+          ...(prev.scheduleDependencies || []),
+          { _key: result.depKey, source: sourceTaskId, target: targetTaskId, linkType: "e2s" },
+        ],
+      }));
+    } catch (err: any) {
+      setError(err.message || "Failed to add dependency");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveDependency = async (depKey: string) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/schedule-dependency", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "remove", projectId, depKey }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Failed to remove dependency");
+      }
+      setData((prev) => ({
+        ...prev,
+        scheduleDependencies: (prev.scheduleDependencies || []).filter(
+          (dep: any) => dep._key !== depKey,
+        ),
+      }));
+    } catch (err: any) {
+      setError(err.message || "Failed to remove dependency");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // -- Add contractor to schedule --
+
+  const handleAddContractor = async (contractorId: string) => {
+    setSaving(true);
+    setError(null);
+    try {
+      const today = serializeSanityDate(new Date());
+      const res = await fetch("/api/admin/schedule-date", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "addContractor",
+          projectId,
+          contractorId,
+          startDate: today,
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Failed to add contractor");
+      }
+      const result = await res.json();
+      const contractor = allContractors.find((c) => c._id === contractorId);
+      if (contractor) {
+        setData((prev) => ({
+          ...prev,
+          contractors: [
+            ...prev.contractors,
+            {
+              _key: result.assignmentKey || Date.now().toString(36),
+              contractor: { _id: contractor._id, name: contractor.name, company: contractor.company || "", trades: contractor.trades || [] },
+              startDate: today,
+              endDate: null,
+            },
+          ],
+        }));
+      }
+      setPopover(null);
+      setAddMenuOpen(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to add contractor");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // -- Dependency UI helper: get dependencies for a task --
+
+  const getDependenciesForTask = (taskId: string) => {
+    return (data.scheduleDependencies || []).filter(
+      (dep: any) => dep.target === taskId,
+    );
+  };
+
+  const getAvailableDependencySources = (taskId: string) => {
+    const existingSourceIds = new Set(
+      getDependenciesForTask(taskId).map((d: any) => d.source),
+    );
+    return tasks.filter(
+      (t: any) => t.id !== taskId && !existingSourceIds.has(t.id),
+    );
+  };
+
   // -- Calculate fixed popover position for portal --
 
   const getPopoverScreenPos = () => {
@@ -704,10 +854,168 @@ export default function ScheduleEditor({
     };
   };
 
+  // -- Dependency section for edit popovers --
+
+  const renderDependencySection = (taskId: string) => {
+    const deps = getDependenciesForTask(taskId);
+    const availableSources = getAvailableDependencySources(taskId);
+
+    return (
+      <div className="border-t border-stone-light/20 pt-3 mt-3">
+        <label className={labelClasses}>Depends on</label>
+        {deps.length > 0 && (
+          <div className="space-y-1 mb-2">
+            {deps.map((dep: any) => {
+              const srcTask = tasks.find((t: any) => t.id === dep.source);
+              return (
+                <div key={dep._key} className="flex items-center justify-between text-xs font-body text-charcoal bg-cream-dark rounded px-2 py-1">
+                  <span>{srcTask?.text || dep.source}</span>
+                  <button
+                    onClick={() => handleRemoveDependency(dep._key)}
+                    className="text-stone-light hover:text-red-600 transition-colors ml-2"
+                    aria-label="Remove dependency"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {availableSources.length > 0 && (
+          <select
+            className={selectClasses + " text-xs py-2"}
+            value=""
+            onChange={(e) => {
+              if (e.target.value) {
+                handleAddDependency(taskId, e.target.value);
+                e.target.value = "";
+              }
+            }}
+          >
+            <option value="">Add dependency...</option>
+            {availableSources.map((t: any) => (
+              <option key={t.id} value={t.id}>{t.text}</option>
+            ))}
+          </select>
+        )}
+      </div>
+    );
+  };
+
   // -- Render popover content based on category --
 
   const renderPopoverContent = () => {
     if (!popover) return null;
+
+    // Add contractor picker
+    if (popover.category === "add-contractor") {
+      const alreadyAssigned = new Set(
+        (data.contractors || []).map((c: any) => c.contractor?._id).filter(Boolean),
+      );
+      const available = allContractors.filter((c) => !alreadyAssigned.has(c._id));
+
+      return (
+        <>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold font-body text-charcoal">Add Contractor</h3>
+            <button onClick={() => setPopover(null)} className="text-stone-light hover:text-charcoal transition-colors" aria-label="Close"><X size={16} /></button>
+          </div>
+          {available.length === 0 ? (
+            <p className="text-sm text-stone font-body">All contractors are already assigned.</p>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label className={labelClasses}>Contractor</label>
+                <select
+                  className={selectClasses}
+                  value={popover.fields.contractorId || ""}
+                  onChange={(e) => updateField("contractorId", e.target.value)}
+                >
+                  <option value="">Select...</option>
+                  {available.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}{c.company ? ` (${c.company})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {error && <p className="text-xs text-red-600 font-body">{error}</p>}
+              <button
+                onClick={() => {
+                  if (popover.fields.contractorId) handleAddContractor(popover.fields.contractorId);
+                }}
+                disabled={saving || !popover.fields.contractorId}
+                className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving || !popover.fields.contractorId ? "opacity-50" : ""}`}
+              >
+                {saving ? "Adding..." : "Add to Schedule"}
+              </button>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    // Create milestone
+    if (popover.category === "milestone" && popover.type === "create") {
+      return (
+        <>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold font-body text-charcoal">New Milestone</h3>
+            <button onClick={() => setPopover(null)} className="text-stone-light hover:text-charcoal transition-colors" aria-label="Close"><X size={16} /></button>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <label className={labelClasses}>Name *</label>
+              <input
+                type="text"
+                className={`${inputClasses} ${nameError ? "border-red-400" : ""}`}
+                value={popover.fields.name || ""}
+                onChange={(e) => updateField("name", e.target.value)}
+                placeholder="Milestone name"
+                autoFocus
+              />
+            </div>
+            <div>
+              <label className={labelClasses}>Date</label>
+              <input type="date" className={inputClasses} value={popover.fields.date || ""} onChange={(e) => updateField("date", e.target.value)} />
+            </div>
+            {error && <p className="text-xs text-red-600 font-body">{error}</p>}
+            <button
+              onClick={async () => {
+                if (!popover.fields.name?.trim()) { setNameError(true); return; }
+                setSaving(true); setError(null);
+                try {
+                  const res = await fetch("/api/admin/schedule-date", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "createMilestone",
+                      projectId,
+                      name: popover.fields.name.trim(),
+                      startDate: popover.fields.date,
+                    }),
+                  });
+                  if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Failed"); }
+                  const result = await res.json();
+                  setData((prev) => ({
+                    ...prev,
+                    milestones: [...prev.milestones, { _key: result.milestoneKey || Date.now().toString(36), name: popover.fields.name.trim(), date: popover.fields.date, completed: false }],
+                  }));
+                  setPopover(null);
+                } catch (err: any) {
+                  setError(err.message || "Failed to create milestone");
+                } finally { setSaving(false); }
+              }}
+              disabled={saving}
+              className={`text-xs text-stone font-body px-3 py-1.5 border border-stone-light/20 rounded-md hover:bg-stone-light/10 transition-colors ${saving ? "opacity-50" : ""}`}
+            >
+              {saving ? "Creating..." : "Create Milestone"}
+            </button>
+          </div>
+        </>
+      );
+    }
 
     // Procurement: read-only
     if (popover.category === "procurement") {
@@ -740,6 +1048,7 @@ export default function ScheduleEditor({
 
     // Contractor: startDate, endDate
     if (popover.category === "contractor") {
+      const taskId = `contractor:${popover._key}`;
       return (
         <>
           <div className="flex items-center justify-between mb-3">
@@ -783,6 +1092,7 @@ export default function ScheduleEditor({
             >
               {saving ? "Saving..." : "Save Dates"}
             </button>
+            {renderDependencySection(taskId)}
           </div>
         </>
       );
@@ -790,6 +1100,7 @@ export default function ScheduleEditor({
 
     // Milestone: date, completed toggle
     if (popover.category === "milestone") {
+      const taskId = `milestone:${popover._key}`;
       return (
         <>
           <div className="flex items-center justify-between mb-3">
@@ -853,6 +1164,7 @@ export default function ScheduleEditor({
                 Delete
               </button>
             </div>
+            {renderDependencySection(taskId)}
           </div>
         </>
       );
@@ -963,6 +1275,7 @@ export default function ScheduleEditor({
               >
                 Delete Event
               </button>
+              {renderDependencySection(`event:${popover._key}`)}
             </>
           )}
         </div>
@@ -970,49 +1283,111 @@ export default function ScheduleEditor({
     );
   };
 
-  // -- Legend --
+  // -- Legend (two-row card) --
 
   const renderLegend = () => {
     const contractors = data.contractors || [];
     return (
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4 text-xs text-stone font-body">
-        {contractors.map((c: any, i: number) => {
-          const name = c.contractor?.name || "Unknown";
-          const color = getContractorColor(i);
-          return (
-            <div key={c._key} className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full inline-block mr-2"
-                style={{ backgroundColor: color }}
-              />
-              {name}
-            </div>
-          );
-        })}
-        <div className="flex items-center">
-          <span
-            className="w-3 h-3 rounded-full inline-block mr-2"
-            style={{ backgroundColor: CATEGORY_COLORS.milestones }}
-          />
-          Milestones
-        </div>
-        <div className="flex items-center">
-          <span
-            className="w-3 h-3 rounded-full inline-block mr-2"
-            style={{ backgroundColor: CATEGORY_COLORS.events }}
-          />
-          Events
-        </div>
-        <div className="flex items-center">
-          <span
-            className="w-3 h-3 rounded-full inline-block mr-2"
-            style={{ backgroundColor: CATEGORY_COLORS.procurement }}
-          />
-          Procurement
+      <div className="bg-white border border-stone-light/20 rounded-lg px-4 py-3 text-xs text-stone font-body space-y-2">
+        {/* Row 1: Contractors */}
+        {contractors.length > 0 && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+            <span className="uppercase tracking-widest text-[10px] text-stone-light font-semibold mr-1">Contractors</span>
+            {contractors.map((c: any, i: number) => {
+              const name = c.contractor?.name || "Unknown";
+              const color = getContractorColor(i);
+              return (
+                <div key={c._key} className="flex items-center gap-1.5">
+                  <span className="w-5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: color }} />
+                  <span>{name}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {/* Row 2: Items */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+          <span className="uppercase tracking-widest text-[10px] text-stone-light font-semibold mr-1">Items</span>
+          <div className="flex items-center gap-1.5">
+            <svg width="10" height="10" viewBox="0 0 10 10" className="inline-block"><polygon points="5,0 10,5 5,10 0,5" fill={CATEGORY_COLORS.milestones} /></svg>
+            <span>Milestone</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: CATEGORY_COLORS.events }} />
+            <span>Event</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: CATEGORY_COLORS.procurement }} />
+            <span>Procurement</span>
+          </div>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="w-5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: CATEGORY_COLORS.completed }} />
+            <span>Completed</span>
+          </div>
         </div>
       </div>
     );
   };
+
+  // -- + Add dropdown renderer --
+
+  const renderAddMenu = () => (
+    <div ref={addMenuRef} className="relative shrink-0">
+      <button
+        className="border border-stone-light/20 bg-white text-sm font-medium font-body text-stone px-4 py-2 rounded-lg hover:bg-stone-light/5 transition-colors inline-flex items-center gap-1.5"
+        onClick={() => setAddMenuOpen((v) => !v)}
+      >
+        <Plus size={14} /> Add <ChevronDown size={12} />
+      </button>
+      {addMenuOpen && (
+        <div className="absolute right-0 top-full mt-1 w-56 bg-white border border-stone-light/20 rounded-lg shadow-lg z-20 py-1">
+          {allContractors.length > 0 && (
+            <button
+              className="w-full text-left px-4 py-2.5 hover:bg-stone-light/5 transition-colors"
+              onClick={() => {
+                setAddMenuOpen(false);
+                setPopover({
+                  type: "create",
+                  category: "add-contractor",
+                  position: { top: window.innerHeight / 3, left: window.innerWidth / 3 },
+                  fields: { contractorId: "" },
+                });
+              }}
+            >
+              <span className="text-sm font-body text-charcoal block">Contractor</span>
+              <span className="text-xs font-body text-stone">Assign a contractor to the timeline</span>
+            </button>
+          )}
+          <button
+            className="w-full text-left px-4 py-2.5 hover:bg-stone-light/5 transition-colors"
+            onClick={() => {
+              setAddMenuOpen(false);
+              const today = serializeSanityDate(new Date());
+              if (today) handleEmptyClick(today);
+            }}
+          >
+            <span className="text-sm font-body text-charcoal block">Event</span>
+            <span className="text-xs font-body text-stone">Add a walkthrough, inspection, etc.</span>
+          </button>
+          <button
+            className="w-full text-left px-4 py-2.5 hover:bg-stone-light/5 transition-colors"
+            onClick={() => {
+              setAddMenuOpen(false);
+              setPopover({
+                type: "create",
+                category: "milestone",
+                position: { top: window.innerHeight / 3, left: window.innerWidth / 3 },
+                fields: { name: "", date: serializeSanityDate(new Date()) || "", completed: false },
+              });
+            }}
+          >
+            <span className="text-sm font-body text-charcoal block">Milestone</span>
+            <span className="text-xs font-body text-stone">Add a project milestone marker</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   // -- Empty state --
 
@@ -1021,14 +1396,7 @@ export default function ScheduleEditor({
       <div>
         <div className="flex items-center justify-between mb-6">
           <div />
-          <button
-            className={ctaClasses}
-            onClick={() =>
-              handleEmptyClick(serializeSanityDate(new Date()) || "")
-            }
-          >
-            <Plus size={16} /> Add Event
-          </button>
+          {renderAddMenu()}
         </div>
         <div className="text-center py-12">
           <p className="text-sm font-semibold font-body text-charcoal">
@@ -1049,18 +1417,21 @@ export default function ScheduleEditor({
 
   return (
     <div>
-      {/* Legend + Add Event button */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Legend + Show completed + Add dropdown */}
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1">{renderLegend()}</div>
-        <button
-          className={ctaClasses + " shrink-0 ml-4"}
-          onClick={() => {
-            const today = serializeSanityDate(new Date());
-            if (today) handleEmptyClick(today);
-          }}
-        >
-          <Plus size={16} /> Add Event
-        </button>
+        <div className="flex items-center gap-4 shrink-0">
+          <label className="flex items-center gap-2 text-xs text-stone font-body cursor-pointer">
+            <input
+              type="checkbox"
+              className="w-3.5 h-3.5 rounded border border-stone-light/30 accent-charcoal"
+              checked={showCompleted}
+              onChange={(e) => setShowCompleted(e.target.checked)}
+            />
+            Show completed
+          </label>
+          {renderAddMenu()}
+        </div>
       </div>
 
       {/* Gantt chart container (relative for positioning reference) */}

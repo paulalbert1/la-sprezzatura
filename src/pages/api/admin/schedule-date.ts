@@ -52,9 +52,68 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   }
 
-  const { projectId, taskId, startDate, endDate, isComplete, action } = body as any;
+  const { projectId, taskId, startDate, endDate, isComplete, action, name, contractorId } = body as any;
 
-  if (!projectId || !taskId) {
+  if (!projectId) {
+    return new Response(
+      JSON.stringify({ error: "Missing projectId" }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // Handle createMilestone action
+  if (action === "createMilestone") {
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return new Response(JSON.stringify({ error: "Milestone name is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    try {
+      const milestoneKey = (await import("../../../lib/generateToken")).generatePortalToken(8);
+      const milestone = {
+        _key: milestoneKey,
+        _type: "milestone",
+        name: name.trim(),
+        date: startDate || null,
+        completed: false,
+      };
+      await sanityWriteClient
+        .patch(projectId)
+        .setIfMissing({ milestones: [] })
+        .append("milestones", [milestone])
+        .commit();
+      return new Response(JSON.stringify({ success: true, milestoneKey }), { status: 200, headers: { "Content-Type": "application/json" } });
+    } catch (err) {
+      console.error("Failed to create milestone:", err);
+      return new Response(JSON.stringify({ error: "Failed to create milestone" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
+  // Handle addContractor action
+  if (action === "addContractor") {
+    if (!contractorId) {
+      return new Response(JSON.stringify({ error: "Missing contractorId" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    try {
+      const assignmentKey = (await import("../../../lib/generateToken")).generatePortalToken(8);
+      const assignment = {
+        _key: assignmentKey,
+        _type: "contractorAssignment",
+        contractor: { _type: "reference", _ref: contractorId },
+        startDate: startDate || null,
+        endDate: endDate || null,
+      };
+      await sanityWriteClient
+        .patch(projectId)
+        .setIfMissing({ contractors: [] })
+        .append("contractors", [assignment])
+        .commit();
+      return new Response(JSON.stringify({ success: true, assignmentKey }), { status: 200, headers: { "Content-Type": "application/json" } });
+    } catch (err) {
+      console.error("Failed to add contractor:", err);
+      return new Response(JSON.stringify({ error: "Failed to add contractor" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
+  if (!taskId) {
     return new Response(
       JSON.stringify({ error: "Missing required fields" }),
       { status: 400, headers: { "Content-Type": "application/json" } },
