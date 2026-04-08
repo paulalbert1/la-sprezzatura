@@ -8,6 +8,7 @@ import {
   DocumentsIcon,
   BellIcon,
   ClockIcon,
+  ClipboardIcon,
 } from "@sanity/icons";
 import { generatePortalToken } from "../../lib/generateToken";
 import { BlobFileInput } from "../components/BlobFileInput";
@@ -28,6 +29,7 @@ export const project = defineType({
     { name: "artifacts", title: "Artifacts", icon: DocumentsIcon },
     { name: "updates", title: "Updates", icon: BellIcon },
     { name: "schedule", title: "Schedule", icon: ClockIcon },
+    { name: "tasks", title: "Tasks", icon: ClipboardIcon },
   ],
   fields: [
     defineField({
@@ -208,6 +210,13 @@ export const project = defineType({
           { title: "Closeout", value: "closeout" },
         ],
       },
+    }),
+    defineField({
+      name: "pipelineStageChangedAt",
+      title: "Stage Changed At",
+      type: "datetime",
+      group: "portal",
+      description: "Automatically set when pipeline stage changes. Used for days-in-stage computation.",
     }),
     defineField({
       name: "portalToken",
@@ -1189,6 +1198,85 @@ export const project = defineType({
               subtitle: "target",
               description: "linkType",
             },
+          },
+        }),
+      ],
+    }),
+    // Phase 30: Tasks inline array
+    defineField({
+      name: "tasks",
+      title: "Tasks",
+      type: "array",
+      group: "tasks",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "task",
+          fields: [
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({ name: "dueDate", title: "Due Date", type: "date" }),
+            defineField({
+              name: "completed",
+              title: "Completed",
+              type: "boolean",
+              initialValue: false,
+            }),
+            defineField({ name: "completedAt", title: "Completed At", type: "datetime" }),
+            defineField({ name: "createdAt", title: "Created At", type: "datetime" }),
+          ],
+          preview: {
+            select: { title: "description", subtitle: "dueDate", completed: "completed" },
+            prepare: ({ title, subtitle, completed }) => ({
+              title: title || "Untitled task",
+              subtitle: `${subtitle || "No date"} ${completed ? "(Complete)" : ""}`,
+            }),
+          },
+        }),
+      ],
+    }),
+    // Phase 30: Activity log inline array
+    defineField({
+      name: "activityLog",
+      title: "Activity Log",
+      type: "array",
+      group: "updates",
+      readOnly: true,
+      description: "Automated log of project mutations (task changes, milestone updates, etc.)",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "activityEntry",
+          fields: [
+            defineField({
+              name: "action",
+              title: "Action",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Task Created", value: "task-created" },
+                  { title: "Task Completed", value: "task-completed" },
+                  { title: "Task Reopened", value: "task-reopened" },
+                  { title: "Milestone Completed", value: "milestone-completed" },
+                  { title: "Procurement Status Changed", value: "procurement-status-changed" },
+                  { title: "Document Uploaded", value: "document-uploaded" },
+                ],
+              },
+            }),
+            defineField({ name: "description", title: "Description", type: "string" }),
+            defineField({ name: "actor", title: "Actor", type: "string" }),
+            defineField({ name: "timestamp", title: "Timestamp", type: "datetime" }),
+          ],
+          preview: {
+            select: { title: "description", subtitle: "timestamp" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Activity",
+              subtitle: subtitle ? new Date(subtitle).toLocaleString() : "",
+            }),
           },
         }),
       ],

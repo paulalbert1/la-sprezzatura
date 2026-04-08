@@ -434,3 +434,104 @@ describe("project schema (Phase 15 schedule extensions)", () => {
     expect(expectedDeliveryIdx).toBeLessThan(installDateIdx);
   });
 });
+
+describe("project schema (Phase 30 extensions)", () => {
+  it('has a "tasks" group in the groups array', () => {
+    const groups = (project as { groups?: { name: string; title: string }[] }).groups;
+    expect(groups).toBeDefined();
+    const tasksGroup = groups!.find((g) => g.name === "tasks");
+    expect(tasksGroup).toBeDefined();
+    expect(tasksGroup!.title).toBe("Tasks");
+  });
+
+  it('has "pipelineStageChangedAt" datetime field in portal group', () => {
+    const field = project.fields?.find((f) => f.name === "pipelineStageChangedAt");
+    expect(field).toBeDefined();
+    expect(field!.type).toBe("datetime");
+    expect(field!.group).toBe("portal");
+  });
+
+  it('has "tasks" array field in tasks group', () => {
+    const field = project.fields?.find((f) => f.name === "tasks");
+    expect(field).toBeDefined();
+    expect(field!.type).toBe("array");
+    expect(field!.group).toBe("tasks");
+  });
+
+  it("tasks array member has name 'task' with correct fields", () => {
+    const tasksField = project.fields?.find((f) => f.name === "tasks");
+    expect(tasksField).toBeDefined();
+    const arrayMember = (tasksField as any)?.of?.[0];
+    expect(arrayMember).toBeDefined();
+    expect(arrayMember.name).toBe("task");
+
+    const fieldNames = arrayMember.fields.map((f: any) => f.name);
+    expect(fieldNames).toContain("description");
+    expect(fieldNames).toContain("dueDate");
+    expect(fieldNames).toContain("completed");
+    expect(fieldNames).toContain("completedAt");
+    expect(fieldNames).toContain("createdAt");
+  });
+
+  it("task description field is string with required validation", () => {
+    const tasksField = project.fields?.find((f) => f.name === "tasks");
+    const arrayMember = (tasksField as any)?.of?.[0];
+    const descField = arrayMember?.fields?.find((f: any) => f.name === "description");
+    expect(descField).toBeDefined();
+    expect(descField.type).toBe("string");
+    expect(descField.validation).toBeDefined();
+  });
+
+  it("task dueDate field is type date", () => {
+    const tasksField = project.fields?.find((f) => f.name === "tasks");
+    const arrayMember = (tasksField as any)?.of?.[0];
+    const dueDateField = arrayMember?.fields?.find((f: any) => f.name === "dueDate");
+    expect(dueDateField).toBeDefined();
+    expect(dueDateField.type).toBe("date");
+  });
+
+  it("task completed field has initialValue false", () => {
+    const tasksField = project.fields?.find((f) => f.name === "tasks");
+    const arrayMember = (tasksField as any)?.of?.[0];
+    const completedField = arrayMember?.fields?.find((f: any) => f.name === "completed");
+    expect(completedField).toBeDefined();
+    expect(completedField.type).toBe("boolean");
+    expect(completedField.initialValue).toBe(false);
+  });
+
+  it('has "activityLog" array field in updates group with readOnly', () => {
+    const field = project.fields?.find((f) => f.name === "activityLog");
+    expect(field).toBeDefined();
+    expect(field!.type).toBe("array");
+    expect(field!.group).toBe("updates");
+    expect((field as any).readOnly).toBe(true);
+  });
+
+  it("activityLog array member has name 'activityEntry' with correct fields", () => {
+    const logField = project.fields?.find((f) => f.name === "activityLog");
+    expect(logField).toBeDefined();
+    const arrayMember = (logField as any)?.of?.[0];
+    expect(arrayMember).toBeDefined();
+    expect(arrayMember.name).toBe("activityEntry");
+
+    const fieldNames = arrayMember.fields.map((f: any) => f.name);
+    expect(fieldNames).toContain("action");
+    expect(fieldNames).toContain("description");
+    expect(fieldNames).toContain("actor");
+    expect(fieldNames).toContain("timestamp");
+  });
+
+  it("activityEntry action field has expected enum values", () => {
+    const logField = project.fields?.find((f) => f.name === "activityLog");
+    const arrayMember = (logField as any)?.of?.[0];
+    const actionField = arrayMember?.fields?.find((f: any) => f.name === "action");
+    expect(actionField).toBeDefined();
+    const values = actionField.options?.list?.map((item: any) => item.value);
+    expect(values).toContain("task-created");
+    expect(values).toContain("task-completed");
+    expect(values).toContain("task-reopened");
+    expect(values).toContain("milestone-completed");
+    expect(values).toContain("procurement-status-changed");
+    expect(values).toContain("document-uploaded");
+  });
+});
