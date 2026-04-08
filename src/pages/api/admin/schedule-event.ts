@@ -207,6 +207,35 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
+    // --- ADD CONTRACTOR ---
+    if (action === "add-contractor") {
+      const { contractorId, startDate, endDate } = body as any;
+      if (!contractorId) {
+        return new Response(
+          JSON.stringify({ error: "Missing fields" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      const entryKey = generatePortalToken(8);
+      await sanityWriteClient
+        .patch(projectId)
+        .setIfMissing({ contractors: [] })
+        .append("contractors", [
+          {
+            _key: entryKey,
+            _type: "contractorAssignment",
+            contractor: { _type: "reference", _ref: contractorId },
+            startDate: startDate || null,
+            endDate: endDate || null,
+          },
+        ])
+        .commit();
+      return new Response(
+        JSON.stringify({ success: true, entryKey }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     // Invalid action
     return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,
