@@ -30,4 +30,14 @@ describe("rateLimit module", () => {
   it("uses sliding window algorithm", () => {
     expect(rateLimitSource).toContain("slidingWindow");
   });
+
+  // --- Admin login rate limiter (Plan 29-01 Task 2) ---
+
+  it("exports adminLoginRatelimit", () => {
+    expect(rateLimitSource).toContain("export const adminLoginRatelimit");
+  });
+
+  it("adminLoginRatelimit uses admin-login prefix", () => {
+    expect(rateLimitSource).toContain("ratelimit:admin-login");
+  });
 });

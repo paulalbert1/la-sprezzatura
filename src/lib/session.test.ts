@@ -76,4 +76,25 @@ describe("session module", () => {
     expect(sessionSource).toContain("'contractor'");
     expect(sessionSource).toContain("'building_manager'");
   });
+
+  // --- Admin session tests (Plan 29-01 Task 2) ---
+
+  it("SessionData role type includes 'admin'", () => {
+    expect(sessionSource).toContain("'admin'");
+  });
+
+  it("SessionData has optional tenantId field", () => {
+    expect(sessionSource).toContain("tenantId?: string");
+  });
+
+  it("createSession accepts 4th parameter for tenantId", () => {
+    // createSession should accept tenantId as optional 4th parameter
+    expect(sessionSource).toMatch(
+      /createSession[\s\S]*?tenantId\??: string/,
+    );
+  });
+
+  it("createSession stores tenantId in session data when provided", () => {
+    expect(sessionSource).toContain("if (tenantId) sessionData.tenantId = tenantId");
+  });
 });
