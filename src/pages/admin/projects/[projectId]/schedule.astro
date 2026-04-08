@@ -3,7 +3,7 @@ export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import ScheduleEditor from "../../../../components/admin/ScheduleEditor.tsx";
-import { getAdminScheduleData, getAllContractors } from "../../../../sanity/queries";
+import { getAdminScheduleData } from "../../../../sanity/queries";
 
 const projectId = Astro.params.projectId;
 if (!projectId) {
@@ -14,8 +14,6 @@ const data = await getAdminScheduleData(projectId);
 if (!data) {
   return Astro.redirect("/admin/projects");
 }
-
-const allContractors = await getAllContractors();
 
 const breadcrumbs = [
   { label: "Projects", href: "/admin/projects" },
@@ -29,6 +27,5 @@ const breadcrumbs = [
     client:load
     scheduleData={data}
     projectId={projectId}
-    allContractors={allContractors}
   />
 </AdminLayout>

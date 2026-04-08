@@ -8,27 +8,27 @@
 
 import type { ProcurementStatus } from "./ganttTypes";
 
-/** 10-color palette for per-contractor bar coloring (Tailwind 500 weights) */
+/** 10-color desaturated palette for per-contractor bar coloring */
 export const CONTRACTOR_PALETTE: readonly string[] = [
-  "#3B82F6", // blue-500
-  "#EF4444", // red-500
-  "#10B981", // emerald-500
-  "#F59E0B", // amber-500
-  "#8B5CF6", // violet-500
-  "#EC4899", // pink-500
-  "#06B6D4", // cyan-500
-  "#F97316", // orange-500
-  "#14B8A6", // teal-500
-  "#6366F1", // indigo-500
+  "#5B8DB8", // slate blue
+  "#C46B5C", // dusty rose
+  "#6BA87A", // sage
+  "#C49A5C", // warm ochre
+  "#8B7BBF", // soft purple
+  "#5DA3A3", // muted teal
+  "#B8856B", // terracotta muted
+  "#7B9E6B", // olive
+  "#A87B8B", // mauve
+  "#6B8BA8", // steel blue
 ] as const;
 
 /** Category colors for non-contractor items */
 export const CATEGORY_COLORS = {
-  contractors: "#3B82F6", // blue-500 (fallback if no per-contractor)
-  procurement: "#F59E0B", // amber-500
-  milestones: "#8B5CF6", // violet-500
-  events: "#14B8A6", // teal-500
-  completed: "#9CA3AF", // gray-400
+  contractors: "#5B8DB8", // slate blue (fallback)
+  procurement: "#C9A96E", // warm amber
+  milestones: "#A8A29E", // neutral stone
+  events: "#78B8A0", // muted teal
+  completed: "#D6D3D1", // light gray
 } as const;
 
 /** Get a contractor color by array index with modulo wrapping */

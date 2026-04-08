@@ -3,6 +3,7 @@
  *
  * Frappe Gantt uses CSS variables (--g-* and --gv-*) and plain class selectors.
  * Per-contractor colors via custom_class (gantt-contractor-0 through 9).
+ * Item types differentiated by border-radius and stroke style.
  */
 
 /* === Container sizing === */
@@ -23,7 +24,7 @@
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-/* === Theme: warm off-white to match Studio === */
+/* === Theme: warm off-white === */
 .gantt-container {
   --g-header-background: #FAF5F2;
   --g-row-color: #FAFAF8;
@@ -36,28 +37,38 @@
   --g-text-light: #FFFFFF;
   --g-actions-background: #F0EEEB;
   --g-arrow-color: #78716C;
-  --g-today-highlight: #EF4444;
+  --g-today-highlight: #C45C5C;
   --g-weekend-highlight-color: rgba(0, 0, 0, 0.02);
   --g-popup-actions: #F0EEEB;
 }
 
-/* === Per-contractor bar colors (matches CONTRACTOR_PALETTE) === */
-.gantt .bar-wrapper.gantt-contractor-0 .bar { fill: #3B82F6 !important; stroke: #3B82F6 !important; }
-.gantt .bar-wrapper.gantt-contractor-1 .bar { fill: #EF4444 !important; stroke: #EF4444 !important; }
-.gantt .bar-wrapper.gantt-contractor-2 .bar { fill: #10B981 !important; stroke: #10B981 !important; }
-.gantt .bar-wrapper.gantt-contractor-3 .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
-.gantt .bar-wrapper.gantt-contractor-4 .bar { fill: #8B5CF6 !important; stroke: #8B5CF6 !important; }
-.gantt .bar-wrapper.gantt-contractor-5 .bar { fill: #EC4899 !important; stroke: #EC4899 !important; }
-.gantt .bar-wrapper.gantt-contractor-6 .bar { fill: #06B6D4 !important; stroke: #06B6D4 !important; }
-.gantt .bar-wrapper.gantt-contractor-7 .bar { fill: #F97316 !important; stroke: #F97316 !important; }
-.gantt .bar-wrapper.gantt-contractor-8 .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
-.gantt .bar-wrapper.gantt-contractor-9 .bar { fill: #6366F1 !important; stroke: #6366F1 !important; }
+/* === Per-contractor bar colors (desaturated palette) === */
+.gantt .bar-wrapper.gantt-contractor-0 .bar { fill: #5B8DB8 !important; stroke: #5B8DB8 !important; }
+.gantt .bar-wrapper.gantt-contractor-1 .bar { fill: #C46B5C !important; stroke: #C46B5C !important; }
+.gantt .bar-wrapper.gantt-contractor-2 .bar { fill: #6BA87A !important; stroke: #6BA87A !important; }
+.gantt .bar-wrapper.gantt-contractor-3 .bar { fill: #C49A5C !important; stroke: #C49A5C !important; }
+.gantt .bar-wrapper.gantt-contractor-4 .bar { fill: #8B7BBF !important; stroke: #8B7BBF !important; }
+.gantt .bar-wrapper.gantt-contractor-5 .bar { fill: #5DA3A3 !important; stroke: #5DA3A3 !important; }
+.gantt .bar-wrapper.gantt-contractor-6 .bar { fill: #B8856B !important; stroke: #B8856B !important; }
+.gantt .bar-wrapper.gantt-contractor-7 .bar { fill: #7B9E6B !important; stroke: #7B9E6B !important; }
+.gantt .bar-wrapper.gantt-contractor-8 .bar { fill: #A87B8B !important; stroke: #A87B8B !important; }
+.gantt .bar-wrapper.gantt-contractor-9 .bar { fill: #6B8BA8 !important; stroke: #6B8BA8 !important; }
 
-/* === Category colors === */
-.gantt .bar-wrapper.gantt-cat-milestone .bar { fill: #8B5CF6 !important; stroke: #8B5CF6 !important; }
-.gantt .bar-wrapper.gantt-cat-procurement .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+/* Contractor bars: solid rounded rects (default Frappe style, slight rounding) */
+.gantt .bar-wrapper[class*="gantt-contractor-"] .bar {
+  rx: 6;
+  ry: 6;
+}
 
-/* Events by category */
+/* === Milestone: neutral stone, small diamond-ish (high rx for narrow bars) === */
+.gantt .bar-wrapper.gantt-cat-milestone .bar {
+  fill: #A8A29E !important;
+  stroke: #A8A29E !important;
+  rx: 3;
+  ry: 3;
+}
+
+/* === Events: muted teal, pill shape === */
 .gantt .bar-wrapper.gantt-cat-walkthrough .bar,
 .gantt .bar-wrapper.gantt-cat-inspection .bar,
 .gantt .bar-wrapper.gantt-cat-punch-list .bar,
@@ -67,34 +78,80 @@
 .gantt .bar-wrapper.gantt-cat-presentation .bar,
 .gantt .bar-wrapper.gantt-cat-deadline .bar,
 .gantt .bar-wrapper.gantt-cat-access .bar,
-.gantt .bar-wrapper.gantt-cat-other .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
+.gantt .bar-wrapper.gantt-cat-other .bar,
+.gantt .bar-wrapper.gantt-cat-event .bar {
+  fill: #D4EDE3 !important;
+  stroke: #9DD4BC !important;
+  stroke-width: 1px;
+  rx: 14;
+  ry: 14;
+}
 
-/* Completed milestones — dimmed */
-.gantt .bar-wrapper.gantt-completed .bar {
-  fill: #9CA3AF !important;
-  stroke: #9CA3AF !important;
-  opacity: 0.6;
+/* Event labels: dark text on light teal */
+.gantt .bar-wrapper[class*="gantt-cat-walkthrough"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-inspection"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-punch-list"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-move"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-permit"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-delivery-window"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-presentation"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-deadline"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-access"] .bar-label,
+.gantt .bar-wrapper[class*="gantt-cat-other"] .bar-label,
+.gantt .bar-wrapper.gantt-cat-event .bar-label {
+  fill: #0F6E56 !important;
+}
+
+/* === Procurement: warm amber, dashed borders, square corners === */
+.gantt .bar-wrapper.gantt-cat-procurement .bar {
+  fill: #FAF0DA !important;
+  stroke: #D4A94E !important;
+  stroke-width: 1px;
+  stroke-dasharray: 4 2;
+  rx: 4;
+  ry: 4;
+}
+
+/* Procurement labels: dark amber text */
+.gantt .bar-wrapper.gantt-cat-procurement .bar-label {
+  fill: #854F0B !important;
 }
 
 /* Procurement by status */
-.gantt .bar-wrapper.gantt-procurement-pending .bar { fill: #D1D5DB !important; stroke: #D1D5DB !important; }
-.gantt .bar-wrapper.gantt-procurement-ordered .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+.gantt .bar-wrapper.gantt-procurement-pending .bar { fill: #F5F0E4 !important; stroke: #D6D3D1 !important; stroke-dasharray: 4 2; rx: 4; ry: 4; }
+.gantt .bar-wrapper.gantt-procurement-ordered .bar { fill: #FAF0DA !important; stroke: #D4A94E !important; stroke-dasharray: 4 2; rx: 4; ry: 4; }
 .gantt .bar-wrapper.gantt-procurement-in-transit .bar,
-.gantt .bar-wrapper.gantt-procurement-warehouse .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
-.gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #10B981 !important; stroke: #10B981 !important; }
-.gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #9CA3AF !important; stroke: #9CA3AF !important; }
+.gantt .bar-wrapper.gantt-procurement-warehouse .bar { fill: #FAF0DA !important; stroke: #D4A94E !important; stroke-dasharray: 4 2; rx: 4; ry: 4; }
+.gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #D4EDE3 !important; stroke: #9DD4BC !important; stroke-dasharray: 4 2; rx: 4; ry: 4; }
+.gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #E8E6E1 !important; stroke: #D6D3D1 !important; stroke-dasharray: 4 2; rx: 4; ry: 4; }
 
-/* Labels inside bars: white text on colored backgrounds */
+.gantt .bar-wrapper[class*="gantt-procurement-"] .bar-label {
+  fill: #854F0B !important;
+}
+
+/* === Completed items: greyed out with reduced opacity === */
+.gantt .bar-wrapper.gantt-completed .bar {
+  fill: #D6D3D1 !important;
+  stroke: #D6D3D1 !important;
+  opacity: 0.7;
+}
+.gantt .bar-wrapper.gantt-completed .bar-label {
+  fill: #A8A29E !important;
+  text-decoration: line-through;
+}
+
+/* === Labels === */
+/* Labels inside bars: white text on colored contractor backgrounds */
 .gantt .bar-label {
   fill: #FFFFFF !important;
 }
 
-/* Labels outside bars (overflowed): dark text on light background */
+/* Labels outside bars (overflowed): dark text */
 .gantt .bar-label.big {
   fill: #0F172A !important;
 }
 
-/* === Conflict indicator: red dashed outline on bars with violations === */
+/* === Conflict indicator === */
 .gantt .bar-wrapper.gantt-conflict .bar {
   stroke: #DC2626 !important;
   stroke-width: 2px !important;
