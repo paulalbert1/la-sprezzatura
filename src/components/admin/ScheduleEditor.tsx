@@ -1285,56 +1285,33 @@ export default function ScheduleEditor({
 
   // -- Legend (two-row card) --
 
-  const renderLegend = () => {
-    const contractors = data.contractors || [];
-    return (
-      <div className="bg-white border border-stone-light/20 rounded-lg px-4 py-3 text-xs text-stone font-body space-y-2">
-        {/* Row 1: Contractors */}
-        {contractors.length > 0 && (
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-            <span className="uppercase tracking-widest text-[10px] text-stone-light font-semibold mr-1">Contractors</span>
-            {contractors.map((c: any, i: number) => {
-              const name = c.contractor?.name || "Unknown";
-              const color = getContractorColor(i);
-              return (
-                <div key={c._key} className="flex items-center gap-1.5">
-                  <span className="w-5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: color }} />
-                  <span>{name}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {/* Row 2: Items */}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
-          <span className="uppercase tracking-widest text-[10px] text-stone-light font-semibold mr-1">Items</span>
-          <div className="flex items-center gap-1.5">
-            <svg width="10" height="10" viewBox="0 0 10 10" className="inline-block"><polygon points="5,0 10,5 5,10 0,5" fill={CATEGORY_COLORS.milestones} /></svg>
-            <span>Milestone</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: CATEGORY_COLORS.events }} />
-            <span>Event</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: CATEGORY_COLORS.procurement }} />
-            <span>Procurement</span>
-          </div>
-          <div className="flex items-center gap-1.5 ml-auto">
-            <span className="w-5 h-2.5 rounded-sm inline-block" style={{ backgroundColor: CATEGORY_COLORS.completed }} />
-            <span>Completed</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const renderLegend = () => (
+    <div className="flex items-center gap-3 text-xs text-[#8a847c] font-body">
+      <span className="flex items-center gap-1">
+        <svg width="8" height="8" viewBox="0 0 8 8"><rect width="8" height="8" rx="1" fill="#1a1a1a" transform="rotate(45 4 4)" /></svg>
+        Milestone
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "#85B7EB" }} />
+        Event
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "#FAC775" }} />
+        Procurement
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="w-2 h-2 rounded-sm inline-block" style={{ backgroundColor: "#D3D1C7" }} />
+        Completed
+      </span>
+    </div>
+  );
 
   // -- + Add dropdown renderer --
 
   const renderAddMenu = () => (
     <div ref={addMenuRef} className="relative shrink-0">
       <button
-        className="border border-stone-light/20 bg-white text-sm font-medium font-body text-stone px-4 py-2 rounded-lg hover:bg-stone-light/5 transition-colors inline-flex items-center gap-1.5"
+        className="border border-[#d6d0c4] bg-[#f3f1ed] text-xs font-medium font-body text-[#2c2a27] px-3.5 py-1.5 rounded-lg hover:bg-[#eae6df] transition-colors inline-flex items-center gap-1.5"
         onClick={() => setAddMenuOpen((v) => !v)}
       >
         <Plus size={14} /> Add <ChevronDown size={12} />
@@ -1417,11 +1394,11 @@ export default function ScheduleEditor({
 
   return (
     <div>
-      {/* Legend + Show completed + Add dropdown */}
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div className="flex-1">{renderLegend()}</div>
+      {/* Legend + Show completed + Add dropdown — single row */}
+      <div className="flex items-center justify-between mb-4">
+        {renderLegend()}
         <div className="flex items-center gap-4 shrink-0">
-          <label className="flex items-center gap-2 text-xs text-stone font-body cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-[#a09a92] font-body cursor-pointer">
             <input
               type="checkbox"
               className="w-3.5 h-3.5 rounded border border-stone-light/30 accent-charcoal"
