@@ -101,7 +101,7 @@ function toFrappeTasks(tasks: GanttTask[], links: GanttLink[]) {
       customClass = `gantt-contractor-${task._colorIndex % 10}`;
     }
     if (task._category === "milestone" && task._completed) {
-      customClass = "gantt-completed";
+      customClass = "gantt-milestone-completed";
     }
     if (task._category === "procurement" && task._status) {
       customClass = `gantt-procurement-${task._status}`;

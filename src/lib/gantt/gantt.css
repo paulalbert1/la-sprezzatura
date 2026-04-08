@@ -60,12 +60,14 @@
   ry: 6;
 }
 
-/* === Milestone: neutral stone, small diamond-ish (high rx for narrow bars) === */
+/* === Milestone: diamond shape via clip-path === */
 .gantt .bar-wrapper.gantt-cat-milestone .bar {
   fill: #A8A29E !important;
-  stroke: #A8A29E !important;
-  rx: 3;
-  ry: 3;
+  stroke: none !important;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.gantt .bar-wrapper.gantt-cat-milestone .bar-label {
+  fill: #57534E !important;
 }
 
 /* === Events: muted teal, pill shape === */
@@ -127,6 +129,17 @@
 
 .gantt .bar-wrapper[class*="gantt-procurement-"] .bar-label {
   fill: #854F0B !important;
+}
+
+/* === Completed milestone: diamond + greyed === */
+.gantt .bar-wrapper.gantt-milestone-completed .bar {
+  fill: #D6D3D1 !important;
+  stroke: none !important;
+  opacity: 0.7;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.gantt .bar-wrapper.gantt-milestone-completed .bar-label {
+  fill: #A8A29E !important;
 }
 
 /* === Completed items: greyed out with reduced opacity === */
