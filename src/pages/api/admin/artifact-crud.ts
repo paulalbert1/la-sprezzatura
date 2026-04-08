@@ -135,27 +135,47 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       artifactKey: string;
     };
 
-    if (action !== "remove") {
-      return new Response(JSON.stringify({ error: "Invalid action" }), {
-        status: 400,
+    if (action === "rename") {
+      const { customTypeName } = body as { customTypeName: string };
+      if (!projectId || !artifactKey || !customTypeName) {
+        return new Response(
+          JSON.stringify({ error: "Missing required fields" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      await sanityWriteClient
+        .patch(projectId)
+        .set({ [`artifacts[_key=="${artifactKey}"].customTypeName`]: customTypeName })
+        .commit();
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    if (!projectId || !artifactKey) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
+    if (action === "remove") {
+      if (!projectId || !artifactKey) {
+        return new Response(
+          JSON.stringify({ error: "Missing required fields" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      await sanityWriteClient
+        .patch(projectId)
+        .unset([`artifacts[_key=="${artifactKey}"]`])
+        .commit();
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    await sanityWriteClient
-      .patch(projectId)
-      .unset([`artifacts[_key=="${artifactKey}"]`])
-      .commit();
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
+    return new Response(JSON.stringify({ error: "Invalid action" }), {
+      status: 400,
       headers: { "Content-Type": "application/json" },
     });
   } catch (err) {

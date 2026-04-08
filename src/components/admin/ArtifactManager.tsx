@@ -93,13 +93,19 @@ function VersionRow({
 function DocRow({
   artifact,
   typeKey,
+  projectId,
   onUploadVersion,
+  onRename,
 }: {
   artifact: Artifact;
   typeKey: string;
+  projectId: string;
   onUploadVersion: (artifactKey: string) => void;
+  onRename: (artifactKey: string, name: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(artifact.customTypeName || "");
   const cv = getCurrentVersion(artifact);
   const hasFile = !!cv?.file?.asset?.url;
   const olderVersions = artifact.versions.length > 1;
@@ -107,6 +113,14 @@ function DocRow({
     artifact.customTypeName ||
     cv?.file?.asset?.originalFilename ||
     ARTIFACT_LABELS[typeKey] || "Untitled";
+
+  function handleSaveName() {
+    const trimmed = editName.trim();
+    if (trimmed && trimmed !== artifact.customTypeName) {
+      onRename(artifact._key, trimmed);
+    }
+    setEditing(false);
+  }
 
   return (
     <div className="border-b border-stone-light/10 last:border-b-0">
@@ -117,9 +131,33 @@ function DocRow({
       >
         <FileText size={16} className="text-stone-light shrink-0" />
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium font-body text-charcoal truncate">
-            {displayName}
-          </div>
+          {editing ? (
+            <input
+              type="text"
+              className="text-sm font-medium font-body text-charcoal bg-transparent border-b border-terracotta outline-none w-full py-0"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onBlur={handleSaveName}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveName();
+                if (e.key === "Escape") setEditing(false);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          ) : (
+            <div
+              className="text-sm font-medium font-body text-charcoal truncate hover:text-terracotta transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditName(artifact.customTypeName || "");
+                setEditing(true);
+              }}
+              title="Click to rename"
+            >
+              {displayName}
+            </div>
+          )}
           <div className="text-[11px] text-stone-light font-body">
             {hasFile ? (
               <>
@@ -204,6 +242,7 @@ function TypeBucket({
   typeKey,
   label,
   instances,
+  projectId,
   dragOver,
   uploading,
   onDragOver,
@@ -211,10 +250,12 @@ function TypeBucket({
   onDrop,
   onAddNew,
   onUploadVersion,
+  onRename,
 }: {
   typeKey: string;
   label: string;
   instances: Artifact[];
+  projectId: string;
   dragOver: boolean;
   uploading: boolean;
   onDragOver: (e: React.DragEvent) => void;
@@ -222,9 +263,10 @@ function TypeBucket({
   onDrop: (e: React.DragEvent) => void;
   onAddNew: () => void;
   onUploadVersion: (artifactKey: string) => void;
+  onRename: (artifactKey: string, name: string) => void;
 }) {
-  const [expanded, setExpanded] = useState(true);
   const count = instances.length;
+  const [expanded, setExpanded] = useState(count > 0);
   const latestDate =
     count > 0
       ? instances
@@ -286,7 +328,9 @@ function TypeBucket({
               key={artifact._key}
               artifact={artifact}
               typeKey={typeKey}
+              projectId={projectId}
               onUploadVersion={onUploadVersion}
+              onRename={onRename}
             />
           ))}
 
@@ -459,6 +503,42 @@ export default function ArtifactManager({
     if (file) uploadFile(typeKey, file);
   }
 
+  async function handleRename(artifactKey: string, name: string) {
+    // Find which type this artifact belongs to
+    const typeKey = Object.keys(docsByType).find((t) =>
+      docsByType[t].some((a) => a._key === artifactKey),
+    );
+    if (!typeKey) return;
+
+    // Optimistic update
+    setDocsByType((prev) => ({
+      ...prev,
+      [typeKey]: prev[typeKey].map((a) =>
+        a._key === artifactKey ? { ...a, customTypeName: name } : a,
+      ),
+    }));
+
+    // Save to Sanity
+    try {
+      const res = await fetch("/api/admin/artifact-crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "rename",
+          projectId,
+          artifactKey,
+          customTypeName: name,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Rename failed");
+      }
+    } catch (err: any) {
+      setError(err.message || "Rename failed");
+    }
+  }
+
   return (
     <div>
       <input
@@ -500,6 +580,7 @@ export default function ArtifactManager({
             typeKey={typeKey}
             label={ARTIFACT_LABELS[typeKey] || typeKey}
             instances={docsByType[typeKey] || []}
+            projectId={projectId}
             dragOver={dragOver === typeKey}
             uploading={uploading === typeKey}
             onDragOver={(e) => {
@@ -512,6 +593,7 @@ export default function ArtifactManager({
             onUploadVersion={(artifactKey) =>
               triggerFilePicker(typeKey, artifactKey)
             }
+            onRename={handleRename}
           />
         ))}
       </div>
