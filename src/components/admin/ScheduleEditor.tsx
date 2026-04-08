@@ -251,9 +251,36 @@ function AdminGanttChart({
         },
       });
 
-      // Force container to match SVG height
+      // Post-process: fix milestone diamonds and container height
       resizeTimer = setTimeout(() => {
         if (!containerRef.current) return;
+
+        // Transform milestone bars into true diamonds via SVG attributes
+        const milestoneWrappers = containerRef.current.querySelectorAll(
+          ".bar-wrapper.gantt-cat-milestone, .bar-wrapper.gantt-milestone-completed",
+        );
+        for (const wrapper of milestoneWrappers) {
+          const bar = wrapper.querySelector(".bar") as SVGRectElement | null;
+          if (!bar) continue;
+          const x = parseFloat(bar.getAttribute("x") || "0");
+          const w = parseFloat(bar.getAttribute("width") || "0");
+          const h = parseFloat(bar.getAttribute("height") || "28");
+          // Center a square diamond within the bar's area
+          const size = Math.min(h, 18);
+          const cx = x + w / 2;
+          const cy = parseFloat(bar.getAttribute("y") || "0") + h / 2;
+          bar.setAttribute("width", String(size));
+          bar.setAttribute("height", String(size));
+          bar.setAttribute("x", String(cx - size / 2));
+          bar.setAttribute("y", String(cy - size / 2));
+          bar.setAttribute("rx", "2");
+          bar.setAttribute("ry", "2");
+          bar.style.transform = "rotate(45deg)";
+          bar.style.transformOrigin = "center";
+          bar.style.transformBox = "fill-box";
+        }
+
+        // Fix container height
         const svg = containerRef.current.querySelector("svg.gantt");
         if (svg) {
           const svgHeight = svg.getAttribute("height");

@@ -60,12 +60,11 @@
   ry: 6;
 }
 
-/* === Milestone: compact centered diamond via clip-path === */
+/* === Milestone: diamond (bar resized + rotated via JS post-process) === */
 .gantt .bar-wrapper.gantt-cat-milestone .bar {
   fill: #A8A29E !important;
-  stroke: transparent !important;
+  stroke: none !important;
   stroke-width: 0 !important;
-  clip-path: polygon(50% 0%, calc(50% + 14px) 50%, 50% 100%, calc(50% - 14px) 50%);
 }
 .gantt .bar-wrapper.gantt-cat-milestone .bar-progress,
 .gantt .bar-wrapper.gantt-cat-milestone .handle {
@@ -136,13 +135,12 @@
   fill: #854F0B !important;
 }
 
-/* === Completed milestone: compact diamond + greyed === */
+/* === Completed milestone: diamond + greyed === */
 .gantt .bar-wrapper.gantt-milestone-completed .bar {
   fill: #D6D3D1 !important;
-  stroke: transparent !important;
+  stroke: none !important;
   stroke-width: 0 !important;
   opacity: 0.7;
-  clip-path: polygon(50% 0%, calc(50% + 14px) 50%, 50% 100%, calc(50% - 14px) 50%);
 }
 .gantt .bar-wrapper.gantt-milestone-completed .bar-progress,
 .gantt .bar-wrapper.gantt-milestone-completed .handle {
