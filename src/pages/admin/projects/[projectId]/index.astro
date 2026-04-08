@@ -1,0 +1,66 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
+import { getAdminProjectDetail } from "../../../../sanity/queries";
+import { getTenantClient } from "../../../../lib/tenantClient";
+import { STAGE_META } from "../../../../lib/portalStages";
+import { getDaysInStage } from "../../../../lib/dashboardUtils";
+
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/admin/projects");
+}
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+
+const project = await getAdminProjectDetail(client, projectId);
+if (!project) {
+  return Astro.redirect("/admin/projects");
+}
+
+const stageMeta = STAGE_META[project.pipelineStage as keyof typeof STAGE_META];
+const daysInStage = getDaysInStage(project.stageChangedAt);
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Projects", href: "/admin/projects" },
+  { label: project.title },
+];
+---
+
+<AdminLayout title={project.title + " - Studio"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
+  <div class="max-w-4xl">
+    {/* Project header with stage badge and days-in-stage */}
+    <div class="flex items-center gap-4 mb-8">
+      <h1 class="text-xl font-semibold font-body text-charcoal">{project.title}</h1>
+      {stageMeta && (
+        <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-terracotta/10 text-terracotta">
+          {stageMeta.title}
+        </span>
+      )}
+      <span class="text-[11px] text-stone-light font-body">{daysInStage}d in stage</span>
+    </div>
+
+    {/* Placeholder sections for future phases (milestones, procurement) */}
+    <div id="milestones" class="mb-8">
+      {/* Milestones section placeholder -- expanded in future phases */}
+    </div>
+
+    <div id="procurement" class="mb-8">
+      {/* Procurement section placeholder -- expanded in future phases */}
+    </div>
+
+    {/* Tasks section - React island */}
+    <ProjectTasks
+      client:load
+      tasks={project.tasks || []}
+      projectId={projectId}
+    />
+  </div>
+</AdminLayout>

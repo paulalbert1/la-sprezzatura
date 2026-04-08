@@ -1,0 +1,216 @@
+import { useState } from "react";
+import { format, parseISO } from "date-fns";
+import { isTaskOverdue } from "../../lib/dashboardUtils";
+
+interface TaskItem {
+  _key: string;
+  description: string;
+  dueDate: string | null;
+  completed: boolean;
+  completedAt: string | null;
+  createdAt: string;
+}
+
+interface Props {
+  tasks: TaskItem[];
+  projectId: string;
+}
+
+export default function ProjectTasks({ tasks, projectId }: Props) {
+  const [localTasks, setLocalTasks] = useState<TaskItem[]>(tasks);
+  const [newDescription, setNewDescription] = useState("");
+  const [newDueDate, setNewDueDate] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  async function handleToggle(task: TaskItem) {
+    const newCompleted = !task.completed;
+    // Optimistic update
+    setLocalTasks((prev) =>
+      prev.map((t) =>
+        t._key === task._key
+          ? {
+              ...t,
+              completed: newCompleted,
+              completedAt: newCompleted ? new Date().toISOString() : null,
+            }
+          : t,
+      ),
+    );
+
+    try {
+      const res = await fetch("/api/admin/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle",
+          projectId,
+          taskKey: task._key,
+          completed: newCompleted,
+        }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      // Revert optimistic update
+      setLocalTasks((prev) =>
+        prev.map((t) =>
+          t._key === task._key
+            ? {
+                ...t,
+                completed: task.completed,
+                completedAt: task.completedAt,
+              }
+            : t,
+        ),
+      );
+      setError("Could not update task. Please try again.");
+      setTimeout(() => setError(null), 3000);
+    }
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const desc = newDescription.trim();
+    if (!desc) {
+      setError("Task description is required");
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await fetch("/api/admin/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create",
+          projectId,
+          description: desc,
+          ...(newDueDate && { dueDate: newDueDate }),
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const result = await res.json();
+
+      // Add new task to local state at top of list
+      setLocalTasks((prev) => [
+        {
+          _key: result.taskKey,
+          description: desc,
+          dueDate: newDueDate || null,
+          completed: false,
+          completedAt: null,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ]);
+
+      // Clear form
+      setNewDescription("");
+      setNewDueDate("");
+    } catch {
+      setError("Could not create task. Please try again.");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  return (
+    <div id="tasks">
+      <h2 className="text-sm font-semibold font-body text-charcoal mb-4">
+        Tasks
+      </h2>
+      <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
+        {/* Task rows -- full list, not capped */}
+        {localTasks.length === 0 ? (
+          <p className="text-sm text-stone text-center py-6">
+            No tasks yet. Use the field below to create one.
+          </p>
+        ) : (
+          <div>
+            {localTasks.map((task) => {
+              const overdue = isTaskOverdue(task);
+              return (
+                <div
+                  key={task._key}
+                  className="flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0"
+                >
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => handleToggle(task)}
+                    aria-label={task.description}
+                    className="w-4 h-4 rounded border-stone-light text-terracotta focus:ring-terracotta accent-terracotta shrink-0"
+                  />
+                  <span
+                    className={`text-sm font-body flex-1 ${
+                      task.completed
+                        ? "text-stone-light line-through"
+                        : overdue
+                          ? "text-red-600"
+                          : "text-charcoal"
+                    }`}
+                  >
+                    {task.description}
+                  </span>
+                  {task.dueDate && (
+                    <span
+                      className={`text-[11px] font-body shrink-0 ${
+                        overdue && !task.completed
+                          ? "text-red-600 font-medium"
+                          : "text-stone-light"
+                      }`}
+                    >
+                      {format(parseISO(task.dueDate), "MMM d")}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Quick-add form -- no project dropdown, pre-scoped to this project */}
+        <form
+          onSubmit={handleCreate}
+          className="flex items-center gap-2 px-5 py-3 border-t border-stone-light/10 bg-cream/50"
+        >
+          <svg
+            className="w-3.5 h-3.5 text-stone-light shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Add a task..."
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            disabled={creating}
+            className="flex-1 text-sm font-body text-charcoal bg-transparent outline-none placeholder:text-stone-light"
+          />
+          <input
+            type="date"
+            value={newDueDate}
+            onChange={(e) => setNewDueDate(e.target.value)}
+            className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
+          />
+        </form>
+
+        {error && (
+          <div className="px-5 py-2 text-xs text-red-600 font-body">
+            {error}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
