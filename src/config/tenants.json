@@ -1,0 +1,34 @@
+[
+  {
+    "id": "lasprezzatura",
+    "designerName": "Elizabeth Olivier",
+    "businessName": "La Sprezzatura",
+    "domain": "lasprezz.com",
+    "contactEmail": "office@lasprezz.com",
+    "senderEmail": "noreply@send.lasprezz.com",
+    "sanity": {
+      "projectId": "from-env",
+      "dataset": "production",
+      "writeTokenEnv": "SANITY_WRITE_TOKEN"
+    },
+    "featureFlags": {
+      "rendering": true,
+      "procurement": true
+    },
+    "renderingLimits": {
+      "monthlyAllocation": 50
+    },
+    "admins": [
+      {
+        "email": "liz@lasprezz.com",
+        "name": "Elizabeth Olivier",
+        "passwordHash": "$2a$10$PLACEHOLDER_REPLACE_WITH_REAL_HASH"
+      },
+      {
+        "email": "paul@lasprezz.com",
+        "name": "Paul Albert",
+        "passwordHash": "$2a$10$PLACEHOLDER_REPLACE_WITH_REAL_HASH"
+      }
+    ]
+  }
+]
