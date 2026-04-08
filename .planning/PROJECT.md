@@ -23,13 +23,17 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 
 ## Current Milestone: v5.0 Admin Platform Completion
 
-**Goal:** Complete the custom `/admin/*` app with all remaining management features so Sanity Studio can be fully retired.
+**Goal:** Complete the custom `/admin/*` app (Linha) with tenant-aware architecture, all management features, and dashboard — so Sanity Studio can be fully retired.
 
 **Target features:**
-- Procurement editor — manage procurement items per project in admin
-- Client + contractor CRUD — create, edit, list clients and contractors
-- Rendering tool relocation — move AI rendering workflow from Sanity Studio to admin
-- Settings + Studio retirement — admin settings page, remove Studio dependency
+- Platform foundation — tenant-scoped architecture (Level 1: no hardcoded assumptions, tenant context on every request)
+- Dashboard — cross-project overview with milestones, deliveries, tasks, activity feed (per mockup)
+- Task management — per-project task list with due dates, integrated into dashboard
+- Procurement editor — inline editing, status badges, auto-tracking via Ship24/EasyPost (daily cron + force refresh)
+- Client + contractor CRUD — forms, quick-assign, contact card popovers, internal notes
+- Portfolio management — curate which completed projects appear on public site
+- Rendering tool relocation — port from Sanity Studio to admin, fix 5 UX bugs, retest AI
+- Settings + Studio retirement — settings form, Send Update relocation, hero slideshow, deprecation
 
 ## Requirements
 
@@ -62,10 +66,14 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 
 ### Active (v5.0 — Admin Platform Completion)
 
-- [ ] Procurement editor — manage procurement items per project in admin
-- [ ] Client + contractor CRUD — create, edit, list clients and contractors
-- [ ] Rendering tool relocation — move AI rendering workflow from Sanity Studio to admin
-- [ ] Settings + Studio retirement — admin settings page, remove Studio dependency
+- [x] Platform foundation — tenant-scoped architecture (tenant model, scoped auth, per-tenant config) — Phase 29
+- [ ] Dashboard — cross-project overview (milestones, deliveries, tasks, activity feed)
+- [ ] Task management — per-project tasks with due dates, dashboard integration
+- [ ] Procurement editor — inline editing, status badges, auto-tracking via aggregator API
+- [ ] Client + contractor CRUD — forms, quick-assign, contact popovers, internal notes
+- [ ] Portfolio management — curate completed projects for public site
+- [ ] Rendering tool relocation — port from Studio, fix UX bugs, retest AI
+- [ ] Settings + Studio retirement — settings form, Send Update, hero slideshow, deprecation
 
 ### Deferred
 
@@ -132,6 +140,10 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | Gemini (Nano Banana 2) for image generation | Pro-level quality at Flash speed; strong spatial understanding; ~$0.07/image at 1K; model configurable via env var | — Pending |
 | Build AI rendering in la-sprezzatura first | Liz gets value immediately; all features exist before Linha extraction = cleaner migration | — Pending |
 | v3.0 absorbs old v3.0 + AI rendering | Combined milestone avoids a thin v3.0; rendering is the marquee feature for go-live | — Pending |
+| Product name: Linha | Admin platform is the product; La Sprezzatura is one tenant/instance. Other designers will use it. | — Pending |
+| Multi-tenant from v5.0 (Level 1) | Tenant-scoped architecture baked in from start; no hardcoded single-tenant assumptions. Manual provisioning for now; self-service onboarding in v6.0. | — Pending |
+| Ship24 or EasyPost for tracking | Aggregator API for auto-checking UPS/FedEx/DHL status. Ship24 free tier (100 calls/mo) likely sufficient; EasyPost ~$3/mo fallback. | — Pending |
+| Sanity Studio retirement via deprecation | 30-day deprecation banner before removal; admin must have all features verified first | — Pending |
 
 ## Evolution
 
@@ -151,4 +163,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 — Milestone v5.0 (Admin Platform Completion) started*
+*Last updated: 2026-04-08 — Phase 29 complete (tenant-aware platform foundation)*
