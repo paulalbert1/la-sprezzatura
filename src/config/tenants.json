@@ -22,12 +22,12 @@
       {
         "email": "liz@lasprezz.com",
         "name": "Elizabeth Olivier",
-        "passwordHash": "$2a$10$PLACEHOLDER_REPLACE_WITH_REAL_HASH"
+        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6"
       },
       {
         "email": "paul@lasprezz.com",
         "name": "Paul Albert",
-        "passwordHash": "$2a$10$PLACEHOLDER_REPLACE_WITH_REAL_HASH"
+        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6"
       }
     ]
   }
