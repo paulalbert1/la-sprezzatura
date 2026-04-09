@@ -789,3 +789,93 @@ export async function getAdminProjectDetail(
 ) {
   return client.fetch(ADMIN_PROJECT_DETAIL_QUERY, { projectId });
 }
+
+// -- Phase 31: Admin CRUD Queries --
+
+// Admin: All clients for list page
+export async function getAdminClients(client: SanityClient) {
+  return client.fetch(`
+    *[_type == "client"] | order(name asc) {
+      _id, name, email, phone, preferredContact
+    }
+  `);
+}
+
+// Admin: Single client with full detail
+export async function getAdminClientDetail(client: SanityClient, clientId: string) {
+  return client.fetch(`{
+    "client": *[_type == "client" && _id == $clientId][0] {
+      _id, name, email, phone, preferredContact, address, notes
+    },
+    "projects": *[_type == "project" && references($clientId)] | order(title asc) {
+      _id, title, pipelineStage, engagementType, projectStatus
+    }
+  }`, { clientId });
+}
+
+// Admin: All contractors for list page
+export async function getAdminContractors(client: SanityClient) {
+  return client.fetch(`
+    *[_type == "contractor"] | order(name asc) {
+      _id, name, email, phone, company, trades
+    }
+  `);
+}
+
+// Admin: Single contractor with full detail
+export async function getAdminContractorDetail(client: SanityClient, contractorId: string) {
+  return client.fetch(`{
+    "contractor": *[_type == "contractor" && _id == $contractorId][0] {
+      _id, name, email, phone, company, trades, documents[] { _key, fileName, fileType, url, uploadedAt }
+    },
+    "projects": *[_type == "project" && references($contractorId)] | order(title asc) {
+      _id, title, pipelineStage, engagementType, projectStatus
+    }
+  }`, { contractorId });
+}
+
+// Admin: Portfolio projects (completed projects with portfolio fields)
+export async function getAdminPortfolioProjects(client: SanityClient) {
+  return client.fetch(`
+    *[_type == "project" && projectStatus == "completed"] | order(portfolioOrder asc, title asc) {
+      _id,
+      title,
+      heroImage { asset-> { url, metadata { lqip, dimensions } } },
+      showInPortfolio,
+      portfolioTitle,
+      portfolioDescription,
+      portfolioOrder,
+      portfolioRoomTags,
+      portfolioImage { asset-> { url, metadata { lqip, dimensions } } }
+    }
+  `);
+}
+
+// Admin: Single project portfolio detail for edit form
+export async function getAdminPortfolioDetail(client: SanityClient, projectId: string) {
+  return client.fetch(`
+    *[_type == "project" && _id == $projectId][0] {
+      _id,
+      title,
+      heroImage { asset-> { url, metadata { lqip, dimensions } } },
+      showInPortfolio,
+      portfolioTitle,
+      portfolioDescription,
+      portfolioOrder,
+      portfolioRoomTags,
+      portfolioImage { asset-> { url, metadata { lqip, dimensions } } }
+    }
+  `, { projectId });
+}
+
+// Admin: Search clients and contractors by name (for typeahead)
+export async function searchEntities(client: SanityClient, searchTerm: string) {
+  return client.fetch(`{
+    "clients": *[_type == "client" && name match $searchTerm + "*"] | order(name asc) [0...10] {
+      _id, name, email, "entityType": "client"
+    },
+    "contractors": *[_type == "contractor" && name match $searchTerm + "*"] | order(name asc) [0...10] {
+      _id, name, email, trades, "entityType": "contractor"
+    }
+  }`, { searchTerm });
+}
