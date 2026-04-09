@@ -44,7 +44,7 @@ const businessName = tenant?.businessName ?? "Studio";
     {/* Main area - offset by sidebar width */}
     <div class="ml-60 min-h-screen flex flex-col">
       {/* Top bar */}
-      <header class="bg-cream border-b border-stone-light/30 px-6 py-4 flex items-center justify-between">
+      <header class="bg-cream px-8 pt-4 flex items-start justify-between">
         {breadcrumbs && breadcrumbs.length > 0 ? (
           <nav aria-label="Breadcrumb">
             <ol class="flex items-center">
@@ -63,11 +63,11 @@ const businessName = tenant?.businessName ?? "Studio";
             </ol>
           </nav>
         ) : (
-          <h1 class="text-xl font-semibold font-body text-charcoal">{pageTitle}</h1>
+          <h1 class="text-[22px] font-semibold text-charcoal" style="font-family: var(--font-body); letter-spacing: 0; margin-left: 5px; margin-top: 20px;">{pageTitle}</h1>
         )}
         <a
           href="/admin/logout"
-          class="text-sm text-stone hover:text-charcoal transition-colors font-body"
+          class="text-xs text-stone hover:text-charcoal transition-colors font-body mt-1"
         >
           Log out
         </a>

@@ -20,8 +20,14 @@ export function getTenantClient(tenantId: string): SanityClient {
   const token = process.env[tenant.sanity.writeTokenEnv];
   if (!token) throw new Error(`Missing env var: ${tenant.sanity.writeTokenEnv}`);
 
+  const projectId =
+    tenant.sanity.projectId === "from-env"
+      ? (process.env.PUBLIC_SANITY_PROJECT_ID ?? import.meta.env.PUBLIC_SANITY_PROJECT_ID)
+      : tenant.sanity.projectId;
+  if (!projectId) throw new Error("Missing PUBLIC_SANITY_PROJECT_ID env var");
+
   const client = createClient({
-    projectId: tenant.sanity.projectId,
+    projectId,
     dataset: tenant.sanity.dataset,
     apiVersion: "2025-12-15",
     useCdn: false,

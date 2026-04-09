@@ -635,7 +635,8 @@ const ADMIN_DASHBOARD_PROJECTS_QUERY = `
     title,
     pipelineStage,
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
-    projectStatus
+    projectStatus,
+    "clientName": clients[0].client->name
   }
 `;
 

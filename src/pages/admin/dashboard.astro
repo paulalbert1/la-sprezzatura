@@ -9,10 +9,9 @@ import {
   getOverdueBannerData,
   getDaysInStage,
   isMilestoneOverdue,
-  isTaskOverdue,
 } from "../../lib/dashboardUtils";
-import { STAGE_META } from "../../lib/portalStages";
-import { formatDistanceToNow, format, parseISO } from "date-fns";
+import { STAGE_META, type StageKey } from "../../lib/portalStages";
+import { formatDistanceToNow, format, parseISO, differenceInDays } from "date-fns";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) {
@@ -21,38 +20,41 @@ if (!tenantId) {
 const client = getTenantClient(tenantId);
 const data = await getAdminDashboardData(client);
 
-// Compute overdue banner data
-const allMilestones = data.milestones;
-const allTasks = data.tasks;
-const overdueBanner = getOverdueBannerData(allMilestones, allTasks);
+// Compute overdue banner data (now includes items for specific copy)
+const overdueBanner = getOverdueBannerData(data.milestones, data.tasks);
 
-// Sort milestones: overdue first, then upcoming, up to 6 items
-const sortedMilestones = [...data.milestones]
-  .sort((a, b) => {
-    const aOverdue = isMilestoneOverdue(a);
-    const bOverdue = isMilestoneOverdue(b);
-    if (aOverdue && !bOverdue) return -1;
-    if (!aOverdue && bOverdue) return 1;
-    return (a.date || "").localeCompare(b.date || "");
-  })
-  .slice(0, 6);
+// Split milestones into overdue and upcoming
+const overdueMilestones = data.milestones.filter(isMilestoneOverdue);
+const upcomingMilestones = data.milestones
+  .filter((m) => !isMilestoneOverdue(m) && !m.completed)
+  .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
+  .slice(0, 4);
 
 // Limit projects to 8, deliveries to 6
 const displayProjects = data.activeProjects.slice(0, 8);
 const displayDeliveries = data.deliveries.slice(0, 6);
 
-// Delivery status labels and colors
-const DELIVERY_STATUS: Record<string, { label: string; bg: string; text: string }> = {
-  ordered: { label: "Ordered", bg: "bg-amber-50", text: "text-amber-700" },
-  warehouse: { label: "Warehouse", bg: "bg-blue-50", text: "text-blue-700" },
-  "in-transit": {
-    label: "In Transit",
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-  },
+// Per-stage color palette (matching mockup)
+const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
+  discovery: { bg: "bg-stone-100", text: "text-stone-600" },
+  concept: { bg: "bg-amber-50", text: "text-amber-800" },
+  "design-development": { bg: "bg-blue-50", text: "text-blue-800" },
+  procurement: { bg: "bg-emerald-50", text: "text-emerald-800" },
+  installation: { bg: "bg-violet-50", text: "text-violet-800" },
+  closeout: { bg: "bg-stone-100", text: "text-stone-600" },
 };
 
-// Helper for formatting milestone dates safely
+// Delivery status labels and colors with dot
+const DELIVERY_STATUS: Record<
+  string,
+  { label: string; bg: string; text: string; dot: string }
+> = {
+  ordered: { label: "Ordered", bg: "bg-stone-100", text: "text-stone-500", dot: "bg-stone-400" },
+  warehouse: { label: "Warehouse", bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
+  "in-transit": { label: "In Transit", bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
+};
+
+// Date helpers
 function formatMilestoneDate(dateStr: string | null): string {
   if (!dateStr) return "";
   try {
@@ -62,233 +64,186 @@ function formatMilestoneDate(dateStr: string | null): string {
   }
 }
 
-// Helper for formatting delivery ETA dates
 function formatDeliveryDate(dateStr: string | null | undefined): string {
   if (!dateStr) return "No ETA";
   try {
-    return format(parseISO(dateStr), "MMM d");
+    return `ETA ${format(parseISO(dateStr), "MMM d")}`;
   } catch {
     return dateStr;
   }
 }
+
+function getDaysOverdueStr(dateStr: string): string {
+  try {
+    const days = differenceInDays(new Date(), parseISO(dateStr));
+    return `${days}d overdue`;
+  } catch {
+    return "";
+  }
+}
+
+function getDaysUntilStr(dateStr: string): string {
+  try {
+    const days = differenceInDays(parseISO(dateStr), new Date());
+    return days <= 0 ? "today" : `in ${days}d`;
+  } catch {
+    return "";
+  }
+}
+
+const today = format(new Date(), "EEEE, MMMM d, yyyy");
 ---
 
 <AdminLayout title="Dashboard - Studio" pageTitle="Dashboard">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-    {/* Overdue Alert Banner - full width, conditional */}
-    {overdueBanner.total > 0 && (
+  <div>
+    {/* Header with date */}
+    <div class="flex justify-between items-baseline mb-4" style="margin-top: -15px;">
+      <div></div>
+      <span class="text-xs text-stone-light font-body">{today}</span>
+    </div>
+
+    {/* Overdue Alert Banner - specific single-item copy only */}
+    {overdueBanner.total === 1 && overdueBanner.firstMilestone && (
       <div
-        class="md:col-span-2 bg-red-50 border border-red-300 rounded-xl px-5 py-4 flex items-start gap-3"
+        class="bg-red-50 border border-red-200/30 rounded-xl px-4 py-3 mb-6 text-sm text-red-900"
         role="alert"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 text-red-600 shrink-0 mt-0.5"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path
-            d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"
-          />
-          <path d="M12 9v4" /><path d="M12 17h.01" />
-        </svg>
-        <div>
-          <p class="text-sm font-medium text-charcoal">
-            {overdueBanner.total} overdue {overdueBanner.total === 1 ? "item needs" : "items need"} attention
-          </p>
-          <p class="text-xs text-stone mt-1">
-            {overdueBanner.milestoneCount > 0 && overdueBanner.taskCount > 0
-              ? `${overdueBanner.milestoneCount} ${overdueBanner.milestoneCount === 1 ? "milestone" : "milestones"} and ${overdueBanner.taskCount} ${overdueBanner.taskCount === 1 ? "task" : "tasks"}`
-              : overdueBanner.milestoneCount > 0
-                ? `${overdueBanner.milestoneCount} overdue ${overdueBanner.milestoneCount === 1 ? "milestone" : "milestones"}`
-                : `${overdueBanner.taskCount} overdue ${overdueBanner.taskCount === 1 ? "task" : "tasks"}`}
-          </p>
-        </div>
+        <span class="font-semibold">{overdueBanner.firstMilestone.name}</span>
+        {" "}is {overdueBanner.firstMilestone.daysOverdue} {overdueBanner.firstMilestone.daysOverdue === 1 ? "day" : "days"} overdue — {overdueBanner.firstMilestone.projectTitle}
+      </div>
+    )}
+    {overdueBanner.total === 1 && !overdueBanner.firstMilestone && overdueBanner.firstTask && (
+      <div
+        class="bg-red-50 border border-red-200/30 rounded-xl px-4 py-3 mb-6 text-sm text-red-900"
+        role="alert"
+      >
+        <span class="font-semibold">{overdueBanner.firstTask.description}</span>
+        {" "}is {overdueBanner.firstTask.daysOverdue} {overdueBanner.firstTask.daysOverdue === 1 ? "day" : "days"} overdue — {overdueBanner.firstTask.projectTitle}
       </div>
     )}
 
-    {/* Active Projects Card - col 1 */}
-    <div class="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-      <div class="px-5 py-4 border-b border-stone-light/10">
-        <h2 class="text-sm font-semibold font-body text-charcoal">
-          Active Projects
-        </h2>
-      </div>
-      {displayProjects.length === 0 ? (
-        <p class="text-sm text-stone text-center py-6">No active projects</p>
-      ) : (
-        <div>
-          {displayProjects.map((project) => {
-            const stageMeta =
-              STAGE_META[project.pipelineStage as keyof typeof STAGE_META];
-            const daysInStage = getDaysInStage(project.stageChangedAt);
-            return (
-              <a
-                href={`/admin/projects/${project._id}`}
-                class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors border-b border-stone-light/10 last:border-b-0"
-              >
-                <span class="text-sm font-body text-charcoal flex-1 truncate">
-                  {project.title}
-                </span>
-                {stageMeta && (
-                  <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-terracotta/10 text-terracotta">
-                    {stageMeta.title}
-                  </span>
-                )}
-                <span class="text-[11px] text-stone-light font-body shrink-0 min-w-[48px] text-right">
-                  {daysInStage}d
-                </span>
-              </a>
-            );
-          })}
-        </div>
-      )}
-      {data.activeProjects.length > 8 && (
-        <div class="px-5 py-3 border-t border-stone-light/10 text-center">
-          <a
-            href="/admin/projects"
-            class="text-xs text-terracotta hover:text-terracotta/80 font-body transition-colors"
-          >
-            View all {data.activeProjects.length} projects
-          </a>
-        </div>
-      )}
-    </div>
+    {/* Two-column layout: Left = health, Right = actions */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* LEFT COLUMN: Projects, Milestones, Activity */}
+      <div class="flex flex-col gap-5">
 
-    {/* Milestones Card - col 2 */}
-    <div class="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-      <div class="px-5 py-4 border-b border-stone-light/10">
-        <h2 class="text-sm font-semibold font-body text-charcoal">
-          Milestones
-        </h2>
-      </div>
-      {sortedMilestones.length === 0 ? (
-        <p class="text-sm text-stone text-center py-6">
-          No upcoming milestones
-        </p>
-      ) : (
-        <div>
-          {sortedMilestones.map((m) => {
-            const overdue = isMilestoneOverdue(m);
-            return (
-              <a
-                href={`/admin/projects/${m.projectId}#milestones`}
-                class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors border-b border-stone-light/10 last:border-b-0"
-              >
-                <span class="text-sm font-body text-charcoal flex-1 truncate">
-                  {m.name}
-                </span>
-                <span class="text-[11px] text-stone-light font-body truncate max-w-[100px]">
-                  {m.projectTitle}
-                </span>
-                {m.date && (
-                  <span
-                    class={`text-[11px] font-body shrink-0 ${
-                      overdue
-                        ? "text-red-600 font-medium"
-                        : "text-stone-light"
-                    }`}
-                  >
-                    {formatMilestoneDate(m.date)}
-                  </span>
-                )}
-              </a>
-            );
-          })}
-        </div>
-      )}
-    </div>
-
-    {/* Deliveries Card - col 1 */}
-    <div class="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-      <div class="px-5 py-4 border-b border-stone-light/10">
-        <h2 class="text-sm font-semibold font-body text-charcoal">
-          Deliveries
-        </h2>
-      </div>
-      {displayDeliveries.length === 0 ? (
-        <p class="text-sm text-stone text-center py-6">
-          No active deliveries
-        </p>
-      ) : (
-        <div>
-          {displayDeliveries.map((d) => {
-            const statusInfo = DELIVERY_STATUS[d.status];
-            return (
-              <a
-                href={`/admin/projects/${d.projectId}#procurement`}
-                class="flex items-center gap-3 px-5 py-3 hover:bg-cream transition-colors border-b border-stone-light/10 last:border-b-0"
-              >
-                <span class="text-sm font-body text-charcoal flex-1 truncate">
-                  {d.name}
-                </span>
-                {statusInfo && (
-                  <span
-                    class={`${statusInfo.bg} ${statusInfo.text} inline-flex px-2 py-0.5 rounded text-[11px] font-medium`}
-                  >
-                    {statusInfo.label}
-                  </span>
-                )}
-                <span class="text-[11px] text-stone-light font-body shrink-0">
-                  {formatDeliveryDate(d.expectedDeliveryDate)}
-                </span>
-              </a>
-            );
-          })}
-        </div>
-      )}
-    </div>
-
-    {/* Tasks Card - col 2 - React island */}
-    <DashboardTasksCard
-      client:load
-      tasks={data.tasks}
-      projects={data.activeProjects.map((p) => ({
-        _id: p._id,
-        title: p.title,
-      }))}
-    />
-
-    {/* Activity Feed - full width */}
-    <div class="md:col-span-2 bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-      <div class="px-5 py-4 border-b border-stone-light/10">
-        <h2 class="text-sm font-semibold font-body text-charcoal">
-          Recent Activity
-        </h2>
-      </div>
-      {data.recentActivity.length === 0 ? (
-        <p class="text-sm text-stone text-center py-6">No recent activity</p>
-      ) : (
-        <div>
-          {data.recentActivity.map((activity) => (
-            <a
-              href={`/admin/projects/${activity.projectId}`}
-              class="flex items-start gap-3 px-5 py-3 hover:bg-cream transition-colors border-b border-stone-light/10 last:border-b-0"
-            >
-              <div class="w-2 h-2 rounded-full bg-stone-light/40 mt-1.5 shrink-0">
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-body text-charcoal truncate">
-                  {activity.description}
-                </p>
-                <p class="text-[11px] text-stone-light font-body mt-0.5">
-                  {activity.actor} &middot;{" "}
-                  {formatDistanceToNow(new Date(activity.timestamp), {
-                    addSuffix: true,
-                  })}
-                </p>
-              </div>
-              <span class="text-[11px] text-stone-light font-body shrink-0 truncate max-w-[100px]">
-                {activity.projectTitle}
+        {/* Active Projects Card */}
+        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b border-stone-light/10">
+            <div class="flex items-center gap-2">
+              <h2 class="text-[13px] font-semibold text-charcoal" style="font-family: var(--font-body); letter-spacing: 0.01em;">Active Projects</h2>
+              <span class="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+                {data.activeProjects.length}
               </span>
-            </a>
-          ))}
+            </div>
+          </div>
+          {displayProjects.length === 0 ? (
+            <p class="text-sm text-stone text-center py-6">No active projects</p>
+          ) : (
+            <div>
+              {displayProjects.map((project) => {
+                const stageMeta = STAGE_META[project.pipelineStage as StageKey];
+                const stageColor = STAGE_COLORS[project.pipelineStage] || STAGE_COLORS.discovery;
+                const daysInStage = getDaysInStage(project.stageChangedAt);
+                const daysStale = daysInStage >= 14;
+                return (
+                  <a
+                    href={`/admin/projects/${project._id}`}
+                    class="flex items-center gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <span class="text-[13.5px] font-medium font-body text-charcoal block truncate">
+                        {project.title}
+                      </span>
+                      {project.clientName && (
+                        <span class="text-[11.5px] text-stone-light font-body block truncate mt-0.5">
+                          {project.clientName}
+                        </span>
+                      )}
+                    </div>
+                    {stageMeta && (
+                      <span class={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${stageColor.bg} ${stageColor.text}`}>
+                        {stageMeta.title}
+                      </span>
+                    )}
+                    <span class={`text-[11px] font-body shrink-0 min-w-[28px] text-right ${daysStale ? "text-red-500 font-semibold" : "text-stone-light"}`}>
+                      {daysInStage}d
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+          {data.activeProjects.length > 8 && (
+            <div class="px-5 py-3 border-t border-stone-light/10 text-center">
+              <a href="/admin/projects" class="text-xs text-terracotta hover:text-terracotta/80 font-body transition-colors">
+                View all {data.activeProjects.length} projects
+              </a>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Deliveries Card */}
+        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-3 border-b border-stone-light/10">
+            <div class="flex items-center gap-2">
+              <h2 class="text-[13px] font-semibold text-charcoal" style="font-family: var(--font-body); letter-spacing: 0.01em;">Deliveries</h2>
+              {displayDeliveries.length > 0 && (
+                <span class="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+                  {displayDeliveries.length} in progress
+                </span>
+              )}
+            </div>
+          </div>
+          {displayDeliveries.length === 0 ? (
+            <p class="text-sm text-stone text-center py-6">No active deliveries</p>
+          ) : (
+            <div>
+              {displayDeliveries.map((d) => {
+                const statusInfo = DELIVERY_STATUS[d.status];
+                return (
+                  <a
+                    href={`/admin/projects/${d.projectId}#procurement`}
+                    class="flex items-center gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
+                  >
+                    <div class="flex-1 min-w-0">
+                      <span class="text-[13px] font-medium font-body text-charcoal block truncate">
+                        {d.name}
+                      </span>
+                      <span class="text-[11px] text-stone-light font-body mt-0.5">
+                        {d.projectTitle}
+                      </span>
+                    </div>
+                    <div class="flex flex-col items-end gap-1 shrink-0">
+                      {statusInfo && (
+                        <span class={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusInfo.bg} ${statusInfo.text}`}>
+                          <span class={`w-[5px] h-[5px] rounded-full ${statusInfo.dot}`}></span>
+                          {statusInfo.label}
+                        </span>
+                      )}
+                      <span class="text-[10.5px] text-stone-light font-body">
+                        {formatDeliveryDate(d.expectedDeliveryDate)}
+                      </span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* RIGHT COLUMN: Tasks */}
+      <div class="flex flex-col gap-5">
+        <DashboardTasksCard
+          client:load
+          tasks={data.tasks}
+          projects={data.activeProjects.map((p) => ({
+            _id: p._id,
+            title: p.title,
+          }))}
+        />
+      </div>
     </div>
   </div>
 </AdminLayout>

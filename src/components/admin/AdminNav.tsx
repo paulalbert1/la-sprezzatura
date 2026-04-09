@@ -39,10 +39,10 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
     <nav className="flex flex-col h-full">
       {/* Brand section */}
       <div className="mb-10">
-        <p className="text-xs tracking-[0.2em] uppercase font-body text-charcoal">
+        <p className="text-[15px] tracking-[0.12em] uppercase font-heading font-bold text-charcoal">
           {businessName}
         </p>
-        <p className="text-xs font-body text-stone-light mt-1">Studio</p>
+        <p className="text-[11px] tracking-[0.08em] uppercase font-heading text-stone-light mt-0.5">Linha Studio</p>
       </div>
 
       {/* Nav items */}
@@ -56,8 +56,8 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
               href={item.href}
               className={
                 active
-                  ? "text-terracotta bg-cream border-l-2 border-terracotta px-3 py-2 rounded-lg flex items-center gap-3 font-semibold text-sm font-body"
-                  : "text-stone hover:text-charcoal hover:bg-cream/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm font-body"
+                  ? "text-terracotta bg-cream border-l-2 border-terracotta -ml-3 pl-5 pr-3 py-2 rounded-lg flex items-center gap-3 font-semibold text-sm font-body"
+                  : "text-stone-light hover:text-charcoal hover:bg-cream/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm font-body"
               }
             >
               <Icon className="w-5 h-5" />

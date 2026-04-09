@@ -45,11 +45,20 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
     ? localTasks.filter((t) => t.projectId === filterProject)
     : localTasks;
 
-  // Sort: incomplete first, then by createdAt desc; completed at bottom
+  // Sort: overdue first → nearest due date → undated → completed at bottom
   const sortedTasks = [...filteredTasks].sort((a, b) => {
     if (a.completed && !b.completed) return 1;
     if (!a.completed && b.completed) return -1;
-    return (b.createdAt || "").localeCompare(a.createdAt || "");
+    if (a.completed && b.completed) return 0;
+    const aOverdue = isTaskOverdue(a);
+    const bOverdue = isTaskOverdue(b);
+    if (aOverdue && !bOverdue) return -1;
+    if (!aOverdue && bOverdue) return 1;
+    // Both same overdue status — sort by due date (nulls last)
+    if (a.dueDate && !b.dueDate) return -1;
+    if (!a.dueDate && b.dueDate) return 1;
+    if (a.dueDate && b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+    return 0;
   });
 
   const displayTasks = sortedTasks.slice(0, 8);
@@ -162,19 +171,22 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-      {/* Header with title and filter */}
-      <div className="px-5 py-4 border-b border-stone-light/10 flex items-center justify-between">
-        <h2 className="text-sm font-semibold font-body text-charcoal">
-          Tasks
-        </h2>
+    <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+      {/* Header with title, count, and filter */}
+      <div className="px-5 py-3 border-b border-stone-light/10 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h2 className="text-[13px] font-semibold text-charcoal" style={{ fontFamily: "var(--font-body)", letterSpacing: "0.01em" }}>Tasks</h2>
+          <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+            {localTasks.filter((t) => !t.completed).length}
+          </span>
+        </div>
         <select
           value={filterProject}
           onChange={(e) => {
             setFilterProject(e.target.value);
             setNewProject(e.target.value);
           }}
-          className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-terracotta"
+          className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-terracotta"
         >
           <option value="">All Projects</option>
           {projects.map((p) => (
@@ -199,8 +211,12 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
               <div
                 key={task._key}
                 className={`flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0 transition-colors duration-500 ${
-                  isNew ? "bg-terracotta/5" : ""
-                }`}
+                  isNew
+                    ? "bg-terracotta/5"
+                    : overdue && !task.completed
+                      ? "bg-red-50"
+                      : ""
+                } ${task.completed ? "opacity-40" : ""}`}
               >
                 <input
                   type="checkbox"
@@ -221,20 +237,11 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
                 >
                   {task.description}
                 </a>
-                <span className="text-[11px] text-stone-light font-body truncate max-w-[100px]">
+                <span className={`text-[11px] font-body shrink-0 ${overdue && !task.completed ? "text-red-500" : "text-stone-light"}`}>
                   {task.projectTitle}
+                  {task.dueDate && <> &middot; {formatTaskDate(task.dueDate)}</>}
+                  {overdue && !task.completed && <> &middot; overdue</>}
                 </span>
-                {task.dueDate && (
-                  <span
-                    className={`text-[11px] font-body shrink-0 ${
-                      overdue && !task.completed
-                        ? "text-red-600 font-medium"
-                        : "text-stone-light"
-                    }`}
-                  >
-                    {formatTaskDate(task.dueDate)}
-                  </span>
-                )}
               </div>
             );
           })}
@@ -270,7 +277,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
         <select
           value={newProject || filterProject || projects[0]?._id || ""}
           onChange={(e) => setNewProject(e.target.value)}
-          className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
+          className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 max-w-[130px] truncate shrink-0"
         >
           {projects.map((p) => (
             <option key={p._id} value={p._id}>
@@ -282,7 +289,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
           type="date"
           value={newDueDate}
           onChange={(e) => setNewDueDate(e.target.value)}
-          className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
+          className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 w-[130px] shrink-0"
         />
       </form>
 

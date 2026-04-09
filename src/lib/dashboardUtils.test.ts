@@ -82,39 +82,54 @@ describe("getOverdueBannerData", () => {
     const futureMilestone = { date: addDays(new Date(), 5).toISOString().split("T")[0], completed: false };
     const completedTask = { dueDate: subDays(new Date(), 2).toISOString().split("T")[0], completed: true };
     const result = getOverdueBannerData([futureMilestone], [completedTask]);
-    expect(result).toEqual({ total: 0, milestoneCount: 0, taskCount: 0 });
+    expect(result.total).toBe(0);
+    expect(result.milestoneCount).toBe(0);
+    expect(result.taskCount).toBe(0);
+    expect(result.firstMilestone).toBeNull();
+    expect(result.firstTask).toBeNull();
   });
 
   it("returns correct counts when both milestones and tasks are overdue", () => {
     const pastDate = subDays(new Date(), 3).toISOString().split("T")[0];
-    const overdueMilestone1 = { date: pastDate, completed: false };
-    const overdueMilestone2 = { date: pastDate, completed: false };
-    const overdueTask = { dueDate: pastDate, completed: false };
+    const overdueMilestone1 = { date: pastDate, completed: false, name: "M1", projectTitle: "P1" };
+    const overdueMilestone2 = { date: pastDate, completed: false, name: "M2", projectTitle: "P1" };
+    const overdueTask = { dueDate: pastDate, completed: false, description: "T1", projectTitle: "P2" };
     const result = getOverdueBannerData(
       [overdueMilestone1, overdueMilestone2],
       [overdueTask],
     );
-    expect(result).toEqual({ total: 3, milestoneCount: 2, taskCount: 1 });
+    expect(result.total).toBe(3);
+    expect(result.milestoneCount).toBe(2);
+    expect(result.taskCount).toBe(1);
+    expect(result.firstMilestone?.name).toBe("M1");
+    expect(result.firstTask?.description).toBe("T1");
+    expect(result.projectCount).toBe(2);
   });
 
-  it("returns { total: 0, milestoneCount: 0, taskCount: 0 } for empty arrays", () => {
+  it("returns zeros for empty arrays", () => {
     const result = getOverdueBannerData([], []);
-    expect(result).toEqual({ total: 0, milestoneCount: 0, taskCount: 0 });
+    expect(result.total).toBe(0);
+    expect(result.milestoneCount).toBe(0);
+    expect(result.taskCount).toBe(0);
+    expect(result.projectCount).toBe(0);
   });
 
   it("counts only overdue items among mixed data", () => {
     const pastDate = subDays(new Date(), 2).toISOString().split("T")[0];
     const futureDate = addDays(new Date(), 5).toISOString().split("T")[0];
     const milestones = [
-      { date: pastDate, completed: false },   // overdue
-      { date: pastDate, completed: true },    // not overdue (completed)
-      { date: futureDate, completed: false }, // not overdue (future)
+      { date: pastDate, completed: false, name: "M1", projectTitle: "P1" },
+      { date: pastDate, completed: true, name: "M2", projectTitle: "P1" },
+      { date: futureDate, completed: false, name: "M3", projectTitle: "P2" },
     ];
     const tasks = [
-      { dueDate: pastDate, completed: false },  // overdue
-      { dueDate: futureDate, completed: false }, // not overdue (future)
+      { dueDate: pastDate, completed: false, description: "T1", projectTitle: "P1" },
+      { dueDate: futureDate, completed: false, description: "T2", projectTitle: "P2" },
     ];
     const result = getOverdueBannerData(milestones, tasks);
-    expect(result).toEqual({ total: 2, milestoneCount: 1, taskCount: 1 });
+    expect(result.total).toBe(2);
+    expect(result.milestoneCount).toBe(1);
+    expect(result.taskCount).toBe(1);
+    expect(result.projectCount).toBe(1);
   });
 });
