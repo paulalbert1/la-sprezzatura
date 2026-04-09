@@ -648,7 +648,11 @@ const ADMIN_DASHBOARD_PROJECTS_QUERY = `
     pipelineStage,
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
     projectStatus,
-    "clientName": clients[0].client->name
+    "clientName": clients[0].client->name,
+    "clientId": clients[0].client->._id,
+    "clientEmail": clients[0].client->.email,
+    "clientPhone": clients[0].client->.phone,
+    "clientPreferredContact": clients[0].client->.preferredContact
   }
 `;
 

@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import DashboardTasksCard from "../../components/admin/DashboardTasksCard.tsx";
+import ContactCardWrapper from "../../components/admin/ContactCardWrapper.tsx";
 import { getTenantClient } from "../../lib/tenantClient";
 import { getAdminDashboardData } from "../../sanity/queries";
 import {
@@ -155,7 +156,27 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
                       <span class="text-[13.5px] font-medium font-body text-charcoal block truncate">
                         {project.title}
                       </span>
-                      {project.clientName && (
+                      {project.clientName && project.clientId && (
+                        <ContactCardWrapper
+                          client:load
+                          entityId={project.clientId}
+                          entityType="client"
+                          name={project.clientName}
+                          href={`/admin/clients/${project.clientId}`}
+                          contactData={{
+                            _id: project.clientId,
+                            name: project.clientName,
+                            email: project.clientEmail || "",
+                            phone: project.clientPhone || "",
+                            preferredContact: project.clientPreferredContact || "",
+                            entityType: "client" as const,
+                          }}
+                          className="text-[11.5px] text-stone-light font-body block truncate mt-0.5"
+                        >
+                          {project.clientName}
+                        </ContactCardWrapper>
+                      )}
+                      {project.clientName && !project.clientId && (
                         <span class="text-[11.5px] text-stone-light font-body block truncate mt-0.5">
                           {project.clientName}
                         </span>
