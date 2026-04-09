@@ -1,0 +1,26 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import PortfolioArrange from "../../../components/admin/PortfolioArrange.tsx";
+import { getTenantClient } from "../../../lib/tenantClient";
+import { getAdminPortfolioProjects } from "../../../sanity/queries";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+const allProjects = await getAdminPortfolioProjects(client);
+const portfolioProjects = allProjects.filter((p: any) => p.showInPortfolio);
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Portfolio", href: "/admin/portfolio" },
+  { label: "Arrange Order" },
+];
+---
+
+<AdminLayout title="Arrange Portfolio - Studio" pageTitle="Arrange Order" breadcrumbs={breadcrumbs}>
+  <PortfolioArrange client:load items={portfolioProjects} />
+</AdminLayout>

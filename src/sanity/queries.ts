@@ -1,13 +1,24 @@
 import { sanityClient } from "sanity:client";
 import type { SanityClient } from "@sanity/client";
 
-// Portfolio overview -- all published projects ordered by display order
+// Portfolio overview -- only projects marked for public portfolio, ordered by portfolio order
 export async function getProjects() {
   return sanityClient.fetch(`
-    *[_type == "project"] | order(order asc) {
+    *[_type == "project" && showInPortfolio == true] | order(portfolioOrder asc, order asc) {
       _id,
       title,
+      "displayTitle": coalesce(portfolioTitle, title),
       slug,
+      "displayImage": coalesce(portfolioImage, heroImage) {
+        ...,
+        asset-> {
+          url,
+          metadata {
+            lqip,
+            dimensions
+          }
+        }
+      },
       heroImage {
         ...,
         asset-> {
@@ -21,7 +32,8 @@ export async function getProjects() {
       roomType,
       style,
       location,
-      featured
+      featured,
+      portfolioRoomTags
     }
   `);
 }
