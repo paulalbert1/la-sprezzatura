@@ -3,6 +3,7 @@ import {
   FolderKanban,
   Users,
   HardHat,
+  Image,
   Palette,
   Settings,
   LogOut,
@@ -19,6 +20,7 @@ const navItems: NavItem[] = [
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Clients", href: "/admin/clients", icon: Users },
   { label: "Contractors", href: "/admin/contractors", icon: HardHat },
+  { label: "Portfolio", href: "/admin/portfolio", icon: Image },
   { label: "Rendering Tool", href: "/admin/rendering", icon: Palette },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
