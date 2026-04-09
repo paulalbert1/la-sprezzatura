@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
 import { getTenantClient } from "../../../lib/tenantClient";
+import { generatePortalToken } from "../../../lib/generateToken";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -125,6 +126,30 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
 
       await client.delete(clientId);
+      return jsonResponse({ success: true });
+    }
+
+    if (action === "assign-to-project") {
+      const { projectId, clientId } = body as {
+        projectId: string;
+        clientId: string;
+      };
+
+      if (!projectId || typeof projectId !== "string") {
+        return jsonResponse({ error: "Missing projectId" }, 400);
+      }
+      if (!clientId || typeof clientId !== "string") {
+        return jsonResponse({ error: "Missing clientId" }, 400);
+      }
+
+      await client
+        .patch(projectId)
+        .setIfMissing({ clients: [] })
+        .append("clients", [
+          { _type: "reference", _ref: clientId, _key: generatePortalToken(8) },
+        ])
+        .commit();
+
       return jsonResponse({ success: true });
     }
 

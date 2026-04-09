@@ -791,6 +791,14 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       completed,
       completedAt,
       createdAt
+    },
+    "projectClients": clients[]-> {
+      _id, name, email, phone, preferredContact
+    },
+    "projectContractors": contractors[] {
+      _key,
+      trade,
+      "contractor": contractor-> { _id, name, email, phone, company, trades }
     }
   }
 `;

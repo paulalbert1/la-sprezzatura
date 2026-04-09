@@ -3,6 +3,8 @@ export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
+import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
+import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import { getAdminProjectDetail } from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { STAGE_META } from "../../../../lib/portalStages";
@@ -54,6 +56,86 @@ const breadcrumbs = [
 
     <div id="procurement" class="mb-8">
       {/* Procurement section placeholder -- expanded in future phases */}
+    </div>
+
+    {/* Team section */}
+    <div class="mb-8">
+      <h2 class="text-sm font-semibold font-body text-charcoal mb-4">Team</h2>
+      <div class="bg-white rounded-xl border border-stone-light/40 p-5">
+        {/* Clients sub-section */}
+        {project.projectClients && project.projectClients.length > 0 && (
+          <div class="mb-4">
+            <h3 class="text-[11px] font-semibold text-stone uppercase tracking-wider mb-2">Clients</h3>
+            <div class="flex flex-wrap gap-3">
+              {project.projectClients.map((c: any) => (
+                <ContactCardWrapper
+                  client:load
+                  entityId={c._id}
+                  entityType="client"
+                  name={c.name}
+                  href={`/admin/clients/${c._id}`}
+                  contactData={{
+                    _id: c._id,
+                    name: c.name,
+                    email: c.email || "",
+                    phone: c.phone || "",
+                    preferredContact: c.preferredContact || "",
+                    entityType: "client" as const,
+                  }}
+                  className="text-sm font-body text-terracotta hover:underline cursor-pointer"
+                >
+                  {c.name}
+                </ContactCardWrapper>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Contractors sub-section */}
+        {project.projectContractors && project.projectContractors.length > 0 && (
+          <div class="mb-4">
+            <h3 class="text-[11px] font-semibold text-stone uppercase tracking-wider mb-2">Contractors</h3>
+            <div class="flex flex-wrap gap-3">
+              {project.projectContractors.map((pc: any) => pc.contractor && (
+                <div class="flex items-center gap-1.5">
+                  <ContactCardWrapper
+                    client:load
+                    entityId={pc.contractor._id}
+                    entityType="contractor"
+                    name={pc.contractor.name}
+                    href={`/admin/contractors/${pc.contractor._id}`}
+                    contactData={{
+                      _id: pc.contractor._id,
+                      name: pc.contractor.name,
+                      email: pc.contractor.email || "",
+                      phone: pc.contractor.phone || "",
+                      entityType: "contractor" as const,
+                    }}
+                    className="text-sm font-body text-terracotta hover:underline cursor-pointer"
+                  >
+                    {pc.contractor.name}
+                  </ContactCardWrapper>
+                  {pc.trade && (
+                    <span class="text-[11px] text-stone-light font-body">({pc.trade})</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick-assign typeahead */}
+        <QuickAssignTypeahead
+          client:load
+          projectId={projectId}
+          existingClients={project.projectClients || []}
+          existingContractors={(project.projectContractors || []).map((pc: any) => ({
+            _id: pc.contractor?._id || "",
+            name: pc.contractor?.name || "",
+            trade: pc.trade,
+          }))}
+        />
+      </div>
     </div>
 
     {/* Tasks section - React island */}

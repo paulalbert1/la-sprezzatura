@@ -190,6 +190,39 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return jsonResponse({ success: true });
     }
 
+    if (action === "assign-to-project") {
+      const { projectId, contractorId, trade } = body as {
+        projectId: string;
+        contractorId: string;
+        trade: string;
+      };
+
+      if (!projectId || typeof projectId !== "string") {
+        return jsonResponse({ error: "Missing projectId" }, 400);
+      }
+      if (!contractorId || typeof contractorId !== "string") {
+        return jsonResponse({ error: "Missing contractorId" }, 400);
+      }
+      if (!trade || typeof trade !== "string") {
+        return jsonResponse({ error: "Missing trade" }, 400);
+      }
+
+      await client
+        .patch(projectId)
+        .setIfMissing({ contractors: [] })
+        .append("contractors", [
+          {
+            _key: generatePortalToken(8),
+            _type: "projectContractor",
+            contractor: { _type: "reference", _ref: contractorId },
+            trade,
+          },
+        ])
+        .commit();
+
+      return jsonResponse({ success: true });
+    }
+
     if (action === "delete-doc") {
       const { contractorId, docKey } = body as {
         contractorId: string;
