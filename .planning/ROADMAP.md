@@ -379,7 +379,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 **Note:** Phases 18-28 were the v5.0 foundation (admin app scaffold, project detail, Gantt relocation, procurement UI, documents page). Phases 29-34 complete the platform.
 
 - [x] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes (completed 2026-04-08)
-- [ ] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD
+- [x] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD (completed 2026-04-08)
 - [ ] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation
 - [ ] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA
 - [ ] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes
@@ -413,10 +413,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 30-01-PLAN.md -- Sanity schema extensions (tasks[], activityLog[], pipelineStageChangedAt), dashboard GROQ queries, and dashboardUtils with tests
-- [ ] 30-02-PLAN.md -- Task API route (create + toggle) with activity logging and unit tests
-- [ ] 30-03-PLAN.md -- Dashboard Astro page with 5-card grid and DashboardTasksCard React island
-- [ ] 30-04-PLAN.md -- Project detail page with tasks section and visual verification
+- [x] 30-01-PLAN.md -- Sanity schema extensions (tasks[], activityLog[], pipelineStageChangedAt), dashboard GROQ queries, and dashboardUtils with tests
+- [x] 30-02-PLAN.md -- Task API route (create + toggle) with activity logging and unit tests
+- [x] 30-03-PLAN.md -- Dashboard Astro page with 5-card grid and DashboardTasksCard React island
+- [x] 30-04-PLAN.md -- Project detail page with tasks section and visual verification
 
 ### Phase 31: Client, Contractor, and Portfolio Management
 **Goal**: The admin can manage the full lifecycle of clients and contractors -- create, edit, search, assign to projects, and view linked project history -- and curate which completed projects appear on the public portfolio
@@ -475,7 +475,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
-| 30. Dashboard and Task Management | v5.0 | 0/TBD | Not started | - |
+| 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 0/TBD | Not started | - |
 | 32. Procurement Editor | v5.0 | 0/TBD | Not started | - |
 | 33. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |

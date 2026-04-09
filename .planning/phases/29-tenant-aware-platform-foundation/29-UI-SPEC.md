@@ -56,9 +56,12 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Major section breaks, sidebar vertical padding |
 | 3xl | 64px | Page-level spacing |
 
-Exceptions: none
+Exceptions (inherited from existing portal login pattern in `src/components/portal/LoginForm.tsx` — intentional carry-forward, not new values):
+- 12px (`py-3`) — input field vertical padding
+- 20px (`px-5`) — alert/banner horizontal padding
+- 40px (`px-10`) — submit button horizontal padding
 
-**Source:** Existing admin layout uses Tailwind spacing utilities (`px-6` = 24px, `py-12` = 48px, `py-4` = 16px, `py-3` = 12px for inputs). The login form follows the portal login pattern which uses `px-5 py-4` (20px/16px) for alerts, `px-4 py-3` (16px/12px) for inputs, `px-10 py-4` (40px/16px) for submit button. This phase continues those established patterns rather than introducing new spacing.
+**Source:** Existing admin layout uses Tailwind spacing utilities (`px-6` = 24px, `py-12` = 48px, `py-4` = 16px). The login form follows the portal login pattern which uses `px-5 py-4` (20px/16px) for alerts, `px-4 py-3` (16px/12px) for inputs, `px-10 py-4` (40px/16px) for submit button. This phase continues those established patterns rather than introducing new spacing.
 
 ---
 
@@ -69,7 +72,7 @@ Exceptions: none
 | Body | 14px (`text-sm`) | 400 (regular) | 1.5 | DM Sans (`--font-body`) |
 | Label | 12px (`text-xs`) | 400 (regular) | 1.5 | DM Sans, uppercase, `tracking-widest` |
 | Heading | 20px (`text-xl`) | 600 (semibold) | 1.2 | DM Sans (`--font-body`) |
-| Display | 36px (`text-4xl`) | 300 (light) | 1.2 | Cormorant Garamond (`--font-heading`) |
+| Display | 36px (`text-4xl`) | 400 (regular) | 1.2 | Cormorant Garamond (`--font-heading`) |
 
 **Note on admin typography:** Admin pages use `--font-body` (DM Sans) for ALL text including headings (see AdminLayout.astro `font-body` on body and `font-body text-xl font-semibold` for page titles). The Display role uses `--font-heading` (Cormorant Garamond) only on the login page hero heading -- matching the portal login pattern.
 
@@ -114,7 +117,7 @@ Exceptions: none
 <body class="bg-cream">
   <main> centered vertically and horizontally
     <brand mark> "La Sprezzatura" (later: tenant businessName) -- xs uppercase tracking
-    <h1> "Studio Login" -- Display typography (Cormorant Garamond, text-4xl, font-light)
+    <h1> "Studio Login" -- Display typography (Cormorant Garamond, text-4xl, font-normal)
     <subtitle> "Sign in to manage your projects" -- Body typography, stone color
     <AdminLoginForm client:load />
   </main>
