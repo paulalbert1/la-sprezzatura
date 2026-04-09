@@ -1,0 +1,54 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import EntityDetailForm from "../../../../components/admin/EntityDetailForm.tsx";
+import LinkedProjects from "../../../../components/admin/LinkedProjects.tsx";
+import { getTenantClient } from "../../../../lib/tenantClient";
+import { getAdminContractorDetail } from "../../../../sanity/queries";
+
+const contractorId = Astro.params.contractorId;
+if (!contractorId) {
+  return Astro.redirect("/admin/contractors");
+}
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const sanityClient = getTenantClient(tenantId);
+
+const isNew = contractorId === "new";
+let contractorData = null;
+let projects: any[] = [];
+
+if (!isNew) {
+  const result = await getAdminContractorDetail(sanityClient, contractorId);
+  if (!result?.contractor) {
+    return Astro.redirect("/admin/contractors");
+  }
+  contractorData = result.contractor;
+  projects = result.projects || [];
+}
+
+const pageTitle = isNew ? "New Contractor" : (contractorData?.name || "Contractor");
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Contractors", href: "/admin/contractors" },
+  { label: pageTitle },
+];
+---
+
+<AdminLayout title={pageTitle + " - Studio"} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
+  <div class="max-w-4xl">
+    <EntityDetailForm
+      client:load
+      entityType="contractor"
+      entity={contractorData}
+      isNew={isNew}
+    />
+    {!isNew && (
+      <LinkedProjects client:load projects={projects} />
+    )}
+  </div>
+</AdminLayout>
