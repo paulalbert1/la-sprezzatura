@@ -1,0 +1,28 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import EntityListPage from "../../../components/admin/EntityListPage.tsx";
+import { getTenantClient } from "../../../lib/tenantClient";
+import { getAdminClients } from "../../../sanity/queries";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+const clients = await getAdminClients(client);
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Clients" },
+];
+---
+
+<AdminLayout title="Clients - Studio" pageTitle="Clients" breadcrumbs={breadcrumbs}>
+  <EntityListPage
+    client:load
+    entityType="client"
+    entities={clients}
+  />
+</AdminLayout>
