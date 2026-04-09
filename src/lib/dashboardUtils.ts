@@ -1,24 +1,24 @@
 import { differenceInDays, isPast, parseISO } from "date-fns";
 
-/** Check if a task is overdue: has dueDate, not completed, dueDate is in the past */
+/** Check if a task is overdue: has dueDate, not completed, dueDate is before today */
 export function isTaskOverdue(task: {
   dueDate?: string | null;
   completed?: boolean;
 }): boolean {
   if (!task.dueDate || task.completed) return false;
-  // Parse as end-of-day so tasks due "today" are not overdue until tomorrow
-  const due = parseISO(task.dueDate + "T23:59:59");
-  return isPast(due);
+  // Compare date strings directly (YYYY-MM-DD) to avoid timezone issues
+  const today = new Date().toISOString().split("T")[0];
+  return task.dueDate < today;
 }
 
-/** Check if a milestone is overdue: has date, not completed, date is in the past */
+/** Check if a milestone is overdue: has date, not completed, date is before today */
 export function isMilestoneOverdue(milestone: {
   date?: string | null;
   completed?: boolean;
 }): boolean {
   if (!milestone.date || milestone.completed) return false;
-  const due = parseISO(milestone.date + "T23:59:59");
-  return isPast(due);
+  const today = new Date().toISOString().split("T")[0];
+  return milestone.date < today;
 }
 
 /** Compute days since pipeline stage last changed. Falls back to 0 if null. */
