@@ -380,7 +380,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 
 - [x] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes (completed 2026-04-08)
 - [x] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD (completed 2026-04-08)
-- [ ] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation
+- [x] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation (completed 2026-04-09)
 - [ ] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA
 - [ ] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes
 - [ ] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal
@@ -427,8 +427,14 @@ Plans:
   2. The admin can view a list of all contractors filterable by trade, create and edit contractor records (name, email, phone, company, trades), and view a contractor detail page showing all linked projects
   3. Deleting a client or contractor that has project references is blocked with a clear explanation; the admin can quick-assign a client or contractor to a project via a typeahead field; hovering a client or contractor name anywhere in the admin shows a contact card popover with key details
   4. The admin can view all completed projects in a Portfolio section, toggle which ones appear on the public site, edit portfolio-specific fields (featured image, description, room tags), and drag to reorder the display sequence
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
+
+Plans:
+- [x] 31-01-PLAN.md -- Schema extensions (client notes, contractor documents, project portfolio fields), GROQ queries, API routes, and AdminNav update
+- [x] 31-02-PLAN.md -- Client and contractor list pages, detail pages, shared React components (EntityListPage, EntityDetailForm, LinkedProjects, DeleteConfirmDialog)
+- [x] 31-03-PLAN.md -- Portfolio management: grid with toggles, edit form, drag-and-drop arrange screen, and public portfolio query update
+- [x] 31-04-PLAN.md -- Contact card popover, quick-assign typeahead, and integration into dashboard and project detail pages
 
 ### Phase 32: Procurement Editor
 **Goal**: The admin can manage procurement items with inline editing, visual status tracking through a 6-stage pipeline, automatic carrier tracking via daily cron job, and force-refresh on demand -- replacing the Sanity Studio procurement workflow entirely
@@ -476,7 +482,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 |-------|-----------|----------------|--------|-----------|
 | 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
-| 31. Client, Contractor, and Portfolio Management | v5.0 | 0/TBD | Not started | - |
+| 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 0/TBD | Not started | - |
 | 33. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
