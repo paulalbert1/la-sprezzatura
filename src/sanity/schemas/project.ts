@@ -9,6 +9,7 @@ import {
   BellIcon,
   ClockIcon,
   ClipboardIcon,
+  ImageIcon,
 } from "@sanity/icons";
 import { generatePortalToken } from "../../lib/generateToken";
 import { BlobFileInput } from "../components/BlobFileInput";
@@ -30,6 +31,7 @@ export const project = defineType({
     { name: "updates", title: "Updates", icon: BellIcon },
     { name: "schedule", title: "Schedule", icon: ClockIcon },
     { name: "tasks", title: "Tasks", icon: ClipboardIcon },
+    { name: "portfolio", title: "Portfolio", icon: ImageIcon },
   ],
   fields: [
     defineField({
@@ -1280,6 +1282,51 @@ export const project = defineType({
           },
         }),
       ],
+    }),
+    // Phase 31: Portfolio fields
+    defineField({
+      name: "showInPortfolio",
+      title: "Show in Portfolio",
+      type: "boolean",
+      group: "portfolio",
+      initialValue: false,
+    }),
+    defineField({
+      name: "portfolioTitle",
+      title: "Portfolio Display Title",
+      type: "string",
+      group: "portfolio",
+      description: "Overrides the internal project name on the public portfolio page",
+    }),
+    defineField({
+      name: "portfolioDescription",
+      title: "Portfolio Description",
+      type: "text",
+      group: "portfolio",
+      description: "Portfolio-specific blurb shown on the public site",
+      validation: (r) => r.max(500),
+    }),
+    defineField({
+      name: "portfolioImage",
+      title: "Portfolio Featured Image",
+      type: "image",
+      group: "portfolio",
+      options: { hotspot: true, metadata: ["lqip", "palette"] },
+      description: "Overrides the main photo on the portfolio page",
+    }),
+    defineField({
+      name: "portfolioOrder",
+      title: "Portfolio Display Order",
+      type: "number",
+      group: "portfolio",
+    }),
+    defineField({
+      name: "portfolioRoomTags",
+      title: "Room Tags",
+      type: "array",
+      group: "portfolio",
+      of: [defineArrayMember({ type: "string" })],
+      options: { layout: "tags" },
     }),
   ],
   preview: {

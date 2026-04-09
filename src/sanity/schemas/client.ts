@@ -47,6 +47,13 @@ export const client = defineType({
         defineField({ name: "zip", title: "ZIP Code", type: "string" }),
       ],
     }),
+    defineField({
+      name: "notes",
+      title: "Internal Notes",
+      type: "text",
+      description: "Private notes about this client -- not visible to clients",
+      validation: (r) => r.max(2000),
+    }),
   ],
   preview: {
     select: { title: "name", subtitle: "email" },

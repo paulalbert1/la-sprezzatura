@@ -1,0 +1,109 @@
+/**
+ * Frappe Gantt overrides for La Sprezzatura.
+ *
+ * Frappe Gantt uses CSS variables (--g-* and --gv-*) and plain class selectors.
+ * Per-contractor colors via custom_class (gantt-contractor-0 through 9).
+ */
+
+/* === Container sizing === */
+.gantt-container {
+  --gv-bar-height: 28px;
+  --gv-upper-header-height: 40px;
+  --gv-lower-header-height: 28px;
+  /* Height is set dynamically by GanttChart.tsx after Frappe renders */
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Force sans-serif on all Frappe Gantt text */
+.gantt-container *,
+.gantt .bar-label,
+.gantt .upper-text,
+.gantt .lower-text,
+.gantt-container .popup-wrapper {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* === Theme: warm off-white to match Studio === */
+.gantt-container {
+  --g-header-background: #FAF5F2;
+  --g-row-color: #FAFAF8;
+  --g-border-color: #EEEDED;
+  --g-row-border-color: #E8E5E2;
+  --g-tick-color: #F0EEEB;
+  --g-tick-color-thick: #E2DFDC;
+  --g-text-dark: #0F172A;
+  --g-text-muted: #64748B;
+  --g-text-light: #FFFFFF;
+  --g-actions-background: #F0EEEB;
+  --g-arrow-color: #78716C;
+  --g-today-highlight: #EF4444;
+  --g-weekend-highlight-color: rgba(0, 0, 0, 0.02);
+  --g-popup-actions: #F0EEEB;
+}
+
+/* === Per-contractor bar colors (matches CONTRACTOR_PALETTE) === */
+.gantt .bar-wrapper.gantt-contractor-0 .bar { fill: #3B82F6 !important; stroke: #3B82F6 !important; }
+.gantt .bar-wrapper.gantt-contractor-1 .bar { fill: #EF4444 !important; stroke: #EF4444 !important; }
+.gantt .bar-wrapper.gantt-contractor-2 .bar { fill: #10B981 !important; stroke: #10B981 !important; }
+.gantt .bar-wrapper.gantt-contractor-3 .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+.gantt .bar-wrapper.gantt-contractor-4 .bar { fill: #8B5CF6 !important; stroke: #8B5CF6 !important; }
+.gantt .bar-wrapper.gantt-contractor-5 .bar { fill: #EC4899 !important; stroke: #EC4899 !important; }
+.gantt .bar-wrapper.gantt-contractor-6 .bar { fill: #06B6D4 !important; stroke: #06B6D4 !important; }
+.gantt .bar-wrapper.gantt-contractor-7 .bar { fill: #F97316 !important; stroke: #F97316 !important; }
+.gantt .bar-wrapper.gantt-contractor-8 .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
+.gantt .bar-wrapper.gantt-contractor-9 .bar { fill: #6366F1 !important; stroke: #6366F1 !important; }
+
+/* === Category colors === */
+.gantt .bar-wrapper.gantt-cat-milestone .bar { fill: #8B5CF6 !important; stroke: #8B5CF6 !important; }
+.gantt .bar-wrapper.gantt-cat-procurement .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+
+/* Events by category */
+.gantt .bar-wrapper.gantt-cat-walkthrough .bar,
+.gantt .bar-wrapper.gantt-cat-inspection .bar,
+.gantt .bar-wrapper.gantt-cat-punch-list .bar,
+.gantt .bar-wrapper.gantt-cat-move .bar,
+.gantt .bar-wrapper.gantt-cat-permit .bar,
+.gantt .bar-wrapper.gantt-cat-delivery-window .bar,
+.gantt .bar-wrapper.gantt-cat-presentation .bar,
+.gantt .bar-wrapper.gantt-cat-deadline .bar,
+.gantt .bar-wrapper.gantt-cat-access .bar,
+.gantt .bar-wrapper.gantt-cat-other .bar { fill: #14B8A6 !important; stroke: #14B8A6 !important; }
+
+/* Completed milestones — dimmed */
+.gantt .bar-wrapper.gantt-completed .bar {
+  fill: #9CA3AF !important;
+  stroke: #9CA3AF !important;
+  opacity: 0.6;
+}
+
+/* Procurement by status */
+.gantt .bar-wrapper.gantt-procurement-pending .bar { fill: #D1D5DB !important; stroke: #D1D5DB !important; }
+.gantt .bar-wrapper.gantt-procurement-ordered .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+.gantt .bar-wrapper.gantt-procurement-in-transit .bar,
+.gantt .bar-wrapper.gantt-procurement-warehouse .bar { fill: #F59E0B !important; stroke: #F59E0B !important; }
+.gantt .bar-wrapper.gantt-procurement-delivered .bar { fill: #10B981 !important; stroke: #10B981 !important; }
+.gantt .bar-wrapper.gantt-procurement-installed .bar { fill: #9CA3AF !important; stroke: #9CA3AF !important; }
+
+/* Labels inside bars: white text on colored backgrounds */
+.gantt .bar-label {
+  fill: #FFFFFF !important;
+}
+
+/* Labels outside bars (overflowed): dark text on light background */
+.gantt .bar-label.big {
+  fill: #0F172A !important;
+}
+
+/* === Conflict indicator: red dashed outline on bars with violations === */
+.gantt .bar-wrapper.gantt-conflict .bar {
+  stroke: #DC2626 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 4 2;
+}
+
+/* === Arrows === */
+.gantt .arrow {
+  stroke: #78716C;
+  stroke-width: 1.5;
+  opacity: 0.4;
+}
