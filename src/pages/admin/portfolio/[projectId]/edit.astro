@@ -1,0 +1,37 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import PortfolioEditForm from "../../../../components/admin/PortfolioEditForm.tsx";
+import { getTenantClient } from "../../../../lib/tenantClient";
+import { getAdminPortfolioDetail } from "../../../../sanity/queries";
+
+const projectId = Astro.params.projectId;
+if (!projectId) {
+  return Astro.redirect("/admin/portfolio");
+}
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+const project = await getAdminPortfolioDetail(client, projectId);
+
+if (!project) {
+  return Astro.redirect("/admin/portfolio");
+}
+
+const displayTitle = project.portfolioTitle || project.title;
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Portfolio", href: "/admin/portfolio" },
+  { label: displayTitle },
+];
+---
+
+<AdminLayout title={displayTitle + " - Portfolio - Studio"} pageTitle={displayTitle} breadcrumbs={breadcrumbs}>
+  <div class="max-w-2xl">
+    <PortfolioEditForm client:load project={project} />
+  </div>
+</AdminLayout>
