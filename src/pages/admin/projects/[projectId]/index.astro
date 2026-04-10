@@ -42,7 +42,7 @@ const breadcrumbs = [
   <div class="max-w-4xl">
     {/* Project header with stage badge and days-in-stage */}
     <div class="flex items-center gap-4 mb-8">
-      <h1 class="text-xl font-semibold font-body text-charcoal">{project.title}</h1>
+      <h1 class="text-xl font-semibold text-charcoal" style="font-family: var(--font-body);">{project.title}</h1>
       {stageMeta && (
         <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-terracotta/10 text-terracotta">
           {stageMeta.title}
@@ -54,7 +54,7 @@ const breadcrumbs = [
     {/* Milestones & Schedule */}
     <div id="milestones" class="mb-8">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-semibold font-body text-charcoal">Milestones</h2>
+        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400;">Milestones</h2>
         <a href={`/admin/projects/${projectId}/schedule`} class="text-xs text-terracotta hover:text-terracotta/80 font-body transition-colors">
           View Schedule →
         </a>
@@ -90,7 +90,7 @@ const breadcrumbs = [
 
     {project.engagementType === "full-interior-design" && (
       <div id="procurement" class="mb-8">
-        <h2 class="text-sm font-semibold font-body text-charcoal mb-4">Procurement</h2>
+        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Procurement</h2>
         <ProcurementEditor
           client:load
           items={project.procurementItems || []}
@@ -101,7 +101,7 @@ const breadcrumbs = [
 
     {/* Team section */}
     <div class="mb-8">
-      <h2 class="text-sm font-semibold font-body text-charcoal mb-4">Team</h2>
+      <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Team</h2>
       <div class="bg-white rounded-xl border border-stone-light/40 p-5">
         {/* Clients sub-section */}
         {project.projectClients && project.projectClients.length > 0 && (

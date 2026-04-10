@@ -118,7 +118,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
 
   return (
     <div id="tasks">
-      <h2 className="text-sm font-semibold font-body text-charcoal mb-4">
+      <h2 className="text-charcoal" style={{ fontFamily: "var(--font-body)", fontSize: "15px", fontWeight: 400, marginBottom: "1rem" }}>
         Tasks
       </h2>
       <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">

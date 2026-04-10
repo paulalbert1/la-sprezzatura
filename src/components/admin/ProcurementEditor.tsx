@@ -602,12 +602,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         </td>
         {/* Actions */}
         <td className="px-3 py-3 text-center">
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-0.5">
             <button
               type="button"
               onClick={() => startEdit(item)}
               aria-label="Edit item"
-              className="text-stone-light hover:text-charcoal transition-colors"
+              className="p-2 rounded-md text-stone-light hover:text-charcoal hover:bg-stone-light/10 transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
@@ -617,14 +617,14 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 setDeleteTarget({ key: item._key, name: item.name })
               }
               aria-label="Delete item"
-              className="text-stone-light hover:text-red-600 transition-colors"
+              className="p-2 rounded-md text-stone-light hover:text-red-600 hover:bg-red-50 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
             {canRefresh && (
               <>
                 {refreshingKey === item._key ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-terracotta" />
+                  <div className="p-2"><Loader2 className="w-3.5 h-3.5 animate-spin text-terracotta" /></div>
                 ) : (
                   <button
                     type="button"
@@ -632,7 +632,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       handleForceRefresh(item._key, item.trackingNumber!)
                     }
                     aria-label="Refresh tracking"
-                    className="text-stone-light hover:text-terracotta transition-colors"
+                    className="p-2 rounded-md text-stone-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                   </button>
@@ -762,20 +762,23 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             </div>
           </td>
         </tr>
-        {/* Notes row spanning all columns */}
-        <tr key={item._key + "-notes"}>
-          <td colSpan={9} className="px-5 py-2">
-            <div className="flex gap-2 items-start">
-              <div className="flex-1">
+        {/* Extra fields row */}
+        <tr key={item._key + "-notes"} className="bg-cream/20">
+          <td colSpan={9} className="px-5 py-3">
+            <div className="flex flex-wrap gap-4 items-end">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
                 <input
                   type="date"
                   value={editForm.orderDate || ""}
                   onChange={(e) =>
                     setEditForm((f) => ({ ...f, orderDate: e.target.value }))
                   }
-                  className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1 mr-2"
-                  title="Order date"
+                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
                 />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Install Date</span>
                 <input
                   type="date"
                   value={editForm.installDate || ""}
@@ -785,9 +788,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       installDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1 mr-2"
-                  title="Install date"
+                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
                 />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Retail Price</span>
                 <input
                   type="number"
                   step="0.01"
@@ -799,20 +804,22 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       retailPrice: e.target.value,
                     }))
                   }
-                  placeholder="Retail $"
-                  className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-20 text-right"
-                  title="Retail price"
+                  placeholder="0.00"
+                  className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 text-right focus:border-stone-light focus:outline-none"
                 />
-              </div>
+              </label>
             </div>
-            <textarea
-              value={editForm.notes || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({ ...f, notes: e.target.value }))
-              }
-              placeholder="Internal notes..."
-              className="w-full text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-3 py-2 min-h-[60px] mt-2"
-            />
+            <label className="block mt-3">
+              <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Notes</span>
+              <textarea
+                value={editForm.notes || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, notes: e.target.value }))
+                }
+                placeholder="Internal notes..."
+                className="w-full text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-3 py-2 min-h-[56px] mt-1 focus:border-stone-light focus:outline-none"
+              />
+            </label>
           </td>
         </tr>
       </>
@@ -966,9 +973,10 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         </tr>
         {/* Extra fields row for new item */}
         <tr className="bg-cream/50">
-          <td colSpan={9} className="px-5 py-2">
-            <div className="flex gap-2 items-start">
-              <div className="flex-1">
+          <td colSpan={9} className="px-5 py-3">
+            <div className="flex flex-wrap gap-4 items-end">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
                 <input
                   type="date"
                   value={newItemForm.orderDate || ""}
@@ -978,9 +986,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       orderDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1 mr-2"
-                  title="Order date"
+                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
                 />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Install Date</span>
                 <input
                   type="date"
                   value={newItemForm.installDate || ""}
@@ -990,9 +1000,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       installDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1 mr-2"
-                  title="Install date"
+                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
                 />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Retail Price</span>
                 <input
                   type="number"
                   step="0.01"
@@ -1004,20 +1016,22 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       retailPrice: e.target.value,
                     }))
                   }
-                  placeholder="Retail $"
-                  className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-20 text-right"
-                  title="Retail price"
+                  placeholder="0.00"
+                  className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 text-right focus:border-stone-light focus:outline-none"
                 />
-              </div>
+              </label>
             </div>
-            <textarea
-              value={newItemForm.notes || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({ ...f, notes: e.target.value }))
-              }
-              placeholder="Internal notes..."
-              className="w-full text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-3 py-2 min-h-[60px] mt-2"
-            />
+            <label className="block mt-3">
+              <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Notes</span>
+              <textarea
+                value={newItemForm.notes || ""}
+                onChange={(e) =>
+                  setNewItemForm((f) => ({ ...f, notes: e.target.value }))
+                }
+                placeholder="Internal notes..."
+                className="w-full text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-3 py-2 min-h-[56px] mt-1 focus:border-stone-light focus:outline-none"
+              />
+            </label>
           </td>
         </tr>
       </>
@@ -1028,47 +1042,47 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     <>
       <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
         {localItems.length === 0 && !creatingNew && (
-          <div>
-            <p className="text-sm text-stone text-center py-6">
+          <div className="py-8 px-5 text-center">
+            <p className="text-sm text-stone" style={{ fontFamily: "var(--font-body)" }}>
               No procurement items yet
             </p>
-            <p className="text-xs text-stone-light text-center pb-4">
+            <p className="text-[11px] text-stone-light mt-1" style={{ fontFamily: "var(--font-body)" }}>
               Use the row below to add items as they are ordered for this
               project.
             </p>
           </div>
         )}
 
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px]">
           {(localItems.length > 0 || creatingNew) && (
             <thead>
-              <tr className="border-b border-stone-light/20">
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-left px-3 py-2">
+              <tr className="border-b border-stone-light/20 bg-cream/30">
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Item
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-left px-3 py-2 hidden md:table-cell">
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
                   Vendor
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-center px-3 py-2">
+                <th className="text-[11px] font-medium text-stone-light text-center px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Status
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-right px-3 py-2">
+                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Expected
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-right px-3 py-2 hidden md:table-cell">
+                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
                   Carrier ETA
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-right px-3 py-2">
+                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Cost
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-right px-3 py-2 hidden md:table-cell">
+                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
                   Net
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-center px-3 py-2 hidden md:table-cell">
+                <th className="text-[11px] font-medium text-stone-light text-center px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
                   Track
                 </th>
-                <th className="text-xs uppercase tracking-widest text-stone font-normal text-center px-3 py-2">
-                  {/* Actions -- no header text */}
+                <th className="px-3 py-2.5 w-[80px]">
                 </th>
               </tr>
             </thead>
@@ -1082,6 +1096,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             {renderNewItemRow()}
           </tbody>
         </table>
+        </div>
 
         {error && (
           <div className="px-5 py-2 text-xs text-red-600 font-body">
