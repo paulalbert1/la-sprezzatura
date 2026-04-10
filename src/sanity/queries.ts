@@ -827,6 +827,47 @@ export async function getAdminProjectDetail(
   return client.fetch(ADMIN_PROJECT_DETAIL_QUERY, { projectId });
 }
 
+export async function getAdminScheduleData(
+  client: SanityClient,
+  projectId: string,
+) {
+  return client.fetch(
+    `*[_type == "project" && _id == $projectId][0] {
+      _id,
+      title,
+      engagementType,
+      isCommercial,
+      "contractors": contractors[] {
+        _key, trade,
+        "contractor": contractor-> { _id, name, company, trades }
+      },
+      milestones[] | order(date asc) {
+        _key, name, date, completed
+      },
+      ...select(engagementType == "full-interior-design" => {
+        "procurementItems": procurementItems[] {
+          _key, name, status, orderDate, expectedDeliveryDate, installDate
+        }
+      }),
+      customEvents[] | order(date asc) {
+        _key, name, date, endDate, category, notes
+      },
+      scheduleDependencies[] {
+        _key, source, target, linkType
+      }
+    }`,
+    { projectId },
+  );
+}
+
+export async function getAllContractors(client: SanityClient) {
+  return client.fetch(`
+    *[_type == "contractor"] | order(name asc) {
+      _id, name, company, trades
+    }
+  `);
+}
+
 // -- Phase 31: Admin CRUD Queries --
 
 // Admin: All clients for list page
