@@ -681,7 +681,10 @@ const ADMIN_DASHBOARD_DELIVERIES_QUERY = `
       name,
       status,
       expectedDeliveryDate,
-      trackingNumber
+      trackingNumber,
+      carrierETA,
+      carrierName,
+      lastSyncAt
     }
   }[count(deliveries) > 0]
 `;
@@ -803,7 +806,14 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       _key,
       trade,
       "contractor": contractor-> { _id, name, email, phone, company, trades }
-    }
+    },
+    ...select(engagementType == "full-interior-design" => {
+      "procurementItems": procurementItems[] {
+        _key, name, status, orderDate, expectedDeliveryDate, installDate,
+        clientCost, retailPrice, trackingNumber, vendor, notes,
+        carrierETA, carrierName, trackingUrl, lastSyncAt, syncSource
+      }
+    })
   }
 `;
 
@@ -902,4 +912,37 @@ export async function searchEntities(client: SanityClient, searchTerm: string) {
       _id, name, email, trades, "entityType": "contractor"
     }
   }`, { searchTerm });
+}
+
+// -- Phase 32: Procurement Cron Query --
+
+// GROQ: Active projects with trackable procurement items (for daily cron sync)
+export const ADMIN_PROCUREMENT_CRON_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]
+    && engagementType == "full-interior-design"] {
+    _id,
+    "trackableItems": procurementItems[
+      status in ["ordered", "warehouse", "in-transit"]
+      && defined(trackingNumber)
+      && trackingNumber != ""
+    ] {
+      _key, trackingNumber, status, lastSyncAt
+    }
+  }[count(trackableItems) > 0]
+`;
+
+export type CronProject = {
+  _id: string;
+  trackableItems: {
+    _key: string;
+    trackingNumber: string;
+    status: string;
+    lastSyncAt: string | null;
+  }[];
+};
+
+export async function getAdminProcurementCronData(
+  client: SanityClient,
+): Promise<CronProject[]> {
+  return client.fetch(ADMIN_PROCUREMENT_CRON_QUERY);
 }

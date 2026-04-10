@@ -476,6 +476,61 @@ export const project = defineType({
               title: "Tracking Number",
               type: "string",
             }),
+            // Phase 32: Procurement editor fields
+            defineField({
+              name: "vendor",
+              title: "Vendor",
+              type: "string",
+              description:
+                "Supplier/vendor name (e.g., Restoration Hardware)",
+            }),
+            defineField({
+              name: "notes",
+              title: "Notes",
+              type: "text",
+              description: "Internal notes -- never shown to clients",
+            }),
+            defineField({
+              name: "carrierETA",
+              title: "Carrier ETA",
+              type: "date",
+              description:
+                "Estimated delivery date from Ship24 carrier data",
+            }),
+            defineField({
+              name: "carrierName",
+              title: "Carrier Name",
+              type: "string",
+              description:
+                "Carrier name from Ship24 (e.g., DHL, OnTrac)",
+            }),
+            defineField({
+              name: "trackingUrl",
+              title: "Tracking URL",
+              type: "url",
+              description:
+                "Direct tracking URL (from Ship24 or generated locally)",
+            }),
+            defineField({
+              name: "lastSyncAt",
+              title: "Last Sync At",
+              type: "datetime",
+              description:
+                "Timestamp of last Ship24 sync (cron or manual)",
+            }),
+            defineField({
+              name: "syncSource",
+              title: "Sync Source",
+              type: "string",
+              options: {
+                list: [
+                  { title: "Cron", value: "cron" },
+                  { title: "Manual", value: "manual" },
+                ],
+              },
+              description:
+                "How status was last set: cron (auto), manual (force-refresh), or null (admin-set)",
+            }),
           ],
           preview: {
             select: { title: "name", subtitle: "status" },
