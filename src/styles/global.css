@@ -25,6 +25,8 @@
   --color-text-dark: #2C2520;
   --color-text-mid: #6B5E52;
   --color-text-muted: #9E8E80;
+  --color-destructive: #9B3A2A;
+  --color-destructive-surface: #FBEEE8;
 
   /* Typography -- reference Fonts API CSS variables via @theme inline below */
   --font-heading: "Cormorant Garamond", "Georgia", serif;
@@ -84,10 +86,15 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Focus styles */
+/* Focus styles -- terracotta on public site */
 *:focus-visible {
   outline: 2px solid var(--color-terracotta);
   outline-offset: 3px;
+}
+
+/* Focus styles -- gold inside admin (scoped via data-theme on AdminLayout body) */
+[data-theme="admin"] *:focus-visible {
+  outline-color: var(--color-gold);
 }
 
 /* GSAP animation initial states -- hide only when JS is available */

@@ -1,6 +1,7 @@
 ---
-version: 1.0
+version: 1.1
 created: 2026-04-10
+updated: 2026-04-10
 status: canonical
 authoritative_for:
   - /admin/* (luxury admin theme — primary scope)
@@ -68,10 +69,8 @@ All tokens exist as CSS custom properties in `src/styles/global.css` lines 16–
 | Text — primary | `--color-text-dark` | `#2C2520` | — | Body text, row titles, section headings |
 | Text — secondary | `--color-text-mid` | `#6B5E52` | — | Meta lines, field labels, inactive sidebar items, breadcrumb links |
 | Text — muted | `--color-text-muted` | `#9E8E80` | — | Timestamps, placeholder text, scaffolding labels, ownership stamps |
-| Destructive | *inline* | `#9B3A2A` | — | Error banner text, overdue labels, destructive button backgrounds. **Not `red-600` / `#DC2626`** — we use warm destructive to stay in the luxury palette. |
-| Destructive surface | *inline* | `#FBEEE8` | — | Error banner background, destructive confirmation modal body tint |
-
-> **Note:** `#9B3A2A` and `#FBEEE8` are not yet CSS custom properties. Proposed amendment (v1.1): add `--color-destructive` and `--color-destructive-surface` to `global.css`. Until then, cite these as inline values in phase specs.
+| Destructive | `--color-destructive` | `#9B3A2A` | — | Error banner text, overdue labels, destructive button backgrounds. **Not `red-600` / `#DC2626`** — we use warm destructive to stay in the luxury palette. |
+| Destructive surface | `--color-destructive-surface` | `#FBEEE8` | — | Error banner background, destructive confirmation modal body tint |
 
 #### Accent reserved-for (the 10% rule)
 
@@ -416,7 +415,7 @@ The design system is an aspiration; the code is the reality. Known mismatches th
 
 - **`AdminNav.tsx` nav item font size** is `12.5px`; canonical scale is `13px`. Consolidation deferred to a future polish pass — do not copy 12.5px into new surfaces.
 - **`ProcurementEditor.tsx` "Synced X ago"** is `11px`; canonical scale is `11.5px`. Consolidation deferred to next ProcurementEditor touch.
-- **`--color-destructive` / `--color-destructive-surface`** are not yet CSS custom properties — `#9B3A2A` and `#FBEEE8` are inlined in phase specs. Promote to `global.css` in v1.1 of this doc.
+- ~~`--color-destructive` / `--color-destructive-surface` not yet CSS custom properties~~ — **resolved in v1.1** (2026-04-10).
 
 ### Low priority / intentional
 
@@ -451,7 +450,7 @@ Public site uses Cormorant Garamond for H1–H6 (`--font-heading`), DM Sans for 
 
 ### Known drift
 
-- **Global `*:focus-visible` outline** uses `var(--color-terracotta)` (public theme) but fires on admin surfaces too. Admin focus rings should use `--color-gold`. Fix: scope the focus outline rule to public routes, or override it inside admin layouts. Deferred to a future cleanup.
+- ~~Global `*:focus-visible` outline uses terracotta on admin surfaces~~ — **resolved in v1.1** (2026-04-10) by scoping a gold override via `[data-theme="admin"] *:focus-visible` in `global.css` and adding `data-theme="admin"` to the `AdminLayout.astro` body.
 
 ---
 
@@ -475,6 +474,11 @@ The checker enforces this: any phase spec introducing a hex value or font size n
 ---
 
 ## Changelog
+
+### v1.1 — 2026-04-10
+
+- **Added `--color-destructive` and `--color-destructive-surface`** as first-class CSS custom properties in `global.css` (values unchanged: `#9B3A2A` and `#FBEEE8`). Phase specs now reference the tokens by name instead of inline hex. Resolves v1.0 drift backlog item.
+- **Scoped admin focus rings to gold.** Added `[data-theme="admin"] *:focus-visible { outline-color: var(--color-gold); }` override in `global.css` and `data-theme="admin"` attribute on the `AdminLayout.astro` body. Public site keeps terracotta focus rings. Resolves v1.0 drift backlog item.
 
 ### v1.0 — 2026-04-10
 
