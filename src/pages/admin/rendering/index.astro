@@ -1,0 +1,38 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getTenantClient } from "../../../lib/tenantClient";
+import { RENDERING_SESSIONS_TENANT_QUERY } from "../../../sanity/queries";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) return Astro.redirect("/admin/login");
+
+// These locals are wired up now so Plan 02 can mount SessionListPage without
+// re-plumbing the shell. The ?? "" fallbacks match the admin-login guard above.
+const sanityUserId = Astro.locals.sanityUserId ?? "";
+const studioToken = import.meta.env.STUDIO_API_SECRET ?? "";
+
+const client = getTenantClient(tenantId);
+const sessions = await client.fetch(RENDERING_SESSIONS_TENANT_QUERY);
+
+// studioToken is wired for Plan 02 SessionListPage island (promote/refine actions).
+// Keep a reference here so TS doesn't prune the assignment.
+void studioToken;
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Rendering" },
+];
+---
+
+<AdminLayout title="Rendering - Studio" pageTitle="Rendering" breadcrumbs={breadcrumbs}>
+  <!-- SessionListPage island will be mounted here in Plan 02.
+       Available props already prepared in frontmatter:
+         sessions={sessions}
+         sanityUserId={sanityUserId}
+         studioToken={studioToken} -->
+  <div class="text-sm text-[#6B5E52]">
+    Session list coming in Plan 02 ({sessions.length} session{sessions.length === 1 ? "" : "s"} loaded for {sanityUserId || "anonymous"})
+  </div>
+</AdminLayout>

@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) return Astro.redirect("/admin/login");
+
+const sanityUserId = Astro.locals.sanityUserId ?? "";
+const studioToken = import.meta.env.STUDIO_API_SECRET ?? "";
+const { sessionId } = Astro.params;
+
+// Keep references so TS doesn't prune the assignments; Plan 05 consumes them.
+void studioToken;
+void sanityUserId;
+void sessionId;
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Rendering", href: "/admin/rendering" },
+  { label: "Session" },
+];
+---
+
+<AdminLayout title="Session - Rendering" pageTitle="Rendering" breadcrumbs={breadcrumbs}>
+  <!-- ChatView island will be mounted here in Plan 05.
+       Available props already prepared in frontmatter:
+         sessionId={sessionId}
+         sanityUserId={sanityUserId}
+         studioToken={studioToken} -->
+  <div class="text-sm text-[#6B5E52]">
+    Chat view coming in Plan 05 (session: {sessionId})
+  </div>
+</AdminLayout>

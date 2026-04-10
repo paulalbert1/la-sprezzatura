@@ -599,6 +599,22 @@ export const RENDERING_SESSIONS_BY_CREATOR_QUERY = `
   }
 `;
 
+// GROQ: All rendering sessions for the tenant dataset (admin view -- all designers)
+// Tenant scoping is implicit: getTenantClient() already targets the correct dataset.
+// Optional "Mine" filter applied client-side by SessionListPage by comparing createdBy.
+export const RENDERING_SESSIONS_TENANT_QUERY = `
+  *[_type == "renderingSession"] | order(createdAt desc) {
+    _id,
+    sessionTitle,
+    project-> { _id, title },
+    status,
+    createdAt,
+    createdBy,
+    "renderingCount": count(renderings),
+    "thumbnail": renderings[0].blobPathname
+  }
+`;
+
 // GROQ: Design options by project (for client portal gallery)
 export const DESIGN_OPTIONS_BY_PROJECT_QUERY = `
   *[_type == "designOption" && project._ref == $projectId] | order(sortOrder asc) {

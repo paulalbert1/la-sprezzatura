@@ -1,0 +1,45 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import { getTenantClient } from "../../../lib/tenantClient";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) return Astro.redirect("/admin/login");
+
+// These locals are wired up now so Plan 03 can mount WizardContainer without
+// re-plumbing the shell.
+const sanityUserId = Astro.locals.sanityUserId ?? "";
+const studioToken = import.meta.env.STUDIO_API_SECRET ?? "";
+
+const client = getTenantClient(tenantId);
+// Pre-fetch projects server-side (Risk 4: StepSetup project list)
+const projects = await client.fetch<{ _id: string; title: string }[]>(
+  `*[_type == "project"] | order(title asc) { _id, title }`,
+);
+
+const prefilledProjectId = Astro.url.searchParams.get("project") ?? "";
+
+// Keep references so TS doesn't prune the assignments; Plan 03 consumes them.
+void studioToken;
+void sanityUserId;
+void prefilledProjectId;
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Rendering", href: "/admin/rendering" },
+  { label: "New session" },
+];
+---
+
+<AdminLayout title="New Session - Rendering" pageTitle="Rendering" breadcrumbs={breadcrumbs}>
+  <!-- WizardContainer island will be mounted here in Plan 03.
+       Available props already prepared in frontmatter:
+         projects={projects}
+         prefilledProjectId={prefilledProjectId}
+         sanityUserId={sanityUserId}
+         studioToken={studioToken} -->
+  <div class="text-sm text-[#6B5E52]">
+    Wizard coming in Plan 03 ({projects.length} project{projects.length === 1 ? "" : "s"} available)
+  </div>
+</AdminLayout>
