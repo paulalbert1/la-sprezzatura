@@ -461,8 +461,16 @@ Plans:
   2. Uploaded images show thumbnail previews, long filenames are truncated with ellipsis, multiple images can be uploaded at once, and the style preset / design vision fields are clearly labeled without overlap
   3. The chat refinement view works for multi-turn iteration on renderings, and the admin can promote a rendering to Design Options from the admin interface; a usage tracking badge shows the monthly count and remaining limit
   4. AI rendering generation and conversational refinement produce correct photorealistic results when triggered from the admin app (regression test against the same API routes)
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 7 plans
+
+Plans:
+- [ ] 33-01-PLAN.md -- Identity gap resolution, RENDERING_SESSIONS_TENANT_QUERY, shared types, route shells, AdminNav Sparkles, Wave 0 test stubs
+- [ ] 33-02-PLAN.md -- SessionListPage with all-tenant sessions, Mine filter chip, ownership stamps, UsageBadge
+- [ ] 33-03-PLAN.md -- WizardContainer (maxVisitedStep), StepSetup, StepClassify, StepDescribe, GeneratingOverlay
+- [ ] 33-04-PLAN.md -- StepUpload with instant previews, multi-upload, filename truncation (RNDR-07/08/09 regression)
+- [ ] 33-05-PLAN.md -- ChatView side-by-side layout, multi-turn refinement, polling
+- [ ] 33-06-PLAN.md -- PromoteDrawer (parchment drawer), project detail Rendering tab
+- [ ] 33-07-PLAN.md -- Full Vitest suite, build security check (T-33-01), manual RNDR-11 UAT
 
 ### Phase 34: Settings and Studio Retirement
 **Goal**: The admin can manage all site configuration and operational workflows that previously required Sanity Studio, and Studio is deprecated then removed -- making the admin app the sole management interface
@@ -488,7 +496,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
-| 33. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
+| 33. Rendering Tool Relocation | v5.0 | 0/7 | Planning complete | - |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
 
 ---

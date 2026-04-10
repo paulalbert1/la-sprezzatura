@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v5.0
 milestone_name: Admin Platform Completion
-status: Phase 32 shipped
-stopped_at: Phase 33 context gathered
-last_updated: "2026-04-10T15:25:18.715Z"
-last_activity: 2026-04-10 -- Phase 32 complete
+status: Phase 33 planning complete
+stopped_at: Phase 33 Plan 01 (ready to execute)
+last_updated: "2026-04-10T16:30:00.000Z"
+last_activity: 2026-04-10 -- Phase 33 plans created (7 plans, 4 waves)
 progress:
   total_phases: 19
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 32 — procurement-editor (COMPLETE)
+**Current focus:** Phase 33 — rendering-tool-relocation (PLANNING COMPLETE)
 
 ## Current Position
 
-Phase: 32 (procurement-editor) — COMPLETE
-Plan: 3 of 3
-Status: Phase 32 shipped
-Last activity: 2026-04-10 -- Phase 32 complete
+Phase: 33 (rendering-tool-relocation) — Planning complete, ready to execute
+Plan: 0 of 7 (execution not yet started)
+Status: Phase 33 planning complete
+Last activity: 2026-04-10 -- Phase 33 plans created (7 plans, 4 waves)
 
 Progress: [██████████████░░░░░░] 74% (Phases 1-28, 30-32 complete)
 
@@ -57,6 +57,9 @@ Progress: [██████████████░░░░░░] 74% (Ph
 - [v5.0-28]: Desaturated contractor color palette for Gantt chart
 - [v5.0-28]: Milestones render as diamond markers via JS post-processing
 - [v5.0-28]: Frappe Gantt has limitations requiring eventual custom replacement (see issue #1)
+- [v5.0-33]: sanityUserId for admin sessions = admin email (from tenants.json); consistent within admin tool
+- [v5.0-33]: Rendering sessions list uses RENDERING_SESSIONS_TENANT_QUERY (all-tenant, dataset-scoped)
+- [v5.0-33]: Shared rendering types moved to src/lib/rendering/types.ts; Studio re-exports via backward-compat shim
 
 ### Pending Todos
 
@@ -71,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-10T15:25:18.710Z
-Stopped at: Phase 33 context gathered
-Resume file: .planning/phases/33-rendering-tool-relocation/33-CONTEXT.md
+Last session: 2026-04-10T16:30:00.000Z
+Stopped at: Phase 33 plans created — ready to execute Plan 01
+Resume file: .planning/phases/33-rendering-tool-relocation/33-01-PLAN.md
