@@ -17,6 +17,7 @@ export interface TenantAdmin {
   email: string;
   name: string;
   passwordHash: string;
+  sanityUserId: string; // Stable per-admin identifier for renderingUsage + createdBy
 }
 
 export interface TenantConfig {
@@ -48,4 +49,12 @@ export function getTenantByAdminEmail(email: string): TenantConfig | undefined {
   return tenants.find((t) =>
     t.admins.some((a) => a.email.toLowerCase() === email.toLowerCase()),
   );
+}
+
+export function getAdminBySanityUserId(
+  tenantId: string,
+  sanityUserId: string,
+): TenantAdmin | undefined {
+  const tenant = getTenantById(tenantId);
+  return tenant?.admins.find((a) => a.sanityUserId === sanityUserId);
 }

@@ -22,12 +22,14 @@
       {
         "email": "liz@lasprezz.com",
         "name": "Elizabeth Olivier",
-        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6"
+        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6",
+        "sanityUserId": "liz@lasprezz.com"
       },
       {
         "email": "paul@lasprezz.com",
         "name": "Paul Albert",
-        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6"
+        "passwordHash": "$2b$10$4JLc45ZjOr//1ZchfiKGs.Zw2RLQMnSysFVm5CO61Lz9idLXTiJe6",
+        "sanityUserId": "paul@lasprezz.com"
       }
     ]
   }

@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { getSession } from "./lib/session";
+import { getTenantByAdminEmail } from "./lib/tenants";
 
 const PUBLIC_PATHS = [
   "/portal/login",
@@ -66,6 +67,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
     context.locals.tenantId = session.tenantId;
     context.locals.role = session.role;
+
+    // Resolve sanityUserId from tenant admin config (Phase 33 Risk 1 resolution)
+    const adminEntry = getTenantByAdminEmail(session.entityId)?.admins.find(
+      (a) => a.email.toLowerCase() === session.entityId.toLowerCase(),
+    );
+    context.locals.sanityUserId = adminEntry?.sanityUserId;
+
     return next();
   }
 
