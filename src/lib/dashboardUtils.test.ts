@@ -5,6 +5,8 @@ import {
   isMilestoneOverdue,
   getDaysInStage,
   getOverdueBannerData,
+  isProcurementOverdue,
+  getNetPrice,
 } from "./dashboardUtils";
 
 describe("isTaskOverdue", () => {
@@ -131,5 +133,76 @@ describe("getOverdueBannerData", () => {
     expect(result.milestoneCount).toBe(1);
     expect(result.taskCount).toBe(1);
     expect(result.projectCount).toBe(1);
+  });
+});
+
+describe("isProcurementOverdue", () => {
+  it("returns true when expectedDeliveryDate is past and status is ordered", () => {
+    const pastDate = subDays(new Date(), 3).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "ordered" })).toBe(true);
+  });
+
+  it("returns true when expectedDeliveryDate is past and status is warehouse", () => {
+    const pastDate = subDays(new Date(), 3).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "warehouse" })).toBe(true);
+  });
+
+  it("returns true when expectedDeliveryDate is past and status is in-transit", () => {
+    const pastDate = subDays(new Date(), 3).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "in-transit" })).toBe(true);
+  });
+
+  it("returns true when expectedDeliveryDate is past and status is pending", () => {
+    const pastDate = subDays(new Date(), 3).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "pending" })).toBe(true);
+  });
+
+  it("returns false when status is delivered even if date is past", () => {
+    const pastDate = subDays(new Date(), 5).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "delivered" })).toBe(false);
+  });
+
+  it("returns false when status is installed even if date is past", () => {
+    const pastDate = subDays(new Date(), 5).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: pastDate, status: "installed" })).toBe(false);
+  });
+
+  it("returns false when expectedDeliveryDate is null", () => {
+    expect(isProcurementOverdue({ expectedDeliveryDate: null, status: "ordered" })).toBe(false);
+  });
+
+  it("returns false when expectedDeliveryDate is in the future", () => {
+    const futureDate = addDays(new Date(), 10).toISOString().split("T")[0];
+    expect(isProcurementOverdue({ expectedDeliveryDate: futureDate, status: "ordered" })).toBe(false);
+  });
+
+  it("returns false when expectedDeliveryDate is undefined", () => {
+    expect(isProcurementOverdue({ status: "ordered" })).toBe(false);
+  });
+});
+
+describe("getNetPrice", () => {
+  it("returns retailPrice - clientCost when both are defined (values in cents)", () => {
+    expect(getNetPrice(150000, 200000)).toBe(50000); // $1500 - $2000 = $500 net
+  });
+
+  it("returns null when clientCost is null", () => {
+    expect(getNetPrice(null, 200000)).toBeNull();
+  });
+
+  it("returns null when retailPrice is null", () => {
+    expect(getNetPrice(150000, null)).toBeNull();
+  });
+
+  it("returns null when retailPrice is undefined", () => {
+    expect(getNetPrice(150000, undefined)).toBeNull();
+  });
+
+  it("returns 0 when retailPrice - clientCost is negative (clamp to zero)", () => {
+    expect(getNetPrice(200000, 150000)).toBe(0); // clientCost > retailPrice
+  });
+
+  it("returns 0 when both values are equal", () => {
+    expect(getNetPrice(100000, 100000)).toBe(0);
   });
 });
