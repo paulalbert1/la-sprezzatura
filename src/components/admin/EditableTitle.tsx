@@ -55,6 +55,14 @@ export default function EditableTitle({ title, projectId }: Props) {
     }
   }
 
+  const titleStyle = {
+    fontFamily: "var(--font-serif)",
+    fontSize: "21px",
+    fontWeight: 400,
+    color: "#2C2520",
+    letterSpacing: "0.01em",
+  } as const;
+
   if (editing) {
     return (
       <div className="flex items-center gap-2">
@@ -66,10 +74,14 @@ export default function EditableTitle({ title, projectId }: Props) {
           onKeyDown={handleKeyDown}
           onBlur={save}
           disabled={saving}
-          className="text-xl font-semibold text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1 focus:border-stone-light focus:outline-none"
-          style={{ fontFamily: "var(--font-body)" }}
+          className="rounded-md px-2 py-1 focus:outline-none"
+          style={{
+            ...titleStyle,
+            backgroundColor: "#FFFEFB",
+            border: "0.5px solid #D4C8B8",
+          }}
         />
-        {saving && <Loader2 className="w-4 h-4 animate-spin text-stone-light" />}
+        {saving && <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#9E8E80" }} />}
       </div>
     );
   }
@@ -81,13 +93,10 @@ export default function EditableTitle({ title, projectId }: Props) {
       className="group flex items-center gap-2 text-left"
       aria-label="Edit project name"
     >
-      <h1
-        className="text-xl font-semibold text-charcoal"
-        style={{ fontFamily: "var(--font-body)" }}
-      >
+      <h1 style={titleStyle}>
         {value}
       </h1>
-      <Pencil className="w-3.5 h-3.5 text-stone-light opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Pencil className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#9E8E80" }} />
     </button>
   );
 }

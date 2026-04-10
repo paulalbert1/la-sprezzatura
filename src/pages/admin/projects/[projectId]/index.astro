@@ -41,20 +41,22 @@ const breadcrumbs = [
 
 <AdminLayout title={project.title + " - Studio"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
   <div class="max-w-5xl">
-    {/* Project header with editable title, stage badge, and days-in-stage */}
-    <div class="flex items-center gap-4 mb-8">
+    {/* Project header -- no border, let title breathe */}
+    <div class="flex items-baseline gap-3 mb-7">
       <EditableTitle client:load title={project.title} projectId={projectId} />
       {stageMeta && (
-        <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-terracotta/10 text-terracotta">
+        <span
+          class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
+          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em;"
+        >
           {stageMeta.title}
         </span>
       )}
-      <span class="text-[11px] text-stone-light font-body">{daysInStage}d in stage</span>
+      <span class="text-[11.5px]" style="color: #9E8E80;">{daysInStage}d in stage</span>
     </div>
 
     {/* Two-column layout: Tasks (left) + Milestones (right) */}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-      {/* Tasks - left column */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-[14px]">
       <div>
         <ProjectTasks
           client:load
@@ -63,7 +65,6 @@ const breadcrumbs = [
         />
       </div>
 
-      {/* Milestones - right column */}
       <div id="milestones">
         <MilestonesList
           client:load
@@ -74,73 +75,90 @@ const breadcrumbs = [
       </div>
     </div>
 
-    {/* Team section - full width */}
-    <div class="mb-8">
-      <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Team</h2>
-      <div class="bg-white rounded-xl border border-stone-light/40 p-5">
-        {/* Clients sub-section */}
-        {project.projectClients && project.projectClients.length > 0 && (
-          <div class="mb-4">
-            <h3 class="text-[11px] font-semibold text-stone uppercase tracking-wider mb-2">Clients</h3>
-            <div class="flex flex-wrap gap-3">
-              {project.projectClients.map((c: any) => (
-                <ContactCardWrapper
-                  client:load
-                  entityId={c._id}
-                  entityType="client"
-                  name={c.name}
-                  href={`/admin/clients/${c._id}`}
-                  contactData={{
-                    _id: c._id,
-                    name: c.name,
-                    email: c.email || "",
-                    phone: c.phone || "",
-                    preferredContact: c.preferredContact || "",
-                    entityType: "client" as const,
-                  }}
-                  className="text-sm font-body text-terracotta hover:underline cursor-pointer"
+    {/* Contractors section - full width (no "Team" label, Contractors at h2 weight) */}
+    <div
+      class="mb-[14px] rounded-[10px]"
+      style="background-color: #FFFEFB; border: 0.5px solid #E8DDD0; padding: 18px 20px;"
+    >
+      <h2
+        class="mb-[14px]"
+        style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+      >
+        Contractors
+      </h2>
+
+      {/* Clients chips */}
+      {project.projectClients && project.projectClients.length > 0 && (
+        <div class="mb-3">
+          <div
+            class="mb-[10px]"
+            style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.08em; text-transform: uppercase;"
+          >
+            Clients
+          </div>
+          <div class="flex flex-wrap gap-[7px]">
+            {project.projectClients.map((c: any) => (
+              <ContactCardWrapper
+                client:load
+                entityId={c._id}
+                entityType="client"
+                name={c.name}
+                href={`/admin/clients/${c._id}`}
+                contactData={{
+                  _id: c._id,
+                  name: c.name,
+                  email: c.email || "",
+                  phone: c.phone || "",
+                  preferredContact: c.preferredContact || "",
+                  entityType: "client" as const,
+                }}
+                className="inline-flex items-center gap-[7px] px-[11px] py-[5px] rounded-full text-[12.5px] cursor-pointer"
+              >
+                <span style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8; padding: 5px 11px; border-radius: 20px;">{c.name}</span>
+              </ContactCardWrapper>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Contractors chips */}
+      {project.projectContractors && project.projectContractors.length > 0 && (
+        <div class="flex flex-wrap gap-[7px]">
+          {project.projectContractors.map((pc: any) => pc.contractor && (
+            <ContactCardWrapper
+              client:load
+              entityId={pc.contractor._id}
+              entityType="contractor"
+              name={pc.contractor.name}
+              href={`/admin/contractors/${pc.contractor._id}`}
+              contactData={{
+                _id: pc.contractor._id,
+                name: pc.contractor.name,
+                email: pc.contractor.email || "",
+                phone: pc.contractor.phone || "",
+                entityType: "contractor" as const,
+              }}
+              className="inline-flex cursor-pointer"
+            >
+              <span
+                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
+                style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
+              >
+                <span
+                  class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
+                  style="background-color: #F3EDE3; color: #9A7B4B; border: 0.5px solid #D4C8B8;"
                 >
-                  {c.name}
-                </ContactCardWrapper>
-              ))}
-            </div>
-          </div>
-        )}
+                  {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </span>
+                {pc.contractor.name}
+                {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
+              </span>
+            </ContactCardWrapper>
+          ))}
+        </div>
+      )}
 
-        {/* Contractors sub-section */}
-        {project.projectContractors && project.projectContractors.length > 0 && (
-          <div class="mb-4">
-            <h3 class="text-[11px] font-semibold text-stone uppercase tracking-wider mb-2">Contractors</h3>
-            <div class="flex flex-wrap gap-3">
-              {project.projectContractors.map((pc: any) => pc.contractor && (
-                <div class="flex items-center gap-1.5">
-                  <ContactCardWrapper
-                    client:load
-                    entityId={pc.contractor._id}
-                    entityType="contractor"
-                    name={pc.contractor.name}
-                    href={`/admin/contractors/${pc.contractor._id}`}
-                    contactData={{
-                      _id: pc.contractor._id,
-                      name: pc.contractor.name,
-                      email: pc.contractor.email || "",
-                      phone: pc.contractor.phone || "",
-                      entityType: "contractor" as const,
-                    }}
-                    className="text-sm font-body text-terracotta hover:underline cursor-pointer"
-                  >
-                    {pc.contractor.name}
-                  </ContactCardWrapper>
-                  {pc.trade && (
-                    <span class="text-[11px] text-stone-light font-body">({pc.trade})</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Quick-assign typeahead */}
+      <div class="mt-3">
         <QuickAssignTypeahead
           client:load
           projectId={projectId}
@@ -157,7 +175,6 @@ const breadcrumbs = [
     {/* Procurement section - full width */}
     {project.engagementType === "full-interior-design" && (
       <div id="procurement" class="mb-8">
-        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Procurement</h2>
         <ProcurementEditor
           client:load
           items={project.procurementItems || []}

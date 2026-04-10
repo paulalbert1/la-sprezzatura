@@ -381,7 +381,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 - [x] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes (completed 2026-04-08)
 - [x] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD (completed 2026-04-08)
 - [x] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation (completed 2026-04-09)
-- [ ] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA
+- [x] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA (completed 2026-04-10)
 - [ ] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes
 - [ ] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal
 
@@ -448,9 +448,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md -- Schema extensions, GROQ queries, Ship24 client, and utility functions (isProcurementOverdue, getNetPrice)
-- [ ] 32-02-PLAN.md -- Procurement API route (CRUD + status + force-refresh) and Vercel Cron tracking sync endpoint
-- [ ] 32-03-PLAN.md -- ProcurementEditor React island component, page wiring, and visual verification
+- [x] 32-01-PLAN.md -- Schema extensions, GROQ queries, Ship24 client, and utility functions (isProcurementOverdue, getNetPrice)
+- [x] 32-02-PLAN.md -- Procurement API route (CRUD + status + force-refresh) and Vercel Cron tracking sync endpoint
+- [x] 32-03-PLAN.md -- ProcurementEditor React island component, page wiring, and visual verification
 
 ### Phase 33: Rendering Tool Relocation
 **Goal**: The full AI rendering workflow -- session list, guided wizard, chat refinement, promote to Design Options, and usage tracking -- works in the admin app with all known UX bugs fixed, and produces correct AI-generated results
@@ -487,7 +487,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
-| 32. Procurement Editor | v5.0 | 0/3 | Planning complete | - |
+| 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
 | 33. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
 

@@ -35,16 +35,16 @@ const businessName = tenant?.businessName ?? "Studio";
     <Font cssVariable="--font-body" preload />
     <title>{title}</title>
   </head>
-  <body class="bg-cream text-charcoal font-body min-h-screen">
+  <body class="min-h-screen" style="background-color: #FAF7F2; color: #2C2520; font-family: var(--font-sans);">
     {/* Sidebar - fixed, full height, 240px wide */}
-    <aside class="fixed left-0 top-0 h-screen w-60 bg-cream-dark border-r border-stone-light/30 px-6 py-12 z-10">
+    <aside class="fixed left-0 top-0 h-screen w-60 px-6 py-12 z-10" style="background-color: #FFFEFB; border-right: 0.5px solid #E8DDD0;">
       <AdminNav client:load currentPath={currentPath} businessName={businessName} />
     </aside>
 
     {/* Main area - offset by sidebar width */}
     <div class="ml-60 min-h-screen flex flex-col">
       {/* Top bar */}
-      <header class="bg-cream px-8 pt-4 flex items-start justify-between">
+      <header class="px-8 pt-4 flex items-start justify-between" style="background-color: #FAF7F2;">
         {breadcrumbs && breadcrumbs.length > 0 ? (
           <nav aria-label="Breadcrumb">
             <ol class="flex items-center">

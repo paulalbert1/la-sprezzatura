@@ -35,11 +35,13 @@ Declared values (must be multiples of 4):
 |-------|-------|-------|
 | xs | 4px | Icon gaps, inline badge padding (`px-1`, `gap-1`) |
 | sm | 8px | Compact element spacing, row inner gaps (`gap-2`, `py-2`) |
-| md | 12px | Row padding, input padding (`px-3`, `py-3`, `gap-3`) |
+| md | 12px | Row padding, input padding (`px-3`, `py-3`, `gap-3`) -- codebase-inherited exception (not a multiple of 8) |
 | lg | 16px | Section heading margins (`mb-4`) |
-| xl | 20px | Row horizontal padding (`px-5`) -- matches ProjectTasks.tsx |
+| xl | 20px | Row horizontal padding (`px-5`) -- codebase-inherited exception from ProjectTasks.tsx (not a multiple of 8) |
 | 2xl | 24px | Section spacing between procurement and adjacent sections (`mb-6`) |
 | 3xl | 32px | Section outer margin (`mb-8`) -- matches `#procurement` div |
+
+Note: 12px and 20px are codebase-inherited exceptions carried forward from established patterns in ProjectTasks.tsx, ArtifactManager.tsx, and ProcurementTable.astro. They do not conform to a strict 8-point grid but are retained for visual consistency with adjacent sections.
 
 Exceptions: 44px minimum touch target height for status dropdown badges and action icons on mobile. 11px used for timestamps (established pattern from ProjectTasks.tsx, ArtifactManager.tsx).
 
@@ -102,6 +104,8 @@ Source: ProjectTasks.tsx overdue pattern (line 148-152: `text-red-600`), Procure
 
 The main component mounted in `#procurement` div via `client:load`.
 
+**Primary visual focal point:** The status badge is the primary visual focal point of each row. Its color-coded pill draws the eye first and communicates pipeline stage at a glance. All other row content is secondary to the badge.
+
 #### States
 
 | State | Visual treatment |
@@ -109,9 +113,9 @@ The main component mounted in `#procurement` div via `client:load`.
 | Loading (initial data from Astro props) | Not applicable -- server-rendered initial data, no skeleton |
 | Empty (no items) | Centered empty state message with next-step guidance |
 | Populated (read mode) | Table rows with status badges, tracking links, pricing columns |
-| Row editing (single row) | Inline text inputs, date pickers, cost fields with Save/Cancel buttons |
+| Row editing (single row) | Inline text inputs, date pickers, cost fields with "Save Changes" / "Discard Changes" buttons |
 | Row creating (new item) | Empty editable row appended at bottom |
-| Saving | Save button shows Loader2 spinner, fields disabled |
+| Saving | "Save Changes" button shows Loader2 spinner, fields disabled |
 | Force-refreshing | Small Loader2 spinner replaces RefreshCw icon on that row |
 | Error | Red error banner below table, auto-dismisses after 3 seconds |
 | Optimistic update in flight | UI reflects change immediately, reverts on API failure |
@@ -181,9 +185,9 @@ Responsive: On screens below `md` breakpoint, hide Vendor, Carrier ETA, Net, and
 - Triggered by clicking the Pencil (Edit) icon in Actions column
 - Fields become inline inputs: name (text), vendor (text), expectedDeliveryDate (date), installDate (date), retailPrice (number), clientCost (number), trackingNumber (text), notes (textarea -- appears as a full-width row below the main row)
 - Number inputs for prices use `type="number"` with `step="0.01"` and display in dollars (convert cents to dollars for display, dollars to cents on save)
-- Save and Cancel buttons appear in the Actions column, replacing Edit/Delete/Refresh icons
-- Save button: `text-xs font-semibold text-terracotta hover:text-terracotta-light` (text-only)
-- Cancel button: `text-xs text-stone hover:text-charcoal` (text-only)
+- "Save Changes" and "Discard Changes" text buttons appear in the Actions column, replacing Edit/Delete/Refresh icons
+- "Save Changes" button: `text-xs font-semibold text-terracotta hover:text-terracotta-light` (text-only)
+- "Discard Changes" button: `text-xs text-stone hover:text-charcoal` (text-only)
 - Animation: none -- instant swap between read and edit mode (keep it snappy)
 - Only one row can be in edit mode at a time; clicking Edit on another row cancels the current edit
 - Validation: required fields are name only. Invalid dates or negative prices show `text-xs text-red-600` inline below the field
@@ -206,6 +210,16 @@ Responsive: On screens below `md` breakpoint, hide Vendor, Carrier ETA, Net, and
 - On success: row updates with new data, sync indicator updates
 - On failure: show error banner "Could not refresh tracking. Please try again."
 
+#### Action icon accessibility
+
+Each icon-only action button carries an explicit `aria-label` for screen reader support:
+
+| Icon | `aria-label` |
+|------|-------------|
+| Pencil (Edit) | `aria-label="Edit item"` |
+| Trash2 (Delete) | `aria-label="Delete item"` |
+| RefreshCw (Force-refresh) | `aria-label="Refresh tracking"` |
+
 #### Delete confirmation
 
 - Reuse the existing `DeleteConfirmDialog.tsx` component
@@ -223,6 +237,8 @@ Responsive: On screens below `md` breakpoint, hide Vendor, Carrier ETA, Net, and
 |---------|------|
 | Section heading | Procurement |
 | Primary CTA | Add item |
+| Row edit save CTA | Save Changes |
+| Row edit cancel CTA | Discard Changes |
 | Empty state heading | No procurement items yet |
 | Empty state body | Use the row below to add items as they are ordered for this project. |
 | Error state (generic save) | Could not save changes. Please try again. |
@@ -256,9 +272,9 @@ Source: ProjectTasks.tsx empty state pattern, DeleteConfirmDialog.tsx confirmati
 
 | Action | Trigger | Visual feedback | API call |
 |--------|---------|----------------|----------|
-| Edit row | Click Pencil icon | Fields become inputs, Save/Cancel appear | None until Save |
-| Save row | Click Save text button | Inputs revert to text, spinner on Save during request | POST procurement (action: update) |
-| Cancel edit | Click Cancel text button | Inputs revert to previous values | None |
+| Edit row | Click Pencil icon | Fields become inputs, "Save Changes" / "Discard Changes" appear | None until Save |
+| Save row | Click "Save Changes" text button | Inputs revert to text, spinner on "Save Changes" during request | POST procurement (action: update) |
+| Cancel edit | Click "Discard Changes" text button | Inputs revert to previous values | None |
 | Change status | Click badge, select from dropdown | Badge updates immediately (optimistic) | POST procurement (action: update-status) |
 | Delete row | Click Trash2 icon | Confirmation dialog opens | POST procurement (action: delete) on confirm |
 | Force-refresh | Click RefreshCw icon | Spinner replaces icon | POST procurement (action: force-refresh) |

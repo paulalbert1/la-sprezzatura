@@ -116,101 +116,151 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
     }
   }
 
+  const cardStyle = {
+    backgroundColor: "#FFFEFB",
+    border: "0.5px solid #E8DDD0",
+    borderRadius: "10px",
+    padding: "18px 20px",
+  } as const;
+
+  const titleStyle = {
+    fontFamily: "var(--font-sans)",
+    fontSize: "10.5px",
+    fontWeight: 500,
+    color: "#9E8E80",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+  };
+
   return (
-    <div id="tasks">
-      <h2 className="text-charcoal" style={{ fontFamily: "var(--font-body)", fontSize: "15px", fontWeight: 400, marginBottom: "1rem" }}>
-        Tasks
-      </h2>
-      <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
-        {/* Task rows -- full list, not capped */}
-        {localTasks.length === 0 ? (
-          <p className="text-sm text-stone text-center py-6">
-            No tasks yet. Use the field below to create one.
-          </p>
-        ) : (
-          <div>
-            {localTasks.map((task) => {
-              const overdue = isTaskOverdue(task);
-              return (
-                <div
-                  key={task._key}
-                  className="flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0"
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => handleToggle(task)}
-                    aria-label={task.description}
-                    className="w-4 h-4 rounded border-stone-light text-terracotta focus:ring-terracotta accent-terracotta shrink-0"
-                  />
-                  <span
-                    className={`text-sm font-body flex-1 ${
-                      task.completed
-                        ? "text-stone-light line-through"
-                        : overdue
-                          ? "text-red-600"
-                          : "text-charcoal"
-                    }`}
-                  >
-                    {task.description}
-                  </span>
-                  {task.dueDate && (
-                    <span
-                      className={`text-[11px] font-body shrink-0 ${
-                        overdue && !task.completed
-                          ? "text-red-600 font-medium"
-                          : "text-stone-light"
-                      }`}
-                    >
-                      {format(parseISO(task.dueDate), "MMM d")}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Quick-add form -- no project dropdown, pre-scoped to this project */}
-        <form
-          onSubmit={handleCreate}
-          className="flex items-center gap-2 px-5 py-3 border-t border-stone-light/10 bg-cream/50"
-        >
-          <svg
-            className="w-3.5 h-3.5 text-stone-light shrink-0"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Add a task..."
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            disabled={creating}
-            className="flex-1 text-sm font-body text-charcoal bg-transparent outline-none placeholder:text-stone-light"
-          />
-          <input
-            type="date"
-            value={newDueDate}
-            onChange={(e) => setNewDueDate(e.target.value)}
-            className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
-          />
-        </form>
-
-        {error && (
-          <div className="px-5 py-2 text-xs text-red-600 font-body">
-            {error}
-          </div>
-        )}
+    <div id="tasks" style={cardStyle}>
+      <div
+        className="flex items-center justify-between mb-[14px] pb-[10px]"
+        style={{ borderBottom: "0.5px solid #E8DDD0" }}
+      >
+        <h2 style={titleStyle}>Tasks</h2>
       </div>
+
+      {localTasks.length === 0 ? (
+        <p
+          className="py-4 text-center"
+          style={{ fontFamily: "var(--font-sans)", fontSize: "12.5px", color: "#9E8E80" }}
+        >
+          No tasks yet. Use the field below to create one.
+        </p>
+      ) : (
+        <div>
+          {localTasks.map((task) => {
+            const overdue = isTaskOverdue(task);
+            const labelColor = task.completed
+              ? "#9E8E80"
+              : overdue
+                ? "#9B3A2A"
+                : "#2C2520";
+            const dateColor = overdue && !task.completed ? "#9B3A2A" : "#9E8E80";
+
+            return (
+              <div
+                key={task._key}
+                className="flex items-center gap-[10px] py-[7px]"
+                style={{ borderBottom: "0.5px solid #E8DDD0" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => handleToggle(task)}
+                  aria-label={task.description}
+                  className="shrink-0 cursor-pointer"
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                    accentColor: "#9A7B4B",
+                  }}
+                />
+                <span
+                  className="flex-1"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "12.5px",
+                    color: labelColor,
+                    textDecoration: task.completed ? "line-through" : "none",
+                  }}
+                >
+                  {task.description}
+                </span>
+                {task.dueDate && (
+                  <span
+                    className="shrink-0 tabular-nums"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "11.5px",
+                      color: dateColor,
+                      fontWeight: overdue && !task.completed ? 500 : 400,
+                    }}
+                  >
+                    {format(parseISO(task.dueDate), "MMM d")}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Quick-add form */}
+      <form
+        onSubmit={handleCreate}
+        className="flex items-center gap-2 pt-[8px]"
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "#9E8E80",
+          }}
+        >
+          +
+        </span>
+        <input
+          type="text"
+          placeholder="Add a task"
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          disabled={creating}
+          className="flex-1 bg-transparent outline-none"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "12px",
+            color: "#2C2520",
+          }}
+        />
+        <input
+          type="date"
+          value={newDueDate}
+          onChange={(e) => setNewDueDate(e.target.value)}
+          className="rounded-md px-2 py-1"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "11px",
+            color: "#6B5E52",
+            backgroundColor: "transparent",
+            border: "0.5px solid #E8DDD0",
+          }}
+        />
+      </form>
+
+      {error && (
+        <div
+          className="mt-2"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "11px",
+            color: "#9B3A2A",
+          }}
+        >
+          {error}
+        </div>
+      )}
     </div>
   );
 }

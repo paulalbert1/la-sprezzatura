@@ -13,9 +13,24 @@
   --color-terracotta-light: #D4A08A;
   --color-white: #FFFFFF;
 
+  /* Luxury admin palette -- warm ivory, parchment, antique gold */
+  --color-ivory: #FAF7F2;
+  --color-surface: #FFFEFB;
+  --color-parchment: #F3EDE3;
+  --color-border-warm: #E8DDD0;
+  --color-border-mid: #D4C8B8;
+  --color-gold: #9A7B4B;
+  --color-gold-light: #F5EDD8;
+  --color-gold-mid: #E8D5A8;
+  --color-text-dark: #2C2520;
+  --color-text-mid: #6B5E52;
+  --color-text-muted: #9E8E80;
+
   /* Typography -- reference Fonts API CSS variables via @theme inline below */
   --font-heading: "Cormorant Garamond", "Georgia", serif;
   --font-body: "DM Sans", "system-ui", sans-serif;
+  --font-serif: "Cormorant Garamond", "Georgia", serif;
+  --font-sans: "DM Sans", "system-ui", sans-serif;
 
   /* Spacing scale -- generous */
   --spacing-section: 8rem;

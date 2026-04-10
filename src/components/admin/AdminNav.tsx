@@ -39,12 +39,21 @@ function isActive(currentPath: string, href: string): boolean {
 export default function AdminNav({ currentPath, businessName }: { currentPath: string; businessName: string }) {
   return (
     <nav className="flex flex-col h-full">
-      {/* Brand section */}
-      <div className="mb-10">
-        <p className="text-[15px] tracking-[0.12em] uppercase font-heading font-bold text-charcoal">
+      {/* Brand section - hotel stationery style */}
+      <div className="mb-10 pb-5 border-b border-[#E8DDD0]">
+        <p
+          className="text-[12px] tracking-[0.14em] uppercase font-medium"
+          style={{ color: "#2C2520", fontFamily: "var(--font-sans)" }}
+        >
           {businessName}
         </p>
-        <p className="text-[11px] tracking-[0.08em] uppercase font-heading text-stone-light mt-0.5">Linha Studio</p>
+        <div className="w-7 h-px bg-[#9A7B4B] my-[5px]" />
+        <p
+          className="text-[10px] tracking-[0.16em] uppercase"
+          style={{ color: "#9E8E80", fontFamily: "var(--font-sans)" }}
+        >
+          Linha Studio
+        </p>
       </div>
 
       {/* Nav items */}
@@ -58,9 +67,14 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
               href={item.href}
               className={
                 active
-                  ? "text-terracotta bg-cream border-l-2 border-terracotta -ml-3 pl-5 pr-3 py-2 rounded-lg flex items-center gap-3 font-semibold text-sm font-body"
-                  : "text-stone-light hover:text-charcoal hover:bg-cream/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm font-body"
+                  ? "bg-[#F5EDD8] px-3 py-2 rounded-lg flex items-center gap-3 text-sm"
+                  : "hover:bg-[#F5EDD8]/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm"
               }
+              style={{
+                color: active ? "#9A7B4B" : "#6B5E52",
+                fontFamily: "var(--font-sans)",
+                letterSpacing: "0.02em",
+              }}
             >
               <Icon className="w-5 h-5" />
               {item.label}

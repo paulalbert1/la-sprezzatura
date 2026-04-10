@@ -29,62 +29,89 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
     ? milestones
     : milestones.filter((m) => !m.completed);
 
+  const cardStyle = {
+    backgroundColor: "#FFFEFB",
+    border: "0.5px solid #E8DDD0",
+    borderRadius: "10px",
+    padding: "18px 20px",
+  } as const;
+
+  const titleStyle = {
+    fontFamily: "var(--font-sans)",
+    fontSize: "10.5px",
+    fontWeight: 500,
+    color: "#9E8E80",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+  };
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2
-          className="text-charcoal"
-          style={{ fontFamily: "var(--font-body)", fontSize: "15px", fontWeight: 400 }}
-        >
-          Milestones
-        </h2>
+    <div style={cardStyle}>
+      <div
+        className="flex items-center justify-between mb-[14px] pb-[10px]"
+        style={{ borderBottom: "0.5px solid #E8DDD0" }}
+      >
+        <h2 style={titleStyle}>Milestones</h2>
         <a
           href={scheduleUrl}
-          className="text-xs text-terracotta hover:text-terracotta/80 transition-colors"
-          style={{ fontFamily: "var(--font-body)" }}
+          className="transition-colors"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "11.5px",
+            color: "#9A7B4B",
+            letterSpacing: "0.02em",
+          }}
         >
-          View Schedule →
+          View schedule →
         </a>
       </div>
 
       {milestones.length > 0 ? (
-        <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+        <>
           {visibleMilestones.map((m) => {
             const overdue = isMilestoneOverdue(m);
+            const dotColor = m.completed
+              ? "#9A7B4B"
+              : overdue
+                ? "#9B3A2A"
+                : "#D4C8B8";
+            const labelColor = m.completed
+              ? "#9E8E80"
+              : overdue
+                ? "#9B3A2A"
+                : "#2C2520";
+            const dateColor = overdue && !m.completed ? "#9B3A2A" : "#9E8E80";
+
             return (
               <div
                 key={m._key}
-                className="flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0"
+                className="flex items-center gap-[10px] py-[7px]"
+                style={{ borderBottom: "0.5px solid #E8DDD0" }}
               >
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 ${
-                    m.completed
-                      ? "bg-emerald-500"
-                      : overdue
-                        ? "bg-red-400"
-                        : "bg-stone-light/40"
-                  }`}
+                  className="rounded-full shrink-0"
+                  style={{ width: "7px", height: "7px", backgroundColor: dotColor }}
                 />
                 <span
-                  className={`text-sm flex-1 ${
-                    m.completed
-                      ? "text-stone line-through"
-                      : overdue
-                        ? "text-red-600"
-                        : "text-charcoal"
-                  }`}
-                  style={{ fontFamily: "var(--font-body)" }}
+                  className="flex-1"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "12.5px",
+                    color: labelColor,
+                    textDecoration: m.completed ? "line-through" : "none",
+                  }}
                 >
                   {m.name}
                 </span>
                 {m.date && (
                   <span
-                    className={`text-xs shrink-0 tabular-nums ${
-                      overdue && !m.completed
-                        ? "text-red-500 font-medium"
-                        : "text-stone-light"
-                    }`}
-                    style={{ fontFamily: "var(--font-body)" }}
+                    className="shrink-0 tabular-nums"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "11.5px",
+                      color: dateColor,
+                      fontWeight: overdue && !m.completed ? 500 : 400,
+                    }}
                   >
                     {format(parseISO(m.date), "MMM d")}
                   </span>
@@ -97,8 +124,12 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
             <button
               type="button"
               onClick={() => setShowCompleted(!showCompleted)}
-              className="w-full flex items-center justify-center gap-1.5 px-5 py-2 text-[11px] text-stone-light hover:text-stone transition-colors border-t border-stone-light/10"
-              style={{ fontFamily: "var(--font-body)" }}
+              className="flex items-center gap-[5px] mt-[9px] transition-colors hover:text-[#9A7B4B]"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11.5px",
+                color: "#9E8E80",
+              }}
             >
               {showCompleted ? (
                 <>
@@ -113,16 +144,26 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
               )}
             </button>
           )}
-        </div>
+        </>
       ) : (
-        <div className="bg-white rounded-xl border border-stone-light/40 px-5 py-6 text-center">
-          <p className="text-sm text-stone" style={{ fontFamily: "var(--font-body)" }}>
+        <div className="py-6 text-center">
+          <p
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "12.5px",
+              color: "#9E8E80",
+            }}
+          >
             No milestones yet
           </p>
           <a
             href={scheduleUrl}
-            className="text-xs text-terracotta hover:text-terracotta/80 mt-1 inline-block"
-            style={{ fontFamily: "var(--font-body)" }}
+            className="mt-1 inline-block"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "11.5px",
+              color: "#9A7B4B",
+            }}
           >
             Add milestones in Schedule →
           </a>

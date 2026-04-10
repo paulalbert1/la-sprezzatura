@@ -38,6 +38,16 @@ interface Props {
   projectId: string;
 }
 
+// Luxury status pills -- border-outlined on tinted backgrounds
+const STATUS_PILL_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  pending: { bg: "#F3EDE3", text: "#9E8E80", border: "#E8DDD0" },
+  ordered: { bg: "#E8F0F9", text: "#2A5485", border: "#B0CAE8" },
+  warehouse: { bg: "#F3EDE3", text: "#6B5E52", border: "#D4C8B8" },
+  "in-transit": { bg: "#FBF2E2", text: "#8A5E1A", border: "#E8CFA0" },
+  delivered: { bg: "#EDF5E8", text: "#3A6620", border: "#C4DBA8" },
+  installed: { bg: "#EDF5E8", text: "#3A6620", border: "#A8C98C" },
+};
+
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-stone-light/20 text-stone",
   ordered: "bg-amber-50 text-amber-700",
@@ -435,7 +445,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
           href={item.trackingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-terracotta hover:text-terracotta-light text-xs underline"
+          className="text-[11.5px] underline hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
         >
           {item.carrierName || truncateTracking(item.trackingNumber || "")}
         </a>
@@ -449,7 +459,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             href={info.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-terracotta hover:text-terracotta-light text-xs underline"
+            className="text-[11.5px] underline hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
           >
             {info.carrier !== "unknown"
               ? info.carrier.toUpperCase()
@@ -481,6 +491,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
   function renderStatusDropdown(item: ProcurementItem) {
     const isOpen = statusDropdownKey === item._key;
     const isSaving = savingStatus === item._key;
+    const pill = STATUS_PILL_STYLES[item.status] || STATUS_PILL_STYLES.pending;
 
     return (
       <div className="relative" ref={isOpen ? dropdownRef : undefined}>
@@ -489,9 +500,18 @@ export default function ProcurementEditor({ items, projectId }: Props) {
           onClick={() =>
             setStatusDropdownKey(isOpen ? null : item._key)
           }
-          className={`px-2.5 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1 cursor-pointer transition-opacity ${
-            STATUS_STYLES[item.status] || "bg-stone-light/20 text-stone"
-          } ${isSaving ? "opacity-50" : ""}`}
+          className={`inline-flex items-center gap-1 cursor-pointer transition-opacity ${isSaving ? "opacity-50" : ""}`}
+          style={{
+            padding: "3px 9px",
+            borderRadius: "20px",
+            fontSize: "10.5px",
+            fontWeight: 500,
+            letterSpacing: "0.04em",
+            backgroundColor: pill.bg,
+            color: pill.text,
+            border: `0.5px solid ${pill.border}`,
+            fontFamily: "var(--font-sans)",
+          }}
           disabled={isSaving}
         >
           {STATUS_LABELS[item.status] || item.status}
@@ -499,26 +519,33 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         </button>
         {isOpen && (
           <div
-            className="absolute left-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-stone-light/20 py-1 z-10 min-w-[140px]"
+            className="absolute left-0 top-full mt-1 rounded-lg shadow-lg py-1 z-10 min-w-[140px]"
+            style={{ backgroundColor: "#FFFEFB", border: "0.5px solid #E8DDD0" }}
             role="listbox"
           >
-            {STATUS_ORDER.map((s) => (
-              <button
-                key={s}
-                type="button"
-                role="option"
-                aria-selected={item.status === s}
-                onClick={() => handleStatusChange(item._key, s)}
-                className={`w-full text-left px-3 py-1.5 text-xs flex items-center gap-2 hover:bg-cream/50 ${
-                  STATUS_STYLES[s] || ""
-                }`}
-              >
-                {item.status === s && <Check className="w-3.5 h-3.5" />}
-                <span className={item.status !== s ? "ml-[22px]" : ""}>
-                  {STATUS_LABELS[s]}
-                </span>
-              </button>
-            ))}
+            {STATUS_ORDER.map((s) => {
+              const sPill = STATUS_PILL_STYLES[s];
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  role="option"
+                  aria-selected={item.status === s}
+                  onClick={() => handleStatusChange(item._key, s)}
+                  className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
+                  style={{
+                    fontSize: "11.5px",
+                    color: sPill.text,
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  {item.status === s && <Check className="w-3.5 h-3.5" />}
+                  <span className={item.status !== s ? "ml-[22px]" : ""}>
+                    {STATUS_LABELS[s]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -542,61 +569,106 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       item.trackingNumber &&
       ["ordered", "warehouse", "in-transit"].includes(item.status);
 
+    const rowLabelColor = overdue ? "#9B3A2A" : "#2C2520";
+    const rowDateColor = overdue ? "#9B3A2A" : "#6B5E52";
     return (
       <tr
         key={item._key}
-        className="border-b border-stone-light/10 last:border-b-0"
+        className="hover:bg-[#FAF7F2]"
+        style={{ borderBottom: "0.5px solid #E8DDD0" }}
       >
         {/* Item + Vendor */}
-        <td className="px-3 py-3">
-          <span
-            className={`text-sm font-body block ${overdue ? "text-red-600" : "text-charcoal"}`}
+        <td style={{ padding: "12px 16px" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              color: rowLabelColor,
+            }}
           >
             {item.name}
-          </span>
+          </div>
           {item.vendor && (
-            <span className="text-[11px] font-body text-stone-light block mt-0.5">
+            <div
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11.5px",
+                color: "#9E8E80",
+                marginTop: "2px",
+              }}
+            >
               {item.vendor}
-            </span>
+            </div>
           )}
         </td>
         {/* Status */}
-        <td className="px-3 py-3">
+        <td style={{ padding: "12px 16px" }}>
           {renderStatusDropdown(item)}
           {renderSyncIndicator(item)}
         </td>
         {/* Delivery: Expected + Carrier ETA */}
-        <td className="px-3 py-3">
-          <span
-            className={`text-xs font-body block tabular-nums ${overdue ? "text-red-600 font-medium" : "text-stone"}`}
+        <td style={{ padding: "12px 16px" }}>
+          <div
+            className="tabular-nums"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "12px",
+              color: rowDateColor,
+              fontWeight: overdue ? 500 : 400,
+            }}
           >
             {item.expectedDeliveryDate
               ? format(parseISO(item.expectedDeliveryDate), "MMM d")
               : "\u2014"}
-          </span>
+          </div>
           {item.carrierETA && (
-            <span className="text-[11px] font-body text-stone-light block mt-0.5 tabular-nums">
+            <div
+              className="tabular-nums"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11px",
+                color: "#9E8E80",
+                marginTop: "2px",
+              }}
+            >
               ETA {format(parseISO(item.carrierETA), "MMM d")}
-            </span>
+            </div>
           )}
         </td>
         {/* Price: Cost + Net */}
-        <td className="px-3 py-3">
-          <span className="text-xs font-body text-charcoal block tabular-nums">
+        <td style={{ padding: "12px 16px" }}>
+          <div
+            className="tabular-nums"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontSize: "12.5px",
+              fontWeight: 500,
+              color: "#2C2520",
+            }}
+          >
             {item.clientCost != null ? formatCurrency(item.clientCost) : "\u2014"}
-          </span>
+          </div>
           {getNetPrice(item.clientCost, item.retailPrice) !== null && (
-            <span className="text-[11px] font-body text-stone-light block mt-0.5 tabular-nums">
+            <div
+              className="tabular-nums"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11px",
+                color: "#9E8E80",
+                marginTop: "2px",
+              }}
+            >
               Net {renderNetPrice(item)}
-            </span>
+            </div>
           )}
         </td>
         {/* Track */}
-        <td className="px-3 py-3 hidden sm:table-cell">
+        <td className="hidden sm:table-cell" style={{ padding: "12px 16px" }}>
           {renderTrackingLink(item)}
         </td>
         {/* Actions */}
-        <td className="px-3 py-3 text-center">
+        <td style={{ padding: "12px 16px", textAlign: "center" }}>
           <div className="flex items-center justify-center gap-0.5">
             <button
               type="button"
@@ -619,7 +691,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             {canRefresh && (
               <>
                 {refreshingKey === item._key ? (
-                  <div className="p-2"><Loader2 className="w-3.5 h-3.5 animate-spin text-terracotta" /></div>
+                  <div className="p-2"><Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#9A7B4B" }} /></div>
                 ) : (
                   <button
                     type="button"
@@ -627,7 +699,8 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       handleForceRefresh(item._key, item.trackingNumber!)
                     }
                     aria-label="Refresh tracking"
-                    className="p-2 rounded-md text-stone-light hover:text-terracotta hover:bg-terracotta/5 transition-colors"
+                    className="p-2 rounded-md hover:bg-[#F5EDD8] transition-colors"
+                    style={{ color: "#9E8E80" }}
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                   </button>
@@ -729,7 +802,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 type="button"
                 onClick={handleSaveEdit}
                 disabled={savingRow}
-                className="text-xs font-semibold text-terracotta hover:text-terracotta-light whitespace-nowrap"
+                className="text-xs font-semibold whitespace-nowrap hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
               >
                 {savingRow && (
                   <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
@@ -814,16 +887,25 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     if (!creatingNew) {
       return (
         <tr
-          className="bg-cream/50 cursor-pointer"
+          className="cursor-pointer hover:text-[#9A7B4B]"
           onClick={() => {
             setCreatingNew(true);
             cancelEdit();
           }}
+          style={{ borderTop: "0.5px solid #E8DDD0" }}
         >
-          <td colSpan={6} className="px-5 py-3">
-            <div className="flex items-center gap-2 text-stone-light">
+          <td colSpan={6} style={{ padding: "11px 16px" }}>
+            <div
+              className="flex items-center gap-[6px]"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "12px",
+                color: "#9E8E80",
+                letterSpacing: "0.03em",
+              }}
+            >
               <Plus className="w-3.5 h-3.5" />
-              <span className="text-sm font-body">Add item...</span>
+              <span>Add item</span>
             </div>
           </td>
         </tr>
@@ -923,7 +1005,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 type="button"
                 onClick={handleCreate}
                 disabled={savingRow}
-                className="text-xs font-semibold text-terracotta hover:text-terracotta-light whitespace-nowrap"
+                className="text-xs font-semibold whitespace-nowrap hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
               >
                 {savingRow && (
                   <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
@@ -1013,13 +1095,16 @@ export default function ProcurementEditor({ items, projectId }: Props) {
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-stone-light/20 overflow-hidden">
+      <div
+        className="rounded-[10px] overflow-hidden"
+        style={{ backgroundColor: "#FFFEFB", border: "0.5px solid #E8DDD0" }}
+      >
         {localItems.length === 0 && !creatingNew && (
           <div className="py-8 px-5 text-center">
-            <p className="text-sm text-stone" style={{ fontFamily: "var(--font-body)" }}>
+            <p style={{ fontFamily: "var(--font-sans)", fontSize: "12.5px", color: "#9E8E80" }}>
               No procurement items yet
             </p>
-            <p className="text-[11px] text-stone-light mt-1" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="mt-1" style={{ fontFamily: "var(--font-sans)", fontSize: "11px", color: "#9E8E80" }}>
               Use the row below to add items as they are ordered for this
               project.
             </p>
@@ -1027,26 +1112,81 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         )}
 
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+        <table className="w-full min-w-[640px] border-collapse">
           {(localItems.length > 0 || creatingNew) && (
             <thead>
-              <tr className="border-b border-stone-light/20 bg-cream/30">
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+              <tr style={{ backgroundColor: "#F3EDE3", borderBottom: "0.5px solid #D4C8B8" }}>
+                <th
+                  className="text-left"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "10.5px",
+                    fontWeight: 500,
+                    color: "#9E8E80",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "11px 16px",
+                  }}
+                >
                   Item
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                <th
+                  className="text-left"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "10.5px",
+                    fontWeight: 500,
+                    color: "#9E8E80",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "11px 16px",
+                  }}
+                >
                   Status
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                <th
+                  className="text-left"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "10.5px",
+                    fontWeight: 500,
+                    color: "#9E8E80",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "11px 16px",
+                  }}
+                >
                   Delivery
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
-                  Price
+                <th
+                  className="text-left"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "10.5px",
+                    fontWeight: 500,
+                    color: "#9E8E80",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "11px 16px",
+                  }}
+                >
+                  Price / Net
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5 hidden sm:table-cell" style={{ fontFamily: "var(--font-body)" }}>
-                  Track
+                <th
+                  className="text-left hidden sm:table-cell"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "10.5px",
+                    fontWeight: 500,
+                    color: "#9E8E80",
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    padding: "11px 16px",
+                  }}
+                >
+                  Tracking
                 </th>
-                <th className="px-3 py-2.5 w-[80px]">
+                <th style={{ padding: "11px 16px", width: "80px" }}>
                 </th>
               </tr>
             </thead>
