@@ -47,12 +47,12 @@ const breadcrumbs = [
       {stageMeta && (
         <span
           class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
-          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -4px;"
+          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -3px;"
         >
           {stageMeta.title}
         </span>
       )}
-      <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -4px;">{daysInStage}d in stage</span>
+      <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
     </div>
 
     {/* Two-column layout: Tasks (left) + Milestones (right) */}
@@ -121,42 +121,50 @@ const breadcrumbs = [
         </div>
       )}
 
-      {/* Contractors chips */}
-      {project.projectContractors && project.projectContractors.length > 0 && (
-        <div class="flex flex-wrap gap-[7px]">
-          {project.projectContractors.map((pc: any) => pc.contractor && (
-            <ContactCardWrapper
-              client:load
-              entityId={pc.contractor._id}
-              entityType="contractor"
-              name={pc.contractor.name}
-              href={`/admin/contractors/${pc.contractor._id}`}
-              contactData={{
-                _id: pc.contractor._id,
-                name: pc.contractor.name,
-                email: pc.contractor.email || "",
-                phone: pc.contractor.phone || "",
-                entityType: "contractor" as const,
-              }}
-              className="inline-flex cursor-pointer"
+      {/* Contractors chips + inline Add button */}
+      <div class="flex flex-wrap gap-[7px] items-center">
+        {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
+          <ContactCardWrapper
+            client:load
+            entityId={pc.contractor._id}
+            entityType="contractor"
+            name={pc.contractor.name}
+            href={`/admin/contractors/${pc.contractor._id}`}
+            contactData={{
+              _id: pc.contractor._id,
+              name: pc.contractor.name,
+              email: pc.contractor.email || "",
+              phone: pc.contractor.phone || "",
+              entityType: "contractor" as const,
+            }}
+            className="inline-flex cursor-pointer"
+          >
+            <span
+              class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
+              style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
             >
               <span
-                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
-                style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
+                class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
+                style="background-color: #F3EDE3; color: #9A7B4B; border: 0.5px solid #D4C8B8;"
               >
-                <span
-                  class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
-                  style="background-color: #F3EDE3; color: #9A7B4B; border: 0.5px solid #D4C8B8;"
-                >
-                  {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
-                </span>
-                {pc.contractor.name}
-                {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
+                {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
               </span>
-            </ContactCardWrapper>
-          ))}
-        </div>
-      )}
+              {pc.contractor.name}
+              {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
+            </span>
+          </ContactCardWrapper>
+        ))}
+
+        {/* + Add contractor chip -- dashed border, focuses the typeahead */}
+        <button
+          type="button"
+          onclick="document.getElementById('quick-assign-input')?.focus();"
+          class="inline-flex items-center gap-[6px] px-[11px] py-[5px] rounded-full transition-colors hover:text-[#9A7B4B] hover:border-[#9A7B4B]"
+          style="border: 0.5px dashed #D4C8B8; font-size: 12px; color: #9E8E80; background-color: transparent; letter-spacing: 0.02em; font-family: var(--font-sans);"
+        >
+          + Add contractor
+        </button>
+      </div>
 
       <div class="mt-3">
         <QuickAssignTypeahead

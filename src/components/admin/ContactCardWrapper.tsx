@@ -1,8 +1,12 @@
-import { useState, useRef, useCallback, type ReactNode } from "react";
+import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import ContactCardPopover, {
   type ContactCardData,
 } from "./ContactCardPopover";
+
+// Module-level singleton: only one contact card popover can be open at a time.
+// When a new card opens, it calls the previous card's close fn.
+let activeCloseFn: (() => void) | null = null;
 
 interface ContactCardWrapperProps {
   entityId: string;
@@ -119,10 +123,31 @@ export default function ContactCardWrapper({
     }
   }, [entityId, name, contactData]);
 
+  const closePopover = useCallback(() => {
+    setVisible(false);
+    if (activeCloseFn === closePopover) {
+      activeCloseFn = null;
+    }
+  }, []);
+
   const showPopover = useCallback(() => {
+    // Close any other open popover first -- only one at a time
+    if (activeCloseFn && activeCloseFn !== closePopover) {
+      activeCloseFn();
+    }
+    activeCloseFn = closePopover;
     computePosition();
     setVisible(true);
-  }, [computePosition]);
+  }, [computePosition, closePopover]);
+
+  // Clean up singleton ref if component unmounts while active
+  useEffect(() => {
+    return () => {
+      if (activeCloseFn === closePopover) {
+        activeCloseFn = null;
+      }
+    };
+  }, [closePopover]);
 
   const handleMouseEnter = useCallback(() => {
     // Cancel any pending dismiss
@@ -147,9 +172,9 @@ export default function ContactCardWrapper({
 
     // Start 150ms grace period for dismiss
     dismissTimerRef.current = setTimeout(() => {
-      setVisible(false);
+      closePopover();
     }, 150);
-  }, []);
+  }, [closePopover]);
 
   const handlePopoverMouseEnter = useCallback(() => {
     // Cancel dismiss if mouse enters the popover
@@ -162,9 +187,9 @@ export default function ContactCardWrapper({
   const handlePopoverMouseLeave = useCallback(() => {
     // Start dismiss timer when leaving popover
     dismissTimerRef.current = setTimeout(() => {
-      setVisible(false);
+      closePopover();
     }, 150);
-  }, []);
+  }, [closePopover]);
 
   const Tag = href ? "a" : "span";
   const tagProps = href ? { href } : {};

@@ -222,12 +222,22 @@ export default function QuickAssignTypeahead({
       {/* Input */}
       <input
         ref={inputRef}
+        id="quick-assign-input"
         type="text"
         placeholder="Assign a client or contractor..."
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
         disabled={state === "assigning"}
-        className="text-sm font-body bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-72 focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+        className="w-72 outline-none focus:outline-none"
+        style={{
+          fontFamily: "var(--font-sans)",
+          fontSize: "12.5px",
+          color: "#2C2520",
+          backgroundColor: "#FDFBF8",
+          border: "0.5px solid #D4C8B8",
+          borderRadius: "6px",
+          padding: "6px 12px",
+        }}
       />
 
       {/* Dropdown results */}
