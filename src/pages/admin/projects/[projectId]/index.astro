@@ -42,17 +42,17 @@ const breadcrumbs = [
 <AdminLayout title={project.title + " - Studio"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
   <div class="max-w-5xl">
     {/* Project header -- no border, let title breathe */}
-    <div class="flex items-baseline gap-3 mb-7">
+    <div class="flex items-center gap-2 mb-7">
       <EditableTitle client:load title={project.title} projectId={projectId} />
       {stageMeta && (
         <span
           class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
-          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em;"
+          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -4px;"
         >
           {stageMeta.title}
         </span>
       )}
-      <span class="text-[11.5px]" style="color: #9E8E80;">{daysInStage}d in stage</span>
+      <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -4px;">{daysInStage}d in stage</span>
     </div>
 
     {/* Two-column layout: Tasks (left) + Milestones (right) */}

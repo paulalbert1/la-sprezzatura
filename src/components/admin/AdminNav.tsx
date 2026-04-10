@@ -39,8 +39,8 @@ function isActive(currentPath: string, href: string): boolean {
 export default function AdminNav({ currentPath, businessName }: { currentPath: string; businessName: string }) {
   return (
     <nav className="flex flex-col h-full">
-      {/* Brand section - hotel stationery style */}
-      <div className="mb-10 pb-5 border-b border-[#E8DDD0]">
+      {/* Brand section - hotel stationery style. Padded to match nav items */}
+      <div className="mb-6 pb-5 mx-6 border-b border-[#E8DDD0]">
         <p
           className="text-[12px] tracking-[0.14em] uppercase font-medium"
           style={{ color: "#2C2520", fontFamily: "var(--font-sans)" }}
@@ -56,8 +56,8 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
         </p>
       </div>
 
-      {/* Nav items */}
-      <div className="flex flex-col gap-1">
+      {/* Nav items - edge-to-edge, with inner padding to match brand */}
+      <div className="flex flex-col">
         {navItems.map((item) => {
           const active = isActive(currentPath, item.href);
           const Icon = item.icon;
@@ -67,16 +67,18 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
               href={item.href}
               className={
                 active
-                  ? "bg-[#F5EDD8] px-3 py-2 rounded-lg flex items-center gap-3 text-sm"
-                  : "hover:bg-[#F5EDD8]/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm"
+                  ? "px-6 py-2 flex items-center gap-3 text-sm"
+                  : "px-6 py-2 flex items-center gap-3 text-sm transition-colors hover:bg-[#F5EDD8]/40"
               }
               style={{
+                backgroundColor: active ? "#F5EDD8" : "transparent",
                 color: active ? "#9A7B4B" : "#6B5E52",
                 fontFamily: "var(--font-sans)",
                 letterSpacing: "0.02em",
+                borderLeft: active ? "1.5px solid #9A7B4B" : "1.5px solid transparent",
               }}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-[14px] h-[14px]" />
               {item.label}
             </a>
           );
@@ -86,12 +88,17 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
       {/* Spacer */}
       <div className="mt-auto" />
 
-      {/* Logout button at bottom */}
+      {/* Logout button at bottom - edge-to-edge */}
       <a
         href="/admin/logout"
-        className="text-stone hover:text-charcoal hover:bg-cream/50 px-3 py-2 rounded-lg flex items-center gap-3 transition-colors text-sm font-body"
+        className="px-6 py-2 flex items-center gap-3 text-sm transition-colors hover:bg-[#F5EDD8]/40"
+        style={{
+          color: "#9E8E80",
+          fontFamily: "var(--font-sans)",
+          letterSpacing: "0.02em",
+        }}
       >
-        <LogOut className="w-5 h-5" />
+        <LogOut className="w-[14px] h-[14px]" />
         Log out
       </a>
     </nav>
