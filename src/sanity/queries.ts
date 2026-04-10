@@ -843,6 +843,47 @@ export async function getAdminProjectDetail(
   return client.fetch(ADMIN_PROJECT_DETAIL_QUERY, { projectId });
 }
 
+// GROQ: Admin artifact data for the Documents page (restored — was removed in Phase 30-01)
+const ADMIN_ARTIFACT_QUERY = `
+  *[_type == "project" && _id == $projectId][0] {
+    _id,
+    title,
+    "artifacts": artifacts[] {
+      _key,
+      artifactType,
+      customTypeName,
+      currentVersionKey,
+      "signedFile": signedFile {
+        "asset": asset-> { url, originalFilename }
+      },
+      "versions": versions[] {
+        _key,
+        "file": file {
+          "asset": asset-> { url, originalFilename, mimeType, size }
+        },
+        uploadedAt,
+        note
+      },
+      "decisionLog": decisionLog[] {
+        _key, action, versionKey, clientId, clientName, feedback, timestamp
+      },
+      "investmentSummary": investmentSummary {
+        tiers[] { _key, name, description, lineItems[] { _key, name, price } },
+        selectedTierKey,
+        eagerness,
+        reservations
+      }
+    }
+  }
+`;
+
+export async function getAdminArtifactData(
+  client: SanityClient,
+  projectId: string,
+) {
+  return client.fetch(ADMIN_ARTIFACT_QUERY, { projectId });
+}
+
 export async function getAdminScheduleData(
   client: SanityClient,
   projectId: string,
