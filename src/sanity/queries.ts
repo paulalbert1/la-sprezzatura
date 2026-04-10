@@ -791,6 +791,9 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     projectStatus,
     engagementType,
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
+    "milestones": milestones[] | order(date asc) {
+      _key, name, date, completed
+    },
     "tasks": tasks[] | order(completed asc, createdAt desc) {
       _key,
       description,
@@ -799,10 +802,10 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       completedAt,
       createdAt
     },
-    "projectClients": clients[]-> {
+    "projectClients": clients[defined(@->._id)]-> {
       _id, name, email, phone, preferredContact
     },
-    "projectContractors": contractors[] {
+    "projectContractors": contractors[defined(contractor)] {
       _key,
       trade,
       "contractor": contractor-> { _id, name, email, phone, company, trades }

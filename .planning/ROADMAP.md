@@ -445,8 +445,12 @@ Plans:
   2. Tracking numbers are clickable links to the carrier's tracking page with auto-detected carrier; carrier-provided ETA is displayed alongside the expected delivery date; net price is computed and displayed at render time (never stored)
   3. A daily cron job automatically checks tracking status via the aggregator API (Ship24/EasyPost) and updates Sanity; auto-updated statuses are visually distinguished from manually-set statuses (e.g., a sync icon or timestamp)
   4. The admin can click a refresh button on any tracked item to force an immediate status check against the aggregator API, with the result reflected in the UI within seconds
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 3 plans
+
+Plans:
+- [ ] 32-01-PLAN.md -- Schema extensions, GROQ queries, Ship24 client, and utility functions (isProcurementOverdue, getNetPrice)
+- [ ] 32-02-PLAN.md -- Procurement API route (CRUD + status + force-refresh) and Vercel Cron tracking sync endpoint
+- [ ] 32-03-PLAN.md -- ProcurementEditor React island component, page wiring, and visual verification
 
 ### Phase 33: Rendering Tool Relocation
 **Goal**: The full AI rendering workflow -- session list, guided wizard, chat refinement, promote to Design Options, and usage tracking -- works in the admin app with all known UX bugs fixed, and produces correct AI-generated results
@@ -483,7 +487,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
-| 32. Procurement Editor | v5.0 | 0/TBD | Not started | - |
+| 32. Procurement Editor | v5.0 | 0/3 | Planning complete | - |
 | 33. Rendering Tool Relocation | v5.0 | 0/TBD | Not started | - |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
 
