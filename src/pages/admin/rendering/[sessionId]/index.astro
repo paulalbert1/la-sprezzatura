@@ -2,33 +2,51 @@
 export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import ChatView from "../../../../components/admin/rendering/ChatView.tsx";
+import { getTenantClient } from "../../../../lib/tenantClient";
+import { RENDERING_SESSION_BY_ID_QUERY } from "../../../../sanity/queries";
+import type { RenderingSession } from "../../../../lib/rendering/types";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) return Astro.redirect("/admin/login");
 
+// Server-side reads — keep STUDIO_API_SECRET inside frontmatter so it never
+// lands in the client bundle via module evaluation (T-33-01 mitigation). The
+// token is forwarded to the React island as a string prop.
 const sanityUserId = Astro.locals.sanityUserId ?? "";
 const studioToken = import.meta.env.STUDIO_API_SECRET ?? "";
 const { sessionId } = Astro.params;
 
-// Keep references so TS doesn't prune the assignments; Plan 05 consumes them.
-void studioToken;
-void sanityUserId;
-void sessionId;
+if (!sessionId) return Astro.redirect("/admin/rendering");
+
+// Server-prefetch the session document so the React island mounts with full
+// data and does not need to re-fetch on mount (Risk 5: avoids the initial
+// client round-trip that useClient() used in the Studio source).
+const client = getTenantClient(tenantId);
+const session = await client.fetch<RenderingSession | null>(
+  RENDERING_SESSION_BY_ID_QUERY,
+  { sessionId },
+);
+
+if (!session) return Astro.redirect("/admin/rendering");
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Rendering", href: "/admin/rendering" },
-  { label: "Session" },
+  { label: session.sessionTitle ?? "Session" },
 ];
 ---
 
-<AdminLayout title="Session - Rendering" pageTitle="Rendering" breadcrumbs={breadcrumbs}>
-  <!-- ChatView island will be mounted here in Plan 05.
-       Available props already prepared in frontmatter:
-         sessionId={sessionId}
-         sanityUserId={sanityUserId}
-         studioToken={studioToken} -->
-  <div class="text-sm text-[#6B5E52]">
-    Chat view coming in Plan 05 (session: {sessionId})
-  </div>
+<AdminLayout
+  title={`${session.sessionTitle ?? "Session"} - Rendering`}
+  pageTitle="Rendering"
+  breadcrumbs={breadcrumbs}
+>
+  <ChatView
+    client:load
+    sessionId={sessionId}
+    sanityUserId={sanityUserId}
+    studioToken={studioToken}
+    initialSession={session}
+  />
 </AdminLayout>
