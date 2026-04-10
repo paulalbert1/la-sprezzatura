@@ -465,7 +465,7 @@ Plans:
 
 Plans:
 - [x] 33-01-PLAN.md -- Identity gap resolution, RENDERING_SESSIONS_TENANT_QUERY, shared types, route shells, AdminNav Sparkles, Wave 0 test stubs
-- [ ] 33-02-PLAN.md -- SessionListPage with all-tenant sessions, Mine filter chip, ownership stamps, UsageBadge
+- [x] 33-02-PLAN.md -- SessionListPage with all-tenant sessions, Mine filter chip, ownership stamps, UsageBadge
 - [x] 33-03-PLAN.md -- WizardContainer (maxVisitedStep), StepSetup, StepClassify, StepDescribe, GeneratingOverlay
 - [ ] 33-04-PLAN.md -- StepUpload with instant previews, multi-upload, filename truncation (RNDR-07/08/09 regression)
 - [x] 33-05-PLAN.md -- ChatView side-by-side layout, multi-turn refinement, polling
@@ -496,7 +496,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
-| 33. Rendering Tool Relocation | v5.0 | 3/7 | In Progress|  |
+| 33. Rendering Tool Relocation | v5.0 | 4/7 | In Progress|  |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
 
 ---
