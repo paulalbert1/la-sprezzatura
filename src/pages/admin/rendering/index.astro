@@ -2,23 +2,43 @@
 export const prerender = false;
 
 import AdminLayout from "../../../layouts/AdminLayout.astro";
+import SessionListPage from "../../../components/admin/rendering/SessionListPage.tsx";
 import { getTenantClient } from "../../../lib/tenantClient";
+import { getTenantById } from "../../../lib/tenants";
 import { RENDERING_SESSIONS_TENANT_QUERY } from "../../../sanity/queries";
+import type { RenderingSession } from "../../../lib/rendering/types";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) return Astro.redirect("/admin/login");
 
-// These locals are wired up now so Plan 02 can mount SessionListPage without
-// re-plumbing the shell. The ?? "" fallbacks match the admin-login guard above.
+// Admin sanityUserId and studioToken — wired server-side only (T-33-01 mitigation).
+// STUDIO_API_SECRET is read exclusively in .astro frontmatter and forwarded to the
+// React island as a string prop so the secret never lands in the client bundle via
+// module-level evaluation.
 const sanityUserId = Astro.locals.sanityUserId ?? "";
 const studioToken = import.meta.env.STUDIO_API_SECRET ?? "";
 
 const client = getTenantClient(tenantId);
-const sessions = await client.fetch(RENDERING_SESSIONS_TENANT_QUERY);
 
-// studioToken is wired for Plan 02 SessionListPage island (promote/refine actions).
-// Keep a reference here so TS doesn't prune the assignment.
-void studioToken;
+// Fetch all tenant sessions (D-07) + project list for the filter dropdown.
+const [sessions, projects] = await Promise.all([
+  client.fetch<RenderingSession[]>(RENDERING_SESSIONS_TENANT_QUERY),
+  client.fetch<{ _id: string; title: string }[]>(
+    `*[_type == "project"] | order(title asc) { _id, title }`,
+  ),
+]);
+
+// Tenant admin list for ownership stamp display name resolution (D-09).
+const tenantConfig = getTenantById(tenantId);
+const tenantAdmins =
+  tenantConfig?.admins.map((a) => ({
+    email: a.email,
+    name: a.name,
+    sanityUserId: a.sanityUserId,
+  })) ?? [];
+
+// Optional pre-filter from ?project=... query param (project detail tab link-out).
+const prefilledProjectId = Astro.url.searchParams.get("project") ?? "";
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
@@ -27,12 +47,13 @@ const breadcrumbs = [
 ---
 
 <AdminLayout title="Rendering - Studio" pageTitle="Rendering" breadcrumbs={breadcrumbs}>
-  <!-- SessionListPage island will be mounted here in Plan 02.
-       Available props already prepared in frontmatter:
-         sessions={sessions}
-         sanityUserId={sanityUserId}
-         studioToken={studioToken} -->
-  <div class="text-sm text-[#6B5E52]">
-    Session list coming in Plan 02 ({sessions.length} session{sessions.length === 1 ? "" : "s"} loaded for {sanityUserId || "anonymous"})
-  </div>
+  <SessionListPage
+    client:load
+    sessions={sessions}
+    projects={projects}
+    sanityUserId={sanityUserId}
+    studioToken={studioToken}
+    tenantAdmins={tenantAdmins}
+    prefilledProjectId={prefilledProjectId}
+  />
 </AdminLayout>
