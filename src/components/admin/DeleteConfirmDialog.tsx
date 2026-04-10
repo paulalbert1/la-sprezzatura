@@ -4,7 +4,7 @@ interface DeleteConfirmDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  entityType: "client" | "contractor" | "document";
+  entityType: "client" | "contractor" | "document" | "procurement-item";
   entityName: string;
   isBlocked?: boolean;
   refCount?: number;
@@ -15,6 +15,7 @@ const ENTITY_LABELS: Record<string, string> = {
   client: "Client",
   contractor: "Contractor",
   document: "Document",
+  "procurement-item": "Item",
 };
 
 export default function DeleteConfirmDialog({
@@ -34,10 +35,12 @@ export default function DeleteConfirmDialog({
   const heading =
     entityType === "document"
       ? "Delete Document"
-      : `Delete ${entityLabel}`;
+      : entityType === "procurement-item"
+        ? "Delete Item"
+        : `Delete ${entityLabel}`;
 
   const bodyText =
-    entityType === "document"
+    entityType === "document" || entityType === "procurement-item"
       ? `Remove ${entityName}? This cannot be undone.`
       : `Are you sure you want to delete ${entityName}? This action cannot be undone.`;
 
