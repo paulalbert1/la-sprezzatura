@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
+import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import { getAdminProjectDetail } from "../../../../sanity/queries";
@@ -54,9 +55,16 @@ const breadcrumbs = [
       {/* Milestones section placeholder -- expanded in future phases */}
     </div>
 
-    <div id="procurement" class="mb-8">
-      {/* Procurement section placeholder -- expanded in future phases */}
-    </div>
+    {project.engagementType === "full-interior-design" && (
+      <div id="procurement" class="mb-8">
+        <h2 class="text-sm font-semibold font-body text-charcoal mb-4">Procurement</h2>
+        <ProcurementEditor
+          client:load
+          items={project.procurementItems || []}
+          projectId={projectId}
+        />
+      </div>
+    )}
 
     {/* Team section */}
     <div class="mb-8">
