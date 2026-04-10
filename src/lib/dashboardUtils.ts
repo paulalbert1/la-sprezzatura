@@ -34,6 +34,27 @@ export function getDaysOverdue(dateStr: string): number {
   return Math.max(0, differenceInDays(new Date(), parseISO(dateStr)));
 }
 
+/** Check if a procurement item is overdue: has expectedDeliveryDate, not yet delivered/installed, date is in the past */
+export function isProcurementOverdue(item: {
+  expectedDeliveryDate?: string | null;
+  status?: string;
+}): boolean {
+  if (!item.expectedDeliveryDate) return false;
+  if (item.status === "delivered" || item.status === "installed") return false;
+  const today = new Date().toISOString().split("T")[0];
+  return item.expectedDeliveryDate < today;
+}
+
+/** Compute net price (retailPrice - clientCost) in cents. Returns null if either input is null/undefined. Clamps negative to zero. */
+export function getNetPrice(
+  clientCost: number | null | undefined,
+  retailPrice: number | null | undefined,
+): number | null {
+  if (clientCost == null || retailPrice == null) return null;
+  const net = retailPrice - clientCost;
+  return net < 0 ? 0 : net;
+}
+
 /** Aggregate overdue counts for the dashboard banner */
 export interface OverdueBannerData {
   total: number;
