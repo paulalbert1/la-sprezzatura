@@ -73,10 +73,12 @@ Source: `WizardContainer.tsx` stepper pattern (lines 200-280 of Studio source), 
 
 **Exactly 4 sizes, exactly 2 weights** -- matches Phase 32 constraint so the checker passes.
 
-| Role | Size | Weight | Line Height | Class / Inline Style |
-|------|------|--------|-------------|----------------------|
+The two declared weights are **400 (regular)** and **600 (semibold)**. Any of the four sizes may carry either weight; the table shows the default for each role.
+
+| Role | Size | Default weight | Line Height | Class / Inline Style |
+|------|------|----------------|-------------|----------------------|
 | Body / default | 14px | 400 (regular) | 1.5 | `text-sm font-body` |
-| Label / meta / timestamp | 11.5px | 400 (regular) | 1.4 | `text-[11.5px] font-body` |
+| Label / meta / timestamp | 11.5px | 400 (regular) -- 600 for uppercase section labels and status pills | 1.4 | `text-[11.5px] font-body` |
 | Section heading / row title | 13px | 600 (semibold) | 1.4 | `text-[13px] font-semibold font-body` |
 | Page heading | 22px | 600 (semibold) | 1.2 | matches AdminLayout `pageTitle` style |
 
@@ -86,14 +88,14 @@ All admin-facing text uses `font-body` / `font-sans` (DM Sans). The serif headin
 
 - **Session row title:** 13px, 600 weight, `color: #2C2520` (charcoal)
 - **Session row meta line** (project name, owner stamp, created-at): 11.5px, 400 weight, `color: #6B5E52` (text-mid)
-- **"by Designer X" ownership stamp:** 11px, 400 weight, `color: #9E8E80` (text-muted), italic
-- **Filter chip label:** 12.5px, 500 weight, `letterSpacing: 0.02em` (matches sidebar nav item pattern in `AdminNav.tsx`)
-- **Usage badge text:** 11px, 500 weight, `letterSpacing: 0.04em` uppercase (matches Phase 32 status pill pattern)
-- **Wizard step indicator label:** 12px, 600 weight when active, 400 weight otherwise
-- **Wizard step number inside circle:** 12px, 600 weight, white on active/completed, `#9E8E80` otherwise
+- **"by Designer X" ownership stamp:** 11.5px, 400 weight, `color: #9E8E80` (text-muted), italic
+- **Filter chip label:** 13px, 600 weight, `letterSpacing: 0.02em` (matches the row title scale; aligned with Phase 32 row-level UI elements)
+- **Usage badge text:** 11.5px, 600 weight, `letterSpacing: 0.04em` uppercase (matches Phase 32 status pill pattern; weight aligned to table meta-role token)
+- **Wizard step indicator label:** 11.5px, 600 weight when active, 400 weight otherwise
+- **Wizard step number inside circle:** 11.5px, 600 weight, white on active/completed, `#9E8E80` otherwise
 - **Chat message body:** 14px, 400 weight, 1.5 line height
-- **Chat message timestamp:** 11px, 400 weight, `color: #9E8E80`
-- **Promote drawer heading:** 22px, 600 weight, matches page heading spec
+- **Chat message timestamp:** 11.5px, 400 weight, `color: #9E8E80`
+- **Promote drawer heading:** 13px, 600 weight (section-heading token; drawer is a contained sub-panel, not a page -- same reasoning as the discard modal)
 - **Promote drawer label:** 11.5px, 600 weight, uppercase, `letterSpacing: 0.04em`, `color: #6B5E52`
 
 Source: `ProcurementEditor.tsx` row/label pattern (lines 584-598), `AdminNav.tsx` letterspacing convention (line 77), Phase 32 `32-UI-SPEC.md`.
@@ -267,6 +269,8 @@ Ported verbatim from `WizardContainer.tsx` lines 200-280 with colors swapped to 
 
 Completed steps are clickable per D-05 / `maxVisitedStep` pattern. Classify is disabled when the session has zero uploaded images (Studio skip-logic preserved at lines 67-85 of `WizardContainer.tsx`).
 
+**Accessibility:** each clickable step circle is a `<button>` with `aria-label="Go to step {n}: {stepLabel}"` (e.g. `"Go to step 2: Upload"`). The visible text label next to each circle is sufficient for sighted users, but the accessible name on the circle itself carries the step context for screen readers, since the numeric content inside the circle is decorative. Disabled circles use `aria-disabled="true"` and are not focusable.
+
 #### Step 1: Setup
 
 - Form fields stacked in a single column, 16px gap:
@@ -283,10 +287,10 @@ Completed steps are clickable per D-05 / `maxVisitedStep` pattern. Classify is d
 - Drop zone copy (centered):
   - Icon: `Upload` from lucide-react, 32px, `#9E8E80`
   - Heading: "Drop images here" (14px / 600 / `#2C2520`)
-  - Body: "or click to select files" (12px / 400 / `#6B5E52`)
+  - Body: "or click to select files" (11.5px / 400 / `#6B5E52`)
 - Under drop zone: grid of uploaded image thumbnails, 4 columns at >=900px, 3 at 600-900px, 2 below
-- Thumbnail: 1:1 aspect, rounded-md, 0.5px `#E8DDD0` border, hover shows `X` remove button in top-right corner
-- Filename strip under thumbnail: 11px / 400 / `#9E8E80`, truncated with ellipsis (RNDR-08 already fixed in Phase 13 -- just preserve)
+- Thumbnail: 1:1 aspect, rounded-md, 0.5px `#E8DDD0` border, hover shows icon-only `X` remove button in top-right corner (`aria-label="Remove image"`)
+- Filename strip under thumbnail: 11.5px / 400 / `#9E8E80`, truncated with ellipsis (RNDR-08 already fixed in Phase 13 -- just preserve)
 - Multi-upload supported (RNDR-09): native `<input type="file" multiple accept="image/png,image/jpeg,image/webp,image/heic" />`
 
 #### Step 3: Classify
@@ -300,21 +304,24 @@ Completed steps are clickable per D-05 / `maxVisitedStep` pattern. Classify is d
 
 - Single large textarea for the design vision prompt, 8 rows minimum, `luxury-input` styling stretched to full width
 - Label: "Design vision" (11.5px / 600 / uppercase / `#6B5E52`)
-- Helper text below the field: "Describe the mood, materials, and feel you want. Keep it specific but not overly prescriptive." (12px / 400 / `#9E8E80`)
+- Helper text below the field: "Describe the mood, materials, and feel you want. Keep it specific but not overly prescriptive." (11.5px / 400 / `#9E8E80`)
 - When generating: textarea disables, a `GeneratingOverlay` dims the step content card (bg `#FFFEFB` at 80% opacity + centered `Loader2` at 32px `#9A7B4B` with text "Generating rendering..." at 14px)
 
 #### Footer buttons (all steps)
 
 - "Discard Session" (step 1 only): `text-sm text-[#9E8E80] hover:text-[#9B3A2A] px-4 py-2 rounded-lg transition-colors`
 - "Back" (steps 2-4): same styling, `text-[#6B5E52]` instead
-- "Next" (steps 1-3): `bg-[#9A7B4B] text-white text-sm font-semibold px-5 py-2 rounded-lg hover:bg-[#8A6D40] transition-colors`, disabled state `opacity-50 cursor-not-allowed`
+- "Next" CTAs (steps 1-3): `bg-[#9A7B4B] text-white text-sm font-semibold px-5 py-2 rounded-lg hover:bg-[#8A6D40] transition-colors`, disabled state `opacity-50 cursor-not-allowed`. **Label is step-specific** (per checker flag 1 -- stepper nav should hint destination):
+  - Step 1 (Setup) footer: "Next: Upload"
+  - Step 2 (Upload) footer: "Next: Classify"
+  - Step 3 (Classify) footer: "Next: Describe"
 - "Generate" (step 4 only): same as Next but with `<Sparkles className="w-4 h-4 mr-1.5" />` prefix icon
 
 #### Discard confirmation modal
 
 - Overlay: `fixed inset-0 bg-[#2C2520]/40 backdrop-blur-[2px] z-50`
 - Dialog: centered, `bg-[#FFFEFB] border 0.5px #E8DDD0 rounded-xl shadow-xl px-6 py-6 max-w-[420px]`
-- Heading: "Discard session?" (18px / 600 / `#2C2520`)
+- Heading: "Discard session?" (13px / 600 / `#2C2520`) -- uses the section-heading token; reads as heading because it sits above 14px body
 - Body: "Your uploads and settings will be lost." (14px / 400 / `#6B5E52`)
 - Buttons (right-aligned, 12px gap): "Keep editing" (ghost) + "Discard" (destructive: `bg-[#9B3A2A] text-white px-4 py-2 rounded-lg text-sm font-semibold`)
 
@@ -338,7 +345,7 @@ Lives at `/admin/rendering/[sessionId]`. Admin sidebar and top bar remain visibl
 ```
 
 - Chat header: horizontal flex row, 56px tall, 0.5px bottom border `#E8DDD0`, bg `#FFFEFB`, padding `px-6 py-3`
-  - Left: `<ArrowLeft />` icon button (linking to `/admin/rendering`) + session title (13px / 600) + project name (11.5px / 400 / `#6B5E52`) stacked
+  - Left: `<ArrowLeft />` icon-only button (linking to `/admin/rendering`, `aria-label="Back to sessions"`) + session title (13px / 600) + project name (11.5px / 400 / `#6B5E52`) stacked
   - Right cluster: UsageBadge + "Promote" button -- the Promote button lives in the chat header per D-14
   - Promote button: outline style `border border-[#9A7B4B] text-[#9A7B4B] text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#F5EDD8] transition-colors`, icon `<Share className="w-4 h-4 mr-1.5" />`
 - Left pane (rendering): 65% width, `bg-[#FFFEFB]`, padding 24px, centered large rendering image with max-height `calc(100vh - 240px)` and `object-contain`
@@ -348,8 +355,8 @@ Lives at `/admin/rendering/[sessionId]`. Admin sidebar and top bar remain visibl
   - Message thread: flex column, 16px gap, 20px padding, scrolls independently
   - Message bubble (user): `bg-[#FFFEFB] border 0.5px #E8DDD0 rounded-lg px-4 py-3 max-w-[85%] self-end text-sm`
   - Message bubble (assistant): `bg-[#F3EDE3] border 0.5px #D4C8B8 rounded-lg px-4 py-3 max-w-[85%] self-start text-sm`
-  - Timestamp below each bubble: 11px / 400 / `#9E8E80`
-  - Read-only client reactions (heart / comment) displayed as small chips below assistant bubbles: 11px / 400 / `#9E8E80` with icon
+  - Timestamp below each bubble: 11.5px / 400 / `#9E8E80`
+  - Read-only client reactions (heart / comment) displayed as small chips below assistant bubbles: 11.5px / 400 / `#9E8E80` with icon
 - Input area: pinned to bottom of right pane, 0.5px top border `#E8DDD0`, bg `#FFFEFB`, padding 16px
   - Textarea: `luxury-input` styling, min-height 40px, auto-expands to 120px
   - Below textarea: optional image attachment row (max 3 thumbnails) + "Send refinement" button right-aligned (`bg-[#9A7B4B] text-white px-4 py-2 rounded-lg text-sm font-semibold`, disabled when input empty)
@@ -391,7 +398,7 @@ Placed in `/admin/rendering` page header (next to "New session") and in the Chat
 - Dimensions: auto width, 28px tall, `px-3 py-1`
 - Content: `Your usage {count} / {limit}` (D-16 per-designer copy exactly)
 - Styling per threshold: see Color section "Usage badge thresholds"
-- Font: 11px / 500 / `letterSpacing: 0.04em` / uppercase
+- Font: 11.5px / 600 / `letterSpacing: 0.04em` / uppercase (meta/label token)
 - Non-interactive: no hover, no click, cursor default
 - No tooltip, no modal, no breakdown -- this is status-only
 
@@ -401,8 +408,8 @@ Placed in the rendering page header next to the project filter (not the right si
 
 - Component: toggle chip (single button, two visual states)
 - Dimensions: auto width, 32px tall, `px-3 py-1.5`
-- Inactive state: `bg-transparent text-[#6B5E52] border 0.5px #D4C8B8 rounded-full text-[12.5px] font-medium hover:bg-[#F3EDE3]`
-- Active state: `bg-[#F5EDD8] text-[#9A7B4B] border 0.5px #9A7B4B rounded-full text-[12.5px] font-semibold`
+- Inactive state: `bg-transparent text-[#6B5E52] border 0.5px #D4C8B8 rounded-full text-[13px] font-semibold hover:bg-[#F3EDE3]`
+- Active state: `bg-[#F5EDD8] text-[#9A7B4B] border 0.5px #9A7B4B rounded-full text-[13px] font-semibold`
 - Optional lead icon: `User` from lucide-react, 14px, positioned left of "Mine"
 - Behavior: Gmail-style toggle tag per `<specifics>` block -- single click flips between all-tenant and mine-only. Not a dropdown.
 - Not sticky on scroll -- the page header itself is not sticky, so the chip scrolls with it. (Design decision: the list is paginated or virtualized at 50 rows; no persistent header is needed.)
@@ -445,8 +452,8 @@ A right-side slide-in drawer modeled directly on the Phase 32 procurement edit d
 - Drawer container: `fixed right-0 top-0 h-screen w-[480px] bg-[#FFFEFB] border-l 0.5px #E8DDD0 shadow-xl z-50 flex flex-col`
 - Slide animation: `transform: translateX(100%)` -> `translateX(0)` at 200ms ease-out
 - Header: `px-6 py-4 border-b 0.5px #E8DDD0 flex items-center justify-between`
-  - Heading: "Promote to Design Options" (16px / 600 / `#2C2520`)
-  - Close button: `X` icon, 20px, `#9E8E80`, hover `#2C2520`
+  - Heading: "Promote to Design Options" (13px / 600 / `#2C2520`)
+  - Close button: `X` icon (icon-only), 20px, `#9E8E80`, hover `#2C2520`. **Accessible label:** `aria-label="Close drawer"`
 - Body: `flex-1 overflow-y-auto px-6 py-6`, contains a parchment band that wraps the preview for the luxury treatment:
   - Preview band: `bg-[#F3EDE3] border 0.5px #E8DDD0 rounded-xl p-4 mb-6` with centered rendering image, max-height 240px, object-contain
 - Variant selector (only rendered when `session.renderings.length > 1`, D-19):
@@ -467,7 +474,7 @@ A right-side slide-in drawer modeled directly on the Phase 32 procurement edit d
 |-------|-----------|
 | Default | As spec'd above |
 | Publishing (API call in flight) | Button shows `Loader2` + "Publishing...", form fields disabled |
-| Success | Drawer closes automatically, SessionList re-fetches, ChatView shows small toast "Published to Design Options" at bottom-right (bg `#F5EDD8`, text `#9A7B4B`, 11px / 500 / uppercase, `px-4 py-2 rounded-lg`, auto-dismiss 3s) |
+| Success | Drawer closes automatically, SessionList re-fetches, ChatView shows small toast "Published to Design Options" at bottom-right (bg `#F5EDD8`, text `#9A7B4B`, 11.5px / 600 / uppercase, `px-4 py-2 rounded-lg`, auto-dismiss 3s) |
 | Error | Red banner inside drawer body above the footer: `bg-[#FBEEE8] text-[#9B3A2A] text-sm px-4 py-3 rounded-lg mb-4` with "Could not publish. Please try again." |
 
 #### Dismissal
@@ -481,7 +488,7 @@ A tab entry added to the project detail page (`/admin/projects/[projectId]`) per
 
 - Tab label: "Rendering"
 - Tab icon: `<Sparkles className="w-4 h-4" />`
-- Tab count badge: `{session_count}` in 11px / 600 / `#9A7B4B`, inside `bg-[#F5EDD8]` 18px pill -- matches the existing project detail tab count badge convention (carry whatever pattern Phase 32 established)
+- Tab count badge: `{session_count}` in 11.5px / 600 / `#9A7B4B`, inside `bg-[#F5EDD8]` 18px-tall pill (18px is a pill height dimension, not a font-size) -- matches the existing project detail tab count badge convention (carry whatever pattern Phase 32 established)
 - Clicking the tab: navigate to `/admin/rendering?project={projectId}` (not a local tab panel -- this is a link out to the filtered global view per D-01). This means the tab is really a styled link, not a tab panel controller.
 - Active state when the user is already on `/admin/rendering?project={projectId}`: same active treatment as other project tabs
 
@@ -506,7 +513,9 @@ A tab entry added to the project detail page (`/admin/projects/[projectId]`) per
 |---------|------|
 | Primary CTA (rendering list header) | New session |
 | Wizard step 4 generate CTA | Generate |
-| Wizard step navigation -- forward | Next |
+| Wizard step 1 (Setup) footer forward CTA | Next: Upload |
+| Wizard step 2 (Upload) footer forward CTA | Next: Classify |
+| Wizard step 3 (Classify) footer forward CTA | Next: Describe |
 | Wizard step navigation -- back | Back |
 | Wizard discard CTA | Discard session |
 | Wizard discard confirmation -- destructive button | Discard |
@@ -766,7 +775,7 @@ Every requirement RNDR-01 through RNDR-11 has a design surface:
 - RNDR-05 Usage tracking badge -- UsageBadge in header
 - RNDR-06 Wizard step navigation -- stepper with maxVisitedStep pattern
 - RNDR-07 Thumbnail previews -- Wizard step 2 upload grid + Classify cards + chat variant strip
-- RNDR-08 Filename truncation -- inherited from Phase 13 fix, 11px `#9E8E80` truncated
+- RNDR-08 Filename truncation -- inherited from Phase 13 fix, 11.5px `#9E8E80` truncated
 - RNDR-09 Multi-upload -- drop zone accepts multiple files natively
 - RNDR-10 Style preset / design vision clarity -- two separate clearly labeled fields on different wizard steps (Setup: STYLE PRESET dropdown; Describe: DESIGN VISION textarea with helper text)
 - RNDR-11 Regression validation -- no UI surface needed; manual UAT per D-24
