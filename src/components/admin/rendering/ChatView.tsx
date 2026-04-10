@@ -7,6 +7,7 @@ import type {
 } from "../../../lib/rendering/types";
 import { ChatMessage } from "./ChatMessage";
 import { ThumbnailStrip } from "./ThumbnailStrip";
+import PromoteDrawer from "./PromoteDrawer";
 
 interface ChatViewProps {
   sessionId: string;
@@ -31,8 +32,10 @@ interface ChatViewProps {
  *       * Tool-context hook  -> props (sanityUserId, studioToken)
  *   - studioToken arrives as a prop from the Astro shell so the secret never
  *     lands in the client bundle via module evaluation (T-33-01 mitigation).
- *   - Promote button is rendered in the chat header (D-14). The drawer itself
- *     is a placeholder div; Plan 06 will replace it with the real PromoteDrawer.
+ *   - Promote button is rendered in the chat header (D-14). Plan 33-06 wires
+ *     the real PromoteDrawer component (right-side parchment slide-in) behind
+ *     the showPromoteDrawer flag, plus a success toast that auto-dismisses
+ *     after 3s when onSuccess fires.
  */
 export default function ChatView({
   sessionId,
@@ -52,8 +55,16 @@ export default function ChatView({
       : 0,
   );
   const [showPromoteDrawer, setShowPromoteDrawer] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isNarrow, setIsNarrow] = useState(false);
+
+  // Auto-dismiss the success toast 3s after it appears (UI-SPEC § 8 "Success").
+  useEffect(() => {
+    if (!showSuccessToast) return;
+    const t = setTimeout(() => setShowSuccessToast(false), 3000);
+    return () => clearTimeout(t);
+  }, [showSuccessToast]);
 
   const threadRef = useRef<HTMLDivElement>(null);
 
@@ -569,61 +580,39 @@ export default function ChatView({
         </div>
       </div>
 
-      {/* PromoteDrawer placeholder — Plan 06 replaces this with the real drawer. */}
-      {showPromoteDrawer && (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center"
-          style={{
-            background: "rgba(44, 37, 32, 0.4)",
-            backdropFilter: "blur(2px)",
+      {/* PromoteDrawer — right-side parchment slide-in drawer (Plan 33-06, D-18). */}
+      {showPromoteDrawer && session && (
+        <PromoteDrawer
+          session={session}
+          activeRenderingIndex={activeThumbIndex}
+          sanityUserId={sanityUserId}
+          studioToken={studioToken}
+          onClose={() => setShowPromoteDrawer(false)}
+          onSuccess={() => {
+            setShowPromoteDrawer(false);
+            setShowSuccessToast(true);
+            // Re-fetch session so the promoted flag on the rendering flips in
+            // the ThumbnailStrip without a full page reload.
+            fetchSession();
           }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="promote-placeholder-title"
-          onClick={() => setShowPromoteDrawer(false)}
+        />
+      )}
+
+      {/* Success toast — auto-dismiss 3s after onSuccess (UI-SPEC § 8). */}
+      {showSuccessToast && (
+        <div
+          className="fixed bottom-6 right-6 rounded-lg px-4 py-2 z-50 uppercase shadow-md"
+          role="status"
+          aria-live="polite"
+          style={{
+            background: "#F5EDD8",
+            color: "#9A7B4B",
+            fontSize: "11.5px",
+            fontWeight: 600,
+            letterSpacing: "0.04em",
+          }}
         >
-          <div
-            className="rounded-xl p-6 flex flex-col gap-4"
-            style={{
-              background: "#FFFEFB",
-              border: "0.5px solid #E8DDD0",
-              maxWidth: "320px",
-              width: "90%",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p
-              id="promote-placeholder-title"
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#2C2520",
-              }}
-            >
-              Promote drawer coming in Plan 06
-            </p>
-            <p style={{ fontSize: "13px", color: "#6B5E52" }}>
-              This is a placeholder. Plan 33-06 will replace it with the real
-              PromoteDrawer that publishes renderings to Design Options.
-            </p>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowPromoteDrawer(false)}
-                className="rounded-lg"
-                style={{
-                  border: "1px solid #D4C8B8",
-                  color: "#6B5E52",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  padding: "6px 14px",
-                  background: "transparent",
-                }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          Published to Design Options
         </div>
       )}
     </>
