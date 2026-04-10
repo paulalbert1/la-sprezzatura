@@ -4,6 +4,7 @@ import type { WizardData, WizardImage, ProjectOption } from "../../../lib/render
 import { INITIAL_WIZARD_DATA, isWizardDirty } from "../../../lib/rendering/types";
 import { GeneratingOverlay } from "./GeneratingOverlay";
 import { StepSetup } from "./StepSetup";
+import StepUpload from "./StepUpload";
 import { StepClassify } from "./StepClassify";
 import { StepDescribe } from "./StepDescribe";
 
@@ -354,16 +355,8 @@ export default function WizardContainer({
           />
         );
       case 2:
-        // StepUpload is intentionally a placeholder — Plan 33-04 replaces this.
         return (
-          <div className="flex flex-col items-center justify-center h-full min-h-[360px] text-center">
-            <p className="text-sm text-[#6B5E52] mb-2">
-              Upload step (Plan 04)
-            </p>
-            <p className="text-[11.5px] text-[#9E8E80]">
-              Image upload UI will replace this placeholder in the next wave.
-            </p>
-          </div>
+          <StepUpload images={wizardData.images} onChange={updateImages} />
         );
       case 3:
         return (
