@@ -47,8 +47,11 @@ const businessName = tenant?.businessName ?? "Studio";
 
     {/* Main area - offset by sidebar width */}
     <div id="admin-main" class="ml-60 min-h-screen flex flex-col transition-all duration-200">
-      {/* Top bar -- same bg as body, no border, breadcrumb + collapse button only */}
-      <header class="px-7 pt-5 pb-1 flex items-center justify-between">
+      {/* Top bar -- surface bg, warm border, breadcrumb + collapse button */}
+      <header
+        class="px-7 py-[13px] flex items-center justify-between"
+        style="background-color: #FFFEFB; border-bottom: 0.5px solid #E8DDD0;"
+      >
         <div class="flex items-center gap-3">
           <button
             type="button"

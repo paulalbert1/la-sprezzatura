@@ -95,3 +95,22 @@ html {
 .gsap-ready [data-animate-item] {
   opacity: 0;
 }
+
+/* Luxury admin input -- warm cream bg, gold focus border */
+.luxury-input {
+  background-color: #FDFBF8;
+  border: 0.5px solid #D4C8B8;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 13px;
+  color: #2C2520;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+.luxury-input:focus {
+  border-color: #9A7B4B;
+}
+.luxury-input::placeholder {
+  color: #9E8E80;
+}

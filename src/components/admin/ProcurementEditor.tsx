@@ -601,6 +601,29 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               {item.vendor}
             </div>
           )}
+          {item.notes && (
+            <div
+              className="flex items-center gap-1"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11.5px",
+                color: "#9E8E80",
+                fontStyle: "italic",
+                marginTop: "3px",
+              }}
+            >
+              <span
+                className="shrink-0 rounded-full"
+                style={{
+                  width: "5px",
+                  height: "5px",
+                  backgroundColor: "#9A7B4B",
+                  opacity: 0.7,
+                }}
+              />
+              {item.notes.length > 60 ? item.notes.slice(0, 60) + "…" : item.notes}
+            </div>
+          )}
         </td>
         {/* Status */}
         <td style={{ padding: "12px 16px" }}>
@@ -714,24 +737,50 @@ export default function ProcurementEditor({ items, projectId }: Props) {
   }
 
   function renderEditRow(item: ProcurementItem) {
+    const inputClass = "luxury-input w-full";
+    const drawerLabelStyle = {
+      fontFamily: "var(--font-sans)",
+      fontSize: "11px",
+      fontWeight: 500,
+      color: "#9E8E80",
+      letterSpacing: "0.08em",
+      textTransform: "uppercase" as const,
+      marginBottom: "4px",
+      display: "block",
+    };
+
+    // Computed net price for the read-only drawer display
+    const costNum = parseFloat(editForm.clientCost || "0");
+    const retailNum = parseFloat(editForm.retailPrice || "0");
+    const netDisplay =
+      editForm.clientCost && editForm.retailPrice
+        ? Math.max(0, retailNum - costNum).toFixed(2)
+        : "";
+
     return (
       <>
+        {/* Main edit row -- gold-light tint */}
         <tr
           key={item._key + "-edit"}
-          className="border-b border-stone-light/10"
+          style={{
+            backgroundColor: "#F5EDD8",
+            borderBottom: "0.5px solid #E8D5A8",
+          }}
         >
           {/* Item + Vendor */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="text"
               value={editForm.name || ""}
               onChange={(e) =>
                 setEditForm((f) => ({ ...f, name: e.target.value }))
               }
-              className="text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
+              className={inputClass}
             />
             {validationError && !(editForm.name || "").trim() && (
-              <span className="text-xs text-red-600">{validationError}</span>
+              <span className="text-[11px]" style={{ color: "#9B3A2A", fontFamily: "var(--font-sans)" }}>
+                {validationError}
+              </span>
             )}
             <input
               type="text"
@@ -740,15 +789,16 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 setEditForm((f) => ({ ...f, vendor: e.target.value }))
               }
               placeholder="Vendor"
-              className="text-[11px] font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1 w-full mt-1.5 focus:border-stone-light focus:outline-none"
+              className={inputClass}
+              style={{ marginTop: "5px" }}
             />
           </td>
           {/* Status */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             {renderStatusDropdown(item)}
           </td>
           {/* Delivery */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="date"
               value={editForm.expectedDeliveryDate || ""}
@@ -758,16 +808,23 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   expectedDeliveryDate: e.target.value,
                 }))
               }
-              className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+              className={inputClass}
             />
             {item.carrierETA && (
-              <span className="text-[11px] font-body text-stone-light block mt-1 tabular-nums">
+              <span
+                className="block mt-1 tabular-nums"
+                style={{
+                  fontSize: "11px",
+                  color: "#9E8E80",
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
                 ETA {format(parseISO(item.carrierETA), "MMM d")}
               </span>
             )}
           </td>
-          {/* Price */}
-          <td className="px-3 py-3">
+          {/* Price (client cost) */}
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="number"
               step="0.01"
@@ -777,11 +834,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 setEditForm((f) => ({ ...f, clientCost: e.target.value }))
               }
               placeholder="Cost"
-              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 focus:border-stone-light focus:outline-none tabular-nums"
+              className={inputClass + " tabular-nums"}
+              style={{ textAlign: "right" }}
             />
           </td>
           {/* Track */}
-          <td className="px-3 py-3 hidden sm:table-cell">
+          <td className="hidden sm:table-cell" style={{ padding: "10px 14px" }}>
             <input
               type="text"
               value={editForm.trackingNumber || ""}
@@ -792,50 +850,72 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               placeholder="Tracking #"
-              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
+              className={inputClass}
             />
           </td>
-          {/* Actions */}
-          <td className="px-3 py-3">
-            <div className="flex flex-col gap-1">
-              <button
-                type="button"
-                onClick={handleSaveEdit}
-                disabled={savingRow}
-                className="text-xs font-semibold whitespace-nowrap hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
-              >
-                {savingRow && (
-                  <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-                )}
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={cancelEdit}
-                className="text-xs text-stone hover:text-charcoal whitespace-nowrap"
-              >
-                Cancel
-              </button>
-            </div>
+          {/* Actions -- solid gold Save button + muted Cancel link */}
+          <td style={{ padding: "10px 14px" }}>
+            <button
+              type="button"
+              onClick={handleSaveEdit}
+              disabled={savingRow}
+              className="block w-full hover:bg-[#7A5E32] transition-colors"
+              style={{
+                padding: "6px 0",
+                backgroundColor: "#9A7B4B",
+                color: "#FAF5EC",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+                fontFamily: "var(--font-sans)",
+                marginBottom: "5px",
+                opacity: savingRow ? 0.7 : 1,
+              }}
+            >
+              {savingRow && (
+                <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
+              )}
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={cancelEdit}
+              className="block w-full text-center hover:text-[#6B5E52] transition-colors"
+              style={{
+                fontSize: "11.5px",
+                color: "#9E8E80",
+                padding: "2px 0",
+                letterSpacing: "0.02em",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Cancel
+            </button>
           </td>
         </tr>
-        {/* Extra fields row */}
-        <tr key={item._key + "-notes"} className="bg-cream/20">
-          <td colSpan={6} className="px-5 py-3">
-            <div className="flex flex-wrap gap-4 items-end">
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
+
+        {/* Edit drawer -- parchment bg, grid of extra fields + notes */}
+        <tr key={item._key + "-notes"} style={{ backgroundColor: "#F3EDE3" }}>
+          <td colSpan={6} style={{ padding: "14px 14px 16px" }}>
+            <div
+              className="grid gap-[10px] mb-[14px]"
+              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+            >
+              <div>
+                <div style={drawerLabelStyle}>Order Date</div>
                 <input
                   type="date"
                   value={editForm.orderDate || ""}
                   onChange={(e) =>
                     setEditForm((f) => ({ ...f, orderDate: e.target.value }))
                   }
-                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full"
                 />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Install Date</span>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Install Date</div>
                 <input
                   type="date"
                   value={editForm.installDate || ""}
@@ -845,11 +925,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       installDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full"
                 />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Retail Price</span>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Retail Price</div>
                 <input
                   type="number"
                   step="0.01"
@@ -862,21 +942,42 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                     }))
                   }
                   placeholder="0.00"
-                  className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 text-right focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full tabular-nums"
+                  style={{ textAlign: "right" }}
                 />
-              </label>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Net Price</div>
+                <input
+                  type="text"
+                  value={netDisplay}
+                  readOnly
+                  placeholder="—"
+                  className="luxury-input w-full tabular-nums"
+                  style={{
+                    textAlign: "right",
+                    color: "#6B5E52",
+                    cursor: "default",
+                  }}
+                />
+              </div>
             </div>
-            <label className="block mt-3">
-              <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Notes</span>
+            <div>
+              <div style={drawerLabelStyle}>Notes</div>
               <textarea
                 value={editForm.notes || ""}
                 onChange={(e) =>
                   setEditForm((f) => ({ ...f, notes: e.target.value }))
                 }
                 placeholder="Internal notes..."
-                className="w-full text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-3 py-2 min-h-[56px] mt-1 focus:border-stone-light focus:outline-none"
+                className="luxury-input w-full"
+                style={{
+                  minHeight: "58px",
+                  lineHeight: 1.55,
+                  resize: "vertical",
+                }}
               />
-            </label>
+            </div>
           </td>
         </tr>
       </>
@@ -912,11 +1013,35 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       );
     }
 
+    const drawerLabelStyle = {
+      fontFamily: "var(--font-sans)",
+      fontSize: "11px",
+      fontWeight: 500,
+      color: "#9E8E80",
+      letterSpacing: "0.08em",
+      textTransform: "uppercase" as const,
+      marginBottom: "4px",
+      display: "block",
+    };
+
+    const newCost = parseFloat(newItemForm.clientCost || "0");
+    const newRetail = parseFloat(newItemForm.retailPrice || "0");
+    const newNetDisplay =
+      newItemForm.clientCost && newItemForm.retailPrice
+        ? Math.max(0, newRetail - newCost).toFixed(2)
+        : "";
+
     return (
       <>
-        <tr className="bg-cream/50 border-b border-stone-light/10">
+        {/* Main new-item row -- gold-light tint */}
+        <tr
+          style={{
+            backgroundColor: "#F5EDD8",
+            borderBottom: "0.5px solid #E8D5A8",
+          }}
+        >
           {/* Item + Vendor */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="text"
               value={newItemForm.name || ""}
@@ -931,10 +1056,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               }}
               placeholder="Item name"
               autoFocus
-              className="text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
+              className="luxury-input w-full"
             />
             {validationError && !(newItemForm.name || "").trim() && (
-              <span className="text-xs text-red-600">{validationError}</span>
+              <span className="text-[11px]" style={{ color: "#9B3A2A", fontFamily: "var(--font-sans)" }}>
+                {validationError}
+              </span>
             )}
             <input
               type="text"
@@ -943,17 +1070,31 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 setNewItemForm((f) => ({ ...f, vendor: e.target.value }))
               }
               placeholder="Vendor"
-              className="text-[11px] font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1 w-full mt-1.5 focus:border-stone-light focus:outline-none"
+              className="luxury-input w-full"
+              style={{ marginTop: "5px" }}
             />
           </td>
           {/* Status (default Pending) */}
-          <td className="px-3 py-3">
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-light/20 text-stone">
+          <td style={{ padding: "10px 14px" }}>
+            <span
+              className="inline-flex items-center"
+              style={{
+                padding: "3px 9px",
+                borderRadius: "20px",
+                fontSize: "10.5px",
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+                backgroundColor: "#F3EDE3",
+                color: "#9E8E80",
+                border: "0.5px solid #E8DDD0",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
               Pending
             </span>
           </td>
           {/* Delivery */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="date"
               value={newItemForm.expectedDeliveryDate || ""}
@@ -963,11 +1104,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   expectedDeliveryDate: e.target.value,
                 }))
               }
-              className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+              className="luxury-input w-full"
             />
           </td>
           {/* Price */}
-          <td className="px-3 py-3">
+          <td style={{ padding: "10px 14px" }}>
             <input
               type="number"
               step="0.01"
@@ -980,11 +1121,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               placeholder="Cost"
-              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 focus:border-stone-light focus:outline-none tabular-nums"
+              className="luxury-input w-full tabular-nums"
+              style={{ textAlign: "right" }}
             />
           </td>
           {/* Track */}
-          <td className="px-3 py-3 hidden sm:table-cell">
+          <td className="hidden sm:table-cell" style={{ padding: "10px 14px" }}>
             <input
               type="text"
               value={newItemForm.trackingNumber || ""}
@@ -995,43 +1137,65 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               placeholder="Tracking #"
-              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
+              className="luxury-input w-full"
             />
           </td>
           {/* Actions */}
-          <td className="px-3 py-3">
-            <div className="flex flex-col gap-1">
-              <button
-                type="button"
-                onClick={handleCreate}
-                disabled={savingRow}
-                className="text-xs font-semibold whitespace-nowrap hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
-              >
-                {savingRow && (
-                  <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-                )}
-                Save
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCreatingNew(false);
-                  setNewItemForm({ name: "" });
-                  setValidationError(null);
-                }}
-                className="text-xs text-stone hover:text-charcoal whitespace-nowrap"
-              >
-                Cancel
-              </button>
-            </div>
+          <td style={{ padding: "10px 14px" }}>
+            <button
+              type="button"
+              onClick={handleCreate}
+              disabled={savingRow}
+              className="block w-full hover:bg-[#7A5E32] transition-colors"
+              style={{
+                padding: "6px 0",
+                backgroundColor: "#9A7B4B",
+                color: "#FAF5EC",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: 500,
+                letterSpacing: "0.04em",
+                fontFamily: "var(--font-sans)",
+                marginBottom: "5px",
+                opacity: savingRow ? 0.7 : 1,
+              }}
+            >
+              {savingRow && (
+                <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
+              )}
+              Save
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCreatingNew(false);
+                setNewItemForm({ name: "" });
+                setValidationError(null);
+              }}
+              className="block w-full text-center hover:text-[#6B5E52] transition-colors"
+              style={{
+                fontSize: "11.5px",
+                color: "#9E8E80",
+                padding: "2px 0",
+                letterSpacing: "0.02em",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Cancel
+            </button>
           </td>
         </tr>
-        {/* Extra fields row for new item */}
-        <tr className="bg-cream/50">
-          <td colSpan={6} className="px-5 py-3">
-            <div className="flex flex-wrap gap-4 items-end">
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
+
+        {/* Edit drawer for new item -- parchment bg */}
+        <tr style={{ backgroundColor: "#F3EDE3" }}>
+          <td colSpan={6} style={{ padding: "14px 14px 16px" }}>
+            <div
+              className="grid gap-[10px] mb-[14px]"
+              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+            >
+              <div>
+                <div style={drawerLabelStyle}>Order Date</div>
                 <input
                   type="date"
                   value={newItemForm.orderDate || ""}
@@ -1041,11 +1205,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       orderDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full"
                 />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Install Date</span>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Install Date</div>
                 <input
                   type="date"
                   value={newItemForm.installDate || ""}
@@ -1055,11 +1219,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                       installDate: e.target.value,
                     }))
                   }
-                  className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full"
                 />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Retail Price</span>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Retail Price</div>
                 <input
                   type="number"
                   step="0.01"
@@ -1072,21 +1236,42 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                     }))
                   }
                   placeholder="0.00"
-                  className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 text-right focus:border-stone-light focus:outline-none"
+                  className="luxury-input w-full tabular-nums"
+                  style={{ textAlign: "right" }}
                 />
-              </label>
+              </div>
+              <div>
+                <div style={drawerLabelStyle}>Net Price</div>
+                <input
+                  type="text"
+                  value={newNetDisplay}
+                  readOnly
+                  placeholder="—"
+                  className="luxury-input w-full tabular-nums"
+                  style={{
+                    textAlign: "right",
+                    color: "#6B5E52",
+                    cursor: "default",
+                  }}
+                />
+              </div>
             </div>
-            <label className="block mt-3">
-              <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Notes</span>
+            <div>
+              <div style={drawerLabelStyle}>Notes</div>
               <textarea
                 value={newItemForm.notes || ""}
                 onChange={(e) =>
                   setNewItemForm((f) => ({ ...f, notes: e.target.value }))
                 }
                 placeholder="Internal notes..."
-                className="w-full text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-3 py-2 min-h-[56px] mt-1 focus:border-stone-light focus:outline-none"
+                className="luxury-input w-full"
+                style={{
+                  minHeight: "58px",
+                  lineHeight: 1.55,
+                  resize: "vertical",
+                }}
               />
-            </label>
+            </div>
           </td>
         </tr>
       </>
