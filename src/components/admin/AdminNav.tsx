@@ -39,8 +39,8 @@ function isActive(currentPath: string, href: string): boolean {
 export default function AdminNav({ currentPath, businessName }: { currentPath: string; businessName: string }) {
   return (
     <nav className="flex flex-col h-full">
-      {/* Brand section - hotel stationery style. Line extends full width of sidebar */}
-      <div className="mb-6 pb-5 px-[18px] border-b border-[#E8DDD0]">
+      {/* Brand section - hotel stationery style */}
+      <div className="mb-8 pl-[26px] pr-[18px]">
         <p
           className="text-[12px] tracking-[0.14em] uppercase font-medium"
           style={{ color: "#2C2520", fontFamily: "var(--font-sans)" }}
@@ -67,8 +67,8 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
               href={item.href}
               className={
                 active
-                  ? "px-[18px] py-2 flex items-center gap-[9px] text-[12.5px]"
-                  : "px-[18px] py-2 flex items-center gap-[9px] text-[12.5px] transition-colors hover:bg-[#F5EDD8]/40"
+                  ? "pl-[26px] pr-[18px] py-2 flex items-center gap-[9px] text-[12.5px]"
+                  : "pl-[26px] pr-[18px] py-2 flex items-center gap-[9px] text-[12.5px] transition-colors hover:bg-[#F5EDD8]/40"
               }
               style={{
                 backgroundColor: active ? "#F5EDD8" : "transparent",
@@ -91,7 +91,7 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
       {/* Logout button at bottom - edge-to-edge */}
       <a
         href="/admin/logout"
-        className="px-[18px] py-2 flex items-center gap-[9px] text-[12.5px] transition-colors hover:bg-[#F5EDD8]/40"
+        className="pl-[26px] pr-[18px] py-2 flex items-center gap-[9px] text-[12.5px] transition-colors hover:bg-[#F5EDD8]/40"
         style={{
           color: "#9E8E80",
           fontFamily: "var(--font-sans)",

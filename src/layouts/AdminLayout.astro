@@ -39,14 +39,14 @@ const businessName = tenant?.businessName ?? "Studio";
     {/* Sidebar - fixed, full height, collapsible */}
     <aside
       id="admin-sidebar"
-      class="fixed left-0 top-0 h-screen w-[184px] py-8 z-10 transition-all duration-200 overflow-hidden"
+      class="fixed left-0 top-0 h-screen w-[210px] py-8 z-10 transition-all duration-200 overflow-hidden"
       style="background-color: #FFFEFB; border-right: 0.5px solid #E8DDD0;"
     >
       <AdminNav client:load currentPath={currentPath} businessName={businessName} />
     </aside>
 
     {/* Main area - offset by sidebar width */}
-    <div id="admin-main" class="ml-[184px] min-h-screen flex flex-col transition-all duration-200">
+    <div id="admin-main" class="ml-[210px] min-h-screen flex flex-col transition-all duration-200">
       {/* Top bar -- surface bg, warm border, breadcrumb + collapse button */}
       <header
         class="px-7 py-[13px] flex items-center justify-between"
@@ -89,7 +89,7 @@ const businessName = tenant?.businessName ?? "Studio";
       </header>
 
       {/* Content area */}
-      <main class="flex-1 px-7 py-6">
+      <main class="flex-1 pt-8 pb-6 pl-9 pr-7">
         <slot />
       </main>
     </div>
@@ -107,12 +107,12 @@ const businessName = tenant?.businessName ?? "Studio";
         function apply(isCollapsed) {
           if (isCollapsed) {
             sidebar.style.transform = "translateX(-100%)";
-            main.classList.remove("ml-[184px]");
+            main.classList.remove("ml-[210px]");
             main.classList.add("ml-0");
           } else {
             sidebar.style.transform = "translateX(0)";
             main.classList.remove("ml-0");
-            main.classList.add("ml-[184px]");
+            main.classList.add("ml-[210px]");
           }
         }
 
