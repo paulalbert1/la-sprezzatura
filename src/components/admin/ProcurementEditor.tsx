@@ -547,57 +547,52 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         key={item._key}
         className="border-b border-stone-light/10 last:border-b-0"
       >
-        {/* Item name */}
+        {/* Item + Vendor */}
         <td className="px-3 py-3">
           <span
-            className={`text-sm font-body ${overdue ? "text-red-600" : "text-charcoal"}`}
+            className={`text-sm font-body block ${overdue ? "text-red-600" : "text-charcoal"}`}
           >
             {item.name}
           </span>
-        </td>
-        {/* Vendor */}
-        <td className="px-3 py-3 hidden md:table-cell">
-          <span className="text-xs font-body text-stone">
-            {item.vendor || "\u2014"}
-          </span>
+          {item.vendor && (
+            <span className="text-[11px] font-body text-stone-light block mt-0.5">
+              {item.vendor}
+            </span>
+          )}
         </td>
         {/* Status */}
-        <td className="px-3 py-3 text-center">
+        <td className="px-3 py-3">
           {renderStatusDropdown(item)}
           {renderSyncIndicator(item)}
         </td>
-        {/* Expected Delivery */}
-        <td className="px-3 py-3 text-right">
+        {/* Delivery: Expected + Carrier ETA */}
+        <td className="px-3 py-3">
           <span
-            className={`text-xs font-body ${overdue ? "text-red-600 font-medium" : "text-stone"}`}
+            className={`text-xs font-body block tabular-nums ${overdue ? "text-red-600 font-medium" : "text-stone"}`}
           >
             {item.expectedDeliveryDate
               ? format(parseISO(item.expectedDeliveryDate), "MMM d")
               : "\u2014"}
           </span>
+          {item.carrierETA && (
+            <span className="text-[11px] font-body text-stone-light block mt-0.5 tabular-nums">
+              ETA {format(parseISO(item.carrierETA), "MMM d")}
+            </span>
+          )}
         </td>
-        {/* Carrier ETA */}
-        <td className="px-3 py-3 text-right hidden md:table-cell">
-          <span className="text-xs font-body text-stone">
-            {item.carrierETA
-              ? format(parseISO(item.carrierETA), "MMM d")
-              : "\u2014"}
-          </span>
-        </td>
-        {/* Cost */}
-        <td className="px-3 py-3 text-right">
-          <span className="text-xs font-body text-charcoal tabular-nums">
+        {/* Price: Cost + Net */}
+        <td className="px-3 py-3">
+          <span className="text-xs font-body text-charcoal block tabular-nums">
             {item.clientCost != null ? formatCurrency(item.clientCost) : "\u2014"}
           </span>
-        </td>
-        {/* Net */}
-        <td className="px-3 py-3 text-right hidden md:table-cell">
-          <span className="text-xs font-body text-charcoal tabular-nums">
-            {renderNetPrice(item)}
-          </span>
+          {getNetPrice(item.clientCost, item.retailPrice) !== null && (
+            <span className="text-[11px] font-body text-stone-light block mt-0.5 tabular-nums">
+              Net {renderNetPrice(item)}
+            </span>
+          )}
         </td>
         {/* Track */}
-        <td className="px-3 py-3 text-center hidden md:table-cell">
+        <td className="px-3 py-3 hidden sm:table-cell">
           {renderTrackingLink(item)}
         </td>
         {/* Actions */}
@@ -652,7 +647,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
           key={item._key + "-edit"}
           className="border-b border-stone-light/10"
         >
-          {/* Item name */}
+          {/* Item + Vendor */}
           <td className="px-3 py-3">
             <input
               type="text"
@@ -660,29 +655,27 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               onChange={(e) =>
                 setEditForm((f) => ({ ...f, name: e.target.value }))
               }
-              className="text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              className="text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
             />
             {validationError && !(editForm.name || "").trim() && (
               <span className="text-xs text-red-600">{validationError}</span>
             )}
-          </td>
-          {/* Vendor */}
-          <td className="px-3 py-3 hidden md:table-cell">
             <input
               type="text"
               value={editForm.vendor || ""}
               onChange={(e) =>
                 setEditForm((f) => ({ ...f, vendor: e.target.value }))
               }
-              className="text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              placeholder="Vendor"
+              className="text-[11px] font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1 w-full mt-1.5 focus:border-stone-light focus:outline-none"
             />
           </td>
-          {/* Status -- still shows dropdown in edit mode */}
-          <td className="px-3 py-3 text-center">
+          {/* Status */}
+          <td className="px-3 py-3">
             {renderStatusDropdown(item)}
           </td>
-          {/* Expected Delivery */}
-          <td className="px-3 py-3 text-right">
+          {/* Delivery */}
+          <td className="px-3 py-3">
             <input
               type="date"
               value={editForm.expectedDeliveryDate || ""}
@@ -692,19 +685,16 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   expectedDeliveryDate: e.target.value,
                 }))
               }
-              className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
+              className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
             />
+            {item.carrierETA && (
+              <span className="text-[11px] font-body text-stone-light block mt-1 tabular-nums">
+                ETA {format(parseISO(item.carrierETA), "MMM d")}
+              </span>
+            )}
           </td>
-          {/* Carrier ETA (read-only in edit mode -- comes from Ship24) */}
-          <td className="px-3 py-3 text-right hidden md:table-cell">
-            <span className="text-xs font-body text-stone">
-              {item.carrierETA
-                ? format(parseISO(item.carrierETA), "MMM d")
-                : "\u2014"}
-            </span>
-          </td>
-          {/* Cost */}
-          <td className="px-3 py-3 text-right">
+          {/* Price */}
+          <td className="px-3 py-3">
             <input
               type="number"
               step="0.01"
@@ -713,18 +703,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               onChange={(e) =>
                 setEditForm((f) => ({ ...f, clientCost: e.target.value }))
               }
-              placeholder="0.00"
-              className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-20 text-right"
+              placeholder="Cost"
+              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 focus:border-stone-light focus:outline-none tabular-nums"
             />
           </td>
-          {/* Net (read-only -- computed) */}
-          <td className="px-3 py-3 text-right hidden md:table-cell">
-            <span className="text-xs font-body text-charcoal tabular-nums">
-              {renderNetPrice(item)}
-            </span>
-          </td>
-          {/* Tracking */}
-          <td className="px-3 py-3 text-center hidden md:table-cell">
+          {/* Track */}
+          <td className="px-3 py-3 hidden sm:table-cell">
             <input
               type="text"
               value={editForm.trackingNumber || ""}
@@ -735,12 +719,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               placeholder="Tracking #"
-              className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
             />
           </td>
           {/* Actions */}
-          <td className="px-3 py-3 text-center">
-            <div className="flex flex-col items-center gap-1">
+          <td className="px-3 py-3">
+            <div className="flex flex-col gap-1">
               <button
                 type="button"
                 onClick={handleSaveEdit}
@@ -750,21 +734,21 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 {savingRow && (
                   <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
                 )}
-                Save Changes
+                Save
               </button>
               <button
                 type="button"
                 onClick={cancelEdit}
                 className="text-xs text-stone hover:text-charcoal whitespace-nowrap"
               >
-                Discard Changes
+                Cancel
               </button>
             </div>
           </td>
         </tr>
         {/* Extra fields row */}
         <tr key={item._key + "-notes"} className="bg-cream/20">
-          <td colSpan={9} className="px-5 py-3">
+          <td colSpan={6} className="px-5 py-3">
             <div className="flex flex-wrap gap-4 items-end">
               <label className="flex flex-col gap-1">
                 <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
@@ -836,7 +820,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             cancelEdit();
           }}
         >
-          <td colSpan={9} className="px-5 py-3">
+          <td colSpan={6} className="px-5 py-3">
             <div className="flex items-center gap-2 text-stone-light">
               <Plus className="w-3.5 h-3.5" />
               <span className="text-sm font-body">Add item...</span>
@@ -849,7 +833,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     return (
       <>
         <tr className="bg-cream/50 border-b border-stone-light/10">
-          {/* Item name */}
+          {/* Item + Vendor */}
           <td className="px-3 py-3">
             <input
               type="text"
@@ -865,14 +849,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               }}
               placeholder="Item name"
               autoFocus
-              className="text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              className="text-sm font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
             />
             {validationError && !(newItemForm.name || "").trim() && (
               <span className="text-xs text-red-600">{validationError}</span>
             )}
-          </td>
-          {/* Vendor */}
-          <td className="px-3 py-3 hidden md:table-cell">
             <input
               type="text"
               value={newItemForm.vendor || ""}
@@ -880,17 +861,17 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 setNewItemForm((f) => ({ ...f, vendor: e.target.value }))
               }
               placeholder="Vendor"
-              className="text-sm font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              className="text-[11px] font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1 w-full mt-1.5 focus:border-stone-light focus:outline-none"
             />
           </td>
           {/* Status (default Pending) */}
-          <td className="px-3 py-3 text-center">
+          <td className="px-3 py-3">
             <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-light/20 text-stone">
               Pending
             </span>
           </td>
-          {/* Expected Delivery */}
-          <td className="px-3 py-3 text-right">
+          {/* Delivery */}
+          <td className="px-3 py-3">
             <input
               type="date"
               value={newItemForm.expectedDeliveryDate || ""}
@@ -900,15 +881,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   expectedDeliveryDate: e.target.value,
                 }))
               }
-              className="text-xs font-body text-stone bg-transparent border border-stone-light/20 rounded-md px-2 py-1"
+              className="text-xs font-body text-stone bg-white border border-stone-light/30 rounded-md px-2 py-1.5 focus:border-stone-light focus:outline-none"
             />
           </td>
-          {/* Carrier ETA */}
-          <td className="px-3 py-3 text-right hidden md:table-cell">
-            <span className="text-stone-light">{"\u2014"}</span>
-          </td>
-          {/* Cost */}
-          <td className="px-3 py-3 text-right">
+          {/* Price */}
+          <td className="px-3 py-3">
             <input
               type="number"
               step="0.01"
@@ -920,16 +897,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   clientCost: e.target.value,
                 }))
               }
-              placeholder="0.00"
-              className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-20 text-right"
+              placeholder="Cost"
+              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-24 focus:border-stone-light focus:outline-none tabular-nums"
             />
           </td>
-          {/* Net */}
-          <td className="px-3 py-3 text-right hidden md:table-cell">
-            <span className="text-stone-light">{"\u2014"}</span>
-          </td>
           {/* Track */}
-          <td className="px-3 py-3 text-center hidden md:table-cell">
+          <td className="px-3 py-3 hidden sm:table-cell">
             <input
               type="text"
               value={newItemForm.trackingNumber || ""}
@@ -940,12 +913,12 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               placeholder="Tracking #"
-              className="text-xs font-body text-charcoal bg-transparent border border-stone-light/20 rounded-md px-2 py-1 w-full"
+              className="text-xs font-body text-charcoal bg-white border border-stone-light/30 rounded-md px-2 py-1.5 w-full focus:border-stone-light focus:outline-none"
             />
           </td>
           {/* Actions */}
-          <td className="px-3 py-3 text-center">
-            <div className="flex flex-col items-center gap-1">
+          <td className="px-3 py-3">
+            <div className="flex flex-col gap-1">
               <button
                 type="button"
                 onClick={handleCreate}
@@ -955,7 +928,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 {savingRow && (
                   <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
                 )}
-                Save Changes
+                Save
               </button>
               <button
                 type="button"
@@ -966,14 +939,14 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }}
                 className="text-xs text-stone hover:text-charcoal whitespace-nowrap"
               >
-                Discard Changes
+                Cancel
               </button>
             </div>
           </td>
         </tr>
         {/* Extra fields row for new item */}
         <tr className="bg-cream/50">
-          <td colSpan={9} className="px-5 py-3">
+          <td colSpan={6} className="px-5 py-3">
             <div className="flex flex-wrap gap-4 items-end">
               <label className="flex flex-col gap-1">
                 <span className="text-[10px] font-medium text-stone-light" style={{ fontFamily: "var(--font-body)" }}>Order Date</span>
@@ -1061,25 +1034,16 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Item
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
-                  Vendor
-                </th>
-                <th className="text-[11px] font-medium text-stone-light text-center px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
                   Status
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
-                  Expected
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                  Delivery
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
-                  Carrier ETA
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
+                  Price
                 </th>
-                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5" style={{ fontFamily: "var(--font-body)" }}>
-                  Cost
-                </th>
-                <th className="text-[11px] font-medium text-stone-light text-right px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
-                  Net
-                </th>
-                <th className="text-[11px] font-medium text-stone-light text-center px-3 py-2.5 hidden md:table-cell" style={{ fontFamily: "var(--font-body)" }}>
+                <th className="text-[11px] font-medium text-stone-light text-left px-3 py-2.5 hidden sm:table-cell" style={{ fontFamily: "var(--font-body)" }}>
                   Track
                 </th>
                 <th className="px-3 py-2.5 w-[80px]">
