@@ -8,7 +8,10 @@ import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
-import { getAdminProjectDetail } from "../../../../sanity/queries";
+import {
+  getAdminProjectDetail,
+  RENDERING_SESSIONS_BY_PROJECT_QUERY,
+} from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { STAGE_META } from "../../../../lib/portalStages";
 import { getDaysInStage } from "../../../../lib/dashboardUtils";
@@ -32,6 +35,22 @@ if (!project) {
 const stageMeta = STAGE_META[project.pipelineStage as keyof typeof STAGE_META];
 const daysInStage = getDaysInStage(project.stageChangedAt);
 
+// Phase 33 D-01: server-side prefetch of the rendering session count for this
+// project. Used by the Rendering tab badge. Query lives in src/sanity/queries.ts
+// and returns _id, sessionTitle, status, createdAt, renderingCount per session.
+const renderingSessions = (await client.fetch(
+  RENDERING_SESSIONS_BY_PROJECT_QUERY,
+  { projectId },
+)) as Array<{ _id: string }> | null;
+const renderingSessionCount = renderingSessions?.length ?? 0;
+
+// Rendering tab is "active" only if the user is already on
+// /admin/rendering?project={projectId} — on this page it is always false,
+// but the check keeps the styling honest if the layout is reused.
+const isRenderingTabActive =
+  Astro.url.pathname.startsWith("/admin/rendering") &&
+  Astro.url.searchParams.get("project") === projectId;
+
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Projects", href: "/admin/projects" },
@@ -53,6 +72,51 @@ const breadcrumbs = [
         </span>
       )}
       <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
+    </div>
+
+    {/* Project tab nav — Phase 33 D-01: Rendering tab is a styled link out to
+        the filtered global list, not a local tab panel controller. */}
+    <div
+      class="flex items-center gap-1 mb-6 pb-2"
+      style="border-bottom: 0.5px solid #E8DDD0;"
+    >
+      <a
+        href={`/admin/rendering?project=${projectId}`}
+        class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          isRenderingTabActive
+            ? "bg-[#F5EDD8] text-[#9A7B4B]"
+            : "text-[#6B5E52] hover:bg-[#F3EDE3]"
+        }`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          class="w-4 h-4"
+          data-icon="SparklesIcon"
+        >
+          <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+          <path d="M20 2v4" />
+          <path d="M22 4h-4" />
+          <circle cx="4" cy="20" r="2" />
+        </svg>
+        Rendering
+        {renderingSessionCount > 0 && (
+          <span
+            class="inline-flex items-center rounded-full px-1.5"
+            style="background:#F5EDD8; color:#9A7B4B; font-size:11.5px; font-weight:600; height:18px;"
+          >
+            {renderingSessionCount}
+          </span>
+        )}
+      </a>
     </div>
 
     {/* Two-column layout: Tasks (left) + Milestones (right) */}
