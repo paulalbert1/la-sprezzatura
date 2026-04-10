@@ -2,15 +2,16 @@
 export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import EditableTitle from "../../../../components/admin/EditableTitle.tsx";
 import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
+import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import { getAdminProjectDetail } from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { STAGE_META } from "../../../../lib/portalStages";
-import { getDaysInStage, isMilestoneOverdue } from "../../../../lib/dashboardUtils";
-import { format, parseISO } from "date-fns";
+import { getDaysInStage } from "../../../../lib/dashboardUtils";
 
 const projectId = Astro.params.projectId;
 if (!projectId) {
@@ -39,10 +40,10 @@ const breadcrumbs = [
 ---
 
 <AdminLayout title={project.title + " - Studio"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
-  <div class="max-w-4xl">
-    {/* Project header with stage badge and days-in-stage */}
+  <div class="max-w-5xl">
+    {/* Project header with editable title, stage badge, and days-in-stage */}
     <div class="flex items-center gap-4 mb-8">
-      <h1 class="text-xl font-semibold text-charcoal" style="font-family: var(--font-body);">{project.title}</h1>
+      <EditableTitle client:load title={project.title} projectId={projectId} />
       {stageMeta && (
         <span class="inline-flex px-2.5 py-1 rounded-md text-xs font-medium bg-terracotta/10 text-terracotta">
           {stageMeta.title}
@@ -51,55 +52,29 @@ const breadcrumbs = [
       <span class="text-[11px] text-stone-light font-body">{daysInStage}d in stage</span>
     </div>
 
-    {/* Milestones & Schedule */}
-    <div id="milestones" class="mb-8">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400;">Milestones</h2>
-        <a href={`/admin/projects/${projectId}/schedule`} class="text-xs text-terracotta hover:text-terracotta/80 font-body transition-colors">
-          View Schedule →
-        </a>
-      </div>
-      {project.milestones && project.milestones.length > 0 ? (
-        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-          {project.milestones.map((m: any) => {
-            const overdue = isMilestoneOverdue(m);
-            return (
-              <div class="flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0">
-                <span class={`w-2 h-2 rounded-full shrink-0 ${m.completed ? "bg-emerald-500" : overdue ? "bg-red-400" : "bg-stone-light/40"}`} />
-                <span class={`text-sm font-body flex-1 ${m.completed ? "text-stone line-through" : overdue ? "text-red-600" : "text-charcoal"}`}>
-                  {m.name}
-                </span>
-                {m.date && (
-                  <span class={`text-xs font-body shrink-0 ${overdue && !m.completed ? "text-red-500 font-medium" : "text-stone-light"}`}>
-                    {format(parseISO(m.date), "MMM d")}
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div class="bg-white rounded-xl border border-stone-light/40 px-5 py-6 text-center">
-          <p class="text-sm text-stone font-body">No milestones yet</p>
-          <a href={`/admin/projects/${projectId}/schedule`} class="text-xs text-terracotta hover:text-terracotta/80 font-body mt-1 inline-block">
-            Add milestones in Schedule →
-          </a>
-        </div>
-      )}
-    </div>
-
-    {project.engagementType === "full-interior-design" && (
-      <div id="procurement" class="mb-8">
-        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Procurement</h2>
-        <ProcurementEditor
+    {/* Two-column layout: Tasks (left) + Milestones (right) */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+      {/* Tasks - left column */}
+      <div>
+        <ProjectTasks
           client:load
-          items={project.procurementItems || []}
+          tasks={project.tasks || []}
           projectId={projectId}
         />
       </div>
-    )}
 
-    {/* Team section */}
+      {/* Milestones - right column */}
+      <div id="milestones">
+        <MilestonesList
+          client:load
+          milestones={project.milestones || []}
+          projectId={projectId}
+          scheduleUrl={`/admin/projects/${projectId}/schedule`}
+        />
+      </div>
+    </div>
+
+    {/* Team section - full width */}
     <div class="mb-8">
       <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Team</h2>
       <div class="bg-white rounded-xl border border-stone-light/40 p-5">
@@ -179,11 +154,16 @@ const breadcrumbs = [
       </div>
     </div>
 
-    {/* Tasks section - React island */}
-    <ProjectTasks
-      client:load
-      tasks={project.tasks || []}
-      projectId={projectId}
-    />
+    {/* Procurement section - full width */}
+    {project.engagementType === "full-interior-design" && (
+      <div id="procurement" class="mb-8">
+        <h2 class="text-charcoal" style="font-family: var(--font-body); font-size: 15px; font-weight: 400; margin-bottom: 1rem;">Procurement</h2>
+        <ProcurementEditor
+          client:load
+          items={project.procurementItems || []}
+          projectId={projectId}
+        />
+      </div>
+    )}
   </div>
 </AdminLayout>
