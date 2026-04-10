@@ -23,3 +23,7 @@ dist/
 .env*.local
 .playwright-mcp/
 .claude/
+
+# Claude Code local artifacts
+CLAUDE.md
+CLAUDE.local.md
