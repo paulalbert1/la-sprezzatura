@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { checkUsageQuota } from "../../../lib/renderingAuth";
+import { buildUsageDocId, checkUsageQuota } from "../../../lib/renderingAuth";
 import { sanityWriteClient } from "../../../sanity/writeClient";
 import { RENDERING_USAGE_QUERY } from "../../../sanity/queries";
 
@@ -35,7 +35,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 
     // 4. Fetch full usage doc for bytesStored
     const month = new Date().toISOString().slice(0, 7);
-    const docId = `usage-${sanityUserId}-${month}`;
+    const docId = buildUsageDocId(sanityUserId, month);
     const usageDoc = await sanityWriteClient.fetch(RENDERING_USAGE_QUERY, {
       docId,
     });

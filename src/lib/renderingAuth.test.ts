@@ -206,4 +206,46 @@ describe("incrementUsage", () => {
     expect(mockInc).toHaveBeenCalledWith({ count: 1, bytesStored: 1024 });
     expect(mockCommit).toHaveBeenCalled();
   });
+
+  it("uses sanitized doc ID when sanityUserId is an email", async () => {
+    const { incrementUsage } = await import("./renderingAuth");
+    await incrementUsage("paul@lasprezz.com", 512);
+
+    // Doc ID must not contain `@` or `.` — Sanity rejects them
+    const patchCalls = mockPatch.mock.calls;
+    expect(patchCalls.length).toBeGreaterThan(0);
+    const passedDocId = patchCalls[0][0] as string;
+    expect(passedDocId).not.toContain("@");
+    expect(passedDocId).toMatch(/^usage-paul-lasprezz-com-\d{4}-\d{2}$/);
+  });
+});
+
+describe("buildUsageDocId", () => {
+  it("replaces @ in email-format user IDs with hyphen", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("paul@lasprezz.com", "2026-04")).toBe(
+      "usage-paul-lasprezz-com-2026-04",
+    );
+  });
+
+  it("replaces dots as well so the final ID is visually consistent", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("liz@lasprezz.com", "2026-04")).toBe(
+      "usage-liz-lasprezz-com-2026-04",
+    );
+  });
+
+  it("leaves already-safe user IDs unchanged", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("user1", "2026-04")).toBe("usage-user1-2026-04");
+    expect(buildUsageDocId("paul_lasprezz_com", "2026-04")).toBe(
+      "usage-paul_lasprezz_com-2026-04",
+    );
+  });
+
+  it("produces only Sanity-legal characters", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    const docId = buildUsageDocId("weird user!@#$%^&*()+=", "2026-04");
+    expect(docId).toMatch(/^[a-zA-Z0-9._-]+$/);
+  });
 });

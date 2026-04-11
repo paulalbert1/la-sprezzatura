@@ -28,6 +28,24 @@ const RENDERING_SETTINGS_QUERY = `*[_type == "siteSettings"][0]{
 }`;
 
 /**
+ * Build a Sanity document ID for a rendering usage record.
+ *
+ * `sanityUserId` values are email addresses (e.g. `paul@lasprezz.com`) per
+ * Plan 33-01's identity resolution, but Sanity document IDs must match
+ * `[a-zA-Z0-9._-]+`. We replace any character outside `[a-zA-Z0-9_-]` with
+ * a hyphen so `paul@lasprezz.com` → `paul-lasprezz-com`. The period is also
+ * replaced to keep the final ID visually consistent with the rest of the
+ * hyphen-separated format (`usage-paul-lasprezz-com-2026-04`).
+ */
+export function buildUsageDocId(
+  sanityUserId: string,
+  month: string,
+): string {
+  const sanitized = sanityUserId.replace(/[^a-zA-Z0-9_-]/g, "-");
+  return `usage-${sanitized}-${month}`;
+}
+
+/**
  * Validate a rendering API request:
  * 1. Check x-studio-token header matches STUDIO_API_SECRET
  * 2. Extract sanityUserId from request body
@@ -110,7 +128,7 @@ export async function checkUsageQuota(
   sanityUserId: string,
 ): Promise<UsageResult> {
   const month = new Date().toISOString().slice(0, 7);
-  const docId = `usage-${sanityUserId}-${month}`;
+  const docId = buildUsageDocId(sanityUserId, month);
 
   // Fetch allocation from siteSettings
   const settings = await sanityWriteClient.fetch(
@@ -159,7 +177,7 @@ export async function incrementUsage(
   bytesStored: number,
 ): Promise<void> {
   const month = new Date().toISOString().slice(0, 7);
-  const docId = `usage-${sanityUserId}-${month}`;
+  const docId = buildUsageDocId(sanityUserId, month);
 
   await sanityWriteClient
     .patch(docId)
