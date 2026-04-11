@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock renderingAuth module
+// Mock renderingAuth module — partial mock keeps the real buildUsageDocId
+// so usage.ts can compute Sanity-legal doc IDs from sanitized user IDs.
 const mockCheckUsageQuota = vi.fn();
-vi.mock("../../../lib/renderingAuth", () => ({
-  checkUsageQuota: mockCheckUsageQuota,
-}));
+vi.mock("../../../lib/renderingAuth", async () => {
+  const actual = await vi.importActual<typeof import("../../../lib/renderingAuth")>(
+    "../../../lib/renderingAuth",
+  );
+  return {
+    ...actual,
+    checkUsageQuota: mockCheckUsageQuota,
+  };
+});
 
 // Mock sanity write client
 const mockFetch = vi.fn();
