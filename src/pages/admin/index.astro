@@ -1,0 +1,5 @@
+---
+// Bare /admin/ route redirects to the dashboard.
+// The middleware will further redirect to /admin/login if unauthenticated.
+return Astro.redirect("/admin/dashboard");
+---
