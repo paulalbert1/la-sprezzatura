@@ -1,6 +1,7 @@
 ---
 import StatusBadge from "./StatusBadge.astro";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
+import { ENGAGEMENT_LABELS } from "../../lib/portal/engagementLabels";
 
 interface Props {
   project: {
@@ -11,12 +12,6 @@ interface Props {
 }
 
 const { project } = Astro.props;
-
-const ENGAGEMENT_LABELS: Record<string, string> = {
-  "full-interior-design": "Full Interior Design",
-  "styling-refreshing": "Styling & Refreshing",
-  "carpet-curating": "Carpet Curating",
-};
 ---
 
 <div class="text-center mb-8">

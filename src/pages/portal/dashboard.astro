@@ -6,6 +6,7 @@ import StatusBadge from "../../components/portal/StatusBadge.astro";
 import { getProjectsByClientId, getClientById } from "../../sanity/queries";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
 import { isProjectVisible } from "../../lib/projectVisibility";
+import { ENGAGEMENT_LABELS } from "../../lib/portal/engagementLabels";
 
 // clientId injected by middleware (guaranteed by auth guard)
 const clientId = Astro.locals.clientId!;
@@ -25,13 +26,6 @@ const visibleProjects = projects.filter((p: any) => isProjectVisible(p));
 const activeProjects = visibleProjects.filter((p: any) => p.projectStatus !== "completed");
 const completedProjects = visibleProjects.filter((p: any) => p.projectStatus === "completed");
 const activeCount = activeProjects.length;
-
-// Engagement type display mapping
-const ENGAGEMENT_LABELS: Record<string, string> = {
-  "full-interior-design": "Full Interior Design",
-  "styling-refreshing": "Styling & Refreshing",
-  "carpet-curating": "Carpet Curating",
-};
 ---
 
 <PortalLayout title="Dashboard | La Sprezzatura">
