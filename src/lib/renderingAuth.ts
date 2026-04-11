@@ -41,8 +41,28 @@ export function buildUsageDocId(
   sanityUserId: string,
   month: string,
 ): string {
-  const sanitized = sanityUserId.replace(/[^a-zA-Z0-9_-]/g, "-");
+  // Lowercase first so the doc ID is deterministic regardless of how Liz
+  // typed the email (e.g. `Paul@Lasprezz.com` and `paul@lasprezz.com` both
+  // resolve to the same usage doc for the month).
+  const sanitized = sanityUserId
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "-");
   return `usage-${sanitized}-${month}`;
+}
+
+/**
+ * Case-insensitive membership check for the excluded-users list.
+ *
+ * Phase 34 D-11: excluded users are stored as-typed on the settings doc (so
+ * Liz sees the same string she entered), but the comparison at auth time
+ * must not depend on casing. Both sides are lowercased before comparison.
+ */
+export function isExcluded(
+  sanityUserId: string,
+  excludedUsers: readonly string[],
+): boolean {
+  const needle = sanityUserId.toLowerCase();
+  return excludedUsers.some((u) => u.toLowerCase() === needle);
 }
 
 /**
@@ -90,11 +110,13 @@ export async function validateRenderingAuth(
     };
   }
 
-  // Step 3: Check exclude list
+  // Step 3: Check exclude list. Comparison is case-normalized on both sides
+  // so `paul@lasprezz.com` and `PAUL@LASPREZZ.COM` resolve the same (Phase 34
+  // D-11 — storage is as-typed, matching lowercases on read).
   const settings = await sanityWriteClient.fetch(RENDERING_SETTINGS_QUERY);
   const excludedUsers: string[] = settings?.renderingExcludedUsers || [];
 
-  if (excludedUsers.includes(sanityUserId)) {
+  if (isExcluded(sanityUserId, excludedUsers)) {
     return {
       authorized: false,
       error: "Your account does not have access to AI Rendering.",

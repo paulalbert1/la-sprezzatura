@@ -255,9 +255,42 @@ describe("buildUsageDocId", () => {
 // .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md (renderingExcludedUsers storage contract)
 
 describe("excludedUsers edge cases (Phase 34)", () => {
-  it.todo("buildUsageDocId('paul+alias@lasprezz.com', '2026-04') sanitizes + and @ to -");
-  it.todo("buildUsageDocId('O\\'Brien@lasprezz.com', '2026-04') replaces apostrophe");
-  it.todo("buildUsageDocId handles unicode (user@münchen.de → user-m-nchen-de)");
-  it.todo("excluded users comparison is case-normalized (paul@lasprezz.com and PAUL@LASPREZZ.COM resolve to same doc)");
-  it.todo("renderingAuth.isExcluded lowercases both sides before comparison");
+  it("buildUsageDocId('paul+alias@lasprezz.com', '2026-04') sanitizes + and @ to -", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("paul+alias@lasprezz.com", "2026-04")).toBe(
+      "usage-paul-alias-lasprezz-com-2026-04",
+    );
+  });
+
+  it("buildUsageDocId('O\\'Brien@lasprezz.com', '2026-04') replaces apostrophe", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("O'Brien@lasprezz.com", "2026-04")).toBe(
+      "usage-o-brien-lasprezz-com-2026-04",
+    );
+  });
+
+  it("buildUsageDocId handles unicode (user@münchen.de → user-m-nchen-de)", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    // `ü` is outside [a-z0-9_-], so it is replaced by a single `-`. The
+    // result must still match Sanity's legal doc ID character set.
+    const docId = buildUsageDocId("user@münchen.de", "2026-04");
+    expect(docId).toBe("usage-user-m-nchen-de-2026-04");
+    expect(docId).toMatch(/^[a-zA-Z0-9._-]+$/);
+  });
+
+  it("excluded users comparison is case-normalized (paul@lasprezz.com and PAUL@LASPREZZ.COM resolve to same doc)", async () => {
+    const { buildUsageDocId } = await import("./renderingAuth");
+    expect(buildUsageDocId("paul@lasprezz.com", "2026-04")).toBe(
+      buildUsageDocId("PAUL@LASPREZZ.COM", "2026-04"),
+    );
+  });
+
+  it("renderingAuth.isExcluded lowercases both sides before comparison", async () => {
+    const { isExcluded } = await import("./renderingAuth");
+    // Stored with mixed case; caller lowercases; helper still lowercases.
+    expect(isExcluded("paul@lasprezz.com", ["Paul@Lasprezz.com"])).toBe(true);
+    expect(isExcluded("PAUL@LASPREZZ.COM", ["paul@lasprezz.com"])).toBe(true);
+    expect(isExcluded("liz@lasprezz.com", ["paul@lasprezz.com"])).toBe(false);
+    expect(isExcluded("paul@lasprezz.com", [])).toBe(false);
+  });
 });

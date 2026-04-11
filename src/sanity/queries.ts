@@ -483,11 +483,50 @@ export async function getProjectsByBuildingManagerEmail(email: string) {
   return sanityClient.fetch(PROJECTS_BY_BUILDING_MANAGER_QUERY, { email });
 }
 
-// GROQ: Site settings for Contact Liz section
+// GROQ: Full site settings singleton. Phase 34 Plan 03 widened this from a
+// contactEmail+contactPhone-only projection to the full field set consumed
+// by /admin/settings. Legacy portal consumers (workorder, building) still
+// read only contactEmail and contactPhone — extra fields are harmless.
+//
+// Filters by `_type == "siteSettings"` (first match) rather than the fixed
+// `_id == "siteSettings"` singleton so that legacy documents created by the
+// pre-Phase-34 Studio UI (which used auto-generated IDs) keep resolving for
+// portal consumers. The Phase 34 admin write path targets the fixed singleton
+// ID via `sanityWriteClient.patch("siteSettings").setIfMissing({ ... })` —
+// see /api/admin/site-settings.
 export const SITE_SETTINGS_QUERY = `
   *[_type == "siteSettings"][0] {
+    _id,
+    siteTitle,
+    tagline,
     contactEmail,
-    contactPhone
+    contactPhone,
+    studioLocation,
+    socialLinks {
+      instagram,
+      pinterest,
+      houzz
+    },
+    heroSlideshow[] {
+      _key,
+      image {
+        _type,
+        asset-> {
+          _id,
+          url
+        }
+      },
+      alt
+    },
+    renderingAllocation,
+    renderingImageTypes,
+    renderingExcludedUsers,
+    updateLog[] | order(savedAt desc)[0...5] {
+      _key,
+      savedAt,
+      actor,
+      action
+    }
   }
 `;
 
