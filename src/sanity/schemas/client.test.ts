@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { client } from "./client";
 
+// Phase 34 Plan 01 Wave 0: portalToken field stubs appended below existing
+// tests. Source of truth: .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md D-18
+
 describe("client schema", () => {
   it('has name "client" and type "document"', () => {
     expect(client.name).toBe("client");
@@ -55,4 +58,11 @@ describe("client schema", () => {
     expect(preview?.select?.title).toBe("name");
     expect(preview?.select?.subtitle).toBe("email");
   });
+});
+
+describe("client schema portalToken field (Phase 34 Plan 05)", () => {
+  it.todo("client schema defines a field named 'portalToken'");
+  it.todo("portalToken field has type 'string'");
+  it.todo("portalToken field has readOnly: true");
+  it.todo("portalToken field has NO initialValue (lazy generation per D-18)");
 });

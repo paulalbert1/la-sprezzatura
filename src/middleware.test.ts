@@ -122,3 +122,25 @@ describe("middleware", () => {
     expect(middlewareSource).toContain('pathname.startsWith("/api/admin")');
   });
 });
+
+// Phase 34 Plan 01 Wave 0: PURL session stubs for client dashboard.
+// Implementation lands in Plan 06 (client-dashboard). Source of truth:
+// .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md D-19 revised;
+// threats T-34-07 (regen kills session) and T-34-08 (read-only gate).
+
+describe("PURL session middleware (Phase 34 Plan 06)", () => {
+  it.todo("PUBLIC_PATHS contains '/portal/client/' (with trailing slash)");
+  it.todo("GET /portal/client/abc123 does NOT trigger /portal/login redirect when path is in PUBLIC_PATHS");
+  it.todo("/portal/client/[token] route handler creates a session with source='purl'");
+  it.todo("PURL session cookie stores { clientId, role: 'client', source: 'purl', portalTokenHash }");
+  it.todo("PURL session cookie TTL is 7 days (maxAge 604800), not 30 days");
+  it.todo("/portal/project/X with PURL session whose portalTokenHash matches current client.portalToken returns next()");
+  it.todo("/portal/project/X with PURL session whose portalTokenHash does NOT match returns 302 /portal/login");
+  it.todo("regenerating client.portalToken invalidates the active PURL session on next request (T-34-07)");
+  it.todo("POST /api/admin/* with session.source='purl' returns 401 (read-only gate, T-34-08)");
+  it.todo("POST /api/any-mutation-endpoint with session.source='purl' returns 401");
+  it.todo("GET /portal/dashboard with session.source='purl' returns next() (reads are allowed)");
+  it.todo("admin session (no source field) is unaffected by PURL read-only gate");
+  it.todo("middleware re-derives portalTokenHash on EVERY /portal/* request (not just at login)");
+  it.todo("PURL session with no source field defaults to legacy behavior (no hash check)");
+});

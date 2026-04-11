@@ -249,3 +249,15 @@ describe("buildUsageDocId", () => {
     expect(docId).toMatch(/^[a-zA-Z0-9._-]+$/);
   });
 });
+
+// Phase 34 Plan 01 Wave 0: extended edge cases for buildUsageDocId + isExcluded.
+// Implementation lands in Plan 03 (settings-surface). Source of truth:
+// .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md (renderingExcludedUsers storage contract)
+
+describe("excludedUsers edge cases (Phase 34)", () => {
+  it.todo("buildUsageDocId('paul+alias@lasprezz.com', '2026-04') sanitizes + and @ to -");
+  it.todo("buildUsageDocId('O\\'Brien@lasprezz.com', '2026-04') replaces apostrophe");
+  it.todo("buildUsageDocId handles unicode (user@münchen.de → user-m-nchen-de)");
+  it.todo("excluded users comparison is case-normalized (paul@lasprezz.com and PAUL@LASPREZZ.COM resolve to same doc)");
+  it.todo("renderingAuth.isExcluded lowercases both sides before comparison");
+});
