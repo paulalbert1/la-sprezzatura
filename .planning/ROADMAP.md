@@ -473,16 +473,25 @@ Plans:
 - [x] 33-07-PLAN.md -- Full Vitest suite, build security check (T-33-01), manual RNDR-11 UAT
 
 ### Phase 34: Settings and Studio Retirement
-**Goal**: The admin can manage all site configuration and operational workflows that previously required Sanity Studio, and Studio is deprecated then removed -- making the admin app the sole management interface
+**Goal**: The admin can manage all site configuration and operational workflows that previously required Sanity Studio, and Studio is retired outright -- making the admin app the sole management interface
 **Depends on**: Phases 30, 31, 32, 33 (all features must be verified before Studio can be retired)
 **Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07, SETT-08
 **Success Criteria** (what must be TRUE):
   1. The admin can edit site settings (title, tagline, contact info, social links), manage hero slideshow images (add, remove, reorder with alt text), and configure rendering settings (monthly limit, image type options) -- with all changes logged with timestamps
-  2. The admin can compose a Send Update email, preview exactly what the client will receive, send it, and view the delivery log -- the complete workflow previously done in Sanity Studio
-  3. Sanity Studio shows a deprecation banner directing users to the admin app; after a 30-day deprecation period, the Studio route is removed from the codebase
+  2. The admin can compose a Send Update email, preview exactly what the client will receive, send it per-recipient with a personal portal link, and view the delivery log -- the complete workflow previously done in Sanity Studio
+  3. Sanity Studio is retired outright (studioBasePath dropped, Studio-specific components deleted) -- SETT-07 superseded and SETT-08 satisfied per Phase 34 CONTEXT.md Requirements reinterpretation
   4. Every feature that previously required Sanity Studio (project editing, procurement, rendering, settings, send update) is accessible and functional in the admin app
-**Plans**: TBD
+**Plans**: 7 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 34-PLAN-wave0-test-stubs.md -- Wave 0 Nyquist test stub seeding for ~20 test files + VALIDATION.md task-ID rewrite
+- [ ] 34-PLAN-foundation-primitives.md -- AdminModal, AdminToast, CollapsibleSection, TagInput, upload-sanity-image route, blob-upload auth gate (T-34-02), luxury-secondary-btn CSS, shared ENGAGEMENT_LABELS
+- [ ] 34-PLAN-settings-surface.md -- /admin/settings page with 4 collapsible sections, HeroSlideshowEditor, RenderingConfigSection, site-settings API (T-34-01), SITE_SETTINGS_QUERY, renderingAuth case normalization
+- [ ] 34-PLAN-send-update-surface.md -- Extract buildSendUpdateEmail to shared module, add usePersonalLinks flag to /api/send-update, create /api/send-update/preview (T-34-04), build SendUpdateModal (T-34-03, T-34-05)
+- [ ] 34-PLAN-per-client-purl.md -- Add client.portalToken schema field (D-18), regenerate-portal-token action (D-22), RegenerateLinkDialog, ClientChipWithRegenerate wrapper
+- [ ] 34-PLAN-client-dashboard.md -- /portal/client/[token] route, clientDashboard resolver, portalTokenHash helper, PURL session source, middleware hash re-validation (T-34-07) + read-only gate (T-34-08)
+- [ ] 34-PLAN-studio-removal.md -- Strip Studio schema imports, delete structure.ts + all Studio components, drop studioBasePath, annotate REQUIREMENTS.md with SETT-07/08 reinterpretation
 
 ## Progress (v5.0 Completion)
 
@@ -497,7 +506,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
 | 33. Rendering Tool Relocation | v5.0 | 7/7 | Complete    | 2026-04-11 |
-| 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
+| 34. Settings and Studio Retirement | v5.0 | 2/7 | In Progress|  |
 
 ---
 *v5.0 completion roadmap created: 2026-04-08 (6 phases, 42 requirements mapped)*
