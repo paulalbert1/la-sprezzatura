@@ -121,3 +121,32 @@ html {
 .luxury-input::placeholder {
   color: #9E8E80;
 }
+
+/* Luxury secondary button -- surface bg, gold hover, Phase 34 Plan 02 */
+.luxury-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #FFFEFB;
+  border: 0.5px solid #D4C8B8;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #2C2520;
+  font-family: var(--font-sans);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.luxury-secondary-btn:hover {
+  border-color: #9A7B4B;
+  color: #9A7B4B;
+}
+.luxury-secondary-btn:focus-visible {
+  outline: 2px solid #9A7B4B;
+  outline-offset: 3px;
+}
+.luxury-secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

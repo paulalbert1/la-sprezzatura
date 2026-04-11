@@ -2,6 +2,7 @@
 import { Font } from "astro:assets";
 import "../styles/global.css";
 import AdminNav from "../components/admin/AdminNav.tsx";
+import ToastContainer from "../components/admin/ui/ToastContainer.tsx";
 import { getTenantById } from "../lib/tenants";
 
 export const prerender = false;
@@ -93,6 +94,11 @@ const businessName = tenant?.businessName ?? "Studio";
         <slot />
       </main>
     </div>
+
+    {/* Global toast stack provider — mounted once per admin page so every
+        consumer (SettingsPage, SendUpdateButton, RegenerateLinkDialog) can
+        call useToast() without per-page mounting. Phase 34 Plan 02. */}
+    <ToastContainer client:load />
 
     <script is:inline>
       (function () {
