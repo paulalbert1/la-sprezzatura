@@ -1,0 +1,84 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import SettingsPage from "../../components/admin/settings/SettingsPage.tsx";
+import { SITE_SETTINGS_QUERY } from "../../sanity/queries";
+import { getTenantClient } from "../../lib/tenantClient";
+
+// Phase 34 Plan 03 — /admin/settings entry page
+// Source of truth: .planning/phases/34-settings-and-studio-retirement/34-UI-SPEC.md § 1
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+
+const client = getTenantClient(tenantId);
+const raw = (await client.fetch(SITE_SETTINGS_QUERY)) ?? {};
+
+// Normalize the GROQ result into a fully-populated payload so the React
+// island never has to branch on undefined fields.
+type SiteSettingsRow = {
+  siteTitle?: string;
+  tagline?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  studioLocation?: string;
+  socialLinks?: { instagram?: string; pinterest?: string; houzz?: string };
+  heroSlideshow?: Array<{
+    _key?: string;
+    image?: {
+      _type?: string;
+      asset?: { _id?: string; url?: string } | null;
+    };
+    alt?: string;
+  }>;
+  renderingAllocation?: number;
+  renderingImageTypes?: string[];
+  renderingExcludedUsers?: string[];
+};
+
+const row = raw as SiteSettingsRow;
+
+const initialSettings = {
+  siteTitle: row.siteTitle ?? "La Sprezzatura",
+  tagline: row.tagline ?? "",
+  contactEmail: row.contactEmail ?? "",
+  contactPhone: row.contactPhone ?? "",
+  studioLocation: row.studioLocation ?? "",
+  socialLinks: {
+    instagram: row.socialLinks?.instagram ?? "",
+    pinterest: row.socialLinks?.pinterest ?? "",
+    houzz: row.socialLinks?.houzz ?? "",
+  },
+  heroSlideshow: (row.heroSlideshow ?? [])
+    .filter((slide) => slide && slide._key && slide.image?.asset?._id)
+    .map((slide) => ({
+      _key: slide._key as string,
+      image: {
+        _type: "image" as const,
+        asset: {
+          _type: "reference" as const,
+          _ref: slide.image!.asset!._id as string,
+        },
+      },
+      alt: slide.alt ?? "",
+      imageUrl: slide.image?.asset?.url,
+    })),
+  renderingAllocation: row.renderingAllocation ?? 50,
+  renderingImageTypes: row.renderingImageTypes ?? [],
+  renderingExcludedUsers: row.renderingExcludedUsers ?? [],
+};
+---
+
+<AdminLayout
+  title="Settings — La Sprezzatura"
+  pageTitle="Settings"
+  breadcrumbs={[
+    { label: "Dashboard", href: "/admin/dashboard" },
+    { label: "Settings" },
+  ]}
+>
+  <SettingsPage client:load initialSettings={initialSettings} />
+</AdminLayout>
