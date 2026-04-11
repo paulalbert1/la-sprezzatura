@@ -69,7 +69,7 @@ export default function GeneralSection({
           className="luxury-input w-full"
           value={values.siteTitle}
           onChange={handle("siteTitle")}
-          placeholder="La Sprezzatura"
+          placeholder="Your studio name"
           maxLength={MAX_SITE_TITLE}
         />
       </div>
@@ -93,7 +93,7 @@ export default function GeneralSection({
           className="luxury-input w-full"
           value={values.contactEmail}
           onChange={handle("contactEmail")}
-          placeholder="hello@lasprezz.com"
+          placeholder="contact@your-studio.example"
         />
         {!emailIsValid ? (
           <div

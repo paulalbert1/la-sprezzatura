@@ -5,6 +5,7 @@ import AdminLayout from "../../layouts/AdminLayout.astro";
 import SettingsPage from "../../components/admin/settings/SettingsPage.tsx";
 import { SITE_SETTINGS_QUERY } from "../../sanity/queries";
 import { getTenantClient } from "../../lib/tenantClient";
+import { getTenantById } from "../../lib/tenants";
 
 // Phase 34 Plan 03 — /admin/settings entry page
 // Source of truth: .planning/phases/34-settings-and-studio-retirement/34-UI-SPEC.md § 1
@@ -13,6 +14,9 @@ const tenantId = Astro.locals.tenantId;
 if (!tenantId) {
   return Astro.redirect("/admin/login");
 }
+
+const tenant = getTenantById(tenantId);
+const tenantBusinessName = tenant?.businessName ?? "Studio";
 
 const client = getTenantClient(tenantId);
 const raw = (await client.fetch(SITE_SETTINGS_QUERY)) ?? {};
@@ -42,7 +46,7 @@ type SiteSettingsRow = {
 const row = raw as SiteSettingsRow;
 
 const initialSettings = {
-  siteTitle: row.siteTitle ?? "La Sprezzatura",
+  siteTitle: row.siteTitle ?? tenantBusinessName,
   tagline: row.tagline ?? "",
   contactEmail: row.contactEmail ?? "",
   contactPhone: row.contactPhone ?? "",
@@ -73,7 +77,7 @@ const initialSettings = {
 ---
 
 <AdminLayout
-  title="Settings — La Sprezzatura"
+  title={`Settings — ${tenantBusinessName}`}
   pageTitle="Settings"
   breadcrumbs={[
     { label: "Dashboard", href: "/admin/dashboard" },

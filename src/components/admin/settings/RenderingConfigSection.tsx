@@ -94,7 +94,7 @@ export default function RenderingConfigSection({
           onChange={(next) =>
             onChange({ ...values, renderingExcludedUsers: next })
           }
-          placeholder="user@lasprezz.com"
+          placeholder="user@your-studio.example"
           validator="email"
           chipIcon={<Mail className="w-3 h-3" />}
           emptyHint="Email addresses of users who cannot use the rendering tool. Stored as-is; sanitization happens server-side."

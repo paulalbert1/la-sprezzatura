@@ -56,9 +56,9 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
 
   it("General section is expanded by default; others collapsed", () => {
     render(<SettingsPage initialSettings={defaultSettings()} />);
-    // General's body renders an input with placeholder "La Sprezzatura"
+    // General's body renders the site-title input with its tenant-neutral placeholder
     expect(
-      screen.queryByPlaceholderText("La Sprezzatura"),
+      screen.queryByPlaceholderText("Your studio name"),
     ).not.toBeNull();
     // Rendering Configuration section is collapsed — the helper text
     // that lives inside its body must NOT be in the DOM.
@@ -89,7 +89,7 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
     ).toBeNull();
     // Modify the site title input
     const siteTitleInput = screen.getByPlaceholderText(
-      "La Sprezzatura",
+      "Your studio name",
     ) as HTMLInputElement;
     fireEvent.change(siteTitleInput, {
       target: { value: "La Sprezzatura Studios" },
@@ -117,7 +117,7 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
     render(<SettingsPage initialSettings={defaultSettings()} />);
     // Mark dirty so save is meaningful
     const siteTitleInput = screen.getByPlaceholderText(
-      "La Sprezzatura",
+      "Your studio name",
     ) as HTMLInputElement;
     fireEvent.change(siteTitleInput, { target: { value: "Updated" } });
 
@@ -161,7 +161,7 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
     render(<SettingsPage initialSettings={defaultSettings()} />);
     // Mark dirty first
     const siteTitleInput = screen.getByPlaceholderText(
-      "La Sprezzatura",
+      "Your studio name",
     ) as HTMLInputElement;
     fireEvent.change(siteTitleInput, { target: { value: "Updated" } });
 
