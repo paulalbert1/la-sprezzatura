@@ -72,7 +72,7 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] Procurement editor — inline editing, status badges, auto-tracking via aggregator API
 - [ ] Client + contractor CRUD — forms, quick-assign, contact popovers, internal notes
 - [ ] Portfolio management — curate completed projects for public site
-- [ ] Rendering tool relocation — port from Studio, fix UX bugs, retest AI
+- [x] Rendering tool relocation — port from Studio, fix UX bugs, retest AI — Phase 33 (verified 2026-04-11, 11/11 RNDR requirements; 2 pre-existing blockers fixed inline with proper scope tags)
 - [ ] Settings + Studio retirement — settings form, Send Update, hero slideshow, deprecation
 
 ### Deferred
@@ -163,4 +163,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 — Phase 29 complete (tenant-aware platform foundation)*
+*Last updated: 2026-04-11 — Phase 33 complete (rendering tool relocated from Studio to /admin/rendering; 11/11 RNDR requirements verified; Studio coexistence preserved via re-export shim)*
