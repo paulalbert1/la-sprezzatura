@@ -382,7 +382,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 - [x] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD (completed 2026-04-08)
 - [x] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation (completed 2026-04-09)
 - [x] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA (completed 2026-04-10)
-- [ ] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes
+- [x] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes (completed 2026-04-11)
 - [ ] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal
 
 ### Phase 29: Tenant-Aware Platform Foundation
@@ -470,7 +470,7 @@ Plans:
 - [x] 33-04-PLAN.md -- StepUpload with instant previews, multi-upload, filename truncation (RNDR-07/08/09 regression)
 - [x] 33-05-PLAN.md -- ChatView side-by-side layout, multi-turn refinement, polling
 - [x] 33-06-PLAN.md -- PromoteDrawer (parchment drawer), project detail Rendering tab
-- [ ] 33-07-PLAN.md -- Full Vitest suite, build security check (T-33-01), manual RNDR-11 UAT
+- [x] 33-07-PLAN.md -- Full Vitest suite, build security check (T-33-01), manual RNDR-11 UAT
 
 ### Phase 34: Settings and Studio Retirement
 **Goal**: The admin can manage all site configuration and operational workflows that previously required Sanity Studio, and Studio is deprecated then removed -- making the admin app the sole management interface
@@ -496,7 +496,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
-| 33. Rendering Tool Relocation | v5.0 | 6/7 | In Progress|  |
+| 33. Rendering Tool Relocation | v5.0 | 7/7 | Complete   | 2026-04-11 |
 | 34. Settings and Studio Retirement | v5.0 | 0/TBD | Not started | - |
 
 ---
