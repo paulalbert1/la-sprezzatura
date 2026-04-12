@@ -172,6 +172,29 @@ export async function getClientByEmail(email: string) {
   return sanityClient.fetch(CLIENT_BY_EMAIL_QUERY, { email });
 }
 
+// GROQ: Look up client by portalToken (Phase 34 Plan 06 — /portal/client/[token]).
+// The token is cryptographically random (generatePortalToken, CHARSET^8 space),
+// so the equality filter is safe from enumeration. Used by the PURL dashboard
+// route handler in src/lib/portal/clientDashboard.ts; duplicated as a local
+// const in that module so its Vitest mocks only need to stub sanityClient.fetch
+// once. Exported here so other admin surfaces can reuse the same GROQ.
+//
+// Param name is `$purl` rather than `$token` to sidestep a @sanity/client
+// TS overload-inference quirk that breaks `fetch(Q, { token })` when Q is a
+// literal string const (see pre-existing error at line ~92 for the twin case).
+export const CLIENT_BY_PORTAL_TOKEN_QUERY = `
+  *[_type == "client" && portalToken == $purl][0] {
+    _id,
+    name,
+    email,
+    portalToken
+  }
+`;
+
+export async function getClientByPortalToken(token: string) {
+  return sanityClient.fetch(CLIENT_BY_PORTAL_TOKEN_QUERY, { purl: token });
+}
+
 // GROQ: Get all portal-enabled projects for an authenticated client
 // Uses references() built-in to match the client _id in the clients[] array
 export const PROJECTS_BY_CLIENT_QUERY = `

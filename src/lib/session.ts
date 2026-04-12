@@ -1,18 +1,41 @@
 import { redis } from "./redis";
 import { generatePortalToken } from "./generateToken";
+import { hashPortalToken } from "./portal/portalTokenHash";
 import type { AstroCookies } from "astro";
 
 const COOKIE_NAME = "portal_session";
 const SESSION_TTL = 2592000; // 30 days in seconds
+const PURL_SESSION_TTL = 604800; // 7 days in seconds (Phase 34 Plan 06 D-19)
 
 /**
  * Session data stored in Redis for authenticated users.
  * Supports multiple roles: client, contractor, building_manager, admin.
+ *
+ * Phase 34 Plan 06 adds two OPTIONAL fields for PURL (Portal URL)
+ * sessions derived from a client.portalToken — distinct from email-
+ * verified sessions created by /portal/verify. These fields are
+ * backward compatible: existing sessions have neither field set.
  */
 export interface SessionData {
   entityId: string;
   role: 'client' | 'contractor' | 'building_manager' | 'admin';
   tenantId?: string;  // Present when role === 'admin'
+  /**
+   * Distinguishes PURL-derived sessions from email-verified sessions.
+   * When source === 'purl', middleware applies extra restrictions:
+   *   - Read-only gate: any non-GET /api/* request returns 401 (T-34-08)
+   *   - Hash re-validation: every /portal/* request re-derives the
+   *     current client.portalToken hash and rejects on mismatch (T-34-07)
+   */
+  source?: 'purl';
+  /**
+   * SHA-256 base64 hash of the client.portalToken at session-creation time.
+   * Middleware compares this to a fresh hash derived from the current
+   * client.portalToken. A mismatch means the token was regenerated, which
+   * invalidates this session (Liz's "regenerate = kill all active access"
+   * mental model per D-22 / Plan 06 T-34-07).
+   */
+  portalTokenHash?: string;
 }
 
 /**
@@ -42,6 +65,51 @@ export async function createSession(
     httpOnly: true,
     sameSite: "lax",
     maxAge: SESSION_TTL, // 2592000 = 30 days
+    secure: import.meta.env.PROD,
+  });
+
+  return sessionToken;
+}
+
+/**
+ * Create a PURL (Portal URL) session for a client who arrived via a
+ * /portal/client/{portalToken} link.
+ *
+ * Differs from createSession in three ways:
+ *   1. Role is always 'client' (no override).
+ *   2. TTL is 7 days (604800s), not 30 days — limits forwarded-link exposure.
+ *   3. Writes { source: 'purl', portalTokenHash } to the session so the
+ *      middleware can enforce hash re-validation on every /portal/* request
+ *      and reject mutation endpoints (Phase 34 Plan 06 T-34-07, T-34-08).
+ *
+ * The portalToken parameter is hashed at session-create time and the RAW
+ * token is never stored in Redis or the cookie — only the SHA-256 base64
+ * hash lives in the session. Middleware hashes the current client.portalToken
+ * on every request and compares with timingSafeEqualHash.
+ */
+export async function createPurlSession(
+  cookies: AstroCookies,
+  clientId: string,
+  portalToken: string,
+): Promise<string> {
+  const sessionToken = generatePortalToken(32);
+  const sessionData: SessionData = {
+    entityId: clientId,
+    role: 'client',
+    source: 'purl',
+    portalTokenHash: hashPortalToken(portalToken),
+  };
+  await redis.set(
+    `session:${sessionToken}`,
+    JSON.stringify(sessionData),
+    { ex: PURL_SESSION_TTL },
+  );
+
+  cookies.set(COOKIE_NAME, sessionToken, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: PURL_SESSION_TTL, // 604800 = 7 days
     secure: import.meta.env.PROD,
   });
 
