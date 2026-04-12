@@ -1,18 +1,55 @@
 import { defineMiddleware } from "astro:middleware";
-import { getSession } from "./lib/session";
+import { sanityClient } from "sanity:client";
+import { getSession, clearSession } from "./lib/session";
 import { getTenantByAdminEmail } from "./lib/tenants";
+import {
+  hashPortalToken,
+  timingSafeEqualHash,
+} from "./lib/portal/portalTokenHash";
 
 const PUBLIC_PATHS = [
   "/portal/login",
   "/portal/verify",
+  // Phase 34 Plan 06 KR-7: the /portal/client/[token] route MUST be public
+  // so the route handler itself can mint the PURL session cookie. Trailing
+  // slash so a bare /portal/client visit (without token) still falls through
+  // to the guarded branch.
+  "/portal/client/",
   "/workorder/login",
   "/workorder/verify",
   "/building/login",
   "/building/verify",
 ];
 
+// Phase 34 Plan 06 T-34-08: PURL-derived sessions are READ-ONLY. Any
+// non-safe HTTP method targeting /api/* must 401 if the session carries
+// source === "purl". Safe methods (GET, HEAD, OPTIONS) pass through — the
+// downstream /api/admin branch still enforces role === "admin" so the
+// PURL session fails that gate anyway. Kept as belt-and-braces so future
+// non-admin mutation surfaces (e.g. portal-read-only APIs) inherit the
+// same protection without an opt-in.
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;
+
+  // Read-only gate for PURL sessions on API mutations (T-34-08)
+  if (
+    pathname.startsWith("/api/") &&
+    !SAFE_METHODS.has(context.request.method)
+  ) {
+    const purlGateSession = await getSession(context.cookies);
+    if (purlGateSession?.source === "purl") {
+      return new Response(
+        JSON.stringify({ error: "PURL sessions are read-only" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+    // Fall through — per-branch session checks below still run.
+  }
 
   // Client portal routes
   if (pathname.startsWith("/portal")) {
@@ -21,6 +58,31 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const session = await getSession(context.cookies);
     if (!session || session.role !== "client") {
       return context.redirect("/portal/login");
+    }
+
+    // Phase 34 Plan 06 T-34-07: PURL session hash re-validation.
+    // On every /portal/* request (not just at login) we re-fetch the
+    // client's current portalToken, hash it, and compare to the
+    // session-stored hash using a constant-time comparison. A mismatch
+    // means Liz regenerated the token (via the D-22 regenerate action),
+    // which invalidates every active PURL session for that client across
+    // every project they're on. Matches "regenerate = kill all active
+    // access" mental model.
+    if (session.source === "purl" && session.portalTokenHash) {
+      const currentToken = await sanityClient.fetch<string | null>(
+        `*[_id == $id][0].portalToken`,
+        { id: session.entityId },
+      );
+      if (
+        !currentToken ||
+        !timingSafeEqualHash(
+          hashPortalToken(currentToken),
+          session.portalTokenHash,
+        )
+      ) {
+        clearSession(context.cookies);
+        return context.redirect("/portal/login");
+      }
     }
 
     context.locals.clientId = session.entityId;
