@@ -7,6 +7,7 @@ import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
 import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
+import ClientChipWithRegenerate from "../../../../components/admin/ClientChipWithRegenerate.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
 import {
@@ -216,24 +217,16 @@ const breadcrumbs = [
           </div>
           <div class="flex flex-wrap gap-[7px]">
             {project.projectClients.map((c: any) => (
-              <ContactCardWrapper
+              <ClientChipWithRegenerate
                 client:load
-                entityId={c._id}
-                entityType="client"
-                name={c.name}
-                href={`/admin/clients/${c._id}`}
-                contactData={{
+                client={{
                   _id: c._id,
                   name: c.name,
                   email: c.email || "",
                   phone: c.phone || "",
                   preferredContact: c.preferredContact || "",
-                  entityType: "client" as const,
                 }}
-                className="inline-flex items-center gap-[7px] px-[11px] py-[5px] rounded-full text-[12.5px] cursor-pointer"
-              >
-                <span style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8; padding: 5px 11px; border-radius: 20px;">{c.name}</span>
-              </ContactCardWrapper>
+              />
             ))}
           </div>
         </div>
