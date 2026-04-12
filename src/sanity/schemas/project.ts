@@ -12,10 +12,6 @@ import {
   ImageIcon,
 } from "@sanity/icons";
 import { generatePortalToken } from "../../lib/generateToken";
-import { BlobFileInput } from "../components/BlobFileInput";
-import { PortalUrlDisplay } from "../components/PortalUrlDisplay";
-import { ScheduleItemPicker } from "../components/gantt/ScheduleItemPicker";
-import { DependencyPreview } from "../components/gantt/DependencyPreview";
 
 export const project = defineType({
   name: "project",
@@ -227,9 +223,6 @@ export const project = defineType({
       group: "portal",
       readOnly: true,
       initialValue: () => generatePortalToken(),
-      components: {
-        input: PortalUrlDisplay,
-      },
     }),
     defineField({
       name: "portalEnabled",
@@ -568,7 +561,6 @@ export const project = defineType({
               title: "Estimate File",
               type: "string",
               description: "Vercel Blob pathname",
-              components: { input: BlobFileInput },
             }),
             defineField({
               name: "estimateAmount",
@@ -697,7 +689,6 @@ export const project = defineType({
               title: "File",
               type: "string",
               description: "Vercel Blob pathname",
-              components: { input: BlobFileInput },
             }),
             defineField({
               name: "description",
@@ -747,7 +738,6 @@ export const project = defineType({
               title: "File",
               type: "string",
               description: "Vercel Blob pathname",
-              components: { input: BlobFileInput },
             }),
             defineField({
               name: "expirationDate",
@@ -807,7 +797,6 @@ export const project = defineType({
               title: "File",
               type: "string",
               description: "Vercel Blob pathname",
-              components: { input: BlobFileInput },
             }),
             defineField({
               name: "description",
@@ -1216,14 +1205,12 @@ export const project = defineType({
               title: "Predecessor (must finish first)",
               type: "string",
               validation: (r) => r.required(),
-              components: { input: ScheduleItemPicker },
             }),
             defineField({
               name: "target",
               title: "Successor (starts after)",
               type: "string",
               validation: (r) => r.required(),
-              components: { input: ScheduleItemPicker },
             }),
             defineField({
               name: "linkType",
@@ -1241,14 +1228,6 @@ export const project = defineType({
               },
             }),
           ],
-          components: {
-            preview: (props: Record<string, unknown>) =>
-              DependencyPreview({
-                source: (props.title || props.source) as string,
-                target: (props.subtitle || props.target) as string,
-                linkType: (props.description || props.linkType) as string,
-              }),
-          },
           preview: {
             select: {
               title: "source",
