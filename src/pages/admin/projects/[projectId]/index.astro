@@ -8,6 +8,7 @@ import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
+import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
 import {
   getAdminProjectDetail,
   RENDERING_SESSIONS_BY_PROJECT_QUERY,
@@ -51,6 +52,54 @@ const isRenderingTabActive =
   Astro.url.pathname.startsWith("/admin/rendering") &&
   Astro.url.searchParams.get("project") === projectId;
 
+// Phase 34 Plan 04 — SendUpdateButton prefetch.
+// Compute per-section counts for the Send Update modal on the server so the
+// React island doesn't need a second fetch. Pending reviews are fetched via a
+// dedicated lightweight query (artifacts aren't in ADMIN_PROJECT_DETAIL_QUERY).
+const now = new Date();
+const milestonesList = (project.milestones || []) as Array<{
+  date?: string;
+  completed?: boolean;
+}>;
+const milestonesTotal = milestonesList.length;
+const milestonesUpcoming = milestonesList.filter((m) => {
+  if (m.completed) return false;
+  if (!m.date) return false;
+  return new Date(m.date).getTime() >= now.getTime();
+}).length;
+
+const procurementList = (project.procurementItems || []) as Array<{
+  status?: string;
+}>;
+const procurementTotal = procurementList.length;
+const procurementDelivered = procurementList.filter(
+  (p) => p.status === "delivered" || p.status === "installed",
+).length;
+
+const pendingReviewsResult = (await client.fetch(
+  `count(*[_type == "project" && _id == $projectId][0].artifacts[
+    defined(currentVersionKey) && count(decisionLog[action == "approved"]) == 0
+  ])`,
+  { projectId },
+)) as number | null;
+const pendingReviewsCount = pendingReviewsResult ?? 0;
+
+const sendUpdateProjectSummary = {
+  _id: project._id,
+  title: project.title,
+  engagementType: project.engagementType || "",
+  clients: (project.projectClients || [])
+    .filter((c: { email?: string }) => Boolean(c.email))
+    .map((c: { _id: string; name: string; email: string }) => ({
+      _id: c._id,
+      name: c.name,
+      email: c.email,
+    })),
+  milestones: { total: milestonesTotal, upcoming: milestonesUpcoming },
+  procurement: { items: procurementTotal, delivered: procurementDelivered },
+  pendingReviews: { count: pendingReviewsCount },
+};
+
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Projects", href: "/admin/projects" },
@@ -72,6 +121,11 @@ const breadcrumbs = [
         </span>
       )}
       <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
+      {/* Phase 34 Plan 04 — Send Update button.
+          The React island owns its own ToastContainer + modal open state. */}
+      <div class="ml-auto">
+        <SendUpdateButton client:load project={sendUpdateProjectSummary} />
+      </div>
     </div>
 
     {/* Project tab nav — Phase 33 D-01: Rendering tab is a styled link out to
