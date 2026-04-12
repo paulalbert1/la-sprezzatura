@@ -383,7 +383,7 @@ Phases execute in numeric order: 15 -> 16 -> 17
 - [x] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation (completed 2026-04-09)
 - [x] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA (completed 2026-04-10)
 - [x] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes (completed 2026-04-11)
-- [ ] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal
+- [x] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal (completed 2026-04-12)
 
 ### Phase 29: Tenant-Aware Platform Foundation
 **Goal**: Every admin request resolves to a specific tenant, all data access is scoped to that tenant's Sanity dataset, and no hardcoded single-tenant assumptions remain in the admin codebase -- the architectural prerequisite for every feature that follows
@@ -506,7 +506,7 @@ Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requi
 | 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
 | 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
 | 33. Rendering Tool Relocation | v5.0 | 7/7 | Complete    | 2026-04-11 |
-| 34. Settings and Studio Retirement | v5.0 | 4/7 | In Progress|  |
+| 34. Settings and Studio Retirement | v5.0 | 7/7 | Complete   | 2026-04-12 |
 
 ---
 *v5.0 completion roadmap created: 2026-04-08 (6 phases, 42 requirements mapped)*
