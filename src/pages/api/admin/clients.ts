@@ -153,6 +153,27 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return jsonResponse({ success: true });
     }
 
+    // Phase 34 Plan 05 — D-22: per-client PURL regeneration.
+    // Unlike the Send Update lazy-gen path (which uses setIfMissing),
+    // regenerate uses `.set()` to FORCE overwrite any existing token.
+    // This invalidates all active PURL sessions for this client across
+    // every project they're on (matches Liz's "regenerate = kill all
+    // active access" mental model). The middleware hash re-validation
+    // shipped by Plan 06 is what enforces the session kill on the next
+    // request; this handler just writes the new token.
+    if (action === "regenerate-portal-token") {
+      const { clientId } = body as { clientId: string };
+      if (!clientId || typeof clientId !== "string") {
+        return jsonResponse({ error: "Missing clientId" }, 400);
+      }
+      const newToken = generatePortalToken(8);
+      await client
+        .patch(clientId)
+        .set({ portalToken: newToken })
+        .commit();
+      return jsonResponse({ success: true, portalToken: newToken });
+    }
+
     return jsonResponse({ error: "Invalid action" }, 400);
   } catch (err) {
     console.error("Failed to process client operation:", err);

@@ -61,8 +61,31 @@ describe("client schema", () => {
 });
 
 describe("client schema portalToken field (Phase 34 Plan 05)", () => {
-  it.todo("client schema defines a field named 'portalToken'");
-  it.todo("portalToken field has type 'string'");
-  it.todo("portalToken field has readOnly: true");
-  it.todo("portalToken field has NO initialValue (lazy generation per D-18)");
+  it("client schema defines a field named 'portalToken'", () => {
+    const field = client.fields?.find((f) => f.name === "portalToken");
+    expect(field).toBeDefined();
+  });
+
+  it("portalToken field has type 'string'", () => {
+    const field = client.fields?.find((f) => f.name === "portalToken");
+    expect(field?.type).toBe("string");
+  });
+
+  it("portalToken field has readOnly: true", () => {
+    const field = client.fields?.find((f) => f.name === "portalToken") as
+      | { readOnly?: boolean }
+      | undefined;
+    expect(field?.readOnly).toBe(true);
+  });
+
+  it("portalToken field has NO initialValue (lazy generation per D-18)", () => {
+    const field = client.fields?.find((f) => f.name === "portalToken") as
+      | { initialValue?: unknown }
+      | undefined;
+    expect(field).toBeDefined();
+    // Property must be absent entirely, not merely undefined from a set call.
+    expect(
+      Object.prototype.hasOwnProperty.call(field ?? {}, "initialValue"),
+    ).toBe(false);
+  });
 });
