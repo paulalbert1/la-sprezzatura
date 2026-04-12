@@ -95,7 +95,7 @@ function getDaysUntilStr(dateStr: string): string {
 const today = format(new Date(), "EEEE, MMMM d, yyyy");
 ---
 
-<AdminLayout title="Dashboard - Studio" pageTitle="Dashboard">
+<AdminLayout title="Dashboard - Studio" pageTitle="Dashboard" breadcrumbs={[{ label: "Dashboard" }]}>
   <div>
     {/* Header with date */}
     <div class="flex justify-between items-baseline mb-4" style="margin-top: -15px;">

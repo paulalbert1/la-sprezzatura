@@ -45,6 +45,7 @@ export const contractor = defineType({
               { title: "HVAC", value: "hvac" },
               { title: "Tile/Stone", value: "tile-stone" },
               { title: "Cabinetry", value: "cabinetry" },
+              { title: "Wallpaper", value: "wallpaper" },
               { title: "Window Treatments", value: "window-treatments" },
               { title: "Other", value: "other" },
             ],
