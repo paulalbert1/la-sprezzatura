@@ -6,10 +6,9 @@
 // Pure renderer extracted from src/pages/api/send-update.ts so the Send Update
 // API route and the new /api/send-update/preview endpoint render from exactly
 // the same source. The only functional change from the pre-Plan-04 shape is
-// that the CTA href is passed in via `ctaHref` instead of being hardcoded to
-// `${baseUrl}/portal/dashboard`. When `ctaHref` is `${baseUrl}/portal/dashboard`
-// and `ctaLabel` is omitted, the output is byte-for-byte equivalent to the
-// legacy builder.
+// that the CTA href is passed in via `ctaHref` instead of being hardcoded.
+// When the caller passes the legacy portal URL and ctaLabel is omitted, the
+// output is byte-for-byte equivalent to the pre-Plan-04 builder.
 //
 // Helpers (formatStatusText, getStatusColor, formatDate, getArtifactLabel) are
 // co-located here so both the template body and any future UI surface that
@@ -79,8 +78,8 @@ export interface SendUpdateEmailInput {
   pendingArtifacts: PendingArtifact[];
   baseUrl: string;
   /** Per-recipient CTA href. Caller decides whether this points at the
-   * legacy `${baseUrl}/portal/dashboard` (usePersonalLinks=false) or the
-   * per-client `${baseUrl}/portal/client/{token}` (usePersonalLinks=true). */
+   * legacy dashboard URL (usePersonalLinks=false) or the per-client
+   * `${baseUrl}/portal/client/{token}` route (usePersonalLinks=true). */
   ctaHref: string;
   /** Defaults to "View in Your Portal" when omitted. */
   ctaLabel?: string;
