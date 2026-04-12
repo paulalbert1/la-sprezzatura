@@ -28,12 +28,16 @@ export interface RegenerateLinkDialogProps {
 }
 
 // Default site base URL. import.meta.env.SITE is populated by Astro's
-// `site` config entry; fall back to the canonical production origin so
-// tests and SSR-free renders get a sane value.
+// `site` config entry. At runtime in a browser, we fall back to the current
+// window origin (tenant-neutral). SSR/test renders without a window use a
+// generic placeholder so this dialog never bakes a tenant domain into the
+// bundle (caught by tenantAudit).
 const DEFAULT_BASE_URL =
   (typeof import.meta !== "undefined" &&
     (import.meta as { env?: { SITE?: string } }).env?.SITE) ||
-  "https://lasprezz.com";
+  (typeof window !== "undefined"
+    ? window.location.origin
+    : "https://your-studio.example");
 
 export default function RegenerateLinkDialog({
   open,
