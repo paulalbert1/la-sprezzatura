@@ -1,0 +1,150 @@
+---
+export const prerender = false;
+
+// Phase 34 Plan 06 — /portal/client/[token]
+//
+// PURL (Portal URL) client dashboard. Visitors arriving from a Send Update
+// email click a link of the form /portal/client/{client.portalToken}. This
+// route resolves the token → client document, mints a 7-day role="client"
+// session with source="purl" (scoped to this clientId, carrying a hash of
+// the current portalToken), and renders a minimal list of the client's
+// portal-enabled projects with click-throughs to /portal/project/[projectId].
+//
+// Security model (see 34-CONTEXT.md § D-19 revised):
+//   T-34-06 (forwarded link): accepted via 7-day TTL + regenerate action.
+//   T-34-07 (regen kills session): middleware re-derives portalTokenHash
+//           on every /portal/* request; hash mismatch triggers clearSession.
+//   T-34-08 (read-only gate): middleware rejects any non-safe /api/*
+//           method from sessions carrying source === "purl".
+//
+// Middleware config (KR-7): "/portal/client/" is in PUBLIC_PATHS so this
+// handler runs WITHOUT a pre-existing session, and can mint one itself.
+
+import PortalLayout from "../../../components/portal/PortalLayout.astro";
+import StatusBadge from "../../../components/portal/StatusBadge.astro";
+import { getClientDashboardData } from "../../../lib/portal/clientDashboard";
+import { createPurlSession } from "../../../lib/session";
+import { STAGE_META, type StageKey } from "../../../lib/portalStages";
+import { ENGAGEMENT_LABELS } from "../../../lib/portal/engagementLabels";
+
+const { token } = Astro.params;
+const data = token ? await getClientDashboardData(token) : null;
+
+// Token-valid path: mint the PURL session before rendering so the browser
+// arrives at any /portal/project/[projectId] link with a valid cookie.
+// createPurlSession is idempotent per visit — it writes a fresh session
+// with a refreshed TTL every time the link is clicked, which matches the
+// UX goal (clicking the email link "feels" like a login).
+if (data) {
+  await createPurlSession(
+    Astro.cookies,
+    data.client._id,
+    data.client.portalToken,
+  );
+}
+
+const firstName = data?.client.name?.split(" ")[0] ?? "";
+const pageTitle = data
+  ? `Welcome, ${firstName} | La Sprezzatura`
+  : "Portal link expired | La Sprezzatura";
+---
+
+<PortalLayout title={pageTitle}>
+  {!data ? (
+    <main class="flex-1">
+      <div class="max-w-2xl mx-auto px-6 py-12 md:py-20 text-center">
+        <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
+          La Sprezzatura
+        </p>
+        <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
+          Your portal link has expired or is invalid
+        </h1>
+        <p class="text-sm text-stone font-body max-w-md mx-auto mb-8 leading-relaxed">
+          If you received this link recently, please contact us and we'll send
+          you a new one.
+        </p>
+        <a
+          href="mailto:office@lasprezz.com"
+          class="inline-block border border-stone-light/40 px-6 py-3 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors font-body"
+        >
+          office@lasprezz.com
+        </a>
+      </div>
+    </main>
+  ) : (
+    <main class="flex-1">
+      <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
+        {/* Brand eyebrow */}
+        <p class="text-xs text-stone tracking-[0.2em] uppercase font-body text-center mb-6">
+          La Sprezzatura
+        </p>
+
+        {/* Welcome headline */}
+        <h1 class="font-heading text-3xl md:text-4xl font-light text-charcoal text-center mb-6">
+          Welcome, {firstName}
+        </h1>
+
+        {/* Helper copy */}
+        <p class="text-sm md:text-base text-stone font-body text-center mb-8">
+          Here are your projects with La Sprezzatura.
+        </p>
+
+        {data.projects.length === 0 ? (
+          <div class="text-center py-12">
+            <h2 class="font-heading text-2xl font-light text-charcoal mb-3">
+              No active projects right now
+            </h2>
+            <p class="text-sm text-stone font-body">
+              When Liz adds a project for you, it will appear here.
+            </p>
+          </div>
+        ) : (
+          <div class="flex flex-col gap-4">
+            {data.projects.map((project) => {
+              const stageKey = project.pipelineStage as StageKey;
+              const stageMeta = STAGE_META[stageKey];
+              const stageTitle = stageMeta?.title || project.pipelineStage;
+              const isComplete = project.pipelineStage === "closeout";
+              const engagementLabel =
+                ENGAGEMENT_LABELS[project.engagementType] ||
+                project.engagementType;
+              return (
+                <a
+                  href={`/portal/project/${project._id}`}
+                  class="block group bg-white hover:bg-cream-dark border border-stone-light/20 px-6 py-5 md:px-8 md:py-6 transition-colors focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none"
+                >
+                  <h2 class="font-heading text-lg md:text-xl font-light text-charcoal mb-1">
+                    {project.title}
+                  </h2>
+                  <p class="text-xs text-stone tracking-widest uppercase font-body mb-4">
+                    {engagementLabel}
+                  </p>
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <StatusBadge stage={stageTitle} isComplete={isComplete} />
+                    <div class="text-xs text-stone tracking-widest uppercase font-body group-hover:text-terracotta transition-colors">
+                      View project &rarr;
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Contact footer */}
+        <div class="mt-16 text-center">
+          <p class="text-xs text-stone font-body">
+            Questions? Email
+            {" "}
+            <a
+              href="mailto:office@lasprezz.com"
+              class="hover:text-terracotta transition-colors underline underline-offset-2"
+            >
+              office@lasprezz.com
+            </a>
+          </p>
+        </div>
+      </div>
+    </main>
+  )}
+</PortalLayout>
