@@ -28,8 +28,8 @@ import {
 // and (a) lazily generates client.portalToken via setIfMissing if missing,
 // (b) re-fetches to resolve the multi-tab concurrent-send race, (c) sends one
 // email per recipient with a per-client CTA href `${baseUrl}/portal/client/${token}`.
-// Parallelizing this loop via Promise.all is forbidden: the re-fetch step must
-// observe the linearized Sanity write order.
+// The loop MUST await each recipient in sequence — do not parallelize — so the
+// re-fetch step observes the linearized Sanity write order.
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
