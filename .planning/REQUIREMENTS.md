@@ -26,7 +26,7 @@
 - [x] **PROJ-01**: Projects list shows a subtle horizontal divider above the completed-projects section
 - [x] **PROJ-02**: Completed projects render with a dulled / muted visual treatment distinct from active projects
 - [x] **PROJ-03**: User can manually archive a completed project from its detail page
-- [ ] **PROJ-04**: Completed projects auto-archive 90 days after their completion date
+- [x] **PROJ-04**: Completed projects auto-archive 90 days after their completion date
 - [x] **PROJ-05**: "View archived projects" link opens a view that lists archived projects in read-only form
 
 ### Procurement Privacy & Modal (PROC)
@@ -113,7 +113,7 @@
 | PROJ-01 | Phase 36 | Complete |
 | PROJ-02 | Phase 36 | Complete |
 | PROJ-03 | Phase 36 | Complete |
-| PROJ-04 | Phase 36 | Pending |
+| PROJ-04 | Phase 36 | Complete |
 | PROJ-05 | Phase 36 | Complete |
 | PROC-10 | Phase 37 | Pending |
 | PROC-11 | Phase 37 | Pending |

@@ -610,14 +610,13 @@ function ProjectsGridInner({ projects }: Props) {
         </div>
       ) : (
         <>
-          {/* Section 1 — Active */}
+          {/* Section 1 — Active. No header: active is the default state, so
+              announcing it adds visual noise. The non-active header below is
+              what signals that the listing has shifted into a different mode. */}
           {hasActive && (
-            <>
-              <SectionHeader label="Active" count={activeCards.length} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-                {activeCards.map((p) => renderRow(p))}
-              </div>
-            </>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+              {activeCards.map((p) => renderRow(p))}
+            </div>
           )}
 
           {/* PROJ-01 divider between Active and Non-active */}

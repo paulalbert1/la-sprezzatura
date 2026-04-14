@@ -103,7 +103,7 @@ v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase
 **Note on ordering:** Phase 38 (Send Update Sender Config) precedes Phase 39 (Work Order & Documents) so that WORK-05's email-send implementation can consume Settings-driven sender values without a retrofit.
 
 - [x] **Phase 35: Dashboard Polish & Global UX Cleanup** — 13 reqs (DASH-10..22) (completed 2026-04-14)
-- [ ] **Phase 36: Projects List & Archive Lifecycle** — 5 reqs (PROJ-01..05)
+- [x] **Phase 36: Projects List & Archive Lifecycle** — 5 reqs (PROJ-01..05) (completed 2026-04-14)
 - [ ] **Phase 37: Procurement Privacy & Modal Editor** — 5 reqs (PROC-10..14)
 - [ ] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12)
 - [ ] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03)
@@ -146,7 +146,7 @@ Plans:
 Plans:
 - [x] 36-01-PLAN.md — Schema, query projection, and archive/unarchive Astro actions (PROJ-03)
 - [x] 36-02-PLAN.md — Three-tier ProjectsGrid + ProjectArchiveMenu detail-header island (PROJ-01, PROJ-02, PROJ-03, PROJ-05)
-- [ ] 36-03-PLAN.md — Vercel Cron auto-archive endpoint + vercel.ts migration (PROJ-04)
+- [x] 36-03-PLAN.md — Vercel Cron auto-archive endpoint + vercel.ts migration (PROJ-04)
 
 ### Phase 37: Procurement Privacy & Modal Editor
 **Goal**: Procurement hides all pricing information from the admin UI, and item editing moves from inline-row editing to a view-then-edit modal that shows every field with support for multiple images
@@ -224,7 +224,7 @@ Plans:
 | 16-17 | v4.0 | — | Superseded by v5.2 | - |
 | 29-34 | v5.0 | 28/28 | Shipped | 2026-04-12 |
 | 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
-| 36 | v5.1 | 2/3 | In Progress|  |
+| 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
 | 37 | v5.1 | 0/3 | Not started | - |
 | 38 | v5.1 | 0/2 | Not started | - |
 | 39 | v5.1 | 0/4 | Not started | - |

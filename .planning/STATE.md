@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: executing
-stopped_at: Completed 36-02-PLAN.md
-last_updated: "2026-04-14T21:15:46.036Z"
+status: verifying
+stopped_at: Completed 36-04-PLAN.md
+last_updated: "2026-04-14T22:17:54.432Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 8
-  completed_plans: 7
-  percent: 88
+  completed_phases: 2
+  total_plans: 9
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 Phase: 36 (projects-list-archive-lifecycle) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
@@ -66,6 +66,9 @@ Carried from v5.0 boundary. Full history:
 - [Phase 36]: Admin action gate uses context.locals.tenantId + sanityUserId (middleware does not populate adminEmail)
 - [Phase 36]: archivedAt stored as optional datetime on project; presence == archived (D-01)
 - [Phase 36]: Per-island ToastContainer provider pattern (React context does not cross Astro island boundaries)
+- [Phase 36]: Adopted vercel.ts as canonical Vercel config via @vercel/config@0.1.1; deleted vercel.json. Both tracking-sync and auto-archive crons registered in typed config.
+- [Phase 36]: Cron endpoint ships at /api/cron/auto-archive (not /api/admin/auto-archive) to match existing tracking-sync.ts convention; dual-header auth accepts Authorization: Bearer OR x-cron-secret against CRON_SECRET env.
+- [Phase 36]: Plan 04 redesigns card lifecycle presentation: projectStatus + archivedAt drive a CardTreatment helper (left border + opacity + top status label); two-section (Active / Non-active) layout replaces the three-tier model; archive wins over projectStatus
 
 ### Pending Todos
 
@@ -81,7 +84,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-14T21:15:40.896Z
-Stopped at: Completed 36-02-PLAN.md
+Last session: 2026-04-14T22:17:54.429Z
+Stopped at: Completed 36-04-PLAN.md
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`
