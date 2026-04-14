@@ -893,6 +893,7 @@ export async function getAdminDashboardData(client: SanityClient) {
 }
 
 // All projects for the /admin/projects list page
+// Phase 36: archivedAt + completedAt projected for ProjectsGrid tier classification (active / completed / archived).
 const ADMIN_PROJECTS_LIST_QUERY = `
   *[_type == "project"] | order(_updatedAt desc) {
     _id,
@@ -900,6 +901,8 @@ const ADMIN_PROJECTS_LIST_QUERY = `
     pipelineStage,
     projectStatus,
     engagementType,
+    completedAt,
+    archivedAt,
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
     "clientName": clients[0].client->name,
     _createdAt,
