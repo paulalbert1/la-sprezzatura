@@ -424,10 +424,11 @@ export const project = defineType({
               type: "string",
               options: {
                 list: [
-                  { title: "Pending", value: "pending" },
-                  { title: "Ordered", value: "ordered" },
+                  { title: "Scheduled", value: "scheduled" },
                   { title: "Warehouse", value: "warehouse" },
                   { title: "In Transit", value: "in-transit" },
+                  { title: "Ordered", value: "ordered" },
+                  { title: "Pending order", value: "pending" },
                   { title: "Delivered", value: "delivered" },
                   { title: "Installed", value: "installed" },
                 ],
@@ -484,6 +485,20 @@ export const project = defineType({
               description: "Internal notes -- never shown to clients",
             }),
             defineField({
+              name: "itemUrl",
+              title: "Item URL",
+              type: "url",
+              description:
+                "Link to the vendor product page (internal reference).",
+            }),
+            defineField({
+              name: "itemImage",
+              title: "Item Image",
+              type: "image",
+              options: { hotspot: true },
+              description: "Product photo for the item (internal reference).",
+            }),
+            defineField({
               name: "carrierETA",
               title: "Carrier ETA",
               type: "date",
@@ -510,6 +525,13 @@ export const project = defineType({
               type: "datetime",
               description:
                 "Timestamp of last Ship24 sync (cron or manual)",
+            }),
+            defineField({
+              name: "retrievedStatus",
+              title: "Retrieved Status",
+              type: "string",
+              description:
+                "Latest status string pulled from the shipper's tracking API (FedEx/UPS/USPS/Ship24). Read-only; overwritten on each sync.",
             }),
             defineField({
               name: "syncSource",
@@ -1270,6 +1292,46 @@ export const project = defineType({
             prepare: ({ title, subtitle, completed }) => ({
               title: title || "Untitled task",
               subtitle: `${subtitle || "No date"} ${completed ? "(Complete)" : ""}`,
+            }),
+          },
+        }),
+      ],
+    }),
+    // Client Action Items: tasks the client is expected to do
+    // (e.g. sign off on mood board, final payment). Appears in the send-update
+    // email third section and on the admin project detail page.
+    defineField({
+      name: "clientActionItems",
+      title: "Client Action Items",
+      type: "array",
+      group: "tasks",
+      description: "Items the client must act on — surfaced in weekly update emails.",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "clientActionItem",
+          fields: [
+            defineField({
+              name: "description",
+              title: "Description",
+              type: "string",
+              validation: (r) => r.required(),
+            }),
+            defineField({ name: "dueDate", title: "Due Date", type: "date" }),
+            defineField({
+              name: "completed",
+              title: "Completed",
+              type: "boolean",
+              initialValue: false,
+            }),
+            defineField({ name: "completedAt", title: "Completed At", type: "datetime" }),
+            defineField({ name: "createdAt", title: "Created At", type: "datetime" }),
+          ],
+          preview: {
+            select: { title: "description", subtitle: "dueDate", completed: "completed" },
+            prepare: ({ title, subtitle, completed }) => ({
+              title: title || "Untitled action item",
+              subtitle: `${subtitle || "No date"} ${completed ? "(Done)" : ""}`,
             }),
           },
         }),

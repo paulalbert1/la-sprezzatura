@@ -26,12 +26,15 @@ const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const UPDATABLE_FIELDS = [
   "name",
   "vendor",
+  "orderDate",
   "expectedDeliveryDate",
   "installDate",
   "retailPrice",
   "clientCost",
   "trackingNumber",
+  "carrierName",
   "notes",
+  "itemUrl",
 ] as const;
 
 function isValidDate(val: unknown): boolean {

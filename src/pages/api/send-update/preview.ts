@@ -36,9 +36,12 @@ const PROJECT_FOR_PREVIEW_QUERY = `*[_type == "project" && _id == $projectId][0]
   _id, title, engagementType,
   clients[] { client-> { _id, name, email, portalToken } },
   milestones[] | order(date asc) { _key, name, date, completed },
-  select(engagementType == "full-interior-design" => {
+  "clientActionItems": clientActionItems[] | order(completed asc, createdAt desc) {
+    _key, description, dueDate, completed
+  },
+  ...select(engagementType == "full-interior-design" => {
     "procurementItems": procurementItems[] {
-      _key, name, status, installDate, retailPrice,
+      _key, name, status, installDate, expectedDeliveryDate, retailPrice,
       "savings": retailPrice - clientCost
     }
   }),
@@ -106,7 +109,12 @@ export const GET: APIRoute = async ({ url, cookies }) => {
   const showArtifacts =
     sectionsParsed.artifacts === true && pendingArtifacts.length > 0;
 
-  const baseUrl = import.meta.env.SITE || "https://lasprezz.com";
+  // Prefer the request's origin so dev (localhost) produces working portal
+  // links in the preview tab. Fall back to the configured SITE.
+  const requestOrigin = new URL(url.toString()).origin;
+  const baseUrl = requestOrigin && !requestOrigin.includes("0.0.0.0")
+    ? requestOrigin
+    : ((import.meta.env.SITE as string) || "https://lasprezz.com");
   let ctaHref = `${baseUrl}/portal/dashboard`;
 
   if (usePersonalLinks && clientId) {
@@ -123,6 +131,12 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     }
   }
 
+  // For preview, use the first client (or the clientId-targeted one) for greeting.
+  const previewClient = clientId
+    ? project.clients?.find((e) => e?.client?._id === clientId)?.client
+    : project.clients?.[0]?.client;
+  const clientFirstName = previewClient?.name?.split(" ")[0];
+
   const html = buildSendUpdateEmail({
     project,
     personalNote: note,
@@ -132,6 +146,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     pendingArtifacts,
     baseUrl,
     ctaHref,
+    clientFirstName,
   });
 
   return new Response(html, {

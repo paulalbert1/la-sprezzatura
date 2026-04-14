@@ -31,6 +31,15 @@ import {
 // The loop MUST await each recipient in sequence — do not parallelize — so the
 // re-fetch step observes the linearized Sanity write order.
 
+function resolveBaseUrl(request: Request): string {
+  // Prefer the incoming request's origin so dev (localhost) and preview deploys
+  // produce working portal links. Fall back to the configured SITE (prod) and
+  // finally to the hardcoded canonical domain.
+  const origin = new URL(request.url).origin;
+  if (origin && !origin.includes("0.0.0.0")) return origin;
+  return (import.meta.env.SITE as string) || "https://lasprezz.com";
+}
+
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     // T-34-03: admin-only gate. Reject BEFORE body parsing.
@@ -47,6 +56,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       note,
       sections,
       usePersonalLinks = false,
+      ccSelf = true,
+      ccLiz = true,
     } = await request.json();
     if (!projectId) {
       return new Response(
@@ -64,9 +75,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         _id, title, engagementType,
         clients[] { client-> { _id, name, email, portalToken } },
         milestones[] | order(date asc) { _key, name, date, completed },
-        select(engagementType == "full-interior-design" => {
+        "clientActionItems": clientActionItems[] | order(completed asc, createdAt desc) {
+          _key, description, dueDate, completed
+        },
+        ...select(engagementType == "full-interior-design" => {
           "procurementItems": procurementItems[] {
-            _key, name, status, installDate, retailPrice,
+            _key, name, status, installDate, expectedDeliveryDate, retailPrice,
             "savings": retailPrice - clientCost
           }
         }),
@@ -87,8 +101,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       );
     }
 
-    // Build email context shared by both branches.
-    const baseUrl = import.meta.env.SITE || "https://lasprezz.com";
+    // Build email context shared by both branches. Prefer the incoming
+    // request's origin so dev (localhost) and preview deploys produce working
+    // portal links. Fall back to the configured SITE.
+    const requestOrigin = new URL(request.url).origin;
+    const baseUrl = requestOrigin && !requestOrigin.includes("0.0.0.0")
+      ? requestOrigin
+      : ((import.meta.env.SITE as string) || "https://lasprezz.com");
     const personalNote = note || "";
     const showMilestones =
       sections?.milestones !== false &&
@@ -150,40 +169,57 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             pendingArtifacts,
             baseUrl,
             ctaHref: perRecipientCtaHref,
+            clientFirstName: client.name?.split(" ")[0],
           });
 
           recipientEmails.push(client.email);
-          await resend.emails.send({
-            from: "La Sprezzatura <noreply@send.lasprezz.com>",
+          const cc: string[] = [];
+          if (ccLiz) cc.push("liz@lasprezz.com");
+          const resendResult = await resend.emails.send({
+            from: import.meta.env.RESEND_FROM || "La Sprezzatura <onboarding@resend.dev>",
             to: [client.email],
-            subject: `Project Update: ${project.title}`,
+            ...(cc.length > 0 && { cc }),
+            subject: `Project Weekly Update - ${client.name || project.title}`,
             html: perRecipientHtml,
           });
+          if (resendResult.error) {
+            console.error("[SendUpdate] Resend error:", resendResult.error, "to:", client.email);
+          } else {
+            console.log("[SendUpdate] Sent id=", resendResult.data?.id, "to:", client.email);
+          }
         }
       } else {
         // Legacy path — single HTML body, one send per recipient. Preserves
         // the pre-Plan-04 behavior for backward compatibility.
-        const html = buildSendUpdateEmail({
-          project,
-          personalNote,
-          showMilestones,
-          showProcurement,
-          showArtifacts,
-          pendingArtifacts,
-          baseUrl,
-          ctaHref: `${baseUrl}/portal/dashboard`,
-        });
-
         for (const entry of project.clients || []) {
           const client = entry?.client;
           if (!client?.email) continue;
           recipientEmails.push(client.email);
-          await resend.emails.send({
-            from: "La Sprezzatura <noreply@send.lasprezz.com>",
+          const html = buildSendUpdateEmail({
+            project,
+            personalNote,
+            showMilestones,
+            showProcurement,
+            showArtifacts,
+            pendingArtifacts,
+            baseUrl,
+            ctaHref: `${baseUrl}/portal/dashboard`,
+            clientFirstName: client.name?.split(" ")[0],
+          });
+          const cc: string[] = [];
+          if (ccLiz) cc.push("liz@lasprezz.com");
+          const resendResult = await resend.emails.send({
+            from: import.meta.env.RESEND_FROM || "La Sprezzatura <onboarding@resend.dev>",
             to: [client.email],
-            subject: `Project Update: ${project.title}`,
+            ...(cc.length > 0 && { cc }),
+            subject: `Project Weekly Update - ${client.name || project.title}`,
             html,
           });
+          if (resendResult.error) {
+            console.error("[SendUpdate] Resend error:", resendResult.error, "to:", client.email);
+          } else {
+            console.log("[SendUpdate] Sent id=", resendResult.data?.id, "to:", client.email);
+          }
         }
       }
     } else {

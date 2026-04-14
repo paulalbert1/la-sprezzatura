@@ -31,27 +31,9 @@ export const contractor = defineType({
       name: "trades",
       title: "Trades",
       type: "array",
-      of: [
-        defineArrayMember({
-          type: "string",
-          options: {
-            list: [
-              { title: "Electrician", value: "electrician" },
-              { title: "Plumber", value: "plumber" },
-              { title: "Painter", value: "painter" },
-              { title: "General Contractor", value: "general-contractor" },
-              { title: "Custom Millwork", value: "custom-millwork" },
-              { title: "Flooring", value: "flooring" },
-              { title: "HVAC", value: "hvac" },
-              { title: "Tile/Stone", value: "tile-stone" },
-              { title: "Cabinetry", value: "cabinetry" },
-              { title: "Wallpaper", value: "wallpaper" },
-              { title: "Window Treatments", value: "window-treatments" },
-              { title: "Other", value: "other" },
-            ],
-          },
-        }),
-      ],
+      description:
+        "Freeform — type any trade name. Added via the /admin/contractors edit form.",
+      of: [defineArrayMember({ type: "string" })],
     }),
     defineField({
       name: "documents",

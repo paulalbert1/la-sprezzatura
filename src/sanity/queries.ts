@@ -860,6 +860,25 @@ export async function getAdminDashboardData(client: SanityClient) {
   };
 }
 
+// All projects for the /admin/projects list page
+const ADMIN_PROJECTS_LIST_QUERY = `
+  *[_type == "project"] | order(_updatedAt desc) {
+    _id,
+    title,
+    pipelineStage,
+    projectStatus,
+    engagementType,
+    "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
+    "clientName": clients[0].client->name,
+    _createdAt,
+    _updatedAt
+  }
+`;
+
+export async function getAdminProjects(client: SanityClient) {
+  return client.fetch(ADMIN_PROJECTS_LIST_QUERY);
+}
+
 // Admin project detail for dashboard navigation target
 const ADMIN_PROJECT_DETAIL_QUERY = `
   *[_type == "project" && _id == $projectId][0] {
@@ -880,7 +899,15 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       completedAt,
       createdAt
     },
-    "projectClients": clients[defined(@->._id)]-> {
+    "clientActionItems": clientActionItems[] | order(completed asc, createdAt desc) {
+      _key,
+      description,
+      dueDate,
+      completed,
+      completedAt,
+      createdAt
+    },
+    "projectClients": clients[defined(client)].client-> {
       _id, name, email, phone, preferredContact
     },
     "projectContractors": contractors[defined(contractor)] {
@@ -892,7 +919,10 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       "procurementItems": procurementItems[] {
         _key, name, status, orderDate, expectedDeliveryDate, installDate,
         clientCost, retailPrice, trackingNumber, vendor, notes,
-        carrierETA, carrierName, trackingUrl, lastSyncAt, syncSource
+        carrierETA, carrierName, trackingUrl, lastSyncAt, syncSource,
+        retrievedStatus,
+        itemUrl,
+        "itemImage": itemImage{ "assetRef": asset._ref, "url": asset->url }
       }
     })
   }
