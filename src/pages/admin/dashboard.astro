@@ -46,7 +46,7 @@ const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   closeout: { bg: "bg-stone-100", text: "text-stone-600" },
 };
 
-// Date helpers (delivery status + formatDeliveryDate moved into
+// Date helpers (delivery status + ETA date formatter moved into
 // UpcomingDeliveriesCard as of Phase 35 Plan 02).
 function formatMilestoneDate(dateStr: string | null): string {
   if (!dateStr) return "";
