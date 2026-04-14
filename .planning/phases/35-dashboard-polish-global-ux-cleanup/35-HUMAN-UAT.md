@@ -1,0 +1,56 @@
+---
+status: partial
+phase: 35-dashboard-polish-global-ux-cleanup
+source: [35-VERIFICATION.md]
+started: 2026-04-14T12:55:00Z
+updated: 2026-04-14T12:55:00Z
+---
+
+## Current Test
+
+[awaiting human testing]
+
+## Tests
+
+### 1. No relative-time badges in admin app
+expected: Only absolute MMM d dates; Active Projects right-col shows `Since {MMM d}`; overdue banner long-form `N days overdue` preserved
+result: [pending]
+
+### 2. Upcoming Deliveries live filter
+expected: Typing client name substring / tracking number / carrier narrows rows per keystroke; empty-state copy matches `No deliveries match your filter.` or `All caught up — no undelivered items.`
+result: [pending]
+
+### 3. Upcoming Deliveries `Show delivered (N)` disclosure
+expected: Click reveals delivered rows, copy swaps to `Hide delivered`; reload restores default hidden state
+result: [pending]
+
+### 4. Active Projects card free-text filter
+expected: Typing stage name (e.g., `construction`, `procurement`) or client name narrows rows per keystroke; empty-state renders `No projects match your filter.`
+result: [pending]
+
+### 5. Dashboard Contractor `+ Add new contractor` CTA (DEFERRED route)
+expected: CTA navigates to `/admin/contractors/new`. Known deferral: that route 404s until a follow-up phase ships the create page. Pass criterion is that the anchor resolves to the correct href with correct copy — the 404 destination is expected.
+result: [pending]
+
+### 6. Quick-assign single-trade bypass
+expected: Picking a contractor with exactly one trade skips the trade picker and fires toast `Assigned {name} as {Sentence-case trade}.`; multi-trade contractor still shows the trade picker.
+result: [pending]
+
+### 7. Trade pill sentence-case visual scan
+expected: Contractor detail page, Quick Assign flow, and portal Contractor section all render trades in sentence case (e.g., `Electrical rough-in`, `HVAC`, `General contractor`) — no raw slugs, no ALL-CAPS.
+result: [pending]
+
+### 8. Tasks cards header Add-task + hide-completed
+expected: All three cards (dashboard, project detail, client detail) show `+ Add task` header button. Completed tasks hidden by default. `Show completed (N)` link only appears when completed tasks exist and toggles to `Hide completed`; reload resets the reveal.
+result: [pending]
+
+## Summary
+
+total: 8
+passed: 0
+issues: 0
+pending: 8
+skipped: 0
+blocked: 0
+
+## Gaps
