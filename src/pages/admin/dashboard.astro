@@ -13,6 +13,7 @@ import {
   isMilestoneOverdue,
 } from "../../lib/dashboardUtils";
 import { format, parseISO } from "date-fns";
+import { formatTrade } from "../../lib/trades";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) {
@@ -93,7 +94,7 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
         <UpcomingDeliveriesCard client:load deliveries={data.deliveries} />
       </div>
 
-      {/* RIGHT COLUMN: Tasks */}
+      {/* RIGHT COLUMN: Tasks + Contractors */}
       <div class="flex flex-col gap-5">
         <DashboardTasksCard
           client:load
@@ -103,6 +104,77 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
             title: p.title,
           }))}
         />
+
+        {/* Contractors card — Phase 35 Plan 04 (DASH-17).
+            Header-right `+ Add new contractor` CTA routes to the full
+            /admin/contractors/new create page (D-12: no modal, no inline
+            form). Lists the top-6 most-recently-created contractors. */}
+        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+          <div class="px-5 pt-[18px] pb-0">
+            <div class="flex items-center justify-between mb-[14px] gap-3">
+              <h2
+                style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+              >
+                Contractors
+              </h2>
+              <a
+                href="/admin/contractors/new"
+                class="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+                Add new contractor
+              </a>
+            </div>
+            <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
+          </div>
+
+          {data.contractors.length === 0 ? (
+            <p class="text-sm text-stone text-center py-6">No contractors yet.</p>
+          ) : (
+            <div>
+              {data.contractors.map((contractor: { _id: string; name: string; company: string | null; trades: string[] | null }) => (
+                <a
+                  href={`/admin/contractors/${contractor._id}`}
+                  class="flex items-start gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
+                >
+                  <div class="flex-1 min-w-0">
+                    <span class="text-[13.5px] font-medium font-body text-charcoal block truncate">
+                      {contractor.name}
+                    </span>
+                    {contractor.company && (
+                      <span class="text-[11.5px] text-stone-light font-body block truncate mt-0.5">
+                        {contractor.company}
+                      </span>
+                    )}
+                  </div>
+                  {contractor.trades && contractor.trades.length > 0 && (
+                    <div class="flex flex-wrap gap-1 justify-end max-w-[55%] shrink-0">
+                      {contractor.trades.slice(0, 3).map((trade: string) => (
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-body bg-stone-100 text-stone-600">
+                          {formatTrade(trade)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   </div>

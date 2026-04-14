@@ -805,16 +805,33 @@ const ADMIN_DASHBOARD_ACTIVITY_QUERY = `
   }
 `;
 
+// Top-N recently-created contractors for the dashboard Contractor card.
+// Phase 35 Plan 04 (DASH-17): tenant-scoped contractor list used by the
+// dashboard Contractor card. Render-only projection (id/name/company/trades);
+// the full CRUD view lives on /admin/contractors.
+const ADMIN_DASHBOARD_CONTRACTORS_QUERY = `
+  *[_type == "contractor"] | order(_createdAt desc) [0...6] {
+    _id, name, company, trades
+  }
+`;
+
 /** Fetch all dashboard data in parallel using the tenant-scoped client */
 export async function getAdminDashboardData(client: SanityClient) {
-  const [projects, milestoneData, deliveryData, taskData, activityData] =
-    await Promise.all([
-      client.fetch(ADMIN_DASHBOARD_PROJECTS_QUERY),
-      client.fetch(ADMIN_DASHBOARD_MILESTONES_QUERY),
-      client.fetch(ADMIN_DASHBOARD_DELIVERIES_QUERY),
-      client.fetch(ADMIN_DASHBOARD_TASKS_QUERY),
-      client.fetch(ADMIN_DASHBOARD_ACTIVITY_QUERY),
-    ]);
+  const [
+    projects,
+    milestoneData,
+    deliveryData,
+    taskData,
+    activityData,
+    contractors,
+  ] = await Promise.all([
+    client.fetch(ADMIN_DASHBOARD_PROJECTS_QUERY),
+    client.fetch(ADMIN_DASHBOARD_MILESTONES_QUERY),
+    client.fetch(ADMIN_DASHBOARD_DELIVERIES_QUERY),
+    client.fetch(ADMIN_DASHBOARD_TASKS_QUERY),
+    client.fetch(ADMIN_DASHBOARD_ACTIVITY_QUERY),
+    client.fetch(ADMIN_DASHBOARD_CONTRACTORS_QUERY),
+  ]);
 
   // Flatten milestones from all projects, keeping project reference
   const milestones = (milestoneData || []).flatMap((p: any) =>
@@ -868,6 +885,9 @@ export async function getAdminDashboardData(client: SanityClient) {
     deliveries,
     tasks,
     recentActivity: activities,
+    // Phase 35 Plan 04 (DASH-17): top-6 recently-created contractors powers
+    // the dashboard Contractor card. Shape: { _id, name, company, trades }[].
+    contractors: contractors || [],
   };
 }
 
