@@ -82,6 +82,71 @@ Build the settings management UI at `/admin/settings` (siteSettings fields, hero
 - Studio coexistence (D-21 from Phase 33) is **REVERSED** in Phase 34 — it was a temporary gate to allow Phase 33 to port the rendering tool without breaking Studio. Phase 34 now completes the pivot.
 - `sanityUserId` email sanitization via `buildUsageDocId()` from Phase 33 `fix(33-01)` commit `7db8dd5` is load-bearing for rendering config. The excluded users field in settings stores raw email strings; `renderingAuth.ts` applies sanitization on the storage side, so the settings UI stores `paul@lasprezz.com` and the doc ID becomes `usage-paul-lasprezz-com-2026-04`.
 
+### Research revisions (locked 2026-04-11 during plan-phase research)
+
+The plan-phase research pass against the live codebase surfaced several facts that contradict CONTEXT.md assumptions. These revisions OVERRIDE the original decisions they reference. Planner MUST treat these as authoritative.
+
+- **D-19 REVISED (client dashboard click-through) — resolved via AskUserQuestion on 2026-04-11, user picked Option A:**
+  - **Original assumption:** the "legacy `/portal/{project.portalToken}` per-project view" kept working for client bookmarks, so dashboard cards could just link there.
+  - **Actual live state:** `src/pages/portal/[token].astro` is a 33-line "Portal Upgraded" marketing stub. It never resolved tokens and redirects to `/portal/login`. `getProjectByPortalToken()` in `src/sanity/queries.ts:87` has zero callers. There is NO working per-project portal view reachable by token.
+  - **Revised decision:** When a visitor lands on `/portal/client/[token]` with a token that resolves to a client document, the route sets a `role: "client"` session cookie (scoped to that `clientId`) with a short expiry before rendering the dashboard. Project cards then link to the EXISTING `/portal/project/[projectId]` view, which Phase 29's session guards now let through because the visitor is authenticated.
+  - **Session policy (locked):**
+    - Expiry: 7 days maximum (session cookie TTL). Long enough to remain useful across a Send Update email week, short enough to limit exposure from a forwarded link.
+    - Session cookie stores `{ clientId, role: "client", portalTokenHash }` where `portalTokenHash = hash(client.portalToken)`. On every request, middleware re-derives the hash from the current `client.portalToken` and compares. If Liz regenerates the token via D-22, the hash mismatch invalidates the session on the next request — **regenerate = kill all active access**, matching Liz's mental model.
+    - PURL sessions are **read-only**: any mutation endpoint (POST/PATCH/DELETE) in `/api/*` must reject when `session.source === "purl"`. Only `GET` requests and "view project" navigation are allowed.
+    - `session.source = "purl"` is a new session-source flag that the `/portal/client/[token]` route sets on the cookie payload to distinguish token-derived sessions from email-verified Phase 29 sessions.
+  - **Plan implications:**
+    - `/portal/client/[token]` route creates the session cookie during resolution (before rendering the dashboard shell).
+    - `src/middleware.ts` re-validates the hash on every `/portal/*` request, not just at login.
+    - Any existing admin mutation endpoint that reads from session must add a `session.source === "purl" → 401` guard OR explicitly opt into allowing PURL sessions (likely NONE do — it's admin surface).
+    - Plan MUST include a unit test covering: valid token → session set → project detail view returns 200; Liz regenerates token → same session cookie → next request returns 401 + redirect to /portal/login.
+  - **Out of scope for Phase 34:** email-code handshake (Option D from the AskUserQuestion), per-client session revocation UI beyond regeneration, analytics on PURL session usage. Those become Phase 35+ concerns if the threat model evolves.
+
+- **D-09 REVISED (hero slideshow upload path) — unblocked with Path A recommendation:**
+  - **Original assumption:** "Image upload via Vercel Blob using the same `<4.5MB PUT` / `>4.5MB @vercel/blob/client` pattern from Phase 33's StepUpload. Store Sanity image asset reference in the heroSlideshow array after upload."
+  - **Actual live constraint:** `siteSettings.heroSlideshow[].image` is a Sanity `image` type. The public homepage uses `@sanity/image-url` to render it responsively. `@sanity/image-url` requires a **Sanity asset reference** (`{ _type: "image", asset: { _ref: "image-abc..." } }`), NOT a Vercel Blob URL/pathname. StepUpload stores blob pathnames and would break the public homepage rendering.
+  - **Revised decision (Path A):** Add a new API route `src/pages/api/admin/upload-sanity-image.ts` that calls `sanityWriteClient.assets.upload("image", file, { filename, contentType })` and returns the full Sanity asset document. The client-side component receives the asset document and patches `siteSettings.heroSlideshow` with `{ _type: "image", asset: { _type: "reference", _ref: asset._id }, alt }`. StepUpload's hybrid-size pattern is NOT reused literally.
+  - **Why not the existing `/api/blob-upload` route:** that route ends at Vercel Blob storage and has no bridge into Sanity assets. Bridging it would still need a second API call to `sanityWriteClient.assets.upload` — adding the direct route is cleaner.
+  - **Plan implications:** Plan includes the new API route as a separate task, with admin-session auth gate (see KR-3 below). The HeroSlideshowEditor component calls `/api/admin/upload-sanity-image` directly instead of `/api/blob-upload`.
+
+- **D-05 / D-06 REVISED (collapsible section source reference):**
+  - **Original assumption:** "Matches the procurement editor pattern from Phase 32."
+  - **Actual live constraint:** `src/components/admin/ProcurementEditor.tsx` has a status dropdown with a ChevronDown, but no useState-toggle section-collapse behavior. The actual collapsible pattern lives in `src/components/admin/ArtifactManager.tsx:271-345`.
+  - **Revised decision:** Plan references `ArtifactManager.tsx:271-345` for the toggle/rotation/conditional-body MECHANICS, but the new `CollapsibleSection.tsx` primitive is rebuilt with the luxury admin tokens from UI-SPEC § Color (not ArtifactManager's portal tokens). No literal copy.
+
+- **New security gate (KR-3 — `/api/blob-upload` auth) — blocking:**
+  - Research found that `src/pages/api/blob-upload.ts`'s `onBeforeGenerateToken` callback has NO auth check. Any session (or possibly anonymous caller) can issue upload tokens and upload arbitrary files within the allowlist.
+  - Low-impact today (Studio is the only known consumer), but `/admin/settings` hero slideshow and possibly other Phase 34 surfaces will hit the same endpoint if the plan deviates from Path A. Even with Path A adopted, the endpoint remains callable.
+  - **Locked:** plan MUST add an `getSession(cookies); if (!session || session.role !== "admin") return 401` gate to both the PUT and POST handlers of `src/pages/api/blob-upload.ts`. This is a Phase 34 task regardless of whether hero slideshow uses it directly.
+
+- **New middleware config change (KR-7) — blocking:**
+  - The new `/portal/client/[token]` route will be 302-redirected to `/portal/login` by middleware unless its path prefix is added to `PUBLIC_PATHS` in `src/middleware.ts`.
+  - **Locked:** plan MUST add `"/portal/client/"` (with trailing slash) to the `PUBLIC_PATHS` array in the same plan that creates the `[token].astro` route. The `/portal/client/[token]` route handler is what sets the session cookie; middleware must not block it.
+
+- **New CSS class introduction (KR-8):**
+  - UI-SPEC line 250 references `class="luxury-secondary-btn"`; that class does not exist in `src/styles/global.css`. Only `.luxury-input` is defined.
+  - **Locked:** plan adds a `.luxury-secondary-btn` rule to `src/styles/global.css`, mirroring the values in UI-SPEC § Send Update modal trigger button (bg `#FFFEFB`, border `0.5px #D4C8B8`, padding `7px 14px`, etc.). One-time add; used by Send Update trigger, Cancel buttons, and Preview email in the modal.
+
+- **Studio file deletion ordering (KR-1, KR-2) — blocking:**
+  - `src/sanity/schemas/project.ts` lines 15-18 import FOUR Studio input components (`BlobFileInput`, `PortalUrlDisplay`, `ScheduleItemPicker`, `DependencyPreview`) and registers them on fields at lines 231, 571, 700, 750, 810, 1219, 1226, 1246. `src/sanity/structure.ts:2` imports `GanttScheduleView` from `src/sanity/components/gantt/`.
+  - Deleting the component files BEFORE stripping the schema/structure imports breaks `npx tsc --noEmit` and `astro build`.
+  - **Locked:** plan must strip schema imports from `project.ts`, delete `src/sanity/structure.ts` (it's dead code once Studio is gone), and delete the component files in a STRICT order within a single plan:
+    1. Edit `src/sanity/schemas/project.ts` — remove 4 imports + all `components: { input: ... }` registrations (leave Sanity's default inputs)
+    2. Delete `src/sanity/structure.ts`
+    3. Delete `src/sanity/components/rendering/**` (14 files, verified zero consumers)
+    4. Delete `src/sanity/components/gantt/**` (verified Studio-only, admin gantt at `src/lib/gantt/GanttChart.tsx` is independent)
+    5. Delete `src/sanity/components/BlobFileInput.tsx`, `PortalUrlDisplay.tsx`, `StudioNavbar.tsx`
+    6. Run `npx tsc --noEmit` and `npx astro build` before commit
+  - The verification step is the acceptance criteria — not just "deleted" but "build is still green after deletion".
+
+- **Full sanity check reference list** — the non-blocking research findings KR-4 (confirmed Path A above), KR-6 (confirmed ArtifactManager above), KR-9 (planner runs `grep -rn "siteSettings" src/` first; picks `_id: "siteSettings"` fixed-ID convention if no prior fetcher exists), KR-10 (accept Vitest-only coverage), are all reflected in the locked plan guidance above or deferred to the planner's discretion.
+
+### Requirements reinterpretation (decided 2026-04-11 during plan-phase)
+
+- **SETT-07 ("Sanity Studio shows deprecation banner directing to admin app")** is considered **superseded by D-01**. Phase 33 D-21 (coexistence mode) already served the role a deprecation banner would have played — Studio continued to work while the admin app took over the rendering tool. By Phase 34, that coexistence period is over and an immediate removal is the correct action. Planner MUST NOT add a deprecation banner; instead, record this reinterpretation in the plan narrative and in the REQUIREMENTS.md status update.
+- **SETT-08 ("Studio route removed after 30-day deprecation period")** is satisfied by the immediate `studioBasePath` drop in D-01. The 30-day clock was a safety margin for the banner approach; since there is no banner, there is no wait. Planner records this interpretation in the plan narrative and in the REQUIREMENTS.md status update.
+- Planner MUST still map SETT-07 and SETT-08 to a plan so the step 13 requirements-coverage gate passes — whichever plan handles Studio removal should claim both REQ-IDs in its frontmatter and include an acceptance criterion that explicitly cites the reinterpretation (e.g., `REQUIREMENTS.md line 86 annotated: "SETT-07 superseded — see Phase 34 CONTEXT.md requirements reinterpretation"`).
+
 ### Claude's Discretion
 
 - Exact settings form field labels and help text (follow existing Phase 30/32 form patterns)

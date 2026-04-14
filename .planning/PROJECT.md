@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A full digital platform for La Sprezzatura, an interior design studio run by Elizabeth ("Liz") on Long Island / New York. The project replaces a low-performing Wix site (38% SEO, 2 indexed pages) with a custom-built portfolio website, client operations portal, and integrated business tooling — designed to attract high-end clients and automate studio operations.
+A full digital platform for La Sprezzatura, an interior design studio run by Elizabeth ("Liz") on Long Island / New York. The project includes a custom-built portfolio website, multi-role client/contractor/building-manager portal, AI rendering tool, and a custom admin app (Linha) that replaced Sanity Studio as the sole management interface. The platform uses tenant-aware architecture, positioning it for multi-tenant extraction in v6.0.
 
 ## Core Value
 
@@ -10,30 +10,51 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 
 ## Milestone Plan
 
-| Milestone | Focus | Phases |
-|-----------|-------|--------|
-| v1.0 MVP | Public site, portfolio, CMS, basic portal | 1-3 |
-| v2.0 Client Portal Foundation | Auth, client data, engagement types, core portal features | 5-6 |
-| v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 |
-| v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish | 9-12 |
-| v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability | 13-14 |
-| v4.0 Project Schedule | Interactive Gantt chart for project sequencing | 15-17 |
-| v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 18-28 (foundation), 29+ (completion) |
-| v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD |
+| Milestone | Focus | Phases | Status |
+|-----------|-------|--------|--------|
+| v1.0 MVP | Public site, portfolio, CMS, basic portal | 1-3 | Shipped 2026-03-15 |
+| v2.0 Client Portal Foundation | Auth, client data, engagement types, core portal features | 5-6 | Complete 2026-04-03 |
+| v2.5 Contractor & Commercial Workflows | Contractor portal, building manager portal, residential/commercial toggle | 7-8 | Complete 2026-04-03 |
+| v3.0 AI Rendering & Go-Live | AI rendering tool, send update, investment proposals, site polish | 9-12 | Phase 12 deferred |
+| v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability | 13-14 | Complete 2026-04-03 |
+| v4.0 Project Schedule | Interactive Gantt chart for project sequencing | 15-17 | Phase 15 complete |
+| v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 29-34 | Shipped 2026-04-12 |
+| v5.1 Admin UX Polish | Hands-on UX refinements, Work Order + Documents panels, vendor/client schema updates | 35-41 | In progress |
+| v5.2 Schedule Rebuild | Retire Frappe Gantt, configurable designer template workflow | TBD | Needs brainstorming |
+| v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD | Planned |
 
-## Current Milestone: v5.0 Admin Platform Completion
+## Current Milestone: v5.1 Admin UX Polish & Workflow Additions
 
-**Goal:** Complete the custom `/admin/*` app (Linha) with tenant-aware architecture, all management features, and dashboard — so Sanity Studio can be fully retired.
+**Goal:** Refine the v5.0 admin app based on Liz's hands-on feedback, add Work Order and Documents panels to project detail, remove pricing exposure from procurement, and tighten vendor/client data models.
 
 **Target features:**
-- Platform foundation — tenant-scoped architecture (Level 1: no hardcoded assumptions, tenant context on every request)
-- Dashboard — cross-project overview with milestones, deliveries, tasks, activity feed (per mockup)
-- Task management — per-project task list with due dates, integrated into dashboard
-- Procurement editor — inline editing, status badges, auto-tracking via Ship24/EasyPost (daily cron + force refresh)
-- Client + contractor CRUD — forms, quick-assign, contact card popovers, internal notes
-- Portfolio management — curate which completed projects appear on public site
-- Rendering tool relocation — port from Sanity Studio to admin, fix 5 UX bugs, retest AI
-- Settings + Studio retirement — settings form, Send Update relocation, hero slideshow, deprecation
+- Dashboard polish — rename Deliveries → Upcoming Deliveries, free-text filters, remove relative-time status noise, fix Contractor card bugs, visible task add + hide-completed
+- Projects list — completed-project visual separation, manual + 90-day auto-archive, archived view
+- Procurement — row-to-modal view/edit, strip all pricing fields (privacy), rename Delivery → Expected install date, multi-image upload
+- NEW Work Order panel — select procurement items + custom fields + special instructions → send via office@lasprezz.com
+- NEW Documents panel — upload contracts and addenda to a project
+- Send Update sender config — from/cc sourced from Settings
+- Contractors/Vendors — rename to "Contractor / Vendor", trade pills + trades CRUD, address field, 1099 upload
+- Clients — consistent phone formatting, address field, updated columns, drop "preferred contact"
+
+## Current State (after v5.0)
+
+**Shipped:** Custom `/admin/*` app with tenant-aware architecture. Sanity Studio fully retired (51 files deleted, studioBasePath dropped). The admin app is the sole management interface for projects, clients, contractors, procurement, rendering, portfolio, settings, and Send Update.
+
+**Tech stack:** Astro 6, React (islands), Sanity CMS (Content Lake only — no Studio), Tailwind CSS, Vercel, Upstash Redis, Vercel Blob, Gemini (AI rendering), Ship24 (tracking), Resend (email), bcryptjs (admin auth)
+
+**LOC:** ~46,800 TypeScript/TSX/Astro/CSS
+
+**Admin features shipped in v5.0:**
+- Tenant-aware platform foundation (per-tenant Sanity clients, admin auth, middleware)
+- Dashboard with active projects, deliveries, tasks, overdue detection
+- Client and contractor CRUD with search, popovers, quick-assign, delete protection
+- Procurement editor with 6-stage pipeline, Ship24 tracking, daily cron
+- AI rendering tool (wizard, chat refinement, promote to Design Options, usage tracking)
+- Portfolio management with toggle, edit, drag-and-drop reorder
+- Site settings, hero slideshow, rendering config
+- Send Update email with per-client personal portal links (PURL)
+- Client dashboard at /portal/client/[token]
 
 ## Requirements
 
@@ -47,40 +68,34 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - ✓ Hosting on Vercel with automatic GitHub deploys — v1.0
 - ✓ Basic client portal with PURL access, pipeline status, milestone timeline — v1.0
 - ✓ SEO foundations (meta, OG, structured data, sitemap) — v1.0
+- ✓ Platform foundation — tenant-scoped architecture (tenant model, scoped auth, per-tenant config) — v5.0
+- ✓ Dashboard — cross-project overview (active projects, deliveries, tasks) — v5.0
+- ✓ Task management — per-project tasks with due dates, dashboard integration — v5.0
+- ✓ Procurement editor — inline editing, status badges, auto-tracking via Ship24 — v5.0
+- ✓ Client + contractor CRUD — forms, quick-assign, contact popovers, internal notes — v5.0
+- ✓ Portfolio management — curate completed projects for public site — v5.0
+- ✓ Rendering tool relocation — port from Studio, fix UX bugs, retest AI — v5.0
+- ✓ Settings + Studio retirement — settings form, Send Update, hero slideshow — v5.0
 
-### Active (v3.0)
+### Active (v3.0 — remaining)
 
-- [ ] AI rendering tool in Sanity Studio — guided wizard with floor plans, space photos, inspiration, and text prompt
-- [ ] Gemini-powered image generation — photorealistic 1K room renderings
-- [ ] Conversational refinement — iterate on renderings with multi-turn context
-- [ ] Design Options — promote renderings as client-facing gallery items with captions
-- [ ] Client portal Design Options gallery — favorites, comments, confidentiality notice
-- [ ] Usage tracking — per-designer monthly allocation with hard cap
-- [ ] Send Update — templated email to client with current portal state + optional note + delivery log
-- [ ] Budget proposals — tiered pricing artifacts (Best/Better/Good) per project
-- [ ] Fantastical Openings booking — replace Cal.com embed on contact page
-- [ ] Home page hero visual refresh — more impact, animation
 - [ ] DNS consolidation — all 4 domains to Cloudflare
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
-- [ ] Professional email addresses: liz@lasprezz.com, info@lasprezz.com, paul@lasprezz.com
 
-### Active (v5.0 — Admin Platform Completion)
+### Active (v5.1 — in progress)
 
-- [x] Platform foundation — tenant-scoped architecture (tenant model, scoped auth, per-tenant config) — Phase 29
-- [ ] Dashboard — cross-project overview (milestones, deliveries, tasks, activity feed)
-- [ ] Task management — per-project tasks with due dates, dashboard integration
-- [ ] Procurement editor — inline editing, status badges, auto-tracking via aggregator API
-- [ ] Client + contractor CRUD — forms, quick-assign, contact popovers, internal notes
-- [ ] Portfolio management — curate completed projects for public site
-- [x] Rendering tool relocation — port from Studio, fix UX bugs, retest AI — Phase 33 (verified 2026-04-11, 11/11 RNDR requirements; 2 pre-existing blockers fixed inline with proper scope tags)
-- [ ] Settings + Studio retirement — settings form, Send Update, hero slideshow, deprecation
+- [ ] Dashboard polish — upcoming-deliveries rename, free-text filters, contractor card fixes, tasks add/hide, remove relative-time status noise
+- [ ] Projects list — completed-project styling, manual archive, 90-day auto-archive, archived view
+- [ ] Procurement — row-to-modal editor, strip pricing fields, rename install-date column, multi-image upload
+- [ ] Work Order panel — select procurement items, custom fields, special instructions, email send
+- [ ] Documents panel — upload contracts and project documentation
+- [ ] Send Update sender config sourced from Settings (office@ / cc liz@)
+- [ ] Contractors/Vendors rename + trade pills + trades CRUD + address + 1099 support
+- [ ] Client data model — phone formatting, address field, updated columns, drop preferred-contact
 
-### Deferred
+### Deferred (v4.0 — Gantt)
 
-- [ ] Gantt drag-and-drop rescheduling with Sanity field sync (v4.0 Phase 16)
-- [ ] Gantt appointment sub-markers, overlap highlighting, procurement lifecycle bars (v4.0 Phase 17)
-- [ ] DNS cutover and go-live — all 4 domains to Cloudflare (v3.0 Phase 12)
-- [ ] AI rendering improvements — revisit later
+- Phases 16-17 superseded by v5.2 Schedule Rebuild (Frappe Gantt retirement)
 
 ### Planned (v6.0 — Linha Platform)
 
@@ -105,45 +120,41 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 
 - **Current site:** Wix at lasprezz.com — sparse content, no dedicated service/about/contact pages, poor SEO
 - **Domains:** 4 domains across Wix and GoDaddy registrars — need consolidation to Cloudflare
-- **Email:** Currently on Microsoft 365 via lasprezzaturany.com, lasprezz.com MX misconfigured (points to Google)
-- **Portfolio:** 4-5 completed projects with photography, plus Instagram content. Projects include Darien, Flower Hill Office, Gramercy Apartment, North Shore Bathroom
-- **Content approach:** Photos-first, minimal long-form writing for now. Let the work speak for itself.
-- **Builder:** Paul (proficient developer, building with Claude Code assistance). Liz is the client/business owner — average tech comfort, needs simple CMS UX.
-- **Design priority:** Polished, cutting-edge design is the #1 requirement. The site must look nothing like a template. UI/UX Pro Max skill available for design quality during execution.
+- **Email:** Microsoft 365 via lasprezzaturany.com. lasprezz.com MX configured for M365.
+- **Portfolio:** 4-5 completed projects with photography, plus Instagram content
+- **Content approach:** Photos-first, minimal long-form writing. Let the work speak for itself.
+- **Builder:** Paul (proficient developer, building with Claude Code assistance). Liz is the client/business owner — average tech comfort, needs simple admin UX.
+- **Design priority:** Polished, cutting-edge design is the #1 requirement. The site must look nothing like a template.
 - **Agents:** Should be relatively self-directed during execution — Paul wants minimal hand-holding of the build process.
 - **Financial tools:** Moving from FreshBooks to QuickBooks for richer integration ecosystem
-- **Existing planning:** Comprehensive Digital Strategy doc (Feb 2026) and Website Planning Report (Mar 2026) in this directory
-
-## Constraints
-
-- **Framework:** Astro 6 with Sanity CMS (decided in v1.0 research)
-- **Code location:** Repo will be created in ~/Dropbox/GitHub/ (not in this planning directory)
-- **CMS UX:** Must be simple enough for Liz to use independently — form-based editing, no technical concepts exposed
-- **Budget:** Minimize monthly costs at launch — leverage free tiers (Vercel, Sanity, Cloudinary, Cal.com, Resend). Realistic Day 1: ~$36/mo (Google Workspace + QuickBooks)
-- **Design:** Must define visual identity through research — no existing brand guide. Luxury interior design aesthetic: warm neutrals, editorial typography, generous whitespace
-- **Email:** Stay on Microsoft 365 (already in use) — do NOT migrate to Google Workspace
+- **Admin app:** Custom `/admin/*` app (Linha) is the sole management interface. Sanity Studio retired as of v5.0.
+- **Multi-tenant readiness:** Tenant-scoped architecture in place (Level 1). Phase 34 APIs still use global sanityWriteClient (tech debt for v6.0).
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Custom build over Squarespace | Template fingerprints unacceptable for luxury brand; developer (Paul) finds visual editor counterproductive | — Pending |
-| Custom build over Houzz Pro | $99/mo too expensive; features overlap with tools being assembled; keep free listing only | — Pending |
-| Microsoft 365 over Google Workspace | Already in use, migration disruptive, no reason to switch | — Pending |
-| Astro 6 over Next.js | Content-first site with islands architecture; better performance for portfolio-heavy site; Sanity integration mature | ✓ Good |
-| Fantastical over Cal.com | Liz already uses Fantastical as daily calendar; avoids dual availability management | — Pending |
-| PURL over account-based portal access | Zero friction for clients, faster to build, appropriate security for interior design data | ⚠️ Revisit — upgrading to magic link in v2.0 |
-| Restructure v2.0 into v2.0/v2.5/v3.0 | v2.0 had 43 requirements across 4 phases — scope creep. Split into foundation (v2.0), contractor/commercial (v2.5), operations + go-live (v3.0) | ✓ Good |
-| Engagement type on project schema | Full Interior Design / Styling & Refreshing / Carpet Curating controls available features. Added to v2.0 data foundation so schema is right from day one | ✓ Good |
-| Cloudflare for DNS | At-cost pricing, fastest authoritative DNS, consolidates 4 domains under one registrar | — Pending |
-| AI rendering via Sanity Studio custom tool | Keeps designer in existing workspace; API service layer matches existing patterns; extractable to Linha | — Pending |
-| Gemini (Nano Banana 2) for image generation | Pro-level quality at Flash speed; strong spatial understanding; ~$0.07/image at 1K; model configurable via env var | — Pending |
-| Build AI rendering in la-sprezzatura first | Liz gets value immediately; all features exist before Linha extraction = cleaner migration | — Pending |
-| v3.0 absorbs old v3.0 + AI rendering | Combined milestone avoids a thin v3.0; rendering is the marquee feature for go-live | — Pending |
-| Product name: Linha | Admin platform is the product; La Sprezzatura is one tenant/instance. Other designers will use it. | — Pending |
-| Multi-tenant from v5.0 (Level 1) | Tenant-scoped architecture baked in from start; no hardcoded single-tenant assumptions. Manual provisioning for now; self-service onboarding in v6.0. | — Pending |
-| Ship24 or EasyPost for tracking | Aggregator API for auto-checking UPS/FedEx/DHL status. Ship24 free tier (100 calls/mo) likely sufficient; EasyPost ~$3/mo fallback. | — Pending |
-| Sanity Studio retirement via deprecation | 30-day deprecation banner before removal; admin must have all features verified first | — Pending |
+| Custom build over Squarespace | Template fingerprints unacceptable for luxury brand | ✓ Good |
+| Microsoft 365 over Google Workspace | Already in use, migration disruptive | ✓ Good |
+| Astro 6 over Next.js | Content-first site with islands architecture; better performance for portfolio-heavy site | ✓ Good |
+| PURL over account-based portal access | Zero friction for clients, appropriate security for interior design data | ✓ Good — upgraded to magic link in v2.0 |
+| Restructure v2.0 into v2.0/v2.5/v3.0 | v2.0 had 43 requirements across 4 phases — scope creep | ✓ Good |
+| Product name: Linha | Admin platform is the product; La Sprezzatura is one tenant/instance | ✓ Good |
+| Multi-tenant from v5.0 (Level 1) | Tenant-scoped architecture baked in from start; no hardcoded single-tenant assumptions | ✓ Good — minor gaps (Phase 34 APIs, cron) accepted as tech debt |
+| Sanity Studio retired immediately (not 30-day deprecation) | No external users depend on Studio; admin app covers all features | ✓ Good |
+| Ship24 for tracking | Aggregator API for auto-checking carrier status; free tier (100 calls/mo) sufficient | ✓ Good |
+| PURL tokens stored as plaintext in Sanity | Bookmark-level credentials; middleware hashes per-request; regenerate is recovery path | — Accepted risk |
+| Gemini for AI rendering | Pro-level quality at Flash speed; ~$0.07/image at 1K; model configurable via env var | ✓ Good |
+
+## Constraints
+
+- **Framework:** Astro 6 with Sanity CMS (Content Lake only — Studio retired)
+- **Code location:** ~/Dropbox/GitHub/la-sprezzatura
+- **Admin UX:** Must be simple enough for Liz to use independently — form-based editing, no technical concepts exposed
+- **Budget:** Minimize monthly costs — leverage free tiers (Vercel, Sanity, Cloudinary, Resend). Realistic Day 1: ~$51/mo (M365 + QuickBooks + Sanity)
+- **Design:** Luxury interior design aesthetic: warm neutrals, editorial typography, generous whitespace
+- **Email:** Stay on Microsoft 365
+- **Admin:** Custom /admin/* app is the sole management interface (Sanity Studio retired)
 
 ## Evolution
 
@@ -163,4 +174,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 — Phase 33 complete (rendering tool relocated from Studio to /admin/rendering; 11/11 RNDR requirements verified; Studio coexistence preserved via re-export shim)*
+*Last updated: 2026-04-14 — v5.1 milestone started (Admin UX Polish & Workflow Additions)*
