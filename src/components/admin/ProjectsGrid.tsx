@@ -63,10 +63,12 @@ function buildCardTreatment(project: Project): CardTreatment {
   if (project.archivedAt) {
     return {
       kind: "archived",
-      borderColor: "#9E8E80", // stone
+      borderColor: "#C4D6A8", // desaturated green — same hue family as
+      // completed (#97C459) but faded, so archived reads as "completed
+      // and set aside" rather than as a distinct terminal state.
       opacity: 0.4,
       statusLabel: `Archived ${formatArchivedDate(project.archivedAt)}`,
-      statusColor: "#9E8E80",
+      statusColor: "#7A8C60", // muted green to match border
       statusIcon: null, // italic-only label reads cleaner than a glyph
     };
   }
@@ -92,10 +94,11 @@ function buildCardTreatment(project: Project): CardTreatment {
     case "cancelled":
       return {
         kind: "cancelled",
-        borderColor: "var(--color-text-tertiary)",
+        borderColor: "#B8B0A4", // warm mid-gray — clearly a stripe but
+        // still muted so it doesn't compete with paused's amber urgency
         opacity: 0.6,
         statusLabel: "Cancelled",
-        statusColor: "var(--color-text-tertiary)",
+        statusColor: "#8A8075",
         statusIcon: "x",
       };
     // "active", "reopened", undefined/empty all render as active (no treatment).
