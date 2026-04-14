@@ -58,3 +58,14 @@ export function getAdminBySanityUserId(
   const tenant = getTenantById(tenantId);
   return tenant?.admins.find((a) => a.sanityUserId === sanityUserId);
 }
+
+/**
+ * Phase 36: cron iteration helper. Returns every tenant id loaded from
+ * tenants.json. Used by /api/cron/* endpoints to fan-out per-tenant work.
+ * Today there is exactly one tenant ("lasprezzatura"); this function exists
+ * so cron handlers don't hard-code that string and so v6.0 multi-tenant
+ * onboarding is a pure data change.
+ */
+export function getAllTenantIds(): string[] {
+  return tenants.map((t) => t.id);
+}
