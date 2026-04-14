@@ -4,21 +4,25 @@ import { format, parseISO } from "date-fns";
 import { STAGE_META, STAGES, type StageKey } from "../../lib/portalStages";
 import ToastContainer, { useToast } from "./ui/ToastContainer";
 
-// Phase 36 Plan 02 — ProjectsGrid tier rendering
+// Phase 36 Plan 04 — ProjectsGrid card status redesign
 // Source of truth:
-//   - .planning/phases/36-projects-list-archive-lifecycle/36-UI-SPEC.md
-//     § Component Inventory (ArchiveToggle, TierDivider, Row visual variants,
-//       Archived row right-side action slot, Empty state — archived view)
-//     § Color → "Opacity tier contract"
-//     § Copywriting Contract (every user-facing string)
-//   - .planning/phases/36-projects-list-archive-lifecycle/36-CONTEXT.md
-//     D-07/D-08/D-09/D-10/D-11
+//   - .planning/phases/36-projects-list-archive-lifecycle/36-04-PLAN.md
+//     § design_spec (active / paused / completed / cancelled / archived card treatments)
+//   - /Users/paulalbert/Downloads/project_cards_status_redesign.html (mockup)
 //
-// Extends the existing flat grid with a three-tier render pass: active (100%)
-// → completed non-archived (70%) → archived (50%). A thin <hr> divider
-// introduces each non-empty subsequent tier. The archived tier is gated by an
-// "Include archived" checkbox in the filter bar (no persistence — reload
-// resets to off, matching Phase 35 DASH-21/22 pattern and CONTEXT D-08).
+// This plan REPLACES the Plan 02 pipelineStage-driven three-tier model with a
+// projectStatus + archivedAt driven card treatment system. Two visual sections:
+//   1. Active — projectStatus in {active, reopened} (or unset), archivedAt null
+//   2. Non-active — paused/completed/cancelled (no archivedAt) + archived
+//      (when "Include archived" is on), in that visual order
+//
+// Card treatment (borderColor, opacity, status label) communicates lifecycle
+// state. The pipelineStage badge is unaffected — it still owns its own badge
+// row independently. Archive WINS over projectStatus when both are set.
+//
+// Opacity contract: 1.0 active / 0.6 paused|completed|cancelled / 0.4 archived.
+// (The mockup file specified 0.7/0.55/0.45 — per plan directive, the 0.6/0.4
+// values are the source of truth.)
 
 interface Project {
   _id: string;
@@ -35,7 +39,92 @@ interface Props {
   projects: Project[];
 }
 
-type Tier = "active" | "completed" | "archived";
+// Phase 36 Plan 04 — card-level lifecycle treatment.
+// Kind drives the left border, opacity, and status label above the title.
+// Archive wins: if archivedAt is set, kind is "archived" regardless of projectStatus.
+type CardKind =
+  | "active"
+  | "paused"
+  | "completed"
+  | "cancelled"
+  | "archived";
+
+interface CardTreatment {
+  kind: CardKind;
+  borderColor: string | null; // hex; null for active (no left border modification)
+  opacity: number; // 1.0 active | 0.6 paused/completed/cancelled | 0.4 archived
+  statusLabel: string | null;
+  statusColor: string | null;
+  statusIcon: "pause" | "check" | "x" | "archive" | null;
+}
+
+function buildCardTreatment(project: Project): CardTreatment {
+  // Archive wins over projectStatus.
+  if (project.archivedAt) {
+    return {
+      kind: "archived",
+      borderColor: "#9E8E80", // stone
+      opacity: 0.4,
+      statusLabel: `Archived ${formatArchivedDate(project.archivedAt)}`,
+      statusColor: "#9E8E80",
+      statusIcon: null, // italic-only label reads cleaner than a glyph
+    };
+  }
+  switch (project.projectStatus) {
+    case "paused":
+      return {
+        kind: "paused",
+        borderColor: "#EF9F27",
+        opacity: 0.6,
+        statusLabel: "Paused",
+        statusColor: "#BA7517",
+        statusIcon: "pause",
+      };
+    case "completed":
+      return {
+        kind: "completed",
+        borderColor: "#97C459",
+        opacity: 0.6,
+        statusLabel: "Completed",
+        statusColor: "#639922",
+        statusIcon: "check",
+      };
+    case "cancelled":
+      return {
+        kind: "cancelled",
+        borderColor: "var(--color-text-tertiary)",
+        opacity: 0.6,
+        statusLabel: "Cancelled",
+        statusColor: "var(--color-text-tertiary)",
+        statusIcon: "x",
+      };
+    // "active", "reopened", undefined/empty all render as active (no treatment).
+    default:
+      return {
+        kind: "active",
+        borderColor: null,
+        opacity: 1,
+        statusLabel: null,
+        statusColor: null,
+        statusIcon: null,
+      };
+  }
+}
+
+function iconChar(icon: CardTreatment["statusIcon"]): string {
+  switch (icon) {
+    case "pause":
+      return "⏸";
+    case "check":
+      return "✓";
+    case "x":
+      return "✕";
+    case "archive":
+      return "⊘";
+    default:
+      return "";
+  }
+}
 
 const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   discovery: { bg: "#F5F1EB", text: "#7A6B5A" },
@@ -87,6 +176,27 @@ const TierDivider = () => (
   />
 );
 
+// Phase 36 Plan 04 — section header with visible count.
+// Counts reflect what's currently on screen: Active count = activeCards.length,
+// Non-active count = nonActiveCards.length + (includeArchived ? archivedCards.length : 0).
+function SectionHeader({ label, count }: { label: string; count: number }) {
+  return (
+    <div
+      style={{
+        fontSize: "11px",
+        fontWeight: 500,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        color: "#9E8E80",
+        fontFamily: "var(--font-sans)",
+        marginBottom: "12px",
+      }}
+    >
+      {label} ({count})
+    </div>
+  );
+}
+
 function ProjectsGridInner({ projects }: Props) {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -96,7 +206,14 @@ function ProjectsGridInner({ projects }: Props) {
   );
   const { show } = useToast();
 
-  const { activeRows, completedRows, archivedRows, totalVisible } = useMemo(() => {
+  // Phase 36 Plan 04 section classification — two visual sections driven by
+  // projectStatus + archivedAt (no longer pipelineStage-driven):
+  //   activeCards      — projectStatus in {active, reopened, unset} & !archivedAt
+  //   nonActiveCards   — projectStatus in {paused, completed, cancelled} & !archivedAt
+  //   archivedCards    — archivedAt != null (regardless of projectStatus)
+  // The Non-active section visually concatenates nonActiveCards + archivedCards
+  // (the latter only when `includeArchived` is true).
+  const { activeCards, nonActiveCards, archivedCards, totalVisible } = useMemo(() => {
     const passesFilters = (p: Project) => {
       if (stageFilter !== "all" && p.pipelineStage !== stageFilter) return false;
       if (statusFilter !== "all" && p.projectStatus !== statusFilter)
@@ -106,15 +223,17 @@ function ProjectsGridInner({ projects }: Props) {
 
     const filtered = projects.filter(passesFilters);
 
-    // Tier classification: "closeout" is the schema's terminal pipelineStage.
-    // CONTEXT D-02 used the colloquial label "completed"; the schema enum has
-    // no such value, so the visible "Completed" tier is sourced from "closeout".
+    const isActiveStatus = (s: string | undefined) =>
+      !s || s === "active" || s === "reopened";
+    const isNonActiveStatus = (s: string | undefined) =>
+      s === "paused" || s === "completed" || s === "cancelled";
+
     const active = filtered
-      .filter((p) => !p.archivedAt && p.pipelineStage !== "closeout")
+      .filter((p) => !p.archivedAt && isActiveStatus(p.projectStatus))
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
-    const completed = filtered
-      .filter((p) => !p.archivedAt && p.pipelineStage === "closeout")
+    const nonActive = filtered
+      .filter((p) => !p.archivedAt && isNonActiveStatus(p.projectStatus))
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
     const archived = filtered
@@ -125,10 +244,10 @@ function ProjectsGridInner({ projects }: Props) {
 
     const visibleArchivedCount = includeArchived ? archived.length : 0;
     return {
-      activeRows: active,
-      completedRows: completed,
-      archivedRows: archived,
-      totalVisible: active.length + completed.length + visibleArchivedCount,
+      activeCards: active,
+      nonActiveCards: nonActive,
+      archivedCards: archived,
+      totalVisible: active.length + nonActive.length + visibleArchivedCount,
     };
   }, [projects, stageFilter, statusFilter, includeArchived]);
 
@@ -167,48 +286,58 @@ function ProjectsGridInner({ projects }: Props) {
     }
   }
 
-  function renderRow(project: Project, tier: Tier) {
+  function renderRow(project: Project) {
     const stageMeta = STAGE_META[project.pipelineStage as StageKey];
     const stageColor =
       STAGE_COLORS[project.pipelineStage] || STAGE_COLORS.discovery;
     const statusInfo =
       STATUS_COLORS[project.projectStatus] || STATUS_COLORS.active;
 
-    // Tier-driven opacity per UI-SPEC § Color → Opacity tier contract.
-    // Literal values (active=1, completed=0.7, archived=0.5) applied to the
-    // entire row anchor so all children dim uniformly; the archived-row
-    // Unarchive button overrides this back to 1 explicitly.
-    const tierOpacity =
-      tier === "archived"
-        ? /* opacity: 0.5 */ 0.5
-        : tier === "completed"
-          ? /* opacity: 0.7 */ 0.7
-          : 1;
-    const isArchived = tier === "archived";
+    // Phase 36 Plan 04 — card treatment drives opacity + left border.
+    // Opacity: 1 active | 0.6 paused/completed/cancelled | 0.4 archived.
+    // Archived-row Unarchive button overrides this back to 1 explicitly.
+    const treatment = buildCardTreatment(project);
+    const isArchived = treatment.kind === "archived";
+    const hasTreatment = treatment.borderColor !== null;
+
+    const cardStyle: React.CSSProperties = {
+      display: "block",
+      position: "relative",
+      background: "#FFFEFB",
+      border: "0.5px solid #E8DDD0",
+      borderRadius: "10px",
+      padding: "18px 20px",
+      textDecoration: "none",
+      transition: "border-color 150ms ease, box-shadow 150ms ease",
+      opacity: treatment.opacity,
+    };
+    if (hasTreatment && treatment.borderColor) {
+      // 3px solid left border, square left corners, right corners preserved.
+      cardStyle.borderLeft = `3px solid ${treatment.borderColor}`;
+      cardStyle.borderTopLeftRadius = 0;
+      cardStyle.borderBottomLeftRadius = 0;
+    }
 
     return (
       <a
         key={project._id}
         href={`/admin/projects/${project._id}`}
-        style={{
-          display: "block",
-          position: "relative",
-          background: "#FFFEFB",
-          border: "0.5px solid #E8DDD0",
-          borderRadius: "10px",
-          padding: "18px 20px",
-          textDecoration: "none",
-          transition: "border-color 150ms ease, box-shadow 150ms ease",
-          opacity: tierOpacity,
-        }}
+        style={cardStyle}
         onMouseEnter={(e) => {
           e.currentTarget.style.borderColor = "#D4C8B8";
           e.currentTarget.style.boxShadow =
             "0 2px 8px rgba(44,37,32,0.04)";
+          // Preserve the left-border color under the hover override.
+          if (hasTreatment && treatment.borderColor) {
+            e.currentTarget.style.borderLeftColor = treatment.borderColor;
+          }
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.borderColor = "#E8DDD0";
           e.currentTarget.style.boxShadow = "none";
+          if (hasTreatment && treatment.borderColor) {
+            e.currentTarget.style.borderLeftColor = treatment.borderColor;
+          }
         }}
       >
         {/* Inline Unarchive button (archived rows only). Overrides parent
@@ -373,14 +502,16 @@ function ProjectsGridInner({ projects }: Props) {
     );
   }
 
-  const hasActive = activeRows.length > 0;
-  const hasCompleted = completedRows.length > 0;
-  const hasArchivedVisible = includeArchived && archivedRows.length > 0;
-  // Second divider renders when the toggle is on and there's at least one
-  // prior tier on screen — gives the "No archived projects yet" empty state
-  // a structural anchor (UI-SPEC § Empty state — archived view).
-  const showArchivedEmptyState =
-    includeArchived && archivedRows.length === 0 && (hasActive || hasCompleted);
+  // Phase 36 Plan 04 — two-section render.
+  // Section 1: Active cards.
+  // Section 2: Non-active (paused/completed/cancelled) cards, followed by
+  //            archived cards when `includeArchived` is true.
+  const hasActive = activeCards.length > 0;
+  const hasNonActive = nonActiveCards.length > 0;
+  const hasArchivedVisible = includeArchived && archivedCards.length > 0;
+  const nonActiveSectionHasContent = hasNonActive || hasArchivedVisible;
+  const nonActiveCount =
+    nonActiveCards.length + (includeArchived ? archivedCards.length : 0);
 
   return (
     <div>
@@ -441,9 +572,9 @@ function ProjectsGridInner({ projects }: Props) {
         </span>
       </div>
 
-      {/* Three-tier render pass. Empty state only when nothing is visible in
-          any tier under the current filters. */}
-      {totalVisible === 0 && !showArchivedEmptyState ? (
+      {/* Two-section render pass (Phase 36 Plan 04). Empty state only when
+          no projects match filters in either section. */}
+      {totalVisible === 0 ? (
         <div
           style={{
             background: "#FFFEFB",
@@ -460,41 +591,45 @@ function ProjectsGridInner({ projects }: Props) {
         </div>
       ) : (
         <>
+          {/* Section 1 — Active */}
           {hasActive && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {activeRows.map((p) => renderRow(p, "active"))}
-            </div>
-          )}
-
-          {hasActive && hasCompleted && <TierDivider />}
-
-          {hasCompleted && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {completedRows.map((p) => renderRow(p, "completed"))}
-            </div>
-          )}
-
-          {hasArchivedVisible && (hasActive || hasCompleted) && <TierDivider />}
-
-          {hasArchivedVisible && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-              {archivedRows.map((p) => renderRow(p, "archived"))}
-            </div>
-          )}
-
-          {showArchivedEmptyState && (
             <>
-              <TierDivider />
-              <div
-                className="text-center py-6"
-                style={{
-                  color: "#B8B0A4",
-                  fontSize: "13px",
-                  fontFamily: "var(--font-sans)",
-                }}
-              >
-                No archived projects yet.
+              <SectionHeader label="Active" count={activeCards.length} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+                {activeCards.map((p) => renderRow(p))}
               </div>
+            </>
+          )}
+
+          {/* PROJ-01 divider between Active and Non-active */}
+          {hasActive && (nonActiveSectionHasContent || includeArchived) && (
+            <TierDivider />
+          )}
+
+          {/* Section 2 — Non-active (paused/completed/cancelled + archived) */}
+          {(nonActiveSectionHasContent || includeArchived) && (
+            <>
+              <SectionHeader label="Non-active" count={nonActiveCount} />
+              {nonActiveSectionHasContent ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+                  {nonActiveCards.map((p) => renderRow(p))}
+                  {hasArchivedVisible &&
+                    archivedCards.map((p) => renderRow(p))}
+                </div>
+              ) : (
+                <div
+                  className="text-center py-6"
+                  style={{
+                    color: "#B8B0A4",
+                    fontSize: "13px",
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  {includeArchived
+                    ? "No completed, paused, cancelled, or archived projects."
+                    : "No completed, paused, or cancelled projects."}
+                </div>
+              )}
             </>
           )}
         </>
