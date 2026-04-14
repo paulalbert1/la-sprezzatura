@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { formatTrade } from "../../lib/trades";
 
 interface ExistingClient {
   _id: string;
@@ -282,7 +283,7 @@ export default function QuickAssignTypeahead({
               onClick={() => handleTradeSelect(trade)}
               className="w-full text-left px-3 py-2 text-sm font-body text-charcoal hover:bg-cream cursor-pointer"
             >
-              {trade}
+              {formatTrade(trade)}
             </button>
           ))}
           {(!selectedContractor.trades ||

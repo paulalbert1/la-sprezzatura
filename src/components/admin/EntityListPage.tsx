@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, ChevronUp, ChevronDown } from "lucide-react";
+import { formatTrade } from "../../lib/trades";
 
 interface EntityListPageProps {
   entityType: "client" | "contractor";
@@ -51,7 +52,9 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
         const phone = (entity.phone || "").toLowerCase();
         const company = (entity.company || "").toLowerCase();
         const trades = Array.isArray(entity.trades)
-          ? entity.trades.join(" ").toLowerCase()
+          ? [...entity.trades, ...entity.trades.map(formatTrade)]
+              .join(" ")
+              .toLowerCase()
           : "";
         return (
           name.includes(query) ||
@@ -87,7 +90,7 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
     const remaining = trades.length - 3;
     return (
       <span className="text-stone">
-        {visible.join(", ")}
+        {visible.map((slug) => formatTrade(slug)).join(", ")}
         {remaining > 0 && <span className="text-stone-light"> +{remaining} more</span>}
       </span>
     );

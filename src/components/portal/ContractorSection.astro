@@ -1,4 +1,6 @@
 ---
+import { formatTrade } from "../../lib/trades";
+
 interface Appointment {
   dateTime: string;
   label: string;
@@ -42,7 +44,7 @@ const formatDateTime = (dt: string) =>
             <div class="flex flex-wrap gap-1.5">
               {c.trades.map((trade) => (
                 <span class="inline-flex px-2 py-0.5 rounded-full text-xs tracking-wide bg-stone-light/15 text-stone font-body">
-                  {trade}
+                  {formatTrade(trade)}
                 </span>
               ))}
             </div>
