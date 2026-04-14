@@ -131,19 +131,29 @@ export default function QuickAssignTypeahead({
     [fetchResults],
   );
 
-  const showConfirmation = useCallback((name: string) => {
-    setConfirmMessage(`${name} assigned`);
-    setState("assigned");
-    setQuery("");
-    setResults([]);
-    setSelectedContractor(null);
+  const showConfirmation = useCallback(
+    (name: string, tradeLabel?: string) => {
+      // Phase 35 Plan 04 (DASH-18): when a single-trade bypass fires, the
+      // confirmation copy carries the formatted trade label so the user gets
+      // immediate feedback about what was assigned. Multi-trade and client
+      // assignments fall back to the original "{name} assigned" copy.
+      const message = tradeLabel
+        ? `Assigned ${name} as ${tradeLabel}.`
+        : `${name} assigned`;
+      setConfirmMessage(message);
+      setState("assigned");
+      setQuery("");
+      setResults([]);
+      setSelectedContractor(null);
 
-    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-    confirmTimerRef.current = setTimeout(() => {
-      setConfirmMessage("");
-      setState("idle");
-    }, 2000);
-  }, []);
+      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+      confirmTimerRef.current = setTimeout(() => {
+        setConfirmMessage("");
+        setState("idle");
+      }, 2000);
+    },
+    [],
+  );
 
   const assignClient = useCallback(
     async (entity: SearchResult) => {
@@ -184,7 +194,7 @@ export default function QuickAssignTypeahead({
         });
 
         if (!res.ok) throw new Error("Failed to assign");
-        showConfirmation(entity.name);
+        showConfirmation(entity.name, formatTrade(trade));
       } catch {
         setState("results");
       }
@@ -196,13 +206,22 @@ export default function QuickAssignTypeahead({
     (entity: SearchResult) => {
       if (entity.entityType === "client") {
         assignClient(entity);
-      } else {
-        // Contractor -- show trade selection
-        setSelectedContractor(entity);
-        setState("selectingTrade");
+        return;
       }
+      // Contractor branch.
+      // Phase 35 Plan 04 (DASH-18 / D-13): when the contractor has exactly
+      // one trade, skip the trade-picker step and assign directly. The
+      // confirmation surfaces the formatted trade label via showConfirmation.
+      if (entity.trades && entity.trades.length === 1) {
+        void assignContractor(entity, entity.trades[0]);
+        return;
+      }
+      // 0 trades or 2+ trades: fall through to the picker so the user can
+      // either see the existing "No trades listed" fallback or pick one.
+      setSelectedContractor(entity);
+      setState("selectingTrade");
     },
-    [assignClient],
+    [assignClient, assignContractor],
   );
 
   const handleTradeSelect = useCallback(
