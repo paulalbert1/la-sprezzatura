@@ -91,6 +91,6 @@ describe("CardFilterInput (Phase 35 Plan 02)", () => {
     const input = screen.getByPlaceholderText("Filter") as HTMLInputElement;
     expect(input.type).toBe("text");
     expect(input.getAttribute("autocomplete")).toBe("off");
-    expect(input.spellcheck).toBe(false);
+    expect(input.getAttribute("spellcheck")).toBe("false");
   });
 });
