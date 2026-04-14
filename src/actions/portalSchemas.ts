@@ -47,3 +47,8 @@ export const selectTierSchema = z.object({
   reservations: z.string().optional(),
   confirmed: z.literal("true"),
 });
+
+// Phase 36: Archive lifecycle for admin projects list
+export const archiveProjectSchema = z.object({
+  projectId: z.string().min(1, "projectId is required"),
+});

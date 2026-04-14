@@ -6,6 +6,7 @@ import { magicLinkRatelimit } from "../lib/rateLimit";
 import { getClientByEmail, getClientById, getContractorByEmail, getContractorById, getProjectsByContractorId } from "../sanity/queries";
 import { generatePortalToken } from "../lib/generateToken";
 import { sanityWriteClient } from "../sanity/writeClient";
+import { getTenantClient } from "../lib/tenantClient";
 import {
   approveArtifactSchema,
   requestChangesSchema,
@@ -14,6 +15,7 @@ import {
   warrantyClaimSchema,
   contractorNoteSchema,
   selectTierSchema,
+  archiveProjectSchema,
 } from "./portalSchemas";
 
 export { warrantyClaimSchema };
@@ -539,6 +541,71 @@ export const server = {
         }])
         .commit({ autoGenerateArrayKeys: true });
 
+      return { success: true };
+    },
+  }),
+
+  // Phase 36: Admin-only archive lifecycle for projects.
+  // Auth gate: middleware (src/middleware.ts) populates context.locals.tenantId +
+  // context.locals.sanityUserId for admin sessions. We gate on both (tenantId is
+  // the per-tenant scope; sanityUserId proves the admin entry was resolved from
+  // the tenant registry). context.locals.adminEmail is NOT populated in this
+  // codebase (plan referenced it as a fallback concept); we use sanityUserId
+  // instead to match every other admin write path (e.g., src/pages/admin/*).
+  archiveProject: defineAction({
+    accept: "json",
+    input: archiveProjectSchema,
+    handler: async (input, context) => {
+      const tenantId = context.locals.tenantId;
+      const sanityUserId = context.locals.sanityUserId;
+      if (!tenantId || !sanityUserId) {
+        throw new ActionError({ code: "UNAUTHORIZED", message: "Admin session required." });
+      }
+
+      const tenantClient = getTenantClient(tenantId);
+
+      // Per CONTEXT D-02, eligibility = pipelineStage === "completed" && archivedAt == null.
+      // Re-check server-side rather than trust the client.
+      const current = (await tenantClient.fetch(
+        `*[_type == "project" && _id == $projectId][0]{ pipelineStage, archivedAt, completedAt }`,
+        { projectId: input.projectId },
+      )) as { pipelineStage?: string; archivedAt?: string | null; completedAt?: string | null } | null;
+
+      if (!current) {
+        throw new ActionError({ code: "NOT_FOUND", message: "Project not found." });
+      }
+      if (current.archivedAt) {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Project is already archived." });
+      }
+      if (current.pipelineStage !== "completed") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Only completed projects can be archived." });
+      }
+
+      const now = new Date().toISOString();
+      // Discretion safe-guard from CONTEXT: stamp completedAt if missing so
+      // the 90-day auto-archive window has something to anchor on.
+      const setObj: Record<string, string> = current.completedAt
+        ? { archivedAt: now }
+        : { archivedAt: now, completedAt: now };
+
+      await tenantClient.patch(input.projectId).set(setObj).commit();
+      return { success: true, archivedAt: now };
+    },
+  }),
+
+  unarchiveProject: defineAction({
+    accept: "json",
+    input: archiveProjectSchema,
+    handler: async (input, context) => {
+      const tenantId = context.locals.tenantId;
+      const sanityUserId = context.locals.sanityUserId;
+      if (!tenantId || !sanityUserId) {
+        throw new ActionError({ code: "UNAUTHORIZED", message: "Admin session required." });
+      }
+
+      const tenantClient = getTenantClient(tenantId);
+      // Idempotent: clearing archivedAt on a non-archived project is a no-op patch.
+      await tenantClient.patch(input.projectId).set({ archivedAt: null }).commit();
       return { success: true };
     },
   }),
