@@ -582,14 +582,13 @@ function ProjectsGridInner({ projects }: Props) {
             </div>
           )}
 
-          {/* PROJ-01 divider between Active and Non-active */}
-          {hasActive && (nonActiveSectionHasContent || includeArchived) && (
-            <SectionDivider />
-          )}
-
-          {/* Section 2 — Non-active (paused/completed/cancelled + archived) */}
+          {/* Section 2 — Non-active (paused/completed/cancelled + archived).
+              Per UAT feedback: HR divider removed; vertical whitespace + the
+              section header carry the break. Per-card left border + top
+              status label already announce lifecycle state. */}
           {(nonActiveSectionHasContent || includeArchived) && (
             <>
+              {hasActive && <div style={{ height: 32 }} />}
               <SectionHeader label="Non-active" count={nonActiveCount} />
               {nonActiveSectionHasContent ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
