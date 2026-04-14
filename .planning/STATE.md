@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
 status: executing
-stopped_at: Phase 35 UI-SPEC approved
-last_updated: "2026-04-14T18:45:39.830Z"
+stopped_at: Completed 36-01-PLAN.md
+last_updated: "2026-04-14T21:07:38.551Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_plans: 8
+  completed_plans: 6
+  percent: 75
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 35 — dashboard-polish-global-ux-cleanup
+**Current focus:** Phase 36 — projects-list-archive-lifecycle
 
 ## Current Position
 
-Phase: 36
-Plan: Not started
-Status: Executing Phase 35
+Phase: 36 (projects-list-archive-lifecycle) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-14
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
@@ -63,6 +63,8 @@ Carried from v5.0 boundary. Full history:
 - DASH-19 (human-friendly trade labels) treated as presentation-layer — no dependency on VEND-03 trades CRUD data model changes
 - CLNT-10 (phone formatting) implemented as shared utility in Phase 41, reused across vendor popovers
 - Existing commits prefixed `v5.1` (cb4fbe9 send-update email template, f30cb0b card-grid + new drawer, 69f53b0 schema plumbing) are absorbed into this milestone as informal pre-work; verification will confirm which specific requirements they partially satisfy
+- [Phase 36]: Admin action gate uses context.locals.tenantId + sanityUserId (middleware does not populate adminEmail)
+- [Phase 36]: archivedAt stored as optional datetime on project; presence == archived (D-01)
 
 ### Pending Todos
 
@@ -78,7 +80,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-14T15:46:23.903Z
-Stopped at: Phase 35 UI-SPEC approved
-Resume file: .planning/phases/35-dashboard-polish-global-ux-cleanup/35-UI-SPEC.md
+Last session: 2026-04-14T21:07:38.549Z
+Stopped at: Completed 36-01-PLAN.md
+Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

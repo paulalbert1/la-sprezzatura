@@ -144,7 +144,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 36-01-PLAN.md — Schema, query projection, and archive/unarchive Astro actions (PROJ-03)
+- [x] 36-01-PLAN.md — Schema, query projection, and archive/unarchive Astro actions (PROJ-03)
 - [ ] 36-02-PLAN.md — Three-tier ProjectsGrid + ProjectArchiveMenu detail-header island (PROJ-01, PROJ-02, PROJ-03, PROJ-05)
 - [ ] 36-03-PLAN.md — Vercel Cron auto-archive endpoint + vercel.ts migration (PROJ-04)
 
@@ -224,7 +224,7 @@ Plans:
 | 16-17 | v4.0 | — | Superseded by v5.2 | - |
 | 29-34 | v5.0 | 28/28 | Shipped | 2026-04-12 |
 | 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
-| 36 | v5.1 | 0/3 | Not started | - |
+| 36 | v5.1 | 1/3 | In Progress|  |
 | 37 | v5.1 | 0/3 | Not started | - |
 | 38 | v5.1 | 0/2 | Not started | - |
 | 39 | v5.1 | 0/4 | Not started | - |

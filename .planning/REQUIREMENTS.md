@@ -25,7 +25,7 @@
 
 - [ ] **PROJ-01**: Projects list shows a subtle horizontal divider above the completed-projects section
 - [ ] **PROJ-02**: Completed projects render with a dulled / muted visual treatment distinct from active projects
-- [ ] **PROJ-03**: User can manually archive a completed project from its detail page
+- [x] **PROJ-03**: User can manually archive a completed project from its detail page
 - [ ] **PROJ-04**: Completed projects auto-archive 90 days after their completion date
 - [ ] **PROJ-05**: "View archived projects" link opens a view that lists archived projects in read-only form
 
@@ -112,7 +112,7 @@
 | DASH-22 | Phase 35 | Pending |
 | PROJ-01 | Phase 36 | Pending |
 | PROJ-02 | Phase 36 | Pending |
-| PROJ-03 | Phase 36 | Pending |
+| PROJ-03 | Phase 36 | Complete |
 | PROJ-04 | Phase 36 | Pending |
 | PROJ-05 | Phase 36 | Pending |
 | PROC-10 | Phase 37 | Pending |
