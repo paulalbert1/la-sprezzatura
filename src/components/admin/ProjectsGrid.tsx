@@ -169,7 +169,11 @@ function formatArchivedDate(iso: string): string {
     : format(d, "MMM d, yyyy");
 }
 
-const TierDivider = () => (
+// Phase 36 PROJ-01 — thin horizontal divider between the Active section and
+// the Non-active section. Same 1px #E8DDD0 stroke the UI-SPEC specified; the
+// name changed in Plan 04 from TierDivider to SectionDivider because the
+// layout model shifted from three tiers to two sections.
+const SectionDivider = () => (
   <hr
     className="my-5 border-0 border-t"
     style={{ borderTopColor: "#E8DDD0", gridColumn: "1 / -1" }}
@@ -557,8 +561,9 @@ function ProjectsGridInner({ projects }: Props) {
           <option value="paused">Paused</option>
           <option value="cancelled">Cancelled</option>
         </select>
-        {/* Phase 36 PROJ-05: "Include archived" toggle. State is NOT persisted
-            across reload (CONTEXT D-08). */}
+        {/* Phase 36 PROJ-05: "Include archived" toggle. When on, archived
+            cards appear at the end of the Non-active section. State is NOT
+            persisted across reload (CONTEXT D-08). */}
         <label
           className="flex items-center gap-2 cursor-pointer ml-3"
           style={{ fontFamily: "var(--font-sans)" }}
@@ -568,7 +573,7 @@ function ProjectsGridInner({ projects }: Props) {
             checked={includeArchived}
             onChange={(e) => setIncludeArchived(e.target.checked)}
             className="w-3.5 h-3.5 accent-terracotta"
-            aria-label="Include archived projects"
+            aria-label="Include archived projects at the end of the non-active section"
           />
           <span style={{ fontSize: "12px", color: "#9E8E80" }}>
             Include archived
@@ -617,7 +622,7 @@ function ProjectsGridInner({ projects }: Props) {
 
           {/* PROJ-01 divider between Active and Non-active */}
           {hasActive && (nonActiveSectionHasContent || includeArchived) && (
-            <TierDivider />
+            <SectionDivider />
           )}
 
           {/* Section 2 — Non-active (paused/completed/cancelled + archived) */}
