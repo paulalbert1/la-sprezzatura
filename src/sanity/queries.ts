@@ -849,6 +849,7 @@ export async function getAdminDashboardData(client: SanityClient) {
   const deliveries = (deliveryData || []).flatMap((p: any) =>
     (p.deliveries || []).map((d: any) => ({
       ...d,
+      _id: `${p._id}:${d._key}`,
       projectId: p._id,
       projectTitle: p.title,
       clientName: p.clientName ?? null,
