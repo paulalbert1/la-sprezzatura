@@ -4,15 +4,14 @@ export const prerender = false;
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import DashboardTasksCard from "../../components/admin/DashboardTasksCard.tsx";
 import UpcomingDeliveriesCard from "../../components/admin/UpcomingDeliveriesCard.tsx";
+import ActiveProjectsCard from "../../components/admin/ActiveProjectsCard.tsx";
 import ContactCardWrapper from "../../components/admin/ContactCardWrapper.tsx";
 import { getTenantClient } from "../../lib/tenantClient";
 import { getAdminDashboardData } from "../../sanity/queries";
 import {
   getOverdueBannerData,
-  getDaysInStage,
   isMilestoneOverdue,
 } from "../../lib/dashboardUtils";
-import { STAGE_META, type StageKey } from "../../lib/portalStages";
 import { format, parseISO } from "date-fns";
 
 const tenantId = Astro.locals.tenantId;
@@ -32,19 +31,9 @@ const upcomingMilestones = data.milestones
   .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
   .slice(0, 4);
 
-// Limit projects to 8; deliveries now rendered by UpcomingDeliveriesCard
-// (Phase 35 Plan 02) which owns its own filter/disclosure and passes all rows.
-const displayProjects = data.activeProjects.slice(0, 8);
-
-// Per-stage color palette (matching mockup)
-const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
-  discovery: { bg: "bg-stone-100", text: "text-stone-600" },
-  concept: { bg: "bg-amber-50", text: "text-amber-800" },
-  "design-development": { bg: "bg-blue-50", text: "text-blue-800" },
-  procurement: { bg: "bg-emerald-50", text: "text-emerald-800" },
-  installation: { bg: "bg-violet-50", text: "text-violet-800" },
-  closeout: { bg: "bg-stone-100", text: "text-stone-600" },
-};
+// Active projects + deliveries are now rendered by React islands
+// (ActiveProjectsCard — Plan 03; UpcomingDeliveriesCard — Plan 02) which own
+// their own slicing, filtering, and per-stage color maps.
 
 // Date helpers (delivery status + ETA date formatter moved into
 // UpcomingDeliveriesCard as of Phase 35 Plan 02).
@@ -93,62 +82,12 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
       {/* LEFT COLUMN: Projects, Milestones, Activity */}
       <div class="flex flex-col gap-5">
 
-        {/* Active Projects Card */}
-        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-          <div class="px-5 pt-[18px] pb-0">
-            <h2
-              class="mb-[14px]"
-              style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
-            >Active Projects</h2>
-            <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
-          </div>
-          {displayProjects.length === 0 ? (
-            <p class="text-sm text-stone text-center py-6">No active projects</p>
-          ) : (
-            <div>
-              {displayProjects.map((project) => {
-                const stageMeta = STAGE_META[project.pipelineStage as StageKey];
-                const stageColor = STAGE_COLORS[project.pipelineStage] || STAGE_COLORS.discovery;
-                const daysInStage = getDaysInStage(project.stageChangedAt);
-                const daysStale = daysInStage >= 14;
-                return (
-                  <a
-                    href={`/admin/projects/${project._id}`}
-                    class="flex items-center gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
-                  >
-                    <div class="flex-1 min-w-0">
-                      <span class="text-[13.5px] font-medium font-body text-charcoal block truncate">
-                        {project.title}
-                      </span>
-                      {project.clientName && (
-                        <span class="text-[11.5px] text-stone-light font-body block truncate mt-0.5">
-                          {project.clientName}
-                        </span>
-                      )}
-                    </div>
-                    {stageMeta && (
-                      <span class={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${stageColor.bg} ${stageColor.text}`}>
-                        {stageMeta.title}
-                      </span>
-                    )}
-                    <span class={`text-[11px] font-body shrink-0 ${daysStale ? "text-red-600 font-semibold" : "text-stone-light"}`}>
-                      {project.stageChangedAt
-                        ? `Since ${format(parseISO(project.stageChangedAt), "MMM d")}`
-                        : ""}
-                    </span>
-                  </a>
-                );
-              })}
-            </div>
-          )}
-          {data.activeProjects.length > 8 && (
-            <div class="px-5 py-3 border-t border-stone-light/10 text-center">
-              <a href="/admin/projects" class="text-xs text-terracotta hover:text-terracotta/80 font-body transition-colors">
-                View all {data.activeProjects.length} projects
-              </a>
-            </div>
-          )}
-        </div>
+        {/* Active Projects — React island (Phase 35 Plan 03, DASH-16) */}
+        <ActiveProjectsCard
+          client:load
+          projects={data.activeProjects}
+          totalCount={data.activeProjects.length}
+        />
 
         {/* Upcoming Deliveries — React island (Phase 35 Plan 02, DASH-11..15) */}
         <UpcomingDeliveriesCard client:load deliveries={data.deliveries} />
