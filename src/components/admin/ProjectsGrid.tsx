@@ -13,8 +13,10 @@ import ToastContainer, { useToast } from "./ui/ToastContainer";
 // This plan REPLACES the Plan 02 pipelineStage-driven three-tier model with a
 // projectStatus + archivedAt driven card treatment system. Two visual sections:
 //   1. Active — projectStatus in {active, reopened} (or unset), archivedAt null
-//   2. Non-active — paused/completed/cancelled (no archivedAt) + archived
-//      (when "Include archived" is on), in that visual order
+//   2. Non-active — paused/completed/cancelled (no archivedAt)
+//      Archived is a separate status filter option ("Archived"): when
+//      selected, Section 2 becomes an archived-only view. Default hides
+//      archived entirely (Liz's stated intent: out of sight, out of mind).
 //
 // Card treatment (borderColor, opacity, status label) communicates lifecycle
 // state. The pipelineStage badge is unaffected — it still owns its own badge
@@ -174,7 +176,9 @@ const SectionDivider = () => (
 
 // Phase 36 Plan 04 — section header with visible count.
 // Counts reflect what's currently on screen: Active count = activeCards.length,
-// Non-active count = nonActiveCards.length + (includeArchived ? archivedCards.length : 0).
+// Non-active count = what's currently rendered in Section 2 (either the
+// paused/completed/cancelled set or the archived-only set when the status
+// filter is "archived").
 function SectionHeader({ label, count }: { label: string; count: number }) {
   return (
     <div
@@ -195,8 +199,13 @@ function SectionHeader({ label, count }: { label: string; count: number }) {
 
 function ProjectsGridInner({ projects }: Props) {
   const [stageFilter, setStageFilter] = useState<string>("all");
+  // Status filter consolidates the old "Include archived" checkbox (UAT
+  // feedback, Plan 04 follow-up). "archived" is a dropdown option now:
+  //   "all"       → hide archived, show everything else (default, 80% view)
+  //   "active"|"reopened"|"paused"|"completed"|"cancelled" → that projectStatus,
+  //       archived always hidden
+  //   "archived"  → only archived projects
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [includeArchived, setIncludeArchived] = useState<boolean>(false);
   const [pendingUnarchiveId, setPendingUnarchiveId] = useState<string | null>(
     null,
   );
@@ -207,45 +216,56 @@ function ProjectsGridInner({ projects }: Props) {
   //   activeCards      — projectStatus in {active, reopened, unset} & !archivedAt
   //   nonActiveCards   — projectStatus in {paused, completed, cancelled} & !archivedAt
   //   archivedCards    — archivedAt != null (regardless of projectStatus)
-  // The Non-active section visually concatenates nonActiveCards + archivedCards
-  // (the latter only when `includeArchived` is true).
+  // Archived cards render only when `statusFilter === "archived"`.
+  const showArchivedOnly = statusFilter === "archived";
   const { activeCards, nonActiveCards, archivedCards, totalVisible } = useMemo(() => {
-    const passesFilters = (p: Project) => {
-      if (stageFilter !== "all" && p.pipelineStage !== stageFilter) return false;
-      if (statusFilter !== "all" && p.projectStatus !== statusFilter)
-        return false;
-      return true;
-    };
-
-    const filtered = projects.filter(passesFilters);
+    const passesStage = (p: Project) =>
+      stageFilter === "all" || p.pipelineStage === stageFilter;
 
     const isActiveStatus = (s: string | undefined) =>
       !s || s === "active" || s === "reopened";
     const isNonActiveStatus = (s: string | undefined) =>
       s === "paused" || s === "completed" || s === "cancelled";
 
+    // Archived-only view: show all archived projects matching the stage filter,
+    // regardless of their underlying projectStatus.
+    if (statusFilter === "archived") {
+      const archived = projects
+        .filter((p) => !!p.archivedAt && passesStage(p))
+        .sort(
+          (a, b) => +new Date(b.archivedAt!) - +new Date(a.archivedAt!),
+        );
+      return {
+        activeCards: [],
+        nonActiveCards: [],
+        archivedCards: archived,
+        totalVisible: archived.length,
+      };
+    }
+
+    // Otherwise hide archived entirely.
+    const filtered = projects.filter(
+      (p) =>
+        !p.archivedAt &&
+        passesStage(p) &&
+        (statusFilter === "all" || p.projectStatus === statusFilter),
+    );
+
     const active = filtered
-      .filter((p) => !p.archivedAt && isActiveStatus(p.projectStatus))
+      .filter((p) => isActiveStatus(p.projectStatus))
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
     const nonActive = filtered
-      .filter((p) => !p.archivedAt && isNonActiveStatus(p.projectStatus))
+      .filter((p) => isNonActiveStatus(p.projectStatus))
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
-    const archived = filtered
-      .filter((p) => !!p.archivedAt)
-      .sort(
-        (a, b) => +new Date(b.archivedAt!) - +new Date(a.archivedAt!),
-      );
-
-    const visibleArchivedCount = includeArchived ? archived.length : 0;
     return {
       activeCards: active,
       nonActiveCards: nonActive,
-      archivedCards: archived,
-      totalVisible: active.length + nonActive.length + visibleArchivedCount,
+      archivedCards: [],
+      totalVisible: active.length + nonActive.length,
     };
-  }, [projects, stageFilter, statusFilter, includeArchived]);
+  }, [projects, stageFilter, statusFilter]);
 
   const filterSelectStyle: React.CSSProperties = {
     fontFamily: "var(--font-sans)",
@@ -485,15 +505,16 @@ function ProjectsGridInner({ projects }: Props) {
   }
 
   // Phase 36 Plan 04 — two-section render.
-  // Section 1: Active cards.
-  // Section 2: Non-active (paused/completed/cancelled) cards, followed by
-  //            archived cards when `includeArchived` is true.
+  // Section 1: Active cards (default and most filter selections).
+  // Section 2: Non-active (paused/completed/cancelled) cards, OR — when the
+  //            status filter is "archived" — the archived-only view.
   const hasActive = activeCards.length > 0;
   const hasNonActive = nonActiveCards.length > 0;
-  const hasArchivedVisible = includeArchived && archivedCards.length > 0;
+  const hasArchivedVisible = showArchivedOnly && archivedCards.length > 0;
   const nonActiveSectionHasContent = hasNonActive || hasArchivedVisible;
-  const nonActiveCount =
-    nonActiveCards.length + (includeArchived ? archivedCards.length : 0);
+  const nonActiveCount = hasArchivedVisible
+    ? archivedCards.length
+    : nonActiveCards.length;
 
   return (
     <div>
@@ -524,25 +545,8 @@ function ProjectsGridInner({ projects }: Props) {
           <option value="completed">Completed</option>
           <option value="paused">Paused</option>
           <option value="cancelled">Cancelled</option>
+          <option value="archived">Archived</option>
         </select>
-        {/* Phase 36 PROJ-05: "Include archived" toggle. When on, archived
-            cards appear at the end of the Non-active section. State is NOT
-            persisted across reload (CONTEXT D-08). */}
-        <label
-          className="flex items-center gap-2 cursor-pointer ml-3"
-          style={{ fontFamily: "var(--font-sans)" }}
-        >
-          <input
-            type="checkbox"
-            checked={includeArchived}
-            onChange={(e) => setIncludeArchived(e.target.checked)}
-            className="w-3.5 h-3.5 accent-terracotta"
-            aria-label="Include archived projects at the end of the non-active section"
-          />
-          <span style={{ fontSize: "12px", color: "#9E8E80" }}>
-            Include archived
-          </span>
-        </label>
         <span
           style={{
             marginLeft: "auto",
@@ -583,34 +587,22 @@ function ProjectsGridInner({ projects }: Props) {
             </div>
           )}
 
-          {/* Section 2 — Non-active (paused/completed/cancelled + archived).
-              Per UAT feedback: HR divider removed; vertical whitespace + the
-              section header carry the break. Per-card left border + top
+          {/* Section 2 — Non-active (paused/completed/cancelled) OR, when the
+              status filter is "archived", the archived-only view. Per UAT
+              feedback: HR divider removed; the per-card left border + top
               status label already announce lifecycle state. */}
-          {(nonActiveSectionHasContent || includeArchived) && (
+          {nonActiveSectionHasContent && (
             <>
               {hasActive && <div style={{ height: 32 }} />}
-              <SectionHeader label="Non-active" count={nonActiveCount} />
-              {nonActiveSectionHasContent ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
-                  {nonActiveCards.map((p) => renderRow(p))}
-                  {hasArchivedVisible &&
-                    archivedCards.map((p) => renderRow(p))}
-                </div>
-              ) : (
-                <div
-                  className="text-center py-6"
-                  style={{
-                    color: "#B8B0A4",
-                    fontSize: "13px",
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  {includeArchived
-                    ? "No completed, paused, cancelled, or archived projects."
-                    : "No completed, paused, or cancelled projects."}
-                </div>
-              )}
+              <SectionHeader
+                label={showArchivedOnly ? "Archived" : "Non-active"}
+                count={nonActiveCount}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+                {hasArchivedVisible
+                  ? archivedCards.map((p) => renderRow(p))
+                  : nonActiveCards.map((p) => renderRow(p))}
+              </div>
             </>
           )}
         </>
