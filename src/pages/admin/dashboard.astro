@@ -12,7 +12,7 @@ import {
   isMilestoneOverdue,
 } from "../../lib/dashboardUtils";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
-import { formatDistanceToNow, format, parseISO, differenceInDays } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) {
@@ -71,24 +71,6 @@ function formatDeliveryDate(dateStr: string | null | undefined): string {
     return `ETA ${format(parseISO(dateStr), "MMM d")}`;
   } catch {
     return dateStr;
-  }
-}
-
-function getDaysOverdueStr(dateStr: string): string {
-  try {
-    const days = differenceInDays(new Date(), parseISO(dateStr));
-    return `${days}d overdue`;
-  } catch {
-    return "";
-  }
-}
-
-function getDaysUntilStr(dateStr: string): string {
-  try {
-    const days = differenceInDays(parseISO(dateStr), new Date());
-    return days <= 0 ? "today" : `in ${days}d`;
-  } catch {
-    return "";
   }
 }
 
@@ -166,8 +148,10 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
                         {stageMeta.title}
                       </span>
                     )}
-                    <span class={`text-[11px] font-body shrink-0 min-w-[28px] text-right ${daysStale ? "text-red-500 font-semibold" : "text-stone-light"}`}>
-                      {daysInStage}d
+                    <span class={`text-[11px] font-body shrink-0 ${daysStale ? "text-red-600 font-semibold" : "text-stone-light"}`}>
+                      {project.stageChangedAt
+                        ? `Since ${format(parseISO(project.stageChangedAt), "MMM d")}`
+                        : ""}
                     </span>
                   </a>
                 );

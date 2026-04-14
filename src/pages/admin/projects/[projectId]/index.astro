@@ -16,7 +16,7 @@ import {
 } from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { STAGE_META } from "../../../../lib/portalStages";
-import { getDaysInStage } from "../../../../lib/dashboardUtils";
+import { format, parseISO } from "date-fns";
 
 const projectId = Astro.params.projectId;
 if (!projectId) {
@@ -35,7 +35,9 @@ if (!project) {
 }
 
 const stageMeta = STAGE_META[project.pipelineStage as keyof typeof STAGE_META];
-const daysInStage = getDaysInStage(project.stageChangedAt);
+const stageChangedLabel = project.stageChangedAt
+  ? `Since ${format(parseISO(project.stageChangedAt), "MMM d")}`
+  : "";
 
 // Phase 33 D-01: server-side prefetch of the rendering session count for this
 // project. Used by the Rendering tab badge. Query lives in src/sanity/queries.ts
@@ -123,7 +125,9 @@ const breadcrumbs = [
               {stageMeta.title}
             </span>
           )}
-          <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
+          {stageChangedLabel && (
+            <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{stageChangedLabel}</span>
+          )}
         </div>
         {project.projectClients && project.projectClients[0] && (
           <div class="flex items-center gap-2 mt-1">

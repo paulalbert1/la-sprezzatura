@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { format, parseISO, formatDistanceToNow } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   Plus,
   Pencil,
@@ -565,8 +565,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     return (
       <div className="text-[11px] text-stone-light font-body flex items-center gap-1 mt-0.5">
         <RefreshCw className="w-3 h-3" />
-        Synced{" "}
-        {formatDistanceToNow(parseISO(item.lastSyncAt), { addSuffix: true })}
+        Synced {format(parseISO(item.lastSyncAt), "MMM d")}
       </div>
     );
   }
