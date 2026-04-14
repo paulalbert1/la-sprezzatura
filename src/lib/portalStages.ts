@@ -54,3 +54,16 @@ export const STAGES: StageMeta[] = [
 export const STAGE_META: Record<StageKey, StageMeta> = Object.fromEntries(
   STAGES.map((s) => [s.value, s]),
 ) as Record<StageKey, StageMeta>;
+
+// Per-stage Tailwind class pair used by admin dashboard + project list surfaces.
+// Kept here so the dashboard card (Phase 35 Plan 03) and LinkedProjects share
+// one definition. ProjectsGrid uses an alternate hex palette and intentionally
+// stays out of this map.
+export const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
+  discovery: { bg: "bg-stone-100", text: "text-stone-600" },
+  concept: { bg: "bg-amber-50", text: "text-amber-800" },
+  "design-development": { bg: "bg-blue-50", text: "text-blue-800" },
+  procurement: { bg: "bg-emerald-50", text: "text-emerald-800" },
+  installation: { bg: "bg-violet-50", text: "text-violet-800" },
+  closeout: { bg: "bg-stone-100", text: "text-stone-600" },
+};
