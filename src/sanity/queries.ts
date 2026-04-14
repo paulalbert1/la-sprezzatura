@@ -748,13 +748,18 @@ const ADMIN_DASHBOARD_MILESTONES_QUERY = `
   }[count(milestones) > 0]
 `;
 
-// Active deliveries (ordered/warehouse/in-transit procurement items)
+// All deliveries (ordered/warehouse/in-transit/delivered) across active projects.
+// Phase 35 Plan 02 (DASH-11..15): include delivered items with a `delivered`
+// flag so the UpcomingDeliveriesCard can offer an inline Show delivered (N)
+// disclosure. Also project clientName so the row's primary-anchor text reads
+// client-name-first.
 const ADMIN_DASHBOARD_DELIVERIES_QUERY = `
   *[_type == "project" && projectStatus in ["active", "reopened"]
     && engagementType == "full-interior-design"] {
     _id,
     title,
-    "deliveries": procurementItems[status in ["ordered", "warehouse", "in-transit"]] {
+    "clientName": clients[0].client->name,
+    "deliveries": procurementItems[status in ["ordered", "warehouse", "in-transit", "delivered"]] {
       _key,
       name,
       status,
@@ -762,7 +767,8 @@ const ADMIN_DASHBOARD_DELIVERIES_QUERY = `
       trackingNumber,
       carrierETA,
       carrierName,
-      lastSyncAt
+      lastSyncAt,
+      "delivered": status == "delivered"
     }
   }[count(deliveries) > 0]
 `;
@@ -819,12 +825,17 @@ export async function getAdminDashboardData(client: SanityClient) {
     })),
   );
 
-  // Flatten deliveries
+  // Flatten deliveries; surface the project's clientName onto each row and
+  // normalise carrierName (e.g. "FedEx"/"UPS"/"USPS" from Ship24) to a
+  // lowercase `carrier` slug for UpcomingDeliveriesCard's tracked-carrier
+  // match (D-07). Preserve carrierName for any legacy consumers.
   const deliveries = (deliveryData || []).flatMap((p: any) =>
     (p.deliveries || []).map((d: any) => ({
       ...d,
       projectId: p._id,
       projectTitle: p.title,
+      clientName: p.clientName ?? null,
+      carrier: d.carrierName ? String(d.carrierName).toLowerCase() : null,
     })),
   );
 

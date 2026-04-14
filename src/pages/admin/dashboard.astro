@@ -3,6 +3,7 @@ export const prerender = false;
 
 import AdminLayout from "../../layouts/AdminLayout.astro";
 import DashboardTasksCard from "../../components/admin/DashboardTasksCard.tsx";
+import UpcomingDeliveriesCard from "../../components/admin/UpcomingDeliveriesCard.tsx";
 import ContactCardWrapper from "../../components/admin/ContactCardWrapper.tsx";
 import { getTenantClient } from "../../lib/tenantClient";
 import { getAdminDashboardData } from "../../sanity/queries";
@@ -31,9 +32,9 @@ const upcomingMilestones = data.milestones
   .sort((a, b) => (a.date || "").localeCompare(b.date || ""))
   .slice(0, 4);
 
-// Limit projects to 8, deliveries to 6
+// Limit projects to 8; deliveries now rendered by UpcomingDeliveriesCard
+// (Phase 35 Plan 02) which owns its own filter/disclosure and passes all rows.
 const displayProjects = data.activeProjects.slice(0, 8);
-const displayDeliveries = data.deliveries.slice(0, 6);
 
 // Per-stage color palette (matching mockup)
 const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
@@ -45,30 +46,12 @@ const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   closeout: { bg: "bg-stone-100", text: "text-stone-600" },
 };
 
-// Delivery status labels and colors with dot
-const DELIVERY_STATUS: Record<
-  string,
-  { label: string; bg: string; text: string; dot: string }
-> = {
-  ordered: { label: "Ordered", bg: "bg-stone-100", text: "text-stone-500", dot: "bg-stone-400" },
-  warehouse: { label: "Warehouse", bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-  "in-transit": { label: "In Transit", bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
-};
-
-// Date helpers
+// Date helpers (delivery status + formatDeliveryDate moved into
+// UpcomingDeliveriesCard as of Phase 35 Plan 02).
 function formatMilestoneDate(dateStr: string | null): string {
   if (!dateStr) return "";
   try {
     return format(parseISO(dateStr), "MMM d");
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatDeliveryDate(dateStr: string | null | undefined): string {
-  if (!dateStr) return "No ETA";
-  try {
-    return `ETA ${format(parseISO(dateStr), "MMM d")}`;
   } catch {
     return dateStr;
   }
@@ -167,51 +150,8 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
           )}
         </div>
 
-        {/* Deliveries Card */}
-        <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-          <div class="px-5 pt-[18px] pb-0">
-            <h2
-              class="mb-[14px]"
-              style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
-            >Deliveries</h2>
-            <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
-          </div>
-          {displayDeliveries.length === 0 ? (
-            <p class="text-sm text-stone text-center py-6">No active deliveries</p>
-          ) : (
-            <div>
-              {displayDeliveries.map((d) => {
-                const statusInfo = DELIVERY_STATUS[d.status];
-                return (
-                  <a
-                    href={`/admin/projects/${d.projectId}#procurement`}
-                    class="flex items-center gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
-                  >
-                    <div class="flex-1 min-w-0">
-                      <span class="text-[13px] font-medium font-body text-charcoal block truncate">
-                        {d.name}
-                      </span>
-                      <span class="text-[11px] text-stone-light font-body mt-0.5">
-                        {d.projectTitle}
-                      </span>
-                    </div>
-                    <div class="flex flex-col items-end gap-1 shrink-0">
-                      {statusInfo && (
-                        <span class={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusInfo.bg} ${statusInfo.text}`}>
-                          <span class={`w-[5px] h-[5px] rounded-full ${statusInfo.dot}`}></span>
-                          {statusInfo.label}
-                        </span>
-                      )}
-                      <span class="text-[10.5px] text-stone-light font-body">
-                        {formatDeliveryDate(d.expectedDeliveryDate)}
-                      </span>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {/* Upcoming Deliveries — React island (Phase 35 Plan 02, DASH-11..15) */}
+        <UpcomingDeliveriesCard client:load deliveries={data.deliveries} />
       </div>
 
       {/* RIGHT COLUMN: Tasks */}
