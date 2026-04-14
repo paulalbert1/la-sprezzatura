@@ -1,19 +1,15 @@
-// Phase 34 Plan 04 — Send Update email template
-// Source of truth:
-//   - .planning/phases/34-settings-and-studio-retirement/34-04-PLAN.md Task 1
-//   - .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md D-13..D-17
+// Send Update email template — v2 layout matching
+// /Users/paulalbert/Downloads/la_sprezzatura_client_email.html
 //
-// Pure renderer extracted from src/pages/api/send-update.ts so the Send Update
-// API route and the new /api/send-update/preview endpoint render from exactly
-// the same source. The only functional change from the pre-Plan-04 shape is
-// that the CTA href is passed in via `ctaHref` instead of being hardcoded.
-// When the caller passes the legacy portal URL and ctaLabel is omitted, the
-// output is byte-for-byte equivalent to the pre-Plan-04 builder.
+// Key changes from v1:
+//   - Personalized greeting with client first name + date
+//   - Procurement table drops the pricing column; 3 cols: Item, Status, ETA
+//   - New "Client Action Items" section (sits between milestones and procurement)
+//   - Removes the "You saved $X vs. retail" line (per product direction)
+//   - Adds a plain-text "Reply with feedback" CTA below the portal CTA
+//   - Closing signature + footer unsubscribe line
 //
-// Helpers (formatStatusText, getStatusColor, formatDate, getArtifactLabel) are
-// co-located here so both the template body and any future UI surface that
-// wants to preview rows (e.g. a per-section thumbnail) can reuse the same
-// formatting rules.
+// Called from BOTH /api/send-update (real send) and /api/send-update/preview.
 
 import { formatCurrency } from "../formatCurrency";
 
@@ -40,6 +36,7 @@ export interface SendUpdateProcurementItem {
   name?: string;
   status?: string;
   installDate?: string;
+  expectedDeliveryDate?: string;
   retailPrice?: number;
   clientCost?: number;
   savings?: number;
@@ -53,6 +50,13 @@ export interface SendUpdateArtifact {
   hasApproval?: boolean;
 }
 
+export interface SendUpdateClientActionItem {
+  _key?: string;
+  description?: string;
+  dueDate?: string;
+  completed?: boolean;
+}
+
 export interface SendUpdateProject {
   _id: string;
   title: string;
@@ -61,6 +65,7 @@ export interface SendUpdateProject {
   milestones?: SendUpdateMilestone[];
   procurementItems?: SendUpdateProcurementItem[];
   artifacts?: SendUpdateArtifact[];
+  clientActionItems?: SendUpdateClientActionItem[];
 }
 
 export interface PendingArtifact {
@@ -77,41 +82,59 @@ export interface SendUpdateEmailInput {
   showArtifacts: boolean;
   pendingArtifacts: PendingArtifact[];
   baseUrl: string;
-  /** Per-recipient CTA href. Caller decides whether this points at the
-   * legacy dashboard URL (usePersonalLinks=false) or the per-client
-   * `${baseUrl}/portal/client/{token}` route (usePersonalLinks=true). */
   ctaHref: string;
-  /** Defaults to "View in Your Portal" when omitted. */
   ctaLabel?: string;
+  /** Client's first name for the greeting. Falls back to "there" if omitted. */
+  clientFirstName?: string;
+  /** Controls the "Client Action Items" section rendering. */
+  showClientActionItems?: boolean;
+  /** Email address for the "Reply with feedback" CTA (defaults to liz@). */
+  feedbackEmail?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
+const STATUS_LABEL: Record<string, string> = {
+  scheduled: "Scheduled",
+  warehouse: "Warehouse",
+  "in-transit": "In transit",
+  ordered: "Ordered",
+  pending: "Pending order",
+  delivered: "Delivered",
+  installed: "Installed",
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  scheduled: "#8A8478",
+  warehouse: "#B07050",
+  "in-transit": "#D4A574",
+  ordered: "#D4A574",
+  pending: "#B8AFA4",
+  delivered: "#7D9E6E",
+  installed: "#7D9E6E",
+};
+
 export function formatStatusText(status: string): string {
-  return status.charAt(0).toUpperCase() + status.slice(1).replace(/-/g, " ");
+  return STATUS_LABEL[status] ||
+    status.charAt(0).toUpperCase() + status.slice(1).replace(/-/g, " ");
 }
 
 export function getStatusColor(status: string): string {
-  switch (status) {
-    case "ordered":
-    case "warehouse":
-    case "in-transit":
-      return "#C4836A"; // terracotta
-    case "pending":
-      return "#8A8478"; // stone
-    case "delivered":
-    case "installed":
-      return "#059669"; // emerald
-    default:
-      return "#8A8478";
-  }
+  return STATUS_COLOR[status] || "#8A8478";
 }
 
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
     month: "short",
+    day: "numeric",
+  });
+}
+
+function formatLongDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "long",
     day: "numeric",
     year: "numeric",
   });
@@ -131,11 +154,19 @@ export function getArtifactLabel(type: string, customName?: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1).replace(/-/g, " ");
 }
 
+function esc(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 // ---------------------------------------------------------------------------
 // Main renderer
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CTA_LABEL = "View in Your Portal";
+const DEFAULT_CTA_LABEL = "Open Your Project Portal →";
+const DEFAULT_FEEDBACK_EMAIL = "liz@lasprezz.com";
 
 export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
   const {
@@ -144,40 +175,89 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
     showMilestones,
     showProcurement,
     showArtifacts,
+    showClientActionItems = true,
     pendingArtifacts,
     ctaHref,
     ctaLabel,
+    clientFirstName,
+    feedbackEmail,
   } = input;
 
-  // Milestones section
+  const greeting = clientFirstName ? `Hi ${esc(clientFirstName)},` : "Hi there,";
+  const dateStr = formatLongDate(new Date().toISOString());
+  const resolvedCtaLabel = ctaLabel || DEFAULT_CTA_LABEL;
+  const resolvedFeedback = feedbackEmail || DEFAULT_FEEDBACK_EMAIL;
+
+  // ---------- Milestones ----------
   let milestonesHtml = "";
   if (showMilestones && project.milestones && project.milestones.length > 0) {
+    // Split into completed (top), in-progress / upcoming (bottom)
     const rows = project.milestones
-      .map(
-        (m) => `
-        <tr>
-          <td style="padding:8px 12px;font-size:14px;color:#2C2926;border-bottom:1px solid #F0ECE6;">
-            ${m.completed ? "&#10003;" : "&#9675;"} ${m.name || "Untitled"}
-          </td>
-          <td style="padding:8px 12px;font-size:14px;color:#8A8478;border-bottom:1px solid #F0ECE6;text-align:right;">
-            ${m.date ? formatDate(m.date) : ""}
-          </td>
-        </tr>`,
-      )
+      .map((m) => {
+        const done = Boolean(m.completed);
+        const marker = done
+          ? `<span style="font-family: Arial, sans-serif; font-size: 11px; color: #7D9E6E;">&#10003;</span>`
+          : `<span style="width: 7px; height: 7px; border-radius: 50%; background: #D4C9BC; display: inline-block; flex-shrink: 0;"></span>`;
+        const nameStyle = done
+          ? "font-size: 14px; color: #9A8F82; text-decoration: line-through;"
+          : "font-size: 14px; color: #2C2A26;";
+        const dateDisplay = m.date
+          ? `<span style="font-size: 13px; color: ${done ? "#B8AFA4" : "#4A4540"}; font-family: Arial, sans-serif;">${formatDate(m.date)}</span>`
+          : "";
+        return `
+          <div style="padding: 0.6rem 0; border-bottom: 0.5px solid #EDE8E2; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              ${marker}
+              <span style="${nameStyle}">${esc(m.name || "Untitled")}</span>
+            </div>
+            ${dateDisplay}
+          </div>`;
+      })
       .join("");
 
     milestonesHtml = `
-      <div style="margin:24px 0;">
-        <h2 style="margin:0 0 12px;font-size:14px;color:#8A8478;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">
-          Milestones
-        </h2>
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-          ${rows}
-        </table>
+      <div style="padding: 0 2.5rem 1.5rem;">
+        <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.14em; color: #9A8F82; text-transform: uppercase; margin: 0 0 0.75rem;">Milestones</p>
+        <div style="border-top: 0.5px solid #D9D3CA;"></div>
+        ${rows}
       </div>`;
   }
 
-  // Procurement section
+  // ---------- Client Action Items ----------
+  let actionItemsHtml = "";
+  if (
+    showClientActionItems &&
+    project.clientActionItems &&
+    project.clientActionItems.length > 0
+  ) {
+    const openItems = project.clientActionItems.filter((i) => !i.completed);
+    if (openItems.length > 0) {
+      const rows = openItems
+        .map((i) => {
+          const dateDisplay = i.dueDate
+            ? `<span style="font-size: 13px; color: #4A4540; font-family: Arial, sans-serif;">${formatDate(i.dueDate)}</span>`
+            : "";
+          return `
+            <div style="padding: 0.6rem 0; border-bottom: 0.5px solid #EDE8E2; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #C17B5A; display: inline-block; flex-shrink: 0;"></span>
+                <span style="font-size: 14px; color: #2C2A26;">${esc(i.description || "Action needed")}</span>
+              </div>
+              ${dateDisplay}
+            </div>`;
+        })
+        .join("");
+
+      actionItemsHtml = `
+        <div style="padding: 0 2.5rem 1.5rem;">
+          <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.14em; color: #9A8F82; text-transform: uppercase; margin: 0 0 0.75rem;">Action Items for You</p>
+          <div style="border-top: 0.5px solid #D9D3CA;"></div>
+          ${rows}
+        </div>`;
+    }
+  }
+
+  // ---------- Procurement ----------
   let procurementHtml = "";
   if (
     showProcurement &&
@@ -185,113 +265,111 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
     project.procurementItems.length > 0
   ) {
     const rows = project.procurementItems
-      .map(
-        (item) => `
-        <tr>
-          <td style="padding:8px 12px;font-size:14px;color:#2C2926;border-bottom:1px solid #F0ECE6;">
-            ${item.name || "Untitled"}
-          </td>
-          <td style="padding:8px 12px;font-size:14px;border-bottom:1px solid #F0ECE6;text-align:center;">
-            <span style="color:${getStatusColor(item.status || "pending")};">${formatStatusText(item.status || "pending")}</span>
-          </td>
-          <td style="padding:8px 12px;font-size:14px;color:#8A8478;border-bottom:1px solid #F0ECE6;text-align:right;">
-            ${item.installDate ? formatDate(item.installDate) : ""}
-          </td>
-        </tr>`,
-      )
+      .map((item) => {
+        const status = item.status || "pending";
+        const eta = item.expectedDeliveryDate || item.installDate;
+        return `
+          <tr style="border-bottom: 0.5px solid #EDE8E2;">
+            <td style="font-size: 13px; color: #2C2A26; padding: 0.65rem 0;">${esc(item.name || "Untitled")}</td>
+            <td style="font-size: 12px; color: ${getStatusColor(status)}; text-align: center; padding: 0.65rem 0;">${esc(formatStatusText(status))}</td>
+            <td style="font-size: 12px; color: #9A8F82; text-align: right; padding: 0.65rem 0;">${eta ? formatDate(eta) : ""}</td>
+          </tr>`;
+      })
       .join("");
 
-    // Compute total savings
-    const totalSavings = project.procurementItems.reduce(
-      (sum, item) => sum + (item.savings || 0),
-      0,
-    );
-
-    const savingsLine =
-      totalSavings > 0
-        ? `<p style="margin:8px 0 0;font-size:14px;color:#059669;font-weight:500;">You saved ${formatCurrency(totalSavings)} vs. retail</p>`
-        : "";
-
     procurementHtml = `
-      <div style="margin:24px 0;">
-        <h2 style="margin:0 0 12px;font-size:14px;color:#8A8478;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">
-          Procurement
-        </h2>
-        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-          <tr>
-            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:left;border-bottom:2px solid #E5E2DE;">Item</th>
-            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:center;border-bottom:2px solid #E5E2DE;">Status</th>
-            <th style="padding:8px 12px;font-size:12px;color:#8A8478;text-transform:uppercase;text-align:right;border-bottom:2px solid #E5E2DE;">Install Date</th>
-          </tr>
-          ${rows}
+      <div style="padding: 0 2.5rem 1.5rem;">
+        <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.14em; color: #9A8F82; text-transform: uppercase; margin: 0 0 0.75rem;">Procurement</p>
+        <div style="border-top: 0.5px solid #D9D3CA;"></div>
+        <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;">
+          <thead>
+            <tr style="border-bottom: 0.5px solid #D9D3CA;">
+              <td style="font-size: 10px; letter-spacing: 0.1em; color: #B8AFA4; text-transform: uppercase; padding: 0.6rem 0; width: 50%;">Item</td>
+              <td style="font-size: 10px; letter-spacing: 0.1em; color: #B8AFA4; text-transform: uppercase; padding: 0.6rem 0; text-align: center;">Status</td>
+              <td style="font-size: 10px; letter-spacing: 0.1em; color: #B8AFA4; text-transform: uppercase; padding: 0.6rem 0; text-align: right;">ETA</td>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
         </table>
-        ${savingsLine}
       </div>`;
   }
 
-  // Pending reviews section
+  // ---------- Pending artifact reviews (opt-in only) ----------
   let pendingHtml = "";
   if (showArtifacts && pendingArtifacts.length > 0) {
     const items = pendingArtifacts
       .map(
         (a) =>
-          `<li style="margin:0 0 6px;font-size:14px;color:#2C2926;">${getArtifactLabel(a.artifactType || "", a.customTypeName)}</li>`,
+          `<div style="padding: 0.6rem 0; border-bottom: 0.5px solid #EDE8E2; font-size: 14px; color: #2C2A26;">&#9675; ${esc(getArtifactLabel(a.artifactType || "", a.customTypeName))}</div>`,
       )
       .join("");
 
     pendingHtml = `
-      <div style="margin:24px 0;">
-        <h2 style="margin:0 0 12px;font-size:14px;color:#8A8478;text-transform:uppercase;letter-spacing:0.1em;font-weight:400;">
-          Items Awaiting Your Review
-        </h2>
-        <ul style="margin:0;padding:0 0 0 20px;">
-          ${items}
-        </ul>
+      <div style="padding: 0 2.5rem 1.5rem;">
+        <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.14em; color: #9A8F82; text-transform: uppercase; margin: 0 0 0.75rem;">Awaiting Your Review</p>
+        <div style="border-top: 0.5px solid #D9D3CA;"></div>
+        ${items}
       </div>`;
   }
 
-  // Personal note
+  // ---------- Personal note (rendered as narrative paragraphs) ----------
   const noteHtml = personalNote
-    ? `<p style="margin:0 0 24px;font-size:16px;color:#2C2926;line-height:1.7;">${personalNote.replace(/\n/g, "<br>")}</p>`
+    ? personalNote
+        .split(/\n{2,}/)
+        .map(
+          (para) =>
+            `<p style="font-size: 15px; line-height: 1.75; color: #4A4540; margin: 0 0 0.85rem;">${esc(para).replace(/\n/g, "<br>")}</p>`,
+        )
+        .join("")
     : "";
-
-  const resolvedCtaLabel = ctaLabel || DEFAULT_CTA_LABEL;
 
   return `<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background-color:#FAF8F5;font-family:system-ui,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;">
-    <tr>
-      <td style="padding:32px 32px 24px;text-align:center;">
-        <p style="margin:0;font-size:11px;color:#8A8478;text-transform:uppercase;letter-spacing:0.2em;">La Sprezzatura</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="background-color:#FFFFFF;padding:40px 32px;">
-        <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-weight:300;font-size:24px;color:#2C2926;text-align:center;">
-          Project Update: ${project.title}
-        </h1>
+<head><meta charset="utf-8"><title>${esc(project.title)} — Weekly Update</title></head>
+<body style="margin:0;padding:0;background-color:#F5F1EB;">
+  <div style="background: #F5F1EB; padding: 2rem 1rem;">
+    <div style="max-width: 580px; margin: 0 auto; background: #FDFAF6; border: 0.5px solid #E8E2D9; border-radius: 4px; font-family: Georgia, 'Times New Roman', serif; color: #2C2A26;">
+
+      <div style="padding: 2.5rem 2.5rem 0; text-align: center; border-bottom: 0.5px solid #E8E2D9; padding-bottom: 1.5rem;">
+        <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.18em; color: #9A8F82; margin: 0 0 0.35rem; text-transform: uppercase;">La Sprezzatura</p>
+        <p style="font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 0.12em; color: #B8AFA4; margin: 0; text-transform: uppercase;">Linha Studio</p>
+      </div>
+
+      <div style="padding: 2rem 2.5rem 0;">
+        <h1 style="font-size: 22px; font-weight: 400; color: #2C2A26; margin: 0 0 0.25rem; letter-spacing: -0.01em;">Project Update</h1>
+        <p style="font-size: 13px; color: #9A8F82; margin: 0 0 1.75rem; font-family: Arial, sans-serif; letter-spacing: 0.04em;">${esc(project.title)} &nbsp;·&nbsp; ${dateStr}</p>
+
+        <p style="font-size: 15px; line-height: 1.75; color: #4A4540; margin: 0 0 0.85rem;">${greeting}</p>
         ${noteHtml}
-        ${milestonesHtml}
-        ${procurementHtml}
-        ${pendingHtml}
-        <div style="text-align:center;margin:32px 0;">
-          <a href="${ctaHref}"
-             style="display:inline-block;background-color:#C4836A;color:#FFFFFF;text-decoration:none;padding:16px 32px;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;">
-            ${resolvedCtaLabel}
-          </a>
+      </div>
+
+      ${milestonesHtml}
+      ${actionItemsHtml}
+      ${procurementHtml}
+      ${pendingHtml}
+
+      <div style="padding: 0 2.5rem 2.5rem;">
+        <p style="font-size: 15px; color: #2C2A26; margin: 0 0 0.2rem;">Elizabeth</p>
+        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #9A8F82; margin: 0 0 1.75rem;">La Sprezzatura · Linha Studio</p>
+
+        <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 0.5px solid #EDE8E2;">
+          <a href="${esc(ctaHref)}" style="display: inline-block; background: #8B6E5A; color: #FAF7F3; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 2rem; border-radius: 2px;">${esc(resolvedCtaLabel)}</a>
         </div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:24px 32px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#B8B0A4;line-height:1.6;">
-          This is a project update from La Sprezzatura.
+
+        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #6B6560; text-align: center; margin: 1.25rem 0 0; line-height: 1.6;">
+          Questions or feedback? <a href="mailto:${esc(resolvedFeedback)}" style="color: #8B6E5A; text-decoration: underline;">Email Elizabeth</a>.
         </p>
-      </td>
-    </tr>
-  </table>
+      </div>
+
+      <div style="padding: 1rem 2.5rem; border-top: 0.5px solid #EDE8E2; text-align: center;">
+        <p style="font-family: Arial, sans-serif; font-size: 10px; color: #C5BDB4; margin: 0; letter-spacing: 0.06em;">La Sprezzatura · Darien, CT</p>
+      </div>
+
+    </div>
+  </div>
 </body>
 </html>`;
 }
+
+// Re-export for legacy callers that imported formatCurrency indirectly.
+export { formatCurrency };
