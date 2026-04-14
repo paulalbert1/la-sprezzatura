@@ -135,17 +135,6 @@ const STAGE_COLORS: Record<string, { bg: string; text: string }> = {
   closeout: { bg: "#F5F1EB", text: "#7A6B5A" },
 };
 
-const STATUS_COLORS: Record<
-  string,
-  { bg: string; text: string; dot: string }
-> = {
-  active: { bg: "#E8F3EC", text: "#3E7A52", dot: "#5FA67A" },
-  reopened: { bg: "#E8F0F7", text: "#3E6FA0", dot: "#5F89B8" },
-  completed: { bg: "#F3EEE6", text: "#7A6B5A", dot: "#A89882" },
-  paused: { bg: "#FEF3E0", text: "#9A6B2E", dot: "#D4A574" },
-  cancelled: { bg: "#FBEAE8", text: "#A84838", dot: "#C87060" },
-};
-
 function formatRelativeTime(iso: string): string {
   const now = Date.now();
   const then = new Date(iso).getTime();
@@ -294,9 +283,6 @@ function ProjectsGridInner({ projects }: Props) {
     const stageMeta = STAGE_META[project.pipelineStage as StageKey];
     const stageColor =
       STAGE_COLORS[project.pipelineStage] || STAGE_COLORS.discovery;
-    const statusInfo =
-      STATUS_COLORS[project.projectStatus] || STATUS_COLORS.active;
-
     // Phase 36 Plan 04 — card treatment drives opacity + left border.
     // Opacity: 1 active | 0.6 paused/completed/cancelled | 0.4 archived.
     // Archived-row Unarchive button overrides this back to 1 explicitly.
@@ -446,16 +432,19 @@ function ProjectsGridInner({ projects }: Props) {
         )}
         {!project.clientName && <div style={{ marginBottom: "14px" }} />}
 
-        {/* Badges row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            flexWrap: "wrap",
-          }}
-        >
-          {stageMeta && (
+        {/* Badges row — pipelineStage badge only. Plan 04 removed the
+            projectStatus pill: the per-card left border + top status label
+            already communicate lifecycle state; the pill duplicated that
+            signal and added visual noise to the 80% active case. */}
+        {stageMeta && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              flexWrap: "wrap",
+            }}
+          >
             <span
               style={{
                 display: "inline-flex",
@@ -472,34 +461,8 @@ function ProjectsGridInner({ projects }: Props) {
             >
               {stageMeta.title}
             </span>
-          )}
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "3px 10px",
-              borderRadius: "999px",
-              fontSize: "10.5px",
-              fontWeight: 500,
-              background: statusInfo.bg,
-              color: statusInfo.text,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              fontFamily: "var(--font-sans)",
-            }}
-          >
-            <span
-              style={{
-                width: "5px",
-                height: "5px",
-                borderRadius: "50%",
-                background: statusInfo.dot,
-              }}
-            />
-            {project.projectStatus || "active"}
-          </span>
-        </div>
+          </div>
+        )}
 
         {/* Footer: updated time — preserved verbatim from pre-Phase-36 state
             per UI-SPEC §"Notes for Downstream Agents" (Phase 35 already chose
