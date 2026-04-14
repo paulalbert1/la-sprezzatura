@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { format, parseISO } from "date-fns";
+import { Plus } from "lucide-react";
 import { isTaskOverdue } from "../../lib/dashboardUtils";
 
 interface TaskItem {
@@ -32,6 +33,10 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState<boolean>(false);
   const [justCreated, setJustCreated] = useState<string | null>(null);
+  // Phase 35-05 (DASH-21/22): hide completed by default; useState only, reload resets.
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
+
+  const addInputRef = useRef<HTMLInputElement>(null);
 
   // Clear highlight after 1 second
   useEffect(() => {
@@ -61,7 +66,24 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
     return 0;
   });
 
-  const displayTasks = sortedTasks.slice(0, 8);
+  // Phase 35-05: partition for the hide-completed toggle.
+  const activeTasks = sortedTasks.filter((t) => !t.completed);
+  const completedTasks = sortedTasks.filter((t) => t.completed);
+  // Cap (.slice(0, 8)) is applied to the COMBINED list after the showCompleted
+  // filter, so completed rows may push active rows off the visible list when
+  // revealed — per UI-SPEC "show the full set on demand".
+  const visibleTasks = showCompleted
+    ? [...activeTasks, ...completedTasks].slice(0, 8)
+    : activeTasks.slice(0, 8);
+
+  function handleAddTaskClick() {
+    // Focus the existing quick-add input at the form footer.
+    addInputRef.current?.focus();
+    // scrollIntoView is not implemented in jsdom; guard so tests stay quiet.
+    if (typeof addInputRef.current?.scrollIntoView === "function") {
+      addInputRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }
 
   async function handleToggle(task: TaskItem) {
     const newCompleted = !task.completed;
@@ -172,39 +194,50 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
 
   return (
     <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-      {/* Header with title, count, and filter */}
+      {/* Header with title, project filter, and Add-task CTA (DASH-20) */}
+      {/* legacy — do not modify pt-[18px] / mb-[14px] per UI-SPEC "Inherited Exceptions" */}
       <div className="px-5 pt-[18px] pb-0">
-        <div className="flex items-center justify-between mb-[14px]">
+        <div className="flex items-center justify-between mb-[14px] gap-3">
           <h2
             style={{ fontFamily: "var(--font-sans)", fontSize: "10.5px", fontWeight: 500, color: "#9E8E80", letterSpacing: "0.1em", textTransform: "uppercase" as const }}
           >Tasks</h2>
-          <select
-          value={filterProject}
-          onChange={(e) => {
-            setFilterProject(e.target.value);
-            setNewProject(e.target.value);
-          }}
-          className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-terracotta"
-        >
-          <option value="">All Projects</option>
-          {projects.map((p) => (
-            <option key={p._id} value={p._id}>
-              {p.title}
-            </option>
-          ))}
-        </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={filterProject}
+              onChange={(e) => {
+                setFilterProject(e.target.value);
+                setNewProject(e.target.value);
+              }}
+              className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-terracotta"
+            >
+              <option value="">All Projects</option>
+              {projects.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.title}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleAddTaskClick}
+              className="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
+            >
+              <Plus size={14} />
+              Add task
+            </button>
+          </div>
         </div>
         <hr style={{ border: "none", borderTop: "0.5px solid #E8DDD0", margin: 0 }} />
       </div>
 
       {/* Task rows */}
-      {displayTasks.length === 0 ? (
+      {visibleTasks.length === 0 ? (
         <p className="text-sm text-stone text-center py-6">
           No tasks yet. Use the field below to create one.
         </p>
       ) : (
         <div>
-          {displayTasks.map((task) => {
+          {visibleTasks.map((task) => {
             const overdue = isTaskOverdue(task);
             const isNew = justCreated === task._key;
             return (
@@ -248,7 +281,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
         </div>
       )}
 
-      {/* Quick-add form */}
+      {/* Quick-add form (retained; header CTA focuses this input) */}
       <form
         onSubmit={handleCreate}
         className="flex items-center gap-2 px-5 py-3 border-t border-stone-light/10 bg-cream/50"
@@ -267,6 +300,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
           <path d="M12 5v14" />
         </svg>
         <input
+          ref={addInputRef}
           type="text"
           placeholder="Add a task..."
           value={newDescription}
@@ -292,6 +326,21 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
           className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 w-[130px] shrink-0"
         />
       </form>
+
+      {/* Reveal link (DASH-22) — only when completed tasks exist */}
+      {completedTasks.length > 0 && (
+        <div className="border-t border-stone-light/10 text-center py-3">
+          <button
+            type="button"
+            onClick={() => setShowCompleted((s) => !s)}
+            className="text-[13px] font-body text-stone hover:text-charcoal hover:underline underline-offset-2 bg-transparent border-0 cursor-pointer"
+          >
+            {showCompleted
+              ? "Hide completed"
+              : `Show completed (${completedTasks.length})`}
+          </button>
+        </div>
+      )}
 
       {/* Inline error */}
       {error && (
