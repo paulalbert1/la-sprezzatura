@@ -381,6 +381,38 @@ function ProjectsGridInner({ projects }: Props) {
           </button>
         )}
 
+        {/* Phase 36 Plan 04 — status label sits above the title when the card
+            has a non-active treatment. Archived uses italic with no icon;
+            paused/completed/cancelled use an uppercase label + glyph. */}
+        {treatment.statusLabel && treatment.statusColor && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.04em",
+              textTransform: isArchived ? "none" : "uppercase",
+              color: treatment.statusColor,
+              fontStyle: isArchived ? "italic" : "normal",
+              marginBottom: 8,
+              fontFamily: "var(--font-sans)",
+              lineHeight: 1,
+            }}
+          >
+            {treatment.statusIcon && (
+              <span
+                aria-hidden="true"
+                style={{ fontSize: 12, lineHeight: 1 }}
+              >
+                {iconChar(treatment.statusIcon)}
+              </span>
+            )}
+            {treatment.statusLabel}
+          </div>
+        )}
+
         {/* Title */}
         <div
           style={{
@@ -402,31 +434,13 @@ function ProjectsGridInner({ projects }: Props) {
               fontSize: "12.5px",
               color: "#9E8E80",
               fontFamily: "var(--font-sans)",
-              marginBottom: isArchived ? "2px" : "14px",
+              marginBottom: "14px",
             }}
           >
             {project.clientName}
           </div>
         )}
-        {!project.clientName && (
-          <div style={{ marginBottom: isArchived ? "2px" : "14px" }} />
-        )}
-
-        {/* Archived subtitle — italic, 11.5px, stone, sits below client name */}
-        {isArchived && project.archivedAt && (
-          <div
-            style={{
-              fontSize: "11.5px",
-              color: "#9E8E80",
-              fontFamily: "var(--font-sans)",
-              fontStyle: "italic",
-              marginTop: "2px",
-              marginBottom: "14px",
-            }}
-          >
-            Archived {formatArchivedDate(project.archivedAt)}
-          </div>
-        )}
+        {!project.clientName && <div style={{ marginBottom: "14px" }} />}
 
         {/* Badges row */}
         <div
