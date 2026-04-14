@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
 status: executing
-stopped_at: Completed 36-01-PLAN.md
-last_updated: "2026-04-14T21:07:38.551Z"
+stopped_at: Completed 36-02-PLAN.md
+last_updated: "2026-04-14T21:15:46.036Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
-  percent: 75
+  completed_plans: 7
+  percent: 88
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 36 (projects-list-archive-lifecycle) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-14
 
@@ -65,6 +65,7 @@ Carried from v5.0 boundary. Full history:
 - Existing commits prefixed `v5.1` (cb4fbe9 send-update email template, f30cb0b card-grid + new drawer, 69f53b0 schema plumbing) are absorbed into this milestone as informal pre-work; verification will confirm which specific requirements they partially satisfy
 - [Phase 36]: Admin action gate uses context.locals.tenantId + sanityUserId (middleware does not populate adminEmail)
 - [Phase 36]: archivedAt stored as optional datetime on project; presence == archived (D-01)
+- [Phase 36]: Per-island ToastContainer provider pattern (React context does not cross Astro island boundaries)
 
 ### Pending Todos
 
@@ -80,7 +81,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-14T21:07:38.549Z
-Stopped at: Completed 36-01-PLAN.md
+Last session: 2026-04-14T21:15:40.896Z
+Stopped at: Completed 36-02-PLAN.md
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

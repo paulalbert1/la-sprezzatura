@@ -23,11 +23,11 @@
 
 ### Projects List & Archive (PROJ)
 
-- [ ] **PROJ-01**: Projects list shows a subtle horizontal divider above the completed-projects section
-- [ ] **PROJ-02**: Completed projects render with a dulled / muted visual treatment distinct from active projects
+- [x] **PROJ-01**: Projects list shows a subtle horizontal divider above the completed-projects section
+- [x] **PROJ-02**: Completed projects render with a dulled / muted visual treatment distinct from active projects
 - [x] **PROJ-03**: User can manually archive a completed project from its detail page
 - [ ] **PROJ-04**: Completed projects auto-archive 90 days after their completion date
-- [ ] **PROJ-05**: "View archived projects" link opens a view that lists archived projects in read-only form
+- [x] **PROJ-05**: "View archived projects" link opens a view that lists archived projects in read-only form
 
 ### Procurement Privacy & Modal (PROC)
 
@@ -110,11 +110,11 @@
 | DASH-20 | Phase 35 | Pending |
 | DASH-21 | Phase 35 | Pending |
 | DASH-22 | Phase 35 | Pending |
-| PROJ-01 | Phase 36 | Pending |
-| PROJ-02 | Phase 36 | Pending |
+| PROJ-01 | Phase 36 | Complete |
+| PROJ-02 | Phase 36 | Complete |
 | PROJ-03 | Phase 36 | Complete |
 | PROJ-04 | Phase 36 | Pending |
-| PROJ-05 | Phase 36 | Pending |
+| PROJ-05 | Phase 36 | Complete |
 | PROC-10 | Phase 37 | Pending |
 | PROC-11 | Phase 37 | Pending |
 | PROC-12 | Phase 37 | Pending |
