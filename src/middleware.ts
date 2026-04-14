@@ -139,5 +139,30 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
+  // Astro action POSTs hit /_actions/<name>/ regardless of which page invoked
+  // them, so the path-prefixed branches above never run. Hydrate locals from
+  // the session so each action's own auth gate sees what the calling page saw.
+  // No redirect — actions are POST-only; let the action enforce its own role gate.
+  if (pathname.startsWith("/_actions/")) {
+    const session = await getSession(context.cookies);
+    if (session) {
+      context.locals.role = session.role;
+      if (session.role === "admin" && session.tenantId) {
+        context.locals.tenantId = session.tenantId;
+        const adminEntry = getTenantByAdminEmail(session.entityId)?.admins.find(
+          (a) => a.email.toLowerCase() === session.entityId.toLowerCase(),
+        );
+        context.locals.sanityUserId = adminEntry?.sanityUserId;
+      } else if (session.role === "client") {
+        context.locals.clientId = session.entityId;
+      } else if (session.role === "contractor") {
+        context.locals.contractorId = session.entityId;
+      } else if (session.role === "building_manager") {
+        context.locals.buildingManagerEmail = session.entityId;
+      }
+    }
+    return next();
+  }
+
   return next();
 });
