@@ -541,7 +541,7 @@ function ProjectsGridInner({ projects }: Props) {
             checked={includeArchived}
             onChange={(e) => setIncludeArchived(e.target.checked)}
             className="w-3.5 h-3.5 accent-terracotta"
-            aria-label="Include archived projects at the end of the non-active section"
+            aria-label="Include archived projects at the end of the inactive section"
           />
           <span style={{ fontSize: "12px", color: "#9E8E80" }}>
             Include archived
@@ -594,7 +594,7 @@ function ProjectsGridInner({ projects }: Props) {
           {nonActiveSectionHasContent && (
             <>
               {hasActive && <div style={{ height: 32 }} />}
-              <SectionHeader label="Non-active" count={nonActiveCount} />
+              <SectionHeader label="Inactive" count={nonActiveCount} />
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
                 {nonActiveCards.map((p) => renderRow(p))}
                 {hasArchivedVisible && archivedCards.map((p) => renderRow(p))}
