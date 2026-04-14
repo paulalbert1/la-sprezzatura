@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format, parseISO } from "date-fns";
+import { Plus } from "lucide-react";
 import { isTaskOverdue } from "../../lib/dashboardUtils";
 
 interface TaskItem {
@@ -22,6 +23,17 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
   const [newDueDate, setNewDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // Phase 35-05 (DASH-21/22): hide completed by default; useState only, reload resets.
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
+
+  const addInputRef = useRef<HTMLInputElement>(null);
+
+  function handleAddTaskClick() {
+    addInputRef.current?.focus();
+    if (typeof addInputRef.current?.scrollIntoView === "function") {
+      addInputRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }
 
   async function handleToggle(task: TaskItem) {
     const newCompleted = !task.completed;
@@ -116,6 +128,14 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
     }
   }
 
+  // Phase 35-05: partition for the hide-completed toggle. ProjectTasks has
+  // no slice cap — render the full set when `showCompleted` is true.
+  const activeTasks = localTasks.filter((t) => !t.completed);
+  const completedTasks = localTasks.filter((t) => t.completed);
+  const visibleTasks = showCompleted
+    ? [...activeTasks, ...completedTasks]
+    : activeTasks;
+
   const cardStyle = {
     backgroundColor: "#FFFEFB",
     border: "0.5px solid #E8DDD0",
@@ -134,14 +154,23 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
 
   return (
     <div id="tasks" style={cardStyle}>
+      {/* Header — title + right-aligned Add task CTA (DASH-20) */}
       <div
         className="flex items-center justify-between mb-[14px] pb-[10px]"
         style={{ borderBottom: "0.5px solid #E8DDD0" }}
       >
         <h2 style={titleStyle}>Tasks</h2>
+        <button
+          type="button"
+          onClick={handleAddTaskClick}
+          className="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
+        >
+          <Plus size={14} />
+          Add task
+        </button>
       </div>
 
-      {localTasks.length === 0 ? (
+      {visibleTasks.length === 0 ? (
         <p
           className="py-4 text-center"
           style={{ fontFamily: "var(--font-sans)", fontSize: "12.5px", color: "#9E8E80" }}
@@ -150,7 +179,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
         </p>
       ) : (
         <div>
-          {localTasks.map((task) => {
+          {visibleTasks.map((task) => {
             const overdue = isTaskOverdue(task);
             const labelColor = task.completed
               ? "#9E8E80"
@@ -207,7 +236,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
         </div>
       )}
 
-      {/* Quick-add form */}
+      {/* Quick-add form (retained; header CTA focuses this input) */}
       <form
         onSubmit={handleCreate}
         className="flex items-center gap-2 pt-[8px]"
@@ -222,6 +251,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
           +
         </span>
         <input
+          ref={addInputRef}
           type="text"
           placeholder="Add a task"
           value={newDescription}
@@ -248,6 +278,21 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
           }}
         />
       </form>
+
+      {/* Reveal link (DASH-22) */}
+      {completedTasks.length > 0 && (
+        <div className="text-center pt-3 mt-2" style={{ borderTop: "0.5px solid #E8DDD0" }}>
+          <button
+            type="button"
+            onClick={() => setShowCompleted((s) => !s)}
+            className="text-[13px] font-body text-stone hover:text-charcoal hover:underline underline-offset-2 bg-transparent border-0 cursor-pointer"
+          >
+            {showCompleted
+              ? "Hide completed"
+              : `Show completed (${completedTasks.length})`}
+          </button>
+        </div>
+      )}
 
       {error && (
         <div
