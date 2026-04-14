@@ -140,8 +140,13 @@ Plans:
   2. Liz can manually archive a completed project from its detail page
   3. Completed projects auto-archive 90 days after their completion date
   4. A "View archived projects" link opens a read-only archived view
-**Plans**: TBD (estimated 2-3)
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 36-01-PLAN.md — Schema, query projection, and archive/unarchive Astro actions (PROJ-03)
+- [ ] 36-02-PLAN.md — Three-tier ProjectsGrid + ProjectArchiveMenu detail-header island (PROJ-01, PROJ-02, PROJ-03, PROJ-05)
+- [ ] 36-03-PLAN.md — Vercel Cron auto-archive endpoint + vercel.ts migration (PROJ-04)
 
 ### Phase 37: Procurement Privacy & Modal Editor
 **Goal**: Procurement hides all pricing information from the admin UI, and item editing moves from inline-row editing to a view-then-edit modal that shows every field with support for multiple images

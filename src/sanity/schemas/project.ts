@@ -320,6 +320,15 @@ export const project = defineType({
       readOnly: true,
       description: "Set automatically when project is completed",
     }),
+    defineField({
+      name: "archivedAt",
+      title: "Archived At",
+      type: "datetime",
+      group: "portal",
+      readOnly: true,
+      description:
+        "Set when project is archived (manually from /admin/projects/[id] or auto by /api/cron/auto-archive 90 days after completedAt). Clear to restore.",
+    }),
     // Phase 6: Milestones inline array
     defineField({
       name: "milestones",
