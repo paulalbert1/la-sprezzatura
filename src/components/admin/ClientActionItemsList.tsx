@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format, parseISO } from "date-fns";
+import { Plus } from "lucide-react";
 import { isTaskOverdue } from "../../lib/dashboardUtils";
 
 interface Item {
@@ -22,6 +23,17 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
   const [newDueDate, setNewDueDate] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // Phase 35-05 (DASH-21/22): hide completed by default; useState only, reload resets.
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
+
+  const addInputRef = useRef<HTMLInputElement>(null);
+
+  function handleAddTaskClick() {
+    addInputRef.current?.focus();
+    if (typeof addInputRef.current?.scrollIntoView === "function") {
+      addInputRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }
 
   async function handleToggle(item: Item) {
     const nextCompleted = !item.completed;
@@ -106,6 +118,13 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
     setTimeout(() => setError(null), 3000);
   }
 
+  // Phase 35-05: partition for the hide-completed toggle.
+  const activeItems = local.filter((i) => !i.completed);
+  const completedItems = local.filter((i) => i.completed);
+  const visibleItems = showCompleted
+    ? [...activeItems, ...completedItems]
+    : activeItems;
+
   const cardStyle = {
     backgroundColor: "#FFFEFB",
     border: "0.5px solid #E8DDD0",
@@ -124,14 +143,25 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
 
   return (
     <div id="client-action-items" style={cardStyle}>
+      {/* Header — title + right-aligned Add task CTA (DASH-20).
+          UI-SPEC mandates the label read "Add task" here even though the
+          component calls these "action items" internally. */}
       <div
         className="flex items-center justify-between mb-[14px] pb-[10px]"
         style={{ borderBottom: "0.5px solid #E8DDD0" }}
       >
         <h2 style={titleStyle}>Client Action Items</h2>
+        <button
+          type="button"
+          onClick={handleAddTaskClick}
+          className="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
+        >
+          <Plus size={14} />
+          Add task
+        </button>
       </div>
 
-      {local.length === 0 ? (
+      {visibleItems.length === 0 ? (
         <p
           className="py-4 text-center"
           style={{
@@ -144,7 +174,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
         </p>
       ) : (
         <div>
-          {local.map((item) => {
+          {visibleItems.map((item) => {
             const overdue = isTaskOverdue(item);
             const labelColor = item.completed
               ? "#9E8E80"
@@ -215,6 +245,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
           +
         </span>
         <input
+          ref={addInputRef}
           type="text"
           placeholder="Add an action item"
           value={newDescription}
@@ -241,6 +272,21 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
           }}
         />
       </form>
+
+      {/* Reveal link (DASH-22) */}
+      {completedItems.length > 0 && (
+        <div className="text-center pt-3 mt-2" style={{ borderTop: "0.5px solid #E8DDD0" }}>
+          <button
+            type="button"
+            onClick={() => setShowCompleted((s) => !s)}
+            className="text-[13px] font-body text-stone hover:text-charcoal hover:underline underline-offset-2 bg-transparent border-0 cursor-pointer"
+          >
+            {showCompleted
+              ? "Hide completed"
+              : `Show completed (${completedItems.length})`}
+          </button>
+        </div>
+      )}
 
       {error && (
         <div
