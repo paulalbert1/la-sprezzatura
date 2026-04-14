@@ -922,6 +922,8 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     pipelineStage,
     projectStatus,
     engagementType,
+    completedAt,
+    archivedAt,
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
     "milestones": milestones[] | order(date asc) {
       _key, name, date, completed

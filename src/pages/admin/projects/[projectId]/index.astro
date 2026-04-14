@@ -10,6 +10,7 @@ import ProcurementEditor from "../../../../components/admin/ProcurementEditor.ts
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
+import ProjectArchiveMenu from "../../../../components/admin/ProjectArchiveMenu.tsx";
 import {
   getAdminProjectDetail,
   RENDERING_SESSIONS_BY_PROJECT_QUERY,
@@ -128,6 +129,12 @@ const breadcrumbs = [
           {stageChangedLabel && (
             <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{stageChangedLabel}</span>
           )}
+          <ProjectArchiveMenu
+            client:load
+            projectId={projectId}
+            pipelineStage={project.pipelineStage}
+            archivedAt={project.archivedAt ?? null}
+          />
         </div>
         {project.projectClients && project.projectClients[0] && (
           <div class="flex items-center gap-2 mt-1">
