@@ -7,506 +7,227 @@
 - ✅ **v2.5 Contractor & Commercial Workflows** - Phases 7-8 (completed 2026-04-03)
 - 📋 **v3.0 AI Rendering & Go-Live** - Phases 9-12 (Phase 12 deferred)
 - ✅ **v3.1 Rendering Tool Polish** - Phases 13-14 (completed 2026-04-03)
-- 📋 **v4.0 Project Schedule** - Phases 15-17 (planned)
-- 🚧 **v5.0 Admin Platform Completion** - Phases 29-34 (in progress)
+- 🚫 **v4.0 Project Schedule** - Phase 15 complete; Phases 16-17 **superseded by v5.2 Schedule Rebuild**
+- ✅ **v5.0 Admin Platform Completion** - Phases 29-34 (shipped 2026-04-12)
+- 🚧 **v5.1 Admin UX Polish & Workflow Additions** - Phases 35-41 (in progress)
+- 📋 **v5.2 Schedule Rebuild** - TBD (needs brainstorming)
+- 📋 **v6.0 Linha Platform** - TBD (planned)
 
 ## Phases
 
 <details>
-<summary>v1.0 MVP (Phases 1-3) - SHIPPED 2026-03-15</summary>
+<summary>✅ v1.0 MVP (Phases 1-3) — SHIPPED 2026-03-15</summary>
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+- [x] Phase 1: Project Scaffold and Staging Deploy (1/1 plans)
+- [x] Phase 2: Public Portfolio Site (4/4 plans)
+- [x] Phase 3: Client Operations Portal (2/2 plans)
 
-- [x] **Phase 1: Project Scaffold and Staging Deploy** - Create the Astro project with Sanity CMS and deploy to a Vercel preview URL with automatic GitHub deploys
-- [x] **Phase 2: Public Portfolio Site** - Build the complete public-facing site on the staging URL with portfolio, CMS, luxury design, integrations, and SEO
-- [x] **Phase 3: Client Operations Portal** - Add PURL-based client project portal with status tracking, milestones, and pipeline management in Sanity on staging
-
-### Phase 1: Project Scaffold and Staging Deploy
-**Goal**: A working Astro project deployed to a Vercel preview URL with automatic GitHub deploys and Sanity Studio connected
-**Depends on**: Nothing (first phase)
-**Requirements**: INFRA-05
-**Plans**: 1 plan
-
-Plans:
-- [x] 01-01-PLAN.md -- Scaffold Astro 6 project with Sanity, Tailwind, Vercel and deploy to staging
-
-### Phase 2: Public Portfolio Site
-**Goal**: A visually stunning, fast-loading portfolio website on the Vercel staging URL that showcases Liz's work, communicates services, captures leads, and scores 90%+ on SEO audits
-**Depends on**: Phase 1
-**Requirements**: PORT-01, PORT-02, PORT-03, PORT-04, SITE-01, SITE-02, SITE-03, SITE-04, SITE-05, SITE-07, DSGN-01, DSGN-02, DSGN-03, SEO-01, SEO-02, SEO-03, SEO-04, SEO-05
-**Plans**: 4 plans
-
-Plans:
-- [x] 02-01-PLAN.md -- Design system, Sanity schemas, layout shell, and reusable components
-- [x] 02-02-PLAN.md -- Home page and portfolio experience (gallery, project pages, lightbox)
-- [x] 02-03-PLAN.md -- Services, Process, About, and Privacy pages
-- [x] 02-04-PLAN.md -- Contact form (Resend), Cal.com booking, GSAP animations, sitemap, and visual review
-
-### Phase 3: Client Operations Portal
-**Goal**: Active clients can visit a unique project URL (no login) on the staging site and see their project status, current pipeline stage, and milestone timeline
-**Depends on**: Phase 2
-**Requirements**: CLNT-01, CLNT-02, CLNT-03
-**Plans**: 2 plans
-
-Plans:
-- [x] 03-01-PLAN.md -- Schema extension, utility modules, Sanity Studio portal fields, and unit tests
-- [x] 03-02-PLAN.md -- Portal page components, SSR page with token lookup, and visual review
+See: `.planning/milestones/` (if archived) or git history for full details.
 
 </details>
 
-**Note:** v1.0 Phase 4 (DNS Cutover) was planned but not executed. Its requirements (INFRA-01 through INFRA-04, INFRA-06) are carried forward into v3.0 Phase 12.
+<details>
+<summary>✅ v2.0 Client Portal Foundation (Phases 5-6) — completed 2026-04-03</summary>
 
-### v2.0 Client Portal Foundation (Completed)
+- [x] Phase 5: Data Foundation, Auth, and Infrastructure (4/4 plans)
+- [x] Phase 6: Portal Features (5/5 plans)
 
-**Milestone Goal:** Secure portal access via magic link auth, client data model with engagement types, core portal features (milestones, procurement, artifacts, post-project workflow) -- the foundation every subsequent milestone builds on.
+</details>
 
-**Phase Numbering:**
-- Integer phases (5, 6): Planned milestone work
-- Decimal phases (5.1, 6.1): Urgent insertions (marked with INSERTED)
+<details>
+<summary>✅ v2.5 Contractor & Commercial Workflows (Phases 7-8) — completed 2026-04-03</summary>
 
-- [x] **Phase 5: Data Foundation, Auth, and Infrastructure** - Client/project schemas, engagement type toggle, magic-link auth, rate limiter upgrade, and Resend domain verification
-- [x] **Phase 6: Portal Features** - Milestones, procurement, artifacts, post-project workflow, and portal UX on the authenticated portal (completed 2026-04-03)
+- [x] Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage (3/3 plans)
+- [x] Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility (3/3 plans)
 
-### v2.5 Contractor & Commercial Workflows (Completed)
+</details>
 
-**Milestone Goal:** Extend the portal platform to contractors and building managers -- residential/commercial project classification, engagement type gating of portal features, contractor portal with scoped project access, building manager portal for commercial compliance documents, and private document storage via Vercel Blob.
+<details>
+<summary>✅ v3.1 Rendering Tool Polish (Phases 13-14) — completed 2026-04-03</summary>
 
-- [x] **Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage** - Contractor and building manager data models, residential/commercial toggle, engagement type feature gating, multi-role session model, and Vercel Blob document storage foundation (completed 2026-04-03)
-- [x] **Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility** - Contractor portal UI (scope, floor plans, estimates), building manager portal UI (COIs, legal docs), and client-facing contractor schedule (completed 2026-04-03)
+- [x] Phase 13: Wizard Infrastructure and Layout Fixes (2/2 plans)
+- [x] Phase 14: Image Experience and Field Clarity (2/2 plans)
+
+</details>
+
+<details>
+<summary>✅ v5.0 Admin Platform Completion (Phases 29-34) — SHIPPED 2026-04-12</summary>
+
+**Delivered:** Custom `/admin/*` app (Linha) with tenant-aware architecture, all management features, and Sanity Studio retired.
+
+- [x] Phase 29: Tenant-Aware Platform Foundation (3/3 plans) — completed 2026-04-08
+- [x] Phase 30: Dashboard and Task Management (4/4 plans) — completed 2026-04-08
+- [x] Phase 31: Client, Contractor, and Portfolio Management (4/4 plans) — completed 2026-04-09
+- [x] Phase 32: Procurement Editor (3/3 plans) — completed 2026-04-10
+- [x] Phase 33: Rendering Tool Relocation (7/7 plans) — completed 2026-04-11
+- [x] Phase 34: Settings and Studio Retirement (7/7 plans) — completed 2026-04-12
+
+Full details: `.planning/milestones/v5.0-ROADMAP.md`
+
+</details>
 
 ### v3.0 AI Rendering & Go-Live (Phase 12 Deferred)
 
-**Milestone Goal:** Equip Liz with an AI rendering tool for photorealistic room visualizations, complete business operations (send update, investment proposals), polish the public site, and consolidate DNS -- the final milestone before extracting to the Linha multi-tenant platform.
+**Milestone Goal:** Equip Liz with an AI rendering tool for photorealistic room visualizations, complete business operations, polish the public site, and consolidate DNS.
 
-- [x] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** - Email capstone with portal snapshot, tiered budget proposals with client selection, hero animation refresh, and Fantastical booking swap (completed 2026-04-03)
-- [x] **Phase 10: AI Rendering Engine** - Rendering schemas, Gemini API integration, generate/refine/status API routes, usage tracking, and Vercel Blob image storage (completed 2026-03-17)
-- [x] **Phase 11: Rendering Studio Tool and Design Options Gallery** - Sanity Studio custom tool (wizard, refinement, session management), promote-to-Design-Option workflow, and client portal Design Options gallery with favorites and comments (completed 2026-03-18)
-- [ ] **Phase 12: DNS Cutover and Go-Live** - DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
-
-## Phase Details
-
-### Phase 5: Data Foundation, Auth, and Infrastructure
-**Goal**: Clients can securely access the portal via magic link, the Sanity schema supports all v2.0 data (clients, milestones, procurement, artifacts), engagement type is set per project, and email infrastructure is production-ready -- the foundation every subsequent phase builds on
-**Depends on**: Phase 3 (v1.0)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, CLNT-04, CLNT-05, ENGMT-01, PROC-03, INFRA-07, INFRA-08
-**Success Criteria** (what must be TRUE):
-  1. A client enters their email on the portal login page, receives a magic link email, clicks it, and lands on a dashboard showing their projects -- no password or account creation involved
-  2. The client closes their browser, reopens the portal URL days later, and is still logged in (cookie-based session persists)
-  3. An unauthenticated visitor sees only a branded login page requesting their email -- no project names, statuses, or client data are visible
-  4. Liz can create a client record in Sanity Studio with name, email, phone, address, and preferred contact method, link that client to one or more projects, and set each project's engagement type (Full Interior Design, Styling & Refreshing, or Carpet Curating)
-  5. Sending a test email from the verified send.lasprezz.com domain delivers successfully to Gmail, Outlook, and Yahoo inboxes with SPF/DKIM passing
-**Plans**: 4 plans
-
-Plans:
-- [x] 05-01-PLAN.md -- Sanity schemas (client type, project extensions, engagement type) and GROQ queries
-- [x] 05-02-PLAN.md -- Upstash Redis client, persistent rate limiter, session helpers, and middleware
-- [x] 05-03-PLAN.md -- Magic link auth flow (actions, verify, login, dashboard, PURL redirect, logout)
-- [x] 05-04-PLAN.md -- Upstash Redis setup, Resend domain DNS verification, and end-to-end visual verification
-
-### Phase 6: Portal Features
-**Goal**: The authenticated portal is Liz's primary client communication tool -- clients see custom milestones with dates, a procurement table with savings, uploadable artifacts with version history and approval workflow, and post-project warranty access -- all managed by Liz through Sanity Studio
-**Depends on**: Phase 5
-**Requirements**: CLNT-06, CLNT-07, MILE-01, MILE-02, MILE-03, PROC-01, PROC-02, ARTF-01, ARTF-02, ARTF-03, ARTF-04, ARTF-08, ARTF-09, PORT-05, PORT-06, PORT-07, POST-01, POST-02, POST-03, POST-04
-**Success Criteria** (what must be TRUE):
-  1. A client logs in and sees a dashboard greeting them by name with all their active and completed projects; clicking a project shows custom milestones with dates and completion indicators, a procurement table with line-item statuses and total savings, and uploaded artifacts with version history
-  2. Liz uploads a new version of a design board artifact in Sanity Studio; the client sees the new version as current and previous versions visually muted, and can approve/select versions with their decisions recorded in a timestamped log
-  3. Liz marks the final milestone complete and generates a close document; the client sees the project as completed but can still access it, and Liz can later reopen it for warranty work that the client can submit through the portal
-  4. The portal displays a confidentiality notice about not sharing the access link, and clients can submit notes at artifact review points and milestone checkpoints
-**Plans**: 5 plans
-
-Plans:
-- [ ] 06-01-PLAN.md -- Schema extensions (milestones, procurement, artifacts), utility libraries with tests, GROQ queries, and Sanity write client
-- [ ] 06-02-PLAN.md -- Project detail page, milestones section, procurement table, dashboard 30-day visibility filter
-- [ ] 06-03-PLAN.md -- Artifact section UI, approval/notes React forms, and Astro Actions for client interactions
-- [ ] 06-04-PLAN.md -- Wire artifacts into page, Sanity Studio document actions (Notify Client, Complete Project, Reopen)
-- [ ] 06-05-PLAN.md -- Close document PDF generation, warranty claim form, post-project features
-
-### Phase 7: Schema Extensions, Multi-Role Auth, and Document Storage
-**Goal**: The Sanity schema supports contractors, building managers, residential/commercial classification, and engagement type feature gating; the auth system handles multi-role sessions with namespace isolation; and private documents are stored in Vercel Blob with signed URLs -- all architectural decisions resolved before any portal UI is built
-**Depends on**: Phase 6
-**Requirements**: ENGMT-02, PRJT-01, PRJT-02, CONTR-01, CONTR-02, CONTR-05, CONTR-06, CONTR-07, BLDG-01, DOCS-01
-**Success Criteria** (what must be TRUE):
-  1. Liz can create contractor records in Sanity Studio (name, email, phone, company, trade), assign contractors to Full Interior Design projects, and upload a final estimate per contractor per project; contractor fields are hidden for non-Full Interior Design engagement types
-  2. Liz can toggle a project between Residential and Commercial; commercial projects show building manager contact fields and a COI section in Sanity Studio, while residential projects hide them entirely
-  3. A contractor receives a magic link email, clicks it, and lands on a session-gated page -- the session carries a role that prevents access to client portal routes, and vice versa
-  4. COI documents, floor plans, and legal documents uploaded through Sanity Studio are stored in Vercel Blob with signed URLs; direct Blob URLs without a valid signature return an error
-**Plans**: 3 plans
-
-Plans:
-- [ ] 07-01-PLAN.md -- Contractor document type, project schema extensions (contractors[], buildingManager, COIs, legalDocs, floorPlans, isCommercial), engagement type field gating, GROQ queries
-- [ ] 07-02-PLAN.md -- Vercel Blob infrastructure (BlobFileInput Studio component, upload API route, authenticated serve proxy)
-- [ ] 07-03-PLAN.md -- Multi-role session upgrade, contractor magic link flow (login, verify, dashboard), SendWorkOrderAccess Studio action, role selection
-
-### Phase 8: Contractor Portal, Building Manager Portal, and Client Contractor Visibility
-**Goal**: Contractors can view their assigned project scope, floor plans, estimates, and notes through a branded portal; building managers can access COI documents, legal docs, and client contact info for commercial projects; and clients can see which contractors are assigned to their project with on-site schedule dates
-**Depends on**: Phase 7
-**Requirements**: CONTR-03, CONTR-04, BLDG-02, BLDG-03, BLDG-04, BLDG-05, BLDG-06, CVIS-01
-**Success Criteria** (what must be TRUE):
-  1. A contractor logs in via magic link and sees their assigned project with floor plans (downloadable via signed URL), scope of work, deadline, estimate, and notes -- but sees only the client name and project address with a "contact Liz" notice instead of client email or phone
-  2. A building manager logs in via magic link on a commercial project and sees the client name and contact info, a COI section with certificates showing expiration date badges, a legal documents section with downloadable PDFs, and can request contractor info (name and license only, with "contact Liz" for more)
-  3. A client viewing their Full Interior Design project on the portal sees a contractor section showing assigned contractor names and on-site schedule dates
-**Plans**: 3 plans
-
-Plans:
-- [ ] 08-01-PLAN.md -- Schema extensions (appointments, contractor notes), GROQ queries with information boundaries, middleware, COI utility, building manager magic link infra, SendBuildingAccessAction
-- [ ] 08-02-PLAN.md -- Contractor work order detail page, dashboard modifications, ContractorNoteForm
-- [ ] 08-03-PLAN.md -- Building manager auth flow and portal (login, verify, dashboard, project detail), ExpirationBadge, ContractorSection (CVIS-01), role selection extension
-
-### Phase 9: Send Update, Investment Proposals, and Public Site Polish
-**Goal**: Liz can send branded email updates that snapshot the full portal state to clients, present tiered investment proposals (Best/Better/Good) that clients can customize, and the public site has a visually impactful hero and modern booking -- the final features before AI rendering
-**Depends on**: Phase 8
-**Requirements**: SEND-01, SEND-02, SEND-03, ARTF-05, ARTF-06, ARTF-07, BOOK-01, SITE-08
-**Success Criteria** (what must be TRUE):
-  1. Liz clicks "Send Update" on a project in Sanity Studio, adds an optional personal note, previews the email, confirms, and the client receives a branded email showing current milestones, procurement status, and pending artifact reviews -- the delivery is logged with timestamp and recipient on the project
-  2. Liz creates a proposal artifact with Good/Better/Best tiers and line items; the client views the tiers on the portal, selects their preferred tier (or mixes items across tiers), and completes a readiness check with eagerness rating and reservations capture before approval
-  3. A first-time visitor to the home page sees the hero text animate in with character-level GSAP SplitText animation creating a strong visual first impression
-  4. The contact page links to Fantastical Openings for booking with no Cal.com embed or dead code remaining in the codebase
-**Plans**: 3 plans
-
-Plans:
-- [ ] 09-01-PLAN.md -- Schema extensions (updateLog, investmentSummary), GROQ queries, SendUpdateAction Studio dialog, send-update API route, branded email template
-- [ ] 09-02-PLAN.md -- Investment proposal tier cards (InvestmentSummary.astro), tier selection form (TierSelectionForm.tsx), selectTier Astro Action, ArtifactCard wiring
-- [x] 09-03-PLAN.md -- Hero slideshow with crossfade + Ken Burns + GSAP SplitText animation, siteSettings heroSlideshow schema, Cal.com dead code cleanup
-
-### Phase 10: AI Rendering Engine
-**Goal**: The server-side rendering pipeline is fully operational -- Sanity schemas for sessions, outputs, and usage tracking are deployed, API routes handle generation, conversational refinement, and polling with Gemini integration, usage is enforced per-designer per-month with hard cap, and generated images are stored in Vercel Blob -- all backend infrastructure ready before building the Studio UI
-**Depends on**: Phase 9
-**Requirements**: RNDR-01, RNDR-02, RNDR-03, RNDR-06, RNDR-07
-**Success Criteria** (what must be TRUE):
-  1. A POST to /api/rendering/generate with a valid session ID, prompt, and input images creates a renderingSession document in Sanity, calls Gemini to produce a photorealistic 1K room rendering, stores the output image in Vercel Blob, and returns the session with the new rendering appended
-  2. A POST to /api/rendering/refine with a session ID and refinement text sends the full conversation history (previous prompt + refinement instruction) to Gemini, produces a new rendering version, and preserves the complete multi-turn context on the session
-  3. GET /api/rendering/usage returns the current designer's monthly generation count, limit, and remaining quota; POST to /api/rendering/generate returns a 403 with a clear message when the monthly limit is reached; failed generations do not increment the usage counter
-  4. GET /api/rendering/status polls a session and returns its current status (generating/complete/error); the generate endpoint uses Vercel waitUntil to process the Gemini call after returning an immediate response
-**Plans**: 4 plans
-
-Plans:
-- [ ] 10-01-PLAN.md -- Sanity schemas (renderingSession, designOption, renderingUsage), siteSettings extensions, GROQ queries, schema tests, npm deps, maxDuration config
-- [ ] 10-02-PLAN.md -- Library modules (promptBuilder, geminiClient, renderingAuth) with unit tests
-- [ ] 10-03-PLAN.md -- Core API routes (generate with waitUntil, refine with multi-turn, status polling)
-- [ ] 10-04-PLAN.md -- Supporting API routes (usage quota, promote/unpromote Design Options, client reactions)
-
-### Phase 11: Rendering Studio Tool and Design Options Gallery
-**Goal**: Liz can create rendering sessions, upload inputs through a guided wizard, generate and refine renderings, and promote favorites as Design Options visible to clients -- the complete AI rendering workflow from designer creation to client consumption
-**Depends on**: Phase 10
-**Requirements**: RNDR-04, RNDR-05
-**Success Criteria** (what must be TRUE):
-  1. Liz opens the Rendering tool in Sanity Studio, creates a new session linked to a project, uploads a floor plan and inspiration images through a 4-step wizard, describes her vision, and generates a rendering -- the session list shows all her sessions filterable by project with a persistent usage counter badge
-  2. After generating a rendering, Liz clicks "Promote to Design Options" on her preferred rendering, adds a caption, and a designOption document is created linking to the same Blob image -- the rendering shows a star icon indicating it has been promoted
-  3. A client viewing their project on the portal sees a Design Options gallery with promoted renderings displayed in a grid (2-up mobile, 3-up desktop), can click to expand in a lightbox, favorite options with a heart toggle, and leave comments -- with a confidentiality notice adapted to residential/commercial
-  4. Only promoted renderings are visible to clients -- the rendering session, wizard inputs, iteration history, and unpromoted outputs are never exposed on the portal
-**Plans**: 4 plans
-
-Plans:
-- [x] 11-01-PLAN.md -- Foundation: shared types, tool plugin registration, UsageBadge, HEIC upload support, dual-auth blob serving, env vars
-- [x] 11-02-PLAN.md -- Studio Session List and 4-Step Wizard (Setup, Upload, Classify, Describe + Generate)
-- [x] 11-03-PLAN.md -- Studio Chat View (refinement), RenderingCard actions, PromoteDialog, DesignOptionsTab
-- [x] 11-04-PLAN.md -- Portal Design Options gallery (responsive grid, lightbox with favorites and comments), visual verification
+- [x] **Phase 9: Send Update, Investment Proposals, and Public Site Polish** (completed 2026-04-03)
+- [x] **Phase 10: AI Rendering Engine** (completed 2026-03-17)
+- [x] **Phase 11: Rendering Studio Tool and Design Options Gallery** (completed 2026-03-18)
+- [ ] **Phase 12: DNS Cutover and Go-Live** — DNS consolidation to Cloudflare, email to lasprezz.com, domain redirects, and Wix replacement
 
 ### Phase 12: DNS Cutover and Go-Live
-**Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel -- replacing Wix with minimal downtime and zero email disruption
+**Goal**: All 4 domains consolidated on Cloudflare with working Microsoft 365 email at lasprezz.com, domain redirects active, and lasprezz.com serving the new site from Vercel
 **Depends on**: Phase 11
 **Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-06
-**Success Criteria** (what must be TRUE):
-  1. Visiting lasprezz.com in a browser shows the new site (not Wix) with a valid HTTPS certificate
-  2. Sending an email to liz@lasprezz.com delivers to her Microsoft 365 inbox with MX, SPF, DKIM, and DMARC all passing
-  3. Visiting lasprezzaturany.com, lasprezzny.com, and casadeolivier.com in a browser redirects to lasprezz.com with HTTPS
-  4. All 4 domains show Cloudflare as the authoritative nameserver (verified via dig or whois)
-  5. Liz confirms she can send and receive email at liz@lasprezz.com, info@lasprezz.com, and paul@lasprezz.com within 1 hour of cutover
 **Plans**: 3 plans
 
 Plans:
-- [ ] 12-01-PLAN.md -- Pre-cutover DNS audit and M365 email migration (GoDaddy to Microsoft direct)
-- [ ] 12-02-PLAN.md -- Domain transfers to Cloudflare, DNS configuration for Vercel + email, Resend verification
-- [ ] 12-03-PLAN.md -- Secondary domain redirects, email aliases, go-live verification, and service teardown
+- [ ] 12-01-PLAN.md -- Pre-cutover DNS audit and M365 email migration
+- [ ] 12-02-PLAN.md -- Domain transfers to Cloudflare, DNS configuration for Vercel + email
+- [ ] 12-03-PLAN.md -- Secondary domain redirects, email aliases, go-live verification
+
+### v4.0 Project Schedule (Gantt Chart) — Phases 16-17 Superseded
+
+**Milestone Goal (original):** Visual, interactive project timeline in the admin app for sequencing contractors, procurement, milestones, and custom events.
+
+- [x] **Phase 15: Schema and Read-Only Timeline** (3/3 plans, completed)
+- 🚫 **Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips** — **Superseded by v5.2 Schedule Rebuild**
+- 🚫 **Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars** — **Superseded by v5.2 Schedule Rebuild**
+
+v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase 16-17 scope (drag-and-drop write-back, lifecycle bars, overlap highlighting) will be re-evaluated during v5.2 brainstorming and reincorporated only if still relevant to the new template approach.
+
+### v5.1 Admin UX Polish & Workflow Additions (Phases 35-41) — In Progress
+
+**Milestone Goal:** Refine the v5.0 admin app based on Liz's hands-on feedback, add Work Order and Documents panels to project detail, remove pricing exposure from procurement, and tighten vendor/client data models.
+
+**Note on ordering:** Phase 38 (Send Update Sender Config) precedes Phase 39 (Work Order & Documents) so that WORK-05's email-send implementation can consume Settings-driven sender values without a retrofit.
+
+- [x] **Phase 35: Dashboard Polish & Global UX Cleanup** — 13 reqs (DASH-10..22) (completed 2026-04-14)
+- [ ] **Phase 36: Projects List & Archive Lifecycle** — 5 reqs (PROJ-01..05)
+- [ ] **Phase 37: Procurement Privacy & Modal Editor** — 5 reqs (PROC-10..14)
+- [ ] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12)
+- [ ] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03)
+- [ ] **Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support** — 5 reqs (VEND-01..05)
+- [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
+
+### Phase 35: Dashboard Polish & Global UX Cleanup
+**Goal**: Liz's dashboard surfaces only the signal she acts on: clean status chips, filterable Upcoming Deliveries and Projects cards, a working contractor quick-assign flow, and tasks cards that hide completed work by default
+**Depends on**: v5.0 (Phase 30 Dashboard baseline)
+**Requirements**: DASH-10, DASH-11, DASH-12, DASH-13, DASH-14, DASH-15, DASH-16, DASH-17, DASH-18, DASH-19, DASH-20, DASH-21, DASH-22
+**Success Criteria** (what must be TRUE):
+  1. Liz sees no relative-time "8d / 1w" badges anywhere in the admin app
+  2. The Upcoming Deliveries card is renamed, filterable by free text, shows only undelivered items by default, and renders client → item → project in that visual order with carrier ETA only when Ship24 provides one
+  3. The Projects card has a working free-text filter input that narrows the visible list
+  4. Liz can add a new contractor directly from the Dashboard Contractor card and the quick-assign flow skips the trade prompt when a contractor has a single trade
+  5. Every user-facing trade label renders in sentence case (no slugs, no all-caps)
+  6. Tasks cards (dashboard + project detail + client) have a visible "Add task" button and hide completed tasks by default with a reveal link that resets on reload
+**Plans**: 5 plans
+**UI hint**: yes
+
+Plans:
+- [x] 35-01-PLAN.md — Wave 1: formatTrade utility + admin relative-time purge (DASH-10, DASH-19)
+- [x] 35-02-PLAN.md — Wave 2: Upcoming Deliveries card (rename + filter + delivered disclosure + carrier ETA gating) (DASH-11..15)
+- [x] 35-03-PLAN.md — Wave 3: Active Projects card free-text filter (DASH-16)
+- [x] 35-04-PLAN.md — Wave 4: Dashboard Contractor card + single-trade quick-assign bypass (DASH-17, DASH-18)
+- [x] 35-05-PLAN.md — Wave 2: Tasks cards header Add-task + hide-completed toggle (dashboard + project + client) (DASH-20, DASH-21, DASH-22)
+
+### Phase 36: Projects List & Archive Lifecycle
+**Goal**: Completed projects are visually distinct, can be archived manually or automatically after 90 days, and archived projects live in a read-only view that doesn't clutter the active list
+**Depends on**: Phase 35
+**Requirements**: PROJ-01, PROJ-02, PROJ-03, PROJ-04, PROJ-05
+**Success Criteria** (what must be TRUE):
+  1. The projects list visually separates active from completed projects with a horizontal divider and muted styling on the completed group
+  2. Liz can manually archive a completed project from its detail page
+  3. Completed projects auto-archive 90 days after their completion date
+  4. A "View archived projects" link opens a read-only archived view
+**Plans**: TBD (estimated 2-3)
+**UI hint**: yes
+
+### Phase 37: Procurement Privacy & Modal Editor
+**Goal**: Procurement hides all pricing information from the admin UI, and item editing moves from inline-row editing to a view-then-edit modal that shows every field with support for multiple images
+**Depends on**: v5.0 (Phase 32 Procurement Editor baseline)
+**Requirements**: PROC-10, PROC-11, PROC-12, PROC-13, PROC-14
+**Success Criteria** (what must be TRUE):
+  1. Clicking any procurement row opens a modal showing every field of the item in read mode
+  2. The modal has an explicit Edit action that switches it into editable mode
+  3. No price, cost, retail, net, profit, or markup field is visible anywhere in the procurement UI
+  4. The "Delivery" column and field label read "Expected install date" throughout the procurement editor
+  5. A procurement item can have multiple images uploaded to it
+**Plans**: TBD (estimated 3)
+**UI hint**: yes
+
+### Phase 38: Send Update Sender Config
+**Goal**: Settings stores the default from/cc addresses used by Send Update (and the upcoming Work Order email in Phase 39), replacing any hardcoded office@/liz@ references
+**Depends on**: v5.0 (Phase 34 Send Update baseline)
+**Requirements**: SETT-10, SETT-11, SETT-12
+**Success Criteria** (what must be TRUE):
+  1. Settings exposes a default "from" address for Send Update that defaults to office@lasprezz.com
+  2. Settings exposes a default "cc" address for Send Update that defaults to liz@lasprezz.com
+  3. Send Update emails are sent using the from/cc values read from Settings at send time
+**Plans**: TBD (estimated 2)
+**UI hint**: yes
+
+### Phase 39: Work Order & Documents Panels
+**Goal**: Project detail gains two new panels — Work Order (compose + email a work order from selected procurement items, custom fields, and special instructions) and Documents (upload, list, preview, and delete project documents)
+**Depends on**: Phase 38 (Work Order email send consumes Settings-driven sender config from SETT-10/11); Phase 37 (procurement modal baseline for item selection)
+**Requirements**: WORK-01, WORK-02, WORK-03, WORK-04, WORK-05, DOCS-01, DOCS-02, DOCS-03
+**Success Criteria** (what must be TRUE):
+  1. Project detail page shows a Work Order panel alongside existing panels
+  2. Liz can create a work order by selecting N procurement items from the project, adding custom fields, and writing free-text special instructions
+  3. A work order can be sent as email from the Settings-configured from address with the Settings-configured cc address (default office@lasprezz.com / liz@lasprezz.com)
+  4. Project detail page shows a Documents panel alongside existing panels
+  5. Liz can upload PDF and image documents to a project and then list, preview, and delete them
+**Plans**: TBD (estimated 4)
+**UI hint**: yes
+
+### Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support
+**Goal**: "Contractor" becomes "Contractor / Vendor" across the admin UI; trades are first-class records Liz can manage (create/rename/delete); contractor records gain physical address fields and a 1099 document slot with a visible badge
+**Depends on**: v5.0 (Phase 31 Contractor CRUD baseline)
+**Requirements**: VEND-01, VEND-02, VEND-03, VEND-04, VEND-05
+**Success Criteria** (what must be TRUE):
+  1. Every "Contractor" label, header, and nav entry in the admin UI reads "Contractor / Vendor"
+  2. The contractor list renders trades as distinct pills in sentence case
+  3. Liz can create, rename, and delete trade names from a trades manager UI
+  4. Contractor / Vendor records capture physical address fields (street, city, state, zip)
+  5. Liz can upload a 1099 document to a contractor record and the record shows a clearly-designated 1099 badge
+**Plans**: TBD (estimated 3)
+**UI hint**: yes
+
+### Phase 41: Client Data Model Refinements
+**Goal**: Client schema is tightened — phone numbers render consistently everywhere (clients, contractors, popovers), physical address fields are captured, the list columns reflect the new shape, and the unused preferred-contact field is removed
+**Depends on**: v5.0 (Phase 31 Client CRUD baseline)
+**Requirements**: CLNT-10, CLNT-11, CLNT-12, CLNT-13
+**Success Criteria** (what must be TRUE):
+  1. Phone numbers render in a single consistent format across the client list, contractor list, popovers, and detail views
+  2. Client records capture physical address fields (street, city, state, zip)
+  3. The Clients list columns are name, address, email, phone (no other columns)
+  4. The "Preferred contact" field is absent from both the client schema and the UI
+**Plans**: TBD (estimated 2-3)
+**UI hint**: yes
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Project Scaffold and Staging Deploy | v1.0 | 1/1 | Complete | 2026-03-14 |
-| 2. Public Portfolio Site | v1.0 | 4/4 | Complete | 2026-03-14 |
-| 3. Client Operations Portal | v1.0 | 2/2 | Complete | 2026-03-15 |
-| 4. DNS Cutover and Go-Live | v1.0 | 0/1 | Deferred (moved to v3.0 Phase 12) | - |
-| 5. Data Foundation, Auth, and Infrastructure | v2.0 | 4/4 | Complete | 2026-03-16 |
-| 6. Portal Features | v2.0 | 0/5 | Complete    | 2026-04-03 |
-| 7. Schema Extensions, Multi-Role Auth, and Document Storage | v2.5 | 0/3 | Complete    | 2026-04-03 |
-| 8. Contractor Portal, Building Manager Portal, and Client Contractor Visibility | v2.5 | 0/3 | Complete    | 2026-04-03 |
-| 9. Send Update, Investment Proposals, and Public Site Polish | v3.0 | 1/3 | Complete    | 2026-04-03 |
-| 10. AI Rendering Engine | 4/4 | Complete    | Complete    | 2026-04-03 |
-| 11. Rendering Studio Tool and Design Options Gallery | 4/4 | Complete    | 2026-03-18 | - |
-| 12. DNS Cutover and Go-Live | v3.0 | 0/3 | Not started | - |
+| Phase | Milestone | Plans | Status | Completed |
+|-------|-----------|-------|--------|-----------|
+| 1-3 | v1.0 | 7/7 | Shipped | 2026-03-15 |
+| 5-6 | v2.0 | 9/9 | Complete | 2026-04-03 |
+| 7-8 | v2.5 | 6/6 | Complete | 2026-04-03 |
+| 9-11 | v3.0 | 12/12 | Complete (Phase 12 deferred) | 2026-04-03 |
+| 12 | v3.0 | 0/3 | Not started | - |
+| 13-14 | v3.1 | 4/4 | Complete | 2026-04-03 |
+| 15 | v4.0 | 3/3 | Complete | 2026-04-04 |
+| 16-17 | v4.0 | — | Superseded by v5.2 | - |
+| 29-34 | v5.0 | 28/28 | Shipped | 2026-04-12 |
+| 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
+| 36 | v5.1 | 0/3 | Not started | - |
+| 37 | v5.1 | 0/3 | Not started | - |
+| 38 | v5.1 | 0/2 | Not started | - |
+| 39 | v5.1 | 0/4 | Not started | - |
+| 40 | v5.1 | 0/3 | Not started | - |
+| 41 | v5.1 | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
-*v1.0 shipped: 2026-03-15 (Phases 1-3)*
-*v2.0 roadmap created: 2026-03-16*
-*Restructured into v2.0/v2.5/v3.0: 2026-03-16*
-*Phase 5 plans created: 2026-03-16*
-*Phase 6 plans created: 2026-03-16*
-*Phase 7 plans created: 2026-03-16*
-*Phase 8 plans created: 2026-03-17*
-*v3.0 roadmap expanded: 2026-03-17 (AI Rendering phases 10-11 added, DNS moved to Phase 12)*
-*Phase 9 plans created: 2026-03-17 (3 plans in 2 waves)*
-*Phase 10 plans created: 2026-03-17 (4 plans in 2 waves)*
-*Phase 11 plans created: 2026-03-18 (4 plans in 2 waves)*
-*Phase 12 plans created: 2026-03-18 (3 plans in 3 waves -- operations runbook, no code changes)*
-
-### v3.1 Rendering Tool Polish
-
-**Milestone Goal:** Make the AI rendering wizard intuitive and reliable so Liz can use it with real clients. Fix UX blockers found during first real testing.
-
-- [x] **Phase 13: Wizard Infrastructure and Layout Fixes** - Fix step navigation, blob upload reliability, filename overflow, and classify step responsive layout (completed 2026-04-03)
-- [x] **Phase 14: Image Experience and Field Clarity** - Add image previews, multi-image upload, and simplify the setup/describe field overlap (completed 2026-04-03)
-
-## Progress (v3.1)
-
-| # | Phase | Plans | Status | Completed |
-|---|-------|-------|--------|-----------|
-| 13. Wizard Infrastructure and Layout Fixes | v3.1 | 2/2 | Complete    | 2026-04-03 |
-| 14. Image Experience and Field Clarity | v3.1 | 2/2 | Complete    | 2026-04-03 |
-
-### Phase 13: Wizard Infrastructure and Layout Fixes
-**Goal**: The wizard stepper allows free navigation between completed steps, blob uploads work reliably everywhere, long filenames don't break layout, and the classify step is responsive
-**Depends on**: Phase 11 (existing rendering tool)
-**Requirements**: RNAV-01, RNAV-02, RUPL-01, RIMG-03, RUX-02
-**Plans**: 2 plans
-
-Plans:
-- [x] 13-01-PLAN.md -- Hybrid blob upload (server-side PUT + client fallback), retry button, CSS filename truncation in Upload step
-- [x] 13-02-PLAN.md -- maxVisitedStep stepper navigation with disabled Classify state, Classify card max-width and filename truncation
-
-**Success criteria:**
-1. Designer clicks a completed step indicator and the wizard jumps to that step with all data preserved
-2. Designer uploads an image on both localhost and the production Vercel URL without CORS errors
-3. A filename longer than 60 characters is truncated with ellipsis in both upload and classify views
-4. Classify step fields don't overflow or stack awkwardly on a 1440px-wide screen
-
-### Phase 14: Image Experience and Field Clarity
-**Goal**: Uploaded images show visual previews, multiple images can be uploaded at once, and the setup/describe steps have clear distinct purposes
-**Depends on**: Phase 13 (upload must work before previews matter)
-**Requirements**: RIMG-01, RIMG-02, RUX-01
-**Plans**: 2 plans
-
-Plans:
-- [x] 14-01-PLAN.md -- Types foundation (localPreviewUrl, STYLE_PRESETS), style dropdown in StepSetup, Classify preview fallback
-- [x] 14-02-PLAN.md -- StepUpload overhaul: instant previews, parallel upload (concurrency=3), 120px thumbnails, PDF fallback, memory cleanup
-
-**Success criteria:**
-1. After uploading an image, a thumbnail preview appears (not just the filename)
-2. Designer can drag 3 images onto the upload area and all 3 are uploaded and classified
-3. Setup step and Describe step have clearly labeled, non-overlapping fields
-
----
-*Phase 13 plans created: 2026-04-03 (2 plans in 1 wave -- parallel execution)*
-*Phase 14 plans created: 2026-04-03 (2 plans in 2 waves -- sequential execution)*
-
-### v4.0 Project Schedule (Gantt Chart)
-
-**Milestone Goal:** Give Liz a visual, interactive project timeline in Sanity Studio so she can sequence contractors, procurement, milestones, and custom events for complex commercial projects -- using SVAR React Gantt as a custom document view tab with transform-on-read, patch-on-write architecture.
-
-- [x] **Phase 15: Schema and Read-Only Timeline** - Custom events schema, procurement date fields, Gantt tab as Sanity document view with contractor bars, milestone markers, procurement markers, swim lanes, today line, and week/month toggle
-- [ ] **Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips** - Drag-to-reschedule contractor bars and events, Sanity document patch on drag, undo toast, and hover tooltips for all items
-- [ ] **Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars** - Contractor appointment dots, overlapping schedule highlights, and segmented order-to-install procurement bars
-
-### Phase 15: Schema and Read-Only Timeline
-**Goal**: Liz can open a Schedule tab on any Full Interior Design or Commercial project in Sanity Studio and see all contractor assignments, milestones, procurement items, and custom events displayed as a color-coded, read-only Gantt chart with collapsible swim lanes, a today marker, and week/month view toggle -- proving the data transformation, reference resolution, and CSS integration before any write-back complexity is added
-**Depends on**: Phase 14 (v3.1 complete)
-**Requirements**: SCHED-01, SCHED-02, SCHED-03, SCHED-04, SCHED-05, SCHED-06, SCHED-07, SCHED-08, SCHED-09, SCHED-10, SCHED-11
-**Success Criteria** (what must be TRUE):
-  1. Liz opens a Full Interior Design project in Sanity Studio and sees a "Schedule" tab; opening a Carpet Curating project shows no Schedule tab
-  2. Liz adds a custom schedule event (e.g., "Office Walkthrough" with a date and category) in the schedule group fields, and the event appears on the Gantt timeline as a point marker -- a multi-day event appears as a bar
-  3. Contractor assignments appear as horizontal bars in unique per-contractor colors with a legend showing contractor name and color swatch; milestones appear as diamond markers (dimmed when complete); procurement install dates appear as markers styled by status (pending / ordered / delivered / installed)
-  4. A vertical "Today" line is visible on the timeline, and Liz can toggle between week view (day-level columns, default) and month view (week-level columns) via a segmented control
-  5. Contractors, procurement items, milestones, and custom events are grouped into labeled, individually collapsible swim lanes
-**Plans**: 3 plans
-
-Plans:
-- [x] 15-PLAN-1-schema-extensions.md -- Schedule group, customEvents[] array, procurement date fields (orderDate, expectedDeliveryDate), schema tests
-- [x] 15-PLAN-2-gantt-foundation.md -- npm deps (SVAR, date-fns), type contracts, date/color utilities with tests, structure.ts tab wiring, GanttScheduleView shell
-- [x] 15-PLAN-3-gantt-render.md -- Data transform functions (TDD), useGanttData hook, GanttChart, ScaleToggle, Legend, EmptyState, gantt.css, visual verification
-
-### Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips
-**Goal**: Liz can drag bars and markers on the Gantt chart to reschedule items, with date changes written back to the Sanity project document draft immediately, undo available via a floating toast, and item details visible on hover -- making the timeline an interactive scheduling tool rather than a read-only display
-**Depends on**: Phase 15
-**Requirements**: SCHED-12, SCHED-13, SCHED-14, SCHED-15
-**Success Criteria** (what must be TRUE):
-  1. Liz drags a contractor bar to the right and both the start and end dates shift by the same number of days (duration preserved); dragging the right edge of the bar changes only the end date
-  2. After a drag, the Sanity document draft reflects the updated dates immediately -- no explicit save or sync action required
-  3. A floating "Undo" toast appears after each drag; clicking it reverts the dates on the Sanity document to their pre-drag values
-  4. Hovering any bar or marker shows a tooltip with the item's name, date(s), status or category, and any notes
-**Plans**: TBD
-**UI hint**: yes
-
-### Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars
-**Goal**: The Gantt chart shows fine-grained scheduling details -- contractor appointments as sub-markers along their bars, overlapping contractor schedules highlighted for conflict awareness, and procurement items displayed as full lifecycle bars when order and delivery dates are available -- completing the scheduling picture for complex commercial projects
-**Depends on**: Phase 16
-**Requirements**: SCHED-16, SCHED-17, SCHED-18
-**Success Criteria** (what must be TRUE):
-  1. Contractor appointments (measurement visits, install days) appear as small dot sub-markers positioned along their contractor's timeline bar
-  2. When two contractors have overlapping date ranges, a subtle background highlight indicates the overlapping period on the timeline
-  3. A procurement item with order date, expected delivery date, and install date displays as a segmented lifecycle bar (order -> expected delivery -> install); a procurement item with only an install date falls back to a single marker
-**Plans**: TBD
-**UI hint**: yes
-
-## Progress (v4.0)
-
-**Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 15. Schema and Read-Only Timeline | v4.0 | 0/3 | Planning complete | - |
-| 16. Drag-and-Drop, Write-back, Undo, and Tooltips | v4.0 | 0/TBD | Not started | - |
-| 17. Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars | v4.0 | 0/TBD | Not started | - |
-
----
-*v4.0 roadmap created: 2026-04-04 (3 phases, 18 requirements mapped)*
-*Phase 15 plans created: 2026-04-04 (3 plans in 2 waves -- Plans 1-2 parallel, Plan 3 sequential)*
-
-### v5.0 Admin Platform Completion
-
-**Milestone Goal:** Complete the custom `/admin/*` app (Linha) with tenant-aware architecture, all management features (dashboard, tasks, procurement, clients, contractors, portfolio), rendering tool relocation from Sanity Studio, and settings -- so Sanity Studio can be fully retired as the admin interface.
-
-**Phase Numbering:**
-- Integer phases (29, 30, ...): Planned milestone work
-- Decimal phases (29.1, 30.1): Urgent insertions (marked with INSERTED)
-
-**Note:** Phases 18-28 were the v5.0 foundation (admin app scaffold, project detail, Gantt relocation, procurement UI, documents page). Phases 29-34 complete the platform.
-
-- [x] **Phase 29: Tenant-Aware Platform Foundation** - Tenant model, scoped auth, per-tenant config, and tenant context flowing through all queries and routes (completed 2026-04-08)
-- [x] **Phase 30: Dashboard and Task Management** - Cross-project dashboard with milestones, deliveries, tasks, activity feed, and per-project task CRUD (completed 2026-04-08)
-- [x] **Phase 31: Client, Contractor, and Portfolio Management** - Entity CRUD for clients and contractors with search, forms, detail pages, quick-assign, popovers, and portfolio curation (completed 2026-04-09)
-- [x] **Phase 32: Procurement Editor** - Inline editing, status badge pipeline, overdue highlighting, tracking integration with daily cron and force refresh, carrier ETA (completed 2026-04-10)
-- [x] **Phase 33: Rendering Tool Relocation** - Port rendering wizard, chat refinement, promote workflow, and usage tracking from Sanity Studio to admin with all UX fixes (completed 2026-04-11)
-- [x] **Phase 34: Settings and Studio Retirement** - Site settings, hero slideshow, rendering config, Send Update relocation, deprecation banner, and Studio route removal (completed 2026-04-12)
-
-### Phase 29: Tenant-Aware Platform Foundation
-**Goal**: Every admin request resolves to a specific tenant, all data access is scoped to that tenant's Sanity dataset, and no hardcoded single-tenant assumptions remain in the admin codebase -- the architectural prerequisite for every feature that follows
-**Depends on**: Phase 28 (v5.0 foundation)
-**Requirements**: PLAT-01, PLAT-02, PLAT-03, PLAT-04, PLAT-05
-**Success Criteria** (what must be TRUE):
-  1. A tenant record exists with designer name, Sanity dataset ID, domain config, and feature flags; the admin app resolves the correct tenant on every page load based on the authenticated user
-  2. All GROQ queries and API routes receive tenant context and scope data access to the resolved tenant's Sanity dataset -- switching the tenant config changes which data is returned with zero code changes
-  3. Site settings (rendering limits, branding, contact info) are read from per-tenant configuration rather than a shared global
-  4. A codebase audit confirms no remaining hardcoded references to "la-sprezzatura" dataset names, single-tenant API keys, or domain-specific assumptions in admin components, queries, or routes
-**Plans**: 3 plans
-
-Plans:
-- [x] 29-01-PLAN.md -- Tenant config, types, Sanity client factory, session extension, admin auth, and login API
-- [x] 29-02-PLAN.md -- Middleware admin protection, env.d.ts update, admin login page UI, and visual verification
-- [x] 29-03-PLAN.md -- Refactor admin API routes and queries to tenant client, dynamic AdminNav brand, hardcoded string audit
-
-### Phase 30: Dashboard and Task Management
-**Goal**: The admin opens to a dashboard showing the health of all active projects at a glance -- overdue items, upcoming milestones, active deliveries, recent activity, and tasks -- with the ability to create and manage tasks per project
-**Depends on**: Phase 29
-**Requirements**: DASH-01, DASH-02, DASH-03, DASH-04, DASH-05, DASH-06, TASK-01, TASK-02, TASK-03
-**Success Criteria** (what must be TRUE):
-  1. After logging in, the admin sees a dashboard listing active projects with their current stage and days-in-stage, upcoming and overdue milestones with date badges, and active deliveries with tracking status pills and ETAs
-  2. An overdue alert banner appears at the top of the dashboard summarizing all overdue milestones and tasks across projects; the banner disappears when nothing is overdue
-  3. The dashboard shows a recent activity feed with timestamps and actor names, and a tasks section with checkboxes that can be filtered by project
-  4. The admin can create a task on a project with a description and optional due date, check it off as complete from either the dashboard or the project detail page, and overdue tasks appear highlighted in red in both locations
-**Plans**: 4 plans
-
-Plans:
-- [x] 30-01-PLAN.md -- Sanity schema extensions (tasks[], activityLog[], pipelineStageChangedAt), dashboard GROQ queries, and dashboardUtils with tests
-- [x] 30-02-PLAN.md -- Task API route (create + toggle) with activity logging and unit tests
-- [x] 30-03-PLAN.md -- Dashboard Astro page with 5-card grid and DashboardTasksCard React island
-- [x] 30-04-PLAN.md -- Project detail page with tasks section and visual verification
-
-### Phase 31: Client, Contractor, and Portfolio Management
-**Goal**: The admin can manage the full lifecycle of clients and contractors -- create, edit, search, assign to projects, and view linked project history -- and curate which completed projects appear on the public portfolio
-**Depends on**: Phase 29
-**Requirements**: CRUD-01, CRUD-02, CRUD-03, CRUD-04, CRUD-05, CRUD-06, CRUD-07, CRUD-08, CRUD-09, FOLIO-01, FOLIO-02, FOLIO-03, FOLIO-04
-**Success Criteria** (what must be TRUE):
-  1. The admin can view a searchable list of all clients, create and edit client records (name, email, phone, address, preferred contact method, internal notes), and view a client detail page showing all linked projects
-  2. The admin can view a list of all contractors filterable by trade, create and edit contractor records (name, email, phone, company, trades), and view a contractor detail page showing all linked projects
-  3. Deleting a client or contractor that has project references is blocked with a clear explanation; the admin can quick-assign a client or contractor to a project via a typeahead field; hovering a client or contractor name anywhere in the admin shows a contact card popover with key details
-  4. The admin can view all completed projects in a Portfolio section, toggle which ones appear on the public site, edit portfolio-specific fields (featured image, description, room tags), and drag to reorder the display sequence
-**Plans**: 4 plans
-**UI hint**: yes
-
-Plans:
-- [x] 31-01-PLAN.md -- Schema extensions (client notes, contractor documents, project portfolio fields), GROQ queries, API routes, and AdminNav update
-- [x] 31-02-PLAN.md -- Client and contractor list pages, detail pages, shared React components (EntityListPage, EntityDetailForm, LinkedProjects, DeleteConfirmDialog)
-- [x] 31-03-PLAN.md -- Portfolio management: grid with toggles, edit form, drag-and-drop arrange screen, and public portfolio query update
-- [x] 31-04-PLAN.md -- Contact card popover, quick-assign typeahead, and integration into dashboard and project detail pages
-
-### Phase 32: Procurement Editor
-**Goal**: The admin can manage procurement items with inline editing, visual status tracking through a 6-stage pipeline, automatic carrier tracking via daily cron job, and force-refresh on demand -- replacing the Sanity Studio procurement workflow entirely
-**Depends on**: Phase 29
-**Requirements**: PROC-01, PROC-02, PROC-03, PROC-04, PROC-05, PROC-06, PROC-07, PROC-08, PROC-09
-**Success Criteria** (what must be TRUE):
-  1. The admin can add, edit, and remove procurement items on a project with inline editing; each item shows a status dropdown badge cycling through the 6-stage pipeline (Pending, Ordered, Warehouse, In Transit, Delivered, Installed) with overdue items (past expected delivery, not yet delivered/installed) highlighted in red
-  2. Tracking numbers are clickable links to the carrier's tracking page with auto-detected carrier; carrier-provided ETA is displayed alongside the expected delivery date; net price is computed and displayed at render time (never stored)
-  3. A daily cron job automatically checks tracking status via the aggregator API (Ship24/EasyPost) and updates Sanity; auto-updated statuses are visually distinguished from manually-set statuses (e.g., a sync icon or timestamp)
-  4. The admin can click a refresh button on any tracked item to force an immediate status check against the aggregator API, with the result reflected in the UI within seconds
-**Plans**: 3 plans
-
-Plans:
-- [x] 32-01-PLAN.md -- Schema extensions, GROQ queries, Ship24 client, and utility functions (isProcurementOverdue, getNetPrice)
-- [x] 32-02-PLAN.md -- Procurement API route (CRUD + status + force-refresh) and Vercel Cron tracking sync endpoint
-- [x] 32-03-PLAN.md -- ProcurementEditor React island component, page wiring, and visual verification
-
-### Phase 33: Rendering Tool Relocation
-**Goal**: The full AI rendering workflow -- session list, guided wizard, chat refinement, promote to Design Options, and usage tracking -- works in the admin app with all known UX bugs fixed, and produces correct AI-generated results
-**Depends on**: Phase 29
-**Requirements**: RNDR-01, RNDR-02, RNDR-03, RNDR-04, RNDR-05, RNDR-06, RNDR-07, RNDR-08, RNDR-09, RNDR-10, RNDR-11
-**Success Criteria** (what must be TRUE):
-  1. The admin can view a list of rendering sessions filterable by project, open the 4-step wizard (Setup, Upload, Classify, Describe) to create a new session, and navigate between completed steps by clicking step indicators
-  2. Uploaded images show thumbnail previews, long filenames are truncated with ellipsis, multiple images can be uploaded at once, and the style preset / design vision fields are clearly labeled without overlap
-  3. The chat refinement view works for multi-turn iteration on renderings, and the admin can promote a rendering to Design Options from the admin interface; a usage tracking badge shows the monthly count and remaining limit
-  4. AI rendering generation and conversational refinement produce correct photorealistic results when triggered from the admin app (regression test against the same API routes)
-**Plans**: 7 plans
-
-Plans:
-- [x] 33-01-PLAN.md -- Identity gap resolution, RENDERING_SESSIONS_TENANT_QUERY, shared types, route shells, AdminNav Sparkles, Wave 0 test stubs
-- [x] 33-02-PLAN.md -- SessionListPage with all-tenant sessions, Mine filter chip, ownership stamps, UsageBadge
-- [x] 33-03-PLAN.md -- WizardContainer (maxVisitedStep), StepSetup, StepClassify, StepDescribe, GeneratingOverlay
-- [x] 33-04-PLAN.md -- StepUpload with instant previews, multi-upload, filename truncation (RNDR-07/08/09 regression)
-- [x] 33-05-PLAN.md -- ChatView side-by-side layout, multi-turn refinement, polling
-- [x] 33-06-PLAN.md -- PromoteDrawer (parchment drawer), project detail Rendering tab
-- [x] 33-07-PLAN.md -- Full Vitest suite, build security check (T-33-01), manual RNDR-11 UAT
-
-### Phase 34: Settings and Studio Retirement
-**Goal**: The admin can manage all site configuration and operational workflows that previously required Sanity Studio, and Studio is retired outright -- making the admin app the sole management interface
-**Depends on**: Phases 30, 31, 32, 33 (all features must be verified before Studio can be retired)
-**Requirements**: SETT-01, SETT-02, SETT-03, SETT-04, SETT-05, SETT-06, SETT-07, SETT-08
-**Success Criteria** (what must be TRUE):
-  1. The admin can edit site settings (title, tagline, contact info, social links), manage hero slideshow images (add, remove, reorder with alt text), and configure rendering settings (monthly limit, image type options) -- with all changes logged with timestamps
-  2. The admin can compose a Send Update email, preview exactly what the client will receive, send it per-recipient with a personal portal link, and view the delivery log -- the complete workflow previously done in Sanity Studio
-  3. Sanity Studio is retired outright (studioBasePath dropped, Studio-specific components deleted) -- SETT-07 superseded and SETT-08 satisfied per Phase 34 CONTEXT.md Requirements reinterpretation
-  4. Every feature that previously required Sanity Studio (project editing, procurement, rendering, settings, send update) is accessible and functional in the admin app
-**Plans**: 7 plans
-**UI hint**: yes
-
-Plans:
-- [ ] 34-PLAN-wave0-test-stubs.md -- Wave 0 Nyquist test stub seeding for ~20 test files + VALIDATION.md task-ID rewrite
-- [ ] 34-PLAN-foundation-primitives.md -- AdminModal, AdminToast, CollapsibleSection, TagInput, upload-sanity-image route, blob-upload auth gate (T-34-02), luxury-secondary-btn CSS, shared ENGAGEMENT_LABELS
-- [ ] 34-PLAN-settings-surface.md -- /admin/settings page with 4 collapsible sections, HeroSlideshowEditor, RenderingConfigSection, site-settings API (T-34-01), SITE_SETTINGS_QUERY, renderingAuth case normalization
-- [ ] 34-PLAN-send-update-surface.md -- Extract buildSendUpdateEmail to shared module, add usePersonalLinks flag to /api/send-update, create /api/send-update/preview (T-34-04), build SendUpdateModal (T-34-03, T-34-05)
-- [ ] 34-PLAN-per-client-purl.md -- Add client.portalToken schema field (D-18), regenerate-portal-token action (D-22), RegenerateLinkDialog, ClientChipWithRegenerate wrapper
-- [ ] 34-PLAN-client-dashboard.md -- /portal/client/[token] route, clientDashboard resolver, portalTokenHash helper, PURL session source, middleware hash re-validation (T-34-07) + read-only gate (T-34-08)
-- [ ] 34-PLAN-studio-removal.md -- Strip Studio schema imports, delete structure.ts + all Studio components, drop studioBasePath, annotate REQUIREMENTS.md with SETT-07/08 reinterpretation
-
-## Progress (v5.0 Completion)
-
-**Execution Order:**
-Phases 29 first (foundation), then 30-33 can execute in sequence, 34 last (requires all others complete).
-29 -> 30 -> 31 -> 32 -> 33 -> 34
-
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 29. Tenant-Aware Platform Foundation | v5.0 | 3/3 | Complete    | 2026-04-08 |
-| 30. Dashboard and Task Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
-| 31. Client, Contractor, and Portfolio Management | v5.0 | 4/4 | Complete   | 2026-04-09 |
-| 32. Procurement Editor | v5.0 | 3/3 | Complete   | 2026-04-10 |
-| 33. Rendering Tool Relocation | v5.0 | 7/7 | Complete    | 2026-04-11 |
-| 34. Settings and Studio Retirement | v5.0 | 7/7 | Complete    | 2026-04-12 |
-
----
-*v5.0 completion roadmap created: 2026-04-08 (6 phases, 42 requirements mapped)*
+*v1.0 shipped: 2026-03-15*
+*v5.0 shipped: 2026-04-12 — archived to milestones/v5.0-ROADMAP.md*
+*v5.1 planned: 2026-04-14 — 7 phases, 43 requirements, 22 plans estimated*

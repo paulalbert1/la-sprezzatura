@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v5.0
-milestone_name: Admin Platform Completion
+milestone: v5.1
+milestone_name: Admin UX Polish & Workflow Additions
 status: executing
-stopped_at: Phase 34 UI-SPEC approved
-last_updated: "2026-04-12T03:40:07.044Z"
-last_activity: 2026-04-12
+stopped_at: Phase 35 UI-SPEC approved
+last_updated: "2026-04-14T18:45:39.830Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 19
-  completed_phases: 6
-  total_plans: 28
-  completed_plans: 30
+  total_phases: 8
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 5
   percent: 100
 ---
 
@@ -18,62 +18,67 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-08)
+See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 34 — settings-and-studio-retirement
+**Current focus:** Phase 35 — dashboard-polish-global-ux-cleanup
 
 ## Current Position
 
-Phase: 34
+Phase: 36
 Plan: Not started
-Status: Executing Phase 34
-Last activity: 2026-04-12
+Status: Executing Phase 35
+Last activity: 2026-04-14
 
-Progress: [██████████████░░░░░░] 74% (Phases 1-28, 30-32 complete)
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 
-## Performance Metrics
+## v5.1 Phase Map
 
-**Velocity:**
+| Phase | Name | Reqs | Plans (est.) |
+|-------|------|------|-------|
+| 35 | Dashboard Polish & Global UX Cleanup | 13 | 4-5 |
+| 36 | Projects List & Archive Lifecycle | 5 | 2-3 |
+| 37 | Procurement Privacy & Modal Editor | 5 | 3 |
+| 38 | Send Update Sender Config | 3 | 2 |
+| 39 | Work Order & Documents Panels | 8 | 4 |
+| 40 | Contractor/Vendor Rename, Trades CRUD & 1099 | 5 | 3 |
+| 41 | Client Data Model Refinements | 4 | 2-3 |
 
-- Total plans completed: 45+ (across v1.0-v4.0 foundation)
-- Average duration: varies by complexity
-- Total execution time: multi-week
-
-**Recent Trend:**
-
-- Phases 18-28 (v5.0 foundation) completed through 2026-04-08
-- Trend: Stable
+**Total:** 43 requirements, ~22 plans
 
 ## Accumulated Context
 
 ### Decisions
 
-- [v5.0]: Sanity Studio retired -- replaced by custom admin at /admin/*; Content Lake stays
-- [v5.0]: Phase 23 visual/interaction design carried forward into Phase 27 (procurement editor)
-- [v5.0-28]: Documents page uses bucket pattern (type sections with collapsible rows)
-- [v5.0-28]: Artifacts renamed to "Documents" in all user-facing text
-- [v5.0-28]: Design Board renamed to "Design Concept"
-- [v5.0-28]: Desaturated contractor color palette for Gantt chart
-- [v5.0-28]: Milestones render as diamond markers via JS post-processing
-- [v5.0-28]: Frappe Gantt has limitations requiring eventual custom replacement (see issue #1)
-- [v5.0-33]: sanityUserId for admin sessions = admin email (from tenants.json); consistent within admin tool
-- [v5.0-33]: Rendering sessions list uses RENDERING_SESSIONS_TENANT_QUERY (all-tenant, dataset-scoped)
-- [v5.0-33]: Shared rendering types moved to src/lib/rendering/types.ts; Studio re-exports via backward-compat shim
+Carried from v5.0 boundary. Full history:
+
+- `.planning/MILESTONES.md` (v5.0 section)
+- `.planning/PROJECT.md` (Key Decisions table)
+
+**v5.1-specific:**
+
+- Schedule rebuild (Gantt replacement) deferred to v5.2 — requires brainstorming session first
+- Phase 16-17 (v4.0 Gantt enhancements) marked **Superseded** by v5.2 Schedule Rebuild in ROADMAP.md
+- Phase 38 (Send Update Sender Config) sequenced **before** Phase 39 (Work Order & Documents) so WORK-05 email-send consumes Settings-driven sender values without a retrofit
+- DASH-19 (human-friendly trade labels) treated as presentation-layer — no dependency on VEND-03 trades CRUD data model changes
+- CLNT-10 (phone formatting) implemented as shared utility in Phase 41, reused across vendor popovers
+- Existing commits prefixed `v5.1` (cb4fbe9 send-update email template, f30cb0b card-grid + new drawer, 69f53b0 schema plumbing) are absorbed into this milestone as informal pre-work; verification will confirm which specific requirements they partially satisfy
 
 ### Pending Todos
 
-- Admin contractor create/edit form — replace retired Studio contractor management with /admin/contractors/new and /admin/contractors/[id]/edit (name, email, phone, company, trades multi-select, document upload)
+Carried from v5.0:
+
+- DNS record audit needed for all 4 domains before cutover (v3.0 Phase 12)
+- Pre-existing test failures (14 tests) need cleanup
+- Phase 34 APIs (site-settings, upload-sanity-image, send-update) should migrate to getTenantClient (v6.0)
 
 ### Blockers/Concerns
 
-- DNS record audit needed for all 4 domains before cutover
-- Resend sandbox only delivers to account owner until domain verified
-- Frappe Gantt limitations: arrow alignment, today line, milestone rendering (issue #1)
-- Ship24/EasyPost API key needed before Phase 32 procurement tracking work
+- Resend sandbox only delivers to account owner until domain verified — affects Phase 38 Send Update sender config and Phase 39 Work Order email send (WORK-05)
 
 ## Session Continuity
 
-Last session: 2026-04-11T15:09:50.771Z
-Stopped at: Phase 34 UI-SPEC approved
-Resume file: .planning/phases/34-settings-and-studio-retirement/34-UI-SPEC.md
+Last session: 2026-04-14T15:46:23.903Z
+Stopped at: Phase 35 UI-SPEC approved
+Resume file: .planning/phases/35-dashboard-polish-global-ux-cleanup/35-UI-SPEC.md
+Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`
