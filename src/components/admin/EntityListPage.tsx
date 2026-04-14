@@ -17,10 +17,10 @@ const CLIENT_COLUMNS = [
 
 const CONTRACTOR_COLUMNS = [
   { key: "name", label: "Name" },
+  { key: "company", label: "Company" },
+  { key: "trades", label: "Trade" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
-  { key: "company", label: "Company" },
-  { key: "trades", label: "Trades" },
 ];
 
 export default function EntityListPage({ entityType, entities }: EntityListPageProps) {
@@ -169,18 +169,20 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                   <td className="px-5 py-3 font-medium text-charcoal">
                     {entity.name || "--"}
                   </td>
-                  <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
-                  <td className="px-5 py-3 text-stone">{entity.phone || "--"}</td>
                   {entityType === "client" ? (
-                    <td className="px-5 py-3">
-                      {entity.preferredContact ? (
-                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
-                          {entity.preferredContact}
-                        </span>
-                      ) : (
-                        <span className="text-stone-light">--</span>
-                      )}
-                    </td>
+                    <>
+                      <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
+                      <td className="px-5 py-3 text-stone">{entity.phone || "--"}</td>
+                      <td className="px-5 py-3">
+                        {entity.preferredContact ? (
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
+                            {entity.preferredContact}
+                          </span>
+                        ) : (
+                          <span className="text-stone-light">--</span>
+                        )}
+                      </td>
+                    </>
                   ) : (
                     <>
                       <td className="px-5 py-3 text-stone">
@@ -189,6 +191,8 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                       <td className="px-5 py-3">
                         {formatTrades(entity.trades)}
                       </td>
+                      <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
+                      <td className="px-5 py-3 text-stone">{entity.phone || "--"}</td>
                     </>
                   )}
                 </tr>

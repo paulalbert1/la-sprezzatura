@@ -4,10 +4,10 @@ export const prerender = false;
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import EditableTitle from "../../../../components/admin/EditableTitle.tsx";
 import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
+import ClientActionItemsList from "../../../../components/admin/ClientActionItemsList.tsx";
 import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
-import ClientChipWithRegenerate from "../../../../components/admin/ClientChipWithRegenerate.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
 import {
@@ -110,80 +110,102 @@ const breadcrumbs = [
 
 <AdminLayout title={project.title + " - Studio"} pageTitle={project.title} breadcrumbs={breadcrumbs}>
   <div class="max-w-5xl">
-    {/* Project header -- no border, let title breathe */}
-    <div class="flex items-center gap-2 mb-7">
-      <EditableTitle client:load title={project.title} projectId={projectId} />
-      {stageMeta && (
-        <span
-          class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
-          style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -3px;"
+    {/* Project header -- title with client name below */}
+    <div class="flex items-start gap-2 mb-7">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <EditableTitle client:load title={project.title} projectId={projectId} />
+          {stageMeta && (
+            <span
+              class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
+              style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -3px;"
+            >
+              {stageMeta.title}
+            </span>
+          )}
+          <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
+        </div>
+        {project.projectClients && project.projectClients[0] && (
+          <div class="flex items-center gap-2 mt-1">
+            <a
+              href={`/admin/clients/${project.projectClients[0]._id}`}
+              style="font-family: var(--font-sans); font-size: 13px; color: #6B5E52; text-decoration: none;"
+              onmouseover="this.style.color='#9A7B4B'"
+              onmouseout="this.style.color='#6B5E52'"
+            >
+              {project.projectClients[0].name}
+            </a>
+            {project.projectClients[0].email && (
+              <span style="font-family: var(--font-sans); font-size: 12.5px; color: #9E8E80;">
+                · {project.projectClients[0].email}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <a
+          href={`/admin/rendering?project=${projectId}`}
+          class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            isRenderingTabActive
+              ? "bg-[#F5EDD8] text-[#9A7B4B]"
+              : "text-[#6B5E52] hover:bg-[#F3EDE3]"
+          }`}
         >
-          {stageMeta.title}
-        </span>
-      )}
-      <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{daysInStage}d in stage</span>
-      {/* Phase 34 Plan 04 — Send Update button.
-          The React island owns its own ToastContainer + modal open state. */}
-      <div class="ml-auto">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            class="w-4 h-4"
+            data-icon="SparklesIcon"
+          >
+            <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+            <path d="M20 2v4" />
+            <path d="M22 4h-4" />
+            <circle cx="4" cy="20" r="2" />
+          </svg>
+          Rendering
+          {renderingSessionCount > 0 && (
+            <span
+              class="inline-flex items-center rounded-full px-1.5"
+              style="background:#F5EDD8; color:#9A7B4B; font-size:11.5px; font-weight:600; height:18px;"
+            >
+              {renderingSessionCount}
+            </span>
+          )}
+        </a>
         <SendUpdateButton client:load project={sendUpdateProjectSummary} />
       </div>
     </div>
 
-    {/* Project tab nav — Phase 33 D-01: Rendering tab is a styled link out to
-        the filtered global list, not a local tab panel controller. */}
+    {/* Two-column grid: left = Tasks + Client Action Items stacked; right = Milestones + Contractors stacked */}
     <div
-      class="flex items-center gap-1 mb-6 pb-2"
-      style="border-bottom: 0.5px solid #E8DDD0;"
+      class="mb-[14px]"
+      style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start;"
     >
-      <a
-        href={`/admin/rendering?project=${projectId}`}
-        class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-          isRenderingTabActive
-            ? "bg-[#F5EDD8] text-[#9A7B4B]"
-            : "text-[#6B5E52] hover:bg-[#F3EDE3]"
-        }`}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          class="w-4 h-4"
-          data-icon="SparklesIcon"
-        >
-          <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
-          <path d="M20 2v4" />
-          <path d="M22 4h-4" />
-          <circle cx="4" cy="20" r="2" />
-        </svg>
-        Rendering
-        {renderingSessionCount > 0 && (
-          <span
-            class="inline-flex items-center rounded-full px-1.5"
-            style="background:#F5EDD8; color:#9A7B4B; font-size:11.5px; font-weight:600; height:18px;"
-          >
-            {renderingSessionCount}
-          </span>
-        )}
-      </a>
-    </div>
-
-    {/* Two-column layout: Tasks (left) + Milestones (right) */}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-[14px] mb-[14px]">
-      <div>
+      {/* Left column: Tasks (top) + Client Action Items (bottom) */}
+      <div style="display: flex; flex-direction: column; gap: 14px;">
         <ProjectTasks
           client:load
           tasks={project.tasks || []}
           projectId={projectId}
         />
+        <ClientActionItemsList
+          client:load
+          items={project.clientActionItems || []}
+          projectId={projectId}
+        />
       </div>
 
+      {/* Right column: Milestones (top) + Contractors (bottom) */}
+      <div style="display: flex; flex-direction: column; gap: 14px;">
       <div id="milestones">
         <MilestonesList
           client:load
@@ -192,102 +214,74 @@ const breadcrumbs = [
           scheduleUrl={`/admin/projects/${projectId}/schedule`}
         />
       </div>
-    </div>
 
-    {/* Contractors section - full width (no "Team" label, Contractors at h2 weight) */}
-    <div
-      class="mb-[14px] rounded-[10px]"
-      style="background-color: #FFFEFB; border: 0.5px solid #E8DDD0; padding: 18px 20px;"
-    >
-      <h2
-        class="mb-[14px]"
-        style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+      {/* Contractors */}
+      <div
+        style="background-color: #FFFEFB; border: 0.5px solid #E8DDD0; border-radius: 10px; padding: 18px 20px;"
       >
-        Contractors
-      </h2>
-
-      {/* Clients chips */}
-      {project.projectClients && project.projectClients.length > 0 && (
-        <div class="mb-3">
-          <div
-            class="mb-[10px]"
-            style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.08em; text-transform: uppercase;"
-          >
-            Clients
-          </div>
-          <div class="flex flex-wrap gap-[7px]">
-            {project.projectClients.map((c: any) => (
-              <ClientChipWithRegenerate
-                client:load
-                client={{
-                  _id: c._id,
-                  name: c.name,
-                  email: c.email || "",
-                  phone: c.phone || "",
-                  preferredContact: c.preferredContact || "",
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Contractors chips + inline Add button */}
-      <div class="flex flex-wrap gap-[7px] items-center">
-        {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
-          <ContactCardWrapper
-            client:load
-            entityId={pc.contractor._id}
-            entityType="contractor"
-            name={pc.contractor.name}
-            href={`/admin/contractors/${pc.contractor._id}`}
-            contactData={{
-              _id: pc.contractor._id,
-              name: pc.contractor.name,
-              email: pc.contractor.email || "",
-              phone: pc.contractor.phone || "",
-              entityType: "contractor" as const,
-            }}
-            className="inline-flex cursor-pointer"
-          >
-            <span
-              class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
-              style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
+        <h2
+          class="mb-[14px]"
+          style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+        >
+          Contractors
+        </h2>
+        <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0 0 14px 0;" />
+        <div class="flex flex-wrap gap-[7px] items-center">
+          {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
+            <ContactCardWrapper
+              client:load
+              entityId={pc.contractor._id}
+              entityType="contractor"
+              name={pc.contractor.name}
+              href={`/admin/contractors/${pc.contractor._id}`}
+              contactData={{
+                _id: pc.contractor._id,
+                name: pc.contractor.name,
+                email: pc.contractor.email || "",
+                phone: pc.contractor.phone || "",
+                entityType: "contractor" as const,
+              }}
+              className="inline-flex cursor-pointer"
             >
               <span
-                class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
-                style="background-color: #F3EDE3; color: #9A7B4B; border: 0.5px solid #D4C8B8;"
+                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
+                style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
               >
-                {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                <span
+                  class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
+                  style="background-color: #F3EDE3; color: #9A7B4B; border: 0.5px solid #D4C8B8;"
+                >
+                  {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </span>
+                {pc.contractor.name}
+                {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
               </span>
-              {pc.contractor.name}
-              {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
-            </span>
-          </ContactCardWrapper>
-        ))}
+            </ContactCardWrapper>
+          ))}
 
-        {/* + Add contractor chip -- dashed border, focuses the typeahead */}
-        <button
-          type="button"
-          onclick="document.getElementById('quick-assign-input')?.focus();"
-          class="inline-flex items-center gap-[6px] px-[11px] py-[5px] rounded-full transition-colors hover:text-[#9A7B4B] hover:border-[#9A7B4B]"
-          style="border: 0.5px dashed #D4C8B8; font-size: 12px; color: #9E8E80; background-color: transparent; letter-spacing: 0.02em; font-family: var(--font-sans);"
-        >
-          + Add contractor
-        </button>
+          <button
+            type="button"
+            onclick="document.getElementById('quick-assign-input')?.focus();"
+            class="inline-flex items-center gap-[6px] px-[11px] py-[5px] rounded-full transition-colors hover:text-[#9A7B4B] hover:border-[#9A7B4B]"
+            style="border: 0.5px dashed #D4C8B8; font-size: 12px; color: #9E8E80; background-color: transparent; letter-spacing: 0.02em; font-family: var(--font-sans);"
+          >
+            + Add contractor
+          </button>
+        </div>
+
+        <div class="mt-3">
+          <QuickAssignTypeahead
+            client:load
+            projectId={projectId}
+            existingClients={project.projectClients || []}
+            existingContractors={(project.projectContractors || []).map((pc: any) => ({
+              _id: pc.contractor?._id || "",
+              name: pc.contractor?.name || "",
+              trade: pc.trade,
+            }))}
+          />
+        </div>
       </div>
-
-      <div class="mt-3">
-        <QuickAssignTypeahead
-          client:load
-          projectId={projectId}
-          existingClients={project.projectClients || []}
-          existingContractors={(project.projectContractors || []).map((pc: any) => ({
-            _id: pc.contractor?._id || "",
-            name: pc.contractor?.name || "",
-            trade: pc.trade,
-          }))}
-        />
       </div>
     </div>
 

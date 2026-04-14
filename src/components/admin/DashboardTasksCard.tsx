@@ -173,14 +173,12 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
   return (
     <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
       {/* Header with title, count, and filter */}
-      <div className="px-5 py-3 border-b border-stone-light/10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-[13px] font-semibold text-charcoal" style={{ fontFamily: "var(--font-body)", letterSpacing: "0.01em" }}>Tasks</h2>
-          <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
-            {localTasks.filter((t) => !t.completed).length}
-          </span>
-        </div>
-        <select
+      <div className="px-5 pt-[18px] pb-0">
+        <div className="flex items-center justify-between mb-[14px]">
+          <h2
+            style={{ fontFamily: "var(--font-sans)", fontSize: "10.5px", fontWeight: 500, color: "#9E8E80", letterSpacing: "0.1em", textTransform: "uppercase" as const }}
+          >Tasks</h2>
+          <select
           value={filterProject}
           onChange={(e) => {
             setFilterProject(e.target.value);
@@ -195,6 +193,8 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
             </option>
           ))}
         </select>
+        </div>
+        <hr style={{ border: "none", borderTop: "0.5px solid #E8DDD0", margin: 0 }} />
       </div>
 
       {/* Task rows */}

@@ -203,6 +203,7 @@ export default function SendUpdateModal({
   );
   const [includePendingReviews, setIncludePendingReviews] = useState(false); // D-15
   const [usePersonalLinks, setUsePersonalLinks] = useState(true); // D-17
+  const [ccLiz, setCcLiz] = useState(true); // CC liz@lasprezz.com on all sends
   const [sending, setSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -243,6 +244,7 @@ export default function SendUpdateModal({
             artifacts: includePendingReviews, // D-15 mapping
           },
           usePersonalLinks,
+          ccLiz,
         }),
       });
       if (!res.ok) {
@@ -530,6 +532,32 @@ export default function SendUpdateModal({
           >
             Each client gets a unique dashboard link for all their projects.
             Turn off to send the generic portal link.
+          </p>
+
+          {/* CC Liz toggle — default checked */}
+          <div className="flex items-center gap-3" style={{ marginTop: "12px" }}>
+            <PersonalLinkToggle checked={ccLiz} onChange={setCcLiz} />
+            <label
+              style={{
+                fontSize: "13px",
+                color: "#2C2520",
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+              }}
+              onClick={() => setCcLiz(!ccLiz)}
+            >
+              CC liz@lasprezz.com
+            </label>
+          </div>
+          <p
+            style={{
+              margin: "6px 0 0 44px",
+              fontSize: "11px",
+              color: "#9E8E80",
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            Keep yourself on every send.
           </p>
         </div>
 

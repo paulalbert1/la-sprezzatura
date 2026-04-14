@@ -1,0 +1,24 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ProjectsGrid from "../../../components/admin/ProjectsGrid.tsx";
+import { getTenantClient } from "../../../lib/tenantClient";
+import { getAdminProjects } from "../../../sanity/queries";
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+const client = getTenantClient(tenantId);
+const projects = await getAdminProjects(client);
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Projects" },
+];
+---
+
+<AdminLayout title="Projects - Studio" pageTitle="Projects" breadcrumbs={breadcrumbs}>
+  <ProjectsGrid client:load projects={projects} />
+</AdminLayout>

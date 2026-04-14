@@ -130,13 +130,12 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
         {/* Active Projects Card */}
         <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-          <div class="flex items-center justify-between px-5 py-3 border-b border-stone-light/10">
-            <div class="flex items-center gap-2">
-              <h2 class="text-[13px] font-semibold text-charcoal" style="font-family: var(--font-body); letter-spacing: 0.01em;">Active Projects</h2>
-              <span class="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
-                {data.activeProjects.length}
-              </span>
-            </div>
+          <div class="px-5 pt-[18px] pb-0">
+            <h2
+              class="mb-[14px]"
+              style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+            >Active Projects</h2>
+            <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
           </div>
           {displayProjects.length === 0 ? (
             <p class="text-sm text-stone text-center py-6">No active projects</p>
@@ -186,15 +185,12 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
         {/* Deliveries Card */}
         <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-          <div class="flex items-center justify-between px-5 py-3 border-b border-stone-light/10">
-            <div class="flex items-center gap-2">
-              <h2 class="text-[13px] font-semibold text-charcoal" style="font-family: var(--font-body); letter-spacing: 0.01em;">Deliveries</h2>
-              {displayDeliveries.length > 0 && (
-                <span class="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
-                  {displayDeliveries.length} in progress
-                </span>
-              )}
-            </div>
+          <div class="px-5 pt-[18px] pb-0">
+            <h2
+              class="mb-[14px]"
+              style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
+            >Deliveries</h2>
+            <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
           </div>
           {displayDeliveries.length === 0 ? (
             <p class="text-sm text-stone text-center py-6">No active deliveries</p>

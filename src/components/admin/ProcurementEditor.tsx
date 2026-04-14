@@ -31,6 +31,7 @@ interface ProcurementItem {
   trackingUrl: string | null;
   lastSyncAt: string | null;
   syncSource: string | null;
+  retrievedStatus: string | null;
 }
 
 interface Props {
@@ -40,37 +41,42 @@ interface Props {
 
 // Luxury status pills -- border-outlined on tinted backgrounds
 const STATUS_PILL_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  pending: { bg: "#F3EDE3", text: "#9E8E80", border: "#E8DDD0" },
-  ordered: { bg: "#E8F0F9", text: "#2A5485", border: "#B0CAE8" },
+  scheduled: { bg: "#F3EFE9", text: "#6B5E52", border: "#E0D5C5" },
   warehouse: { bg: "#F3EDE3", text: "#6B5E52", border: "#D4C8B8" },
   "in-transit": { bg: "#FBF2E2", text: "#8A5E1A", border: "#E8CFA0" },
+  ordered: { bg: "#E8F0F9", text: "#2A5485", border: "#B0CAE8" },
+  pending: { bg: "#FDEEE6", text: "#9B3A2A", border: "#F2C9B8" },
   delivered: { bg: "#EDF5E8", text: "#3A6620", border: "#C4DBA8" },
   installed: { bg: "#EDF5E8", text: "#3A6620", border: "#A8C98C" },
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: "bg-stone-light/20 text-stone",
-  ordered: "bg-amber-50 text-amber-700",
+  scheduled: "bg-stone-light/20 text-stone",
   warehouse: "bg-blue-50 text-blue-700",
   "in-transit": "bg-terracotta/10 text-terracotta",
+  ordered: "bg-amber-50 text-amber-700",
+  pending: "bg-red-50 text-red-700",
   delivered: "bg-emerald-50 text-emerald-700",
   installed: "bg-emerald-100 text-emerald-800",
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending",
-  ordered: "Ordered",
+  scheduled: "Scheduled",
   warehouse: "Warehouse",
   "in-transit": "In Transit",
+  ordered: "Ordered",
+  pending: "Pending order",
   delivered: "Delivered",
   installed: "Installed",
 };
 
+// Display/sort order per product spec.
 const STATUS_ORDER = [
-  "pending",
-  "ordered",
+  "scheduled",
   "warehouse",
   "in-transit",
+  "ordered",
+  "pending",
   "delivered",
   "installed",
 ];
@@ -208,6 +214,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       expectedDeliveryDate: editForm.expectedDeliveryDate || null,
       installDate: editForm.installDate || null,
       trackingNumber: editForm.trackingNumber || null,
+      carrierName: editForm.carrierName || null,
       notes: editForm.notes || null,
     };
 
@@ -424,6 +431,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       retailPrice:
         item.retailPrice != null ? (item.retailPrice / 100).toFixed(2) : "",
       trackingNumber: item.trackingNumber || "",
+      carrierName: item.carrierName || "",
       notes: item.notes || "",
     });
   }
@@ -659,7 +667,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             </div>
           )}
         </td>
-        {/* Price: Cost + Net */}
+        {/* Profit: retail - client cost */}
         <td style={{ padding: "12px 16px" }}>
           <div
             className="tabular-nums"
@@ -670,21 +678,8 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               color: "#2C2520",
             }}
           >
-            {item.clientCost != null ? formatCurrency(item.clientCost) : "\u2014"}
+            {renderNetPrice(item)}
           </div>
-          {getNetPrice(item.clientCost, item.retailPrice) !== null && (
-            <div
-              className="tabular-nums"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "11px",
-                color: "#9E8E80",
-                marginTop: "2px",
-              }}
-            >
-              Net {renderNetPrice(item)}
-            </div>
-          )}
         </td>
         {/* Track */}
         <td className="hidden sm:table-cell" style={{ padding: "12px 16px" }}>
@@ -758,119 +753,240 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         : "";
 
     return (
-      <>
-        {/* Main edit row -- gold-light tint */}
-        <tr
-          key={item._key + "-edit"}
-          style={{
-            backgroundColor: "#F5EDD8",
-            borderBottom: "0.5px solid #E8D5A8",
-          }}
-        >
-          {/* Item + Vendor */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="text"
-              value={editForm.name || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({ ...f, name: e.target.value }))
-              }
-              className={inputClass}
-            />
-            {validationError && !(editForm.name || "").trim() && (
-              <span className="text-[11px]" style={{ color: "#9B3A2A", fontFamily: "var(--font-sans)" }}>
-                {validationError}
-              </span>
-            )}
-            <input
-              type="text"
-              value={editForm.vendor || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({ ...f, vendor: e.target.value }))
-              }
-              placeholder="Vendor"
-              className={inputClass}
-              style={{ marginTop: "5px" }}
-            />
-          </td>
-          {/* Status */}
-          <td style={{ padding: "10px 14px" }}>
-            {renderStatusDropdown(item)}
-          </td>
-          {/* Delivery */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="date"
-              value={editForm.expectedDeliveryDate || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({
-                  ...f,
-                  expectedDeliveryDate: e.target.value,
-                }))
-              }
-              className={inputClass}
-            />
-            {item.carrierETA && (
-              <span
-                className="block mt-1 tabular-nums"
+      <tr key={item._key + "-edit"} style={{ backgroundColor: "#F5EDD8" }}>
+        <td colSpan={6} style={{ padding: "16px 18px 18px" }}>
+          {/* Row 1: Item, Vendor, Order Date */}
+          <div
+            className="grid gap-[10px] mb-[12px]"
+            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+          >
+            <div>
+              <div style={drawerLabelStyle}>Item</div>
+              <input
+                type="text"
+                value={editForm.name || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, name: e.target.value }))
+                }
+                className="luxury-input w-full"
+              />
+              {validationError && !(editForm.name || "").trim() && (
+                <span
+                  className="text-[11px]"
+                  style={{
+                    color: "#9B3A2A",
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  {validationError}
+                </span>
+              )}
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Vendor</div>
+              <input
+                type="text"
+                value={editForm.vendor || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, vendor: e.target.value }))
+                }
+                placeholder="Vendor"
+                className="luxury-input w-full"
+              />
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Order Date</div>
+              <input
+                type="date"
+                value={editForm.orderDate || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, orderDate: e.target.value }))
+                }
+                className="luxury-input w-full"
+              />
+            </div>
+          </div>
+
+          {/* Row 2: Carrier, Tracking, Retrieved Status, Expected Install Date */}
+          <div
+            className="grid gap-[10px] mb-[12px]"
+            style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+          >
+            <div>
+              <div style={drawerLabelStyle}>Carrier</div>
+              <input
+                type="text"
+                list={`carrier-suggestions-${item._key}`}
+                value={editForm.carrierName || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    carrierName: e.target.value,
+                  }))
+                }
+                placeholder="FedEx, UPS, USPS, custom..."
+                className="luxury-input w-full"
+              />
+              <datalist id={`carrier-suggestions-${item._key}`}>
+                <option value="FedEx" />
+                <option value="UPS" />
+                <option value="USPS" />
+                <option value="DHL" />
+                <option value="OnTrac" />
+                <option value="Bill of Lading" />
+              </datalist>
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Tracking</div>
+              <input
+                type="text"
+                value={editForm.trackingNumber || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    trackingNumber: e.target.value,
+                  }))
+                }
+                placeholder="Tracking #"
+                className="luxury-input w-full"
+              />
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Retrieved Status</div>
+              <input
+                type="text"
+                value={item.retrievedStatus || ""}
+                readOnly
+                placeholder="—"
+                className="luxury-input w-full"
+                style={{ color: "#6B5E52", cursor: "default" }}
+                title="Read-only. Populated by tracking sync (FedEx/UPS/USPS/Ship24)."
+              />
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Expected Install Date</div>
+              <input
+                type="date"
+                value={
+                  editForm.installDate || editForm.expectedDeliveryDate || ""
+                }
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    installDate: e.target.value,
+                  }))
+                }
+                className="luxury-input w-full"
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Client Cost, Trade Price, Profit */}
+          <div
+            className="grid gap-[10px] mb-[12px]"
+            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
+          >
+            <div>
+              <div style={drawerLabelStyle}>Client Cost</div>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editForm.clientCost || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, clientCost: e.target.value }))
+                }
+                placeholder="0.00"
+                className="luxury-input w-full tabular-nums"
+                style={{ textAlign: "right" }}
+              />
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Trade Price</div>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={editForm.retailPrice || ""}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    retailPrice: e.target.value,
+                  }))
+                }
+                placeholder="0.00"
+                className="luxury-input w-full tabular-nums"
+                style={{ textAlign: "right" }}
+              />
+            </div>
+            <div>
+              <div style={drawerLabelStyle}>Profit</div>
+              <input
+                type="text"
+                value={netDisplay}
+                readOnly
+                placeholder="—"
+                className="luxury-input w-full tabular-nums"
                 style={{
-                  fontSize: "11px",
-                  color: "#9E8E80",
-                  fontFamily: "var(--font-sans)",
+                  textAlign: "right",
+                  color: "#6B5E52",
+                  cursor: "default",
                 }}
-              >
-                ETA {format(parseISO(item.carrierETA), "MMM d")}
-              </span>
-            )}
-          </td>
-          {/* Price (client cost) */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={editForm.clientCost || ""}
+                title="Auto-computed: Trade Price − Client Cost"
+              />
+            </div>
+          </div>
+
+          {/* Row 4: Additional Notes */}
+          <div className="mb-[14px]">
+            <div style={drawerLabelStyle}>Additional Notes</div>
+            <textarea
+              value={editForm.notes || ""}
               onChange={(e) =>
-                setEditForm((f) => ({ ...f, clientCost: e.target.value }))
+                setEditForm((f) => ({ ...f, notes: e.target.value }))
               }
-              placeholder="Cost"
-              className={inputClass + " tabular-nums"}
-              style={{ textAlign: "right" }}
+              placeholder="Internal notes..."
+              className="luxury-input w-full"
+              style={{
+                minHeight: "58px",
+                lineHeight: 1.55,
+                resize: "vertical",
+              }}
             />
-          </td>
-          {/* Track */}
-          <td className="hidden sm:table-cell" style={{ padding: "10px 14px" }}>
-            <input
-              type="text"
-              value={editForm.trackingNumber || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({
-                  ...f,
-                  trackingNumber: e.target.value,
-                }))
-              }
-              placeholder="Tracking #"
-              className={inputClass}
-            />
-          </td>
-          {/* Actions -- solid gold Save button + muted Cancel link */}
-          <td style={{ padding: "10px 14px" }}>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={cancelEdit}
+              style={{
+                fontSize: "12.5px",
+                color: "#6B5E52",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-sans)",
+                padding: "6px 12px",
+              }}
+            >
+              Cancel
+            </button>
             <button
               type="button"
               onClick={handleSaveEdit}
               disabled={savingRow}
-              className="block w-full hover:bg-[#7A5E32] transition-colors"
               style={{
-                padding: "6px 0",
+                padding: "7px 18px",
                 backgroundColor: "#9A7B4B",
                 color: "#FAF5EC",
                 border: "none",
                 borderRadius: "6px",
-                fontSize: "12px",
+                fontSize: "12.5px",
                 fontWeight: 500,
                 letterSpacing: "0.04em",
                 fontFamily: "var(--font-sans)",
-                marginBottom: "5px",
+                cursor: savingRow ? "not-allowed" : "pointer",
                 opacity: savingRow ? 0.7 : 1,
               }}
             >
@@ -879,108 +995,9 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               )}
               Save
             </button>
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="block w-full text-center hover:text-[#6B5E52] transition-colors"
-              style={{
-                fontSize: "11.5px",
-                color: "#9E8E80",
-                padding: "2px 0",
-                letterSpacing: "0.02em",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              Cancel
-            </button>
-          </td>
-        </tr>
-
-        {/* Edit drawer -- parchment bg, grid of extra fields + notes */}
-        <tr key={item._key + "-notes"} style={{ backgroundColor: "#F3EDE3" }}>
-          <td colSpan={6} style={{ padding: "14px 14px 16px" }}>
-            <div
-              className="grid gap-[10px] mb-[14px]"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-            >
-              <div>
-                <div style={drawerLabelStyle}>Order Date</div>
-                <input
-                  type="date"
-                  value={editForm.orderDate || ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, orderDate: e.target.value }))
-                  }
-                  className="luxury-input w-full"
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Install Date</div>
-                <input
-                  type="date"
-                  value={editForm.installDate || ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      installDate: e.target.value,
-                    }))
-                  }
-                  className="luxury-input w-full"
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Retail Price</div>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editForm.retailPrice || ""}
-                  onChange={(e) =>
-                    setEditForm((f) => ({
-                      ...f,
-                      retailPrice: e.target.value,
-                    }))
-                  }
-                  placeholder="0.00"
-                  className="luxury-input w-full tabular-nums"
-                  style={{ textAlign: "right" }}
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Net Price</div>
-                <input
-                  type="text"
-                  value={netDisplay}
-                  readOnly
-                  placeholder="—"
-                  className="luxury-input w-full tabular-nums"
-                  style={{
-                    textAlign: "right",
-                    color: "#6B5E52",
-                    cursor: "default",
-                  }}
-                />
-              </div>
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Notes</div>
-              <textarea
-                value={editForm.notes || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, notes: e.target.value }))
-                }
-                placeholder="Internal notes..."
-                className="luxury-input w-full"
-                style={{
-                  minHeight: "58px",
-                  lineHeight: 1.55,
-                  resize: "vertical",
-                }}
-              />
-            </div>
-          </td>
-        </tr>
-      </>
+          </div>
+        </td>
+      </tr>
     );
   }
 
@@ -1355,7 +1372,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                     padding: "11px 16px",
                   }}
                 >
-                  Price / Net
+                  Profit
                 </th>
                 <th
                   className="text-left hidden sm:table-cell"
