@@ -11,7 +11,7 @@ import ToastContainer, { useToast } from "./ui/ToastContainer";
 //
 // Header overflow menu island for the project detail page. Renders a 28x28
 // ⋯ trigger adjacent to the stage pill. On click it opens a single-item menu
-// offering either "Archive project" (when pipelineStage === "completed" and
+// offering either "Archive project" (when pipelineStage === "closeout" and
 // no archivedAt) or "Unarchive project" (when archivedAt is set). Any other
 // state renders `null` — no trigger button is drawn.
 //
@@ -38,10 +38,12 @@ function ProjectArchiveMenuInner({
   const { show } = useToast();
 
   // Visibility logic per CONTEXT D-03 / UI-SPEC:
-  //   - completed && !archivedAt  → show menu with "Archive project"
+  //   - closeout && !archivedAt  → show menu with "Archive project"
   //   - archivedAt               → show menu with "Unarchive project"
   //   - otherwise                → render nothing (no trigger at all)
-  const canArchive = pipelineStage === "completed" && !archivedAt;
+  // "closeout" is the schema's terminal pipelineStage — CONTEXT used the word
+  // "completed" colloquially; the schema enum has no such value.
+  const canArchive = pipelineStage === "closeout" && !archivedAt;
   const canUnarchive = !!archivedAt;
   const shouldRender = canArchive || canUnarchive;
 

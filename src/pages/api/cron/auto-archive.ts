@@ -43,14 +43,15 @@ export const GET: APIRoute = async ({ request }) => {
   const perTenant: PerTenantResult[] = [];
   let total = 0;
 
-  // Per CONTEXT D-05: GROQ filter pipelineStage == "completed" && !defined(archivedAt)
+  // Per CONTEXT D-05: GROQ filter pipelineStage == "closeout" && !defined(archivedAt)
   // && completedAt <= dateTime(now()) - 7776000.
+  // CONTEXT used "completed"; the schema enum's terminal value is "closeout".
   // We fetch the eligible _ids per tenant, then patch each in a single
   // transaction (Sanity transactions support multi-doc patches; we use
   // client.transaction() to satisfy "single transaction" intent).
   const ELIGIBLE_QUERY = `*[
     _type == "project" &&
-    pipelineStage == "completed" &&
+    pipelineStage == "closeout" &&
     !defined(archivedAt) &&
     defined(completedAt) &&
     dateTime(completedAt) <= dateTime(now()) - $thresholdSeconds

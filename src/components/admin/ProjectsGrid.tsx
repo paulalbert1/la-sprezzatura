@@ -106,12 +106,15 @@ function ProjectsGridInner({ projects }: Props) {
 
     const filtered = projects.filter(passesFilters);
 
+    // Tier classification: "closeout" is the schema's terminal pipelineStage.
+    // CONTEXT D-02 used the colloquial label "completed"; the schema enum has
+    // no such value, so the visible "Completed" tier is sourced from "closeout".
     const active = filtered
-      .filter((p) => !p.archivedAt && p.pipelineStage !== "completed")
+      .filter((p) => !p.archivedAt && p.pipelineStage !== "closeout")
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
     const completed = filtered
-      .filter((p) => !p.archivedAt && p.pipelineStage === "completed")
+      .filter((p) => !p.archivedAt && p.pipelineStage === "closeout")
       .sort((a, b) => +new Date(b._updatedAt) - +new Date(a._updatedAt));
 
     const archived = filtered

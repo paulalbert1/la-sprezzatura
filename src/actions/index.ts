@@ -564,7 +564,8 @@ export const server = {
 
       const tenantClient = getTenantClient(tenantId);
 
-      // Per CONTEXT D-02, eligibility = pipelineStage === "completed" && archivedAt == null.
+      // Per CONTEXT D-02, eligibility = terminal pipeline stage && archivedAt == null.
+      // CONTEXT used "completed"; the schema enum's terminal value is "closeout".
       // Re-check server-side rather than trust the client.
       const current = (await tenantClient.fetch(
         `*[_type == "project" && _id == $projectId][0]{ pipelineStage, archivedAt, completedAt }`,
@@ -577,8 +578,8 @@ export const server = {
       if (current.archivedAt) {
         throw new ActionError({ code: "BAD_REQUEST", message: "Project is already archived." });
       }
-      if (current.pipelineStage !== "completed") {
-        throw new ActionError({ code: "BAD_REQUEST", message: "Only completed projects can be archived." });
+      if (current.pipelineStage !== "closeout") {
+        throw new ActionError({ code: "BAD_REQUEST", message: "Only projects in closeout can be archived." });
       }
 
       const now = new Date().toISOString();
