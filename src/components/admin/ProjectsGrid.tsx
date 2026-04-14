@@ -464,14 +464,12 @@ function ProjectsGridInner({ projects }: Props) {
           </div>
         )}
 
-        {/* Footer: updated time — preserved verbatim from pre-Phase-36 state
-            per UI-SPEC §"Notes for Downstream Agents" (Phase 35 already chose
-            what to purge; this surface stays unchanged). */}
+        {/* Footer: updated time. Per UAT feedback the 0.5px top border was
+            removed — the vertical whitespace already separates the metadata
+            from the badge row and the rule added visual noise. */}
         <div
           style={{
             marginTop: "14px",
-            paddingTop: "10px",
-            borderTop: "0.5px solid #EEE6DC",
             fontSize: "11px",
             color: "#9E8E80",
             fontFamily: "var(--font-sans)",
