@@ -16,7 +16,13 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    include: [
+      "src/**/*.test.ts",
+      "src/**/*.test.tsx",
+      "tests/**/*.test.ts",
+      "tests/**/*.test.tsx",
+      "scripts/**/__tests__/**/*.test.mjs",
+    ],
     // Default environment is node for pure-logic tests. Individual React
     // component tests opt into jsdom via the `@vitest-environment jsdom`
     // docblock pragma at the top of the test file. Setup files still run in
