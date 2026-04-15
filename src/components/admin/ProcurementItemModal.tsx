@@ -443,15 +443,20 @@ export function ProcurementItemModal({
           ) : (
             <div>
               {heroUrl ? (
-                <img
-                  src={heroUrl}
-                  alt={hero?.caption || ""}
-                  className="w-full object-cover rounded-md"
+                <div
+                  className="w-full rounded-md overflow-hidden flex items-center justify-center"
                   style={{
                     aspectRatio: "4/3",
                     maxHeight: "320px",
+                    backgroundColor: "#FAF7F2",
                   }}
-                />
+                >
+                  <img
+                    src={heroUrl}
+                    alt={hero?.caption || ""}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
               ) : null}
               {hero?.caption ? (
                 <p className="mt-2 text-xs text-stone italic">
