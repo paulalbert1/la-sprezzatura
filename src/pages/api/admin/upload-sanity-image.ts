@@ -77,7 +77,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   try {
-    const asset = await sanityWriteClient.assets.upload("image", file, {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const asset = await sanityWriteClient.assets.upload("image", buffer, {
       filename: file.name,
       contentType: file.type,
     });
