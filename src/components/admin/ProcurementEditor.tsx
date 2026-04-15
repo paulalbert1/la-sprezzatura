@@ -9,8 +9,7 @@ import {
   Check,
   ChevronDown,
 } from "lucide-react";
-import { isProcurementOverdue, getNetPrice } from "../../lib/dashboardUtils";
-import { formatCurrency } from "../../lib/formatCurrency";
+import { isProcurementOverdue } from "../../lib/dashboardUtils";
 import { getTrackingInfo } from "../../lib/trackingUrl";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
@@ -21,8 +20,6 @@ interface ProcurementItem {
   orderDate: string | null;
   expectedDeliveryDate: string | null;
   installDate: string | null;
-  clientCost: number | null;
-  retailPrice: number | null;
   trackingNumber: string | null;
   vendor: string | null;
   notes: string | null;
@@ -32,6 +29,13 @@ interface ProcurementItem {
   lastSyncAt: string | null;
   syncSource: string | null;
   retrievedStatus: string | null;
+  // Phase 37: images gallery metadata, to be rendered/managed by Plan 03's modal.
+  images?: Array<{
+    _key: string;
+    url?: string;
+    isPrimary?: boolean;
+    caption?: string | null;
+  }>;
 }
 
 interface Props {
@@ -218,18 +222,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       notes: editForm.notes || null,
     };
 
-    // Convert dollar amounts to cents
-    if (editForm.clientCost) {
-      payload.clientCost = Math.round(parseFloat(editForm.clientCost) * 100);
-    } else {
-      payload.clientCost = null;
-    }
-    if (editForm.retailPrice) {
-      payload.retailPrice = Math.round(parseFloat(editForm.retailPrice) * 100);
-    } else {
-      payload.retailPrice = null;
-    }
-
     try {
       const res = await fetch("/api/admin/procurement", {
         method: "POST",
@@ -254,12 +246,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   | string
                   | null,
                 notes: (editForm.notes || null) as string | null,
-                clientCost: editForm.clientCost
-                  ? Math.round(parseFloat(editForm.clientCost) * 100)
-                  : null,
-                retailPrice: editForm.retailPrice
-                  ? Math.round(parseFloat(editForm.retailPrice) * 100)
-                  : null,
               }
             : i,
         ),
@@ -295,15 +281,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       notes: newItemForm.notes || null,
     };
 
-    if (newItemForm.clientCost) {
-      payload.clientCost = Math.round(parseFloat(newItemForm.clientCost) * 100);
-    }
-    if (newItemForm.retailPrice) {
-      payload.retailPrice = Math.round(
-        parseFloat(newItemForm.retailPrice) * 100,
-      );
-    }
-
     try {
       const res = await fetch("/api/admin/procurement", {
         method: "POST",
@@ -321,12 +298,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         expectedDeliveryDate:
           (newItemForm.expectedDeliveryDate as string) || null,
         installDate: (newItemForm.installDate as string) || null,
-        clientCost: newItemForm.clientCost
-          ? Math.round(parseFloat(newItemForm.clientCost) * 100)
-          : null,
-        retailPrice: newItemForm.retailPrice
-          ? Math.round(parseFloat(newItemForm.retailPrice) * 100)
-          : null,
         trackingNumber: (newItemForm.trackingNumber as string) || null,
         vendor: (newItemForm.vendor as string) || null,
         notes: (newItemForm.notes as string) || null,
@@ -335,6 +306,8 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         trackingUrl: null,
         lastSyncAt: null,
         syncSource: null,
+        retrievedStatus: null,
+        images: [],
       };
 
       setLocalItems((prev) => [...prev, newItem]);
@@ -427,9 +400,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       orderDate: item.orderDate || "",
       expectedDeliveryDate: item.expectedDeliveryDate || "",
       installDate: item.installDate || "",
-      clientCost: item.clientCost != null ? (item.clientCost / 100).toFixed(2) : "",
-      retailPrice:
-        item.retailPrice != null ? (item.retailPrice / 100).toFixed(2) : "",
       trackingNumber: item.trackingNumber || "",
       carrierName: item.carrierName || "",
       notes: item.notes || "",
@@ -482,18 +452,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       );
     }
     return <span className="text-stone-light">{"\u2014"}</span>;
-  }
-
-  function renderNetPrice(item: ProcurementItem) {
-    const net = getNetPrice(item.clientCost, item.retailPrice);
-    if (net === null) return <span className="text-stone-light">{"\u2014"}</span>;
-    if (net === 0)
-      return (
-        <span title="Client cost exceeds retail price">
-          {formatCurrency(0)}
-        </span>
-      );
-    return <span>{formatCurrency(net)}</span>;
   }
 
   function renderStatusDropdown(item: ProcurementItem) {
@@ -637,7 +595,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
           {renderStatusDropdown(item)}
           {renderSyncIndicator(item)}
         </td>
-        {/* Delivery: Expected + Carrier ETA */}
+        {/* Expected install: Expected + Carrier ETA */}
         <td style={{ padding: "12px 16px" }}>
           <div
             className="tabular-nums"
@@ -665,20 +623,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               ETA {format(parseISO(item.carrierETA), "MMM d")}
             </div>
           )}
-        </td>
-        {/* Profit: retail - client cost */}
-        <td style={{ padding: "12px 16px" }}>
-          <div
-            className="tabular-nums"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "12.5px",
-              fontWeight: 500,
-              color: "#2C2520",
-            }}
-          >
-            {renderNetPrice(item)}
-          </div>
         </td>
         {/* Track */}
         <td className="hidden sm:table-cell" style={{ padding: "12px 16px" }}>
@@ -743,17 +687,9 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       display: "block",
     };
 
-    // Computed net price for the read-only drawer display
-    const costNum = parseFloat(editForm.clientCost || "0");
-    const retailNum = parseFloat(editForm.retailPrice || "0");
-    const netDisplay =
-      editForm.clientCost && editForm.retailPrice
-        ? Math.max(0, retailNum - costNum).toFixed(2)
-        : "";
-
     return (
       <tr key={item._key + "-edit"} style={{ backgroundColor: "#F5EDD8" }}>
-        <td colSpan={6} style={{ padding: "16px 18px 18px" }}>
+        <td colSpan={5} style={{ padding: "16px 18px 18px" }}>
           {/* Row 1: Item, Vendor, Order Date */}
           <div
             className="grid gap-[10px] mb-[12px]"
@@ -863,7 +799,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               />
             </div>
             <div>
-              <div style={drawerLabelStyle}>Expected Install Date</div>
+              <div style={drawerLabelStyle}>Expected install date</div>
               <input
                 type="date"
                 value={
@@ -876,62 +812,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   }))
                 }
                 className="luxury-input w-full"
-              />
-            </div>
-          </div>
-
-          {/* Row 3: Client Cost, Trade Price, Profit */}
-          <div
-            className="grid gap-[10px] mb-[12px]"
-            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-          >
-            <div>
-              <div style={drawerLabelStyle}>Client Cost</div>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={editForm.clientCost || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, clientCost: e.target.value }))
-                }
-                placeholder="0.00"
-                className="luxury-input w-full tabular-nums"
-                style={{ textAlign: "right" }}
-              />
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Trade Price</div>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={editForm.retailPrice || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    retailPrice: e.target.value,
-                  }))
-                }
-                placeholder="0.00"
-                className="luxury-input w-full tabular-nums"
-                style={{ textAlign: "right" }}
-              />
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Profit</div>
-              <input
-                type="text"
-                value={netDisplay}
-                readOnly
-                placeholder="—"
-                className="luxury-input w-full tabular-nums"
-                style={{
-                  textAlign: "right",
-                  color: "#6B5E52",
-                  cursor: "default",
-                }}
-                title="Auto-computed: Trade Price − Client Cost"
               />
             </div>
           </div>
@@ -1040,13 +920,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       display: "block",
     };
 
-    const newCost = parseFloat(newItemForm.clientCost || "0");
-    const newRetail = parseFloat(newItemForm.retailPrice || "0");
-    const newNetDisplay =
-      newItemForm.clientCost && newItemForm.retailPrice
-        ? Math.max(0, newRetail - newCost).toFixed(2)
-        : "";
-
     return (
       <>
         {/* Main new-item row -- gold-light tint */}
@@ -1109,7 +982,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
               Pending
             </span>
           </td>
-          {/* Delivery */}
+          {/* Expected install */}
           <td style={{ padding: "10px 14px" }}>
             <input
               type="date"
@@ -1121,24 +994,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                 }))
               }
               className="luxury-input w-full"
-            />
-          </td>
-          {/* Price */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={newItemForm.clientCost || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({
-                  ...f,
-                  clientCost: e.target.value,
-                }))
-              }
-              placeholder="Cost"
-              className="luxury-input w-full tabular-nums"
-              style={{ textAlign: "right" }}
             />
           </td>
           {/* Track */}
@@ -1205,10 +1060,10 @@ export default function ProcurementEditor({ items, projectId }: Props) {
 
         {/* Edit drawer for new item -- parchment bg */}
         <tr style={{ backgroundColor: "#F3EDE3" }}>
-          <td colSpan={6} style={{ padding: "14px 14px 16px" }}>
+          <td colSpan={5} style={{ padding: "14px 14px 16px" }}>
             <div
               className="grid gap-[10px] mb-[14px]"
-              style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+              style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
             >
               <div>
                 <div style={drawerLabelStyle}>Order Date</div>
@@ -1236,39 +1091,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                     }))
                   }
                   className="luxury-input w-full"
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Retail Price</div>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newItemForm.retailPrice || ""}
-                  onChange={(e) =>
-                    setNewItemForm((f) => ({
-                      ...f,
-                      retailPrice: e.target.value,
-                    }))
-                  }
-                  placeholder="0.00"
-                  className="luxury-input w-full tabular-nums"
-                  style={{ textAlign: "right" }}
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Net Price</div>
-                <input
-                  type="text"
-                  value={newNetDisplay}
-                  readOnly
-                  placeholder="—"
-                  className="luxury-input w-full tabular-nums"
-                  style={{
-                    textAlign: "right",
-                    color: "#6B5E52",
-                    cursor: "default",
-                  }}
                 />
               </div>
             </div>
@@ -1357,21 +1179,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                     padding: "11px 16px",
                   }}
                 >
-                  Delivery
-                </th>
-                <th
-                  className="text-left"
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "10.5px",
-                    fontWeight: 500,
-                    color: "#9E8E80",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "11px 16px",
-                  }}
-                >
-                  Profit
+                  EXPECTED INSTALL
                 </th>
                 <th
                   className="text-left hidden sm:table-cell"
