@@ -697,7 +697,24 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
         lastSyncAt: modalState.item.lastSyncAt,
         syncSource: modalState.item.syncSource,
         retrievedStatus: modalState.item.retrievedStatus,
-        images: modalState.item.images,
+        // Normalize GROQ's flat `assetRef` projection into the nested
+        // `asset: { _ref, _type: "reference" }` shape expected by the gallery,
+        // the modal payload, and the /api/admin/procurement validator. New
+        // uploads from the gallery already produce the nested form.
+        images: (modalState.item.images || []).map((img) => {
+          const existingRef =
+            (img.asset as { _ref?: string } | undefined)?._ref ||
+            (img as { assetRef?: string }).assetRef ||
+            "";
+          return {
+            _key: img._key,
+            _type: img._type || "image",
+            asset: { _type: "reference" as const, _ref: existingRef },
+            url: img.url,
+            isPrimary: img.isPrimary,
+            caption: img.caption ?? null,
+          };
+        }),
       }
     : null;
 
