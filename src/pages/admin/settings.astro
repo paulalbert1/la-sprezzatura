@@ -29,6 +29,8 @@ type SiteSettingsRow = {
   contactEmail?: string;
   contactPhone?: string;
   studioLocation?: string;
+  defaultFromEmail?: string;
+  defaultCcEmail?: string;
   socialLinks?: { instagram?: string; pinterest?: string; houzz?: string };
   heroSlideshow?: Array<{
     _key?: string;
@@ -51,6 +53,8 @@ const initialSettings = {
   contactEmail: row.contactEmail ?? "",
   contactPhone: row.contactPhone ?? "",
   studioLocation: row.studioLocation ?? "",
+  defaultFromEmail: row.defaultFromEmail ?? "",
+  defaultCcEmail: row.defaultCcEmail ?? "",
   socialLinks: {
     instagram: row.socialLinks?.instagram ?? "",
     pinterest: row.socialLinks?.pinterest ?? "",

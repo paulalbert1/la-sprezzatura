@@ -38,6 +38,9 @@ export interface SiteSettingsPayload {
   renderingAllocation: number;
   renderingImageTypes: string[];
   renderingExcludedUsers: string[];
+  // Phase 38 — Send Update sender config (SETT-10 / SETT-11)
+  defaultFromEmail: string;
+  defaultCcEmail: string;
 }
 
 export interface SettingsPageProps {
@@ -61,6 +64,8 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     contactEmail: initialSettings.contactEmail ?? "",
     contactPhone: initialSettings.contactPhone ?? "",
     studioLocation: initialSettings.studioLocation ?? "",
+    defaultFromEmail: initialSettings.defaultFromEmail ?? "",
+    defaultCcEmail: initialSettings.defaultCcEmail ?? "",
   });
   const [socialLinks, setSocialLinks] = useState<SocialLinksValues>({
     instagram: initialSettings.socialLinks?.instagram ?? "",
@@ -123,6 +128,8 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
       contactEmail: reset.contactEmail ?? "",
       contactPhone: reset.contactPhone ?? "",
       studioLocation: reset.studioLocation ?? "",
+      defaultFromEmail: reset.defaultFromEmail ?? "",
+      defaultCcEmail: reset.defaultCcEmail ?? "",
     });
     setSocialLinks({ ...reset.socialLinks });
     setRendering({

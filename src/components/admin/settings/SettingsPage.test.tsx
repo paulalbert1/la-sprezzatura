@@ -28,6 +28,9 @@ function defaultSettings(): SiteSettingsPayload {
     renderingAllocation: 50,
     renderingImageTypes: [],
     renderingExcludedUsers: [],
+    // Phase 38 — Send Update sender config (SETT-10 / SETT-11)
+    defaultFromEmail: "",
+    defaultCcEmail: "",
   };
 }
 
