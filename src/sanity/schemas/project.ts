@@ -460,21 +460,6 @@ export const project = defineType({
               type: "date",
             }),
             defineField({
-              name: "clientCost",
-              title: "Client Cost (cents)",
-              type: "number",
-              validation: (r) => r.integer().min(0),
-              description:
-                "Amount in cents (e.g., 1999 = $19.99). Never shown to clients.",
-            }),
-            defineField({
-              name: "retailPrice",
-              title: "Retail/MSRP Price (cents)",
-              type: "number",
-              validation: (r) => r.integer().min(0),
-              description: "Amount in cents. Shown to clients as MSRP.",
-            }),
-            defineField({
               name: "trackingNumber",
               title: "Tracking Number",
               type: "string",
@@ -501,11 +486,28 @@ export const project = defineType({
                 "Link to the vendor product page (internal reference).",
             }),
             defineField({
-              name: "itemImage",
-              title: "Item Image",
-              type: "image",
-              options: { hotspot: true },
-              description: "Product photo for the item (internal reference).",
+              name: "images",
+              title: "Item images",
+              type: "array",
+              of: [
+                {
+                  type: "image",
+                  options: { hotspot: true, metadata: ["lqip"] },
+                  fields: [
+                    defineField({
+                      name: "isPrimary",
+                      type: "boolean",
+                      title: "Primary image",
+                      initialValue: false,
+                    }),
+                    defineField({
+                      name: "caption",
+                      type: "string",
+                      title: "Caption (internal)",
+                    }),
+                  ],
+                },
+              ],
             }),
             defineField({
               name: "carrierETA",
@@ -1370,6 +1372,7 @@ export const project = defineType({
                   { title: "Task Reopened", value: "task-reopened" },
                   { title: "Milestone Completed", value: "milestone-completed" },
                   { title: "Procurement Status Changed", value: "procurement-status-changed" },
+                  { title: "Procurement Item Updated", value: "procurement-item-updated" },
                   { title: "Document Uploaded", value: "document-uploaded" },
                 ],
               },
