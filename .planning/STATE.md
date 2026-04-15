@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
 status: executing
-stopped_at: Completed 36-04-PLAN.md
-last_updated: "2026-04-14T23:21:36.300Z"
+stopped_at: Completed 37-01-PLAN.md (Wave 0 RED test harness)
+last_updated: "2026-04-15T01:29:23.449Z"
 last_activity: 2026-04-14 -- Phase 36 execution started
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_plans: 12
+  completed_plans: 10
+  percent: 83
 ---
 
 # Project State
@@ -69,6 +69,7 @@ Carried from v5.0 boundary. Full history:
 - [Phase 36]: Adopted vercel.ts as canonical Vercel config via @vercel/config@0.1.1; deleted vercel.json. Both tracking-sync and auto-archive crons registered in typed config.
 - [Phase 36]: Cron endpoint ships at /api/cron/auto-archive (not /api/admin/auto-archive) to match existing tracking-sync.ts convention; dual-header auth accepts Authorization: Bearer OR x-cron-secret against CRON_SECRET env.
 - [Phase 36]: Plan 04 redesigns card lifecycle presentation: projectStatus + archivedAt drive a CardTreatment helper (left border + opacity + top status label); two-section (Active / Non-active) layout replaces the three-tier model; archive wins over projectStatus
+- [Phase 37]: Phase 37 Plan 01: Wave 0 RED test harness shipped -- 7 test files, 57 it() blocks, all 5 PROC requirements covered; plans 02/03 can cite these in <automated> verify commands
 
 ### Pending Todos
 
@@ -84,7 +85,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-14T22:17:54.429Z
-Stopped at: Completed 36-04-PLAN.md
+Last session: 2026-04-15T01:29:19.065Z
+Stopped at: Completed 37-01-PLAN.md (Wave 0 RED test harness)
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

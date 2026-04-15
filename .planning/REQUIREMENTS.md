@@ -31,11 +31,11 @@
 
 ### Procurement Privacy & Modal (PROC)
 
-- [ ] **PROC-10**: Clicking a procurement row opens a modal that displays every field of that item in read mode
-- [ ] **PROC-11**: Procurement modal has an explicit Edit action that transitions the modal into editable mode
-- [ ] **PROC-12**: All price, cost, and profit fields are removed from the procurement UI (unit cost, retail, net, profit, markup)
-- [ ] **PROC-13**: "Delivery" column and field label are renamed to "Expected install date" throughout the procurement editor
-- [ ] **PROC-14**: User can upload multiple images to a single procurement item
+- [x] **PROC-10**: Clicking a procurement row opens a modal that displays every field of that item in read mode
+- [x] **PROC-11**: Procurement modal has an explicit Edit action that transitions the modal into editable mode
+- [x] **PROC-12**: All price, cost, and profit fields are removed from the procurement UI (unit cost, retail, net, profit, markup)
+- [x] **PROC-13**: "Delivery" column and field label are renamed to "Expected install date" throughout the procurement editor
+- [x] **PROC-14**: User can upload multiple images to a single procurement item
 
 ### Work Order Panel (WORK)
 
@@ -115,11 +115,11 @@
 | PROJ-03 | Phase 36 | Complete |
 | PROJ-04 | Phase 36 | Complete |
 | PROJ-05 | Phase 36 | Complete |
-| PROC-10 | Phase 37 | Pending |
-| PROC-11 | Phase 37 | Pending |
-| PROC-12 | Phase 37 | Pending |
-| PROC-13 | Phase 37 | Pending |
-| PROC-14 | Phase 37 | Pending |
+| PROC-10 | Phase 37 | Complete |
+| PROC-11 | Phase 37 | Complete |
+| PROC-12 | Phase 37 | Complete |
+| PROC-13 | Phase 37 | Complete |
+| PROC-14 | Phase 37 | Complete |
 | SETT-10 | Phase 38 | Pending |
 | SETT-11 | Phase 38 | Pending |
 | SETT-12 | Phase 38 | Pending |
