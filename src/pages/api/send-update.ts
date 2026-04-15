@@ -57,7 +57,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       sections,
       usePersonalLinks = false,
       ccSelf = true,
-      ccLiz = true,
+      ccDefault = true,
     } = await request.json();
     if (!projectId) {
       return new Response(
@@ -99,6 +99,36 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
     }
+
+    // Phase 38 Plan 02 — resolve sender config from siteSettings at send time.
+    // Settings wins; RESEND_FROM env is the ops escape hatch; literal is last resort.
+    const senderSettings = (await sanityWriteClient.fetch<{
+      defaultFromEmail?: string;
+      defaultCcEmail?: string;
+    } | null>(
+      `*[_type == "siteSettings"][0]{ defaultFromEmail, defaultCcEmail }`,
+    )) ?? null;
+
+    const resolvedFrom =
+      senderSettings?.defaultFromEmail?.trim() ||
+      (import.meta.env.RESEND_FROM as string | undefined) ||
+      "office@lasprezz.com";
+
+    // D-10/D-12: normalize CC at send time. Empty → default singleton.
+    // CRLF → drop entirely (header-injection guard, T-38-01 defense-in-depth).
+    const SEND_UPDATE_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const resolvedCcList: string[] = (() => {
+      const raw = senderSettings?.defaultCcEmail?.trim() ?? "";
+      if (raw.length === 0) return ["liz@lasprezz.com"];
+      if (/[\r\n]/.test(raw)) {
+        console.warn("[SendUpdate] CRLF in defaultCcEmail dropped; falling back to empty cc");
+        return [];
+      }
+      return raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && SEND_UPDATE_EMAIL_REGEX.test(s));
+    })();
 
     // Build email context shared by both branches. Prefer the incoming
     // request's origin so dev (localhost) and preview deploys produce working
@@ -173,9 +203,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
           recipientEmails.push(client.email);
           const cc: string[] = [];
-          if (ccLiz) cc.push("liz@lasprezz.com");
+          if (ccDefault) cc.push(...resolvedCcList);
           const resendResult = await resend.emails.send({
-            from: import.meta.env.RESEND_FROM || "La Sprezzatura <onboarding@resend.dev>",
+            from: resolvedFrom,
             to: [client.email],
             ...(cc.length > 0 && { cc }),
             subject: `Project Weekly Update - ${client.name || project.title}`,
@@ -206,9 +236,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             clientFirstName: client.name?.split(" ")[0],
           });
           const cc: string[] = [];
-          if (ccLiz) cc.push("liz@lasprezz.com");
+          if (ccDefault) cc.push(...resolvedCcList);
           const resendResult = await resend.emails.send({
-            from: import.meta.env.RESEND_FROM || "La Sprezzatura <onboarding@resend.dev>",
+            from: resolvedFrom,
             to: [client.email],
             ...(cc.length > 0 && { cc }),
             subject: `Project Weekly Update - ${client.name || project.title}`,
