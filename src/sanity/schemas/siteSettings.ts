@@ -36,6 +36,16 @@ export const siteSettings = defineType({
       description: "General area (e.g., Long Island, NY) -- not a home address",
     }),
     defineField({
+      name: "defaultFromEmail",
+      title: "Send Update — Default From",
+      type: "string",
+    }),
+    defineField({
+      name: "defaultCcEmail",
+      title: "Send Update — Default CC",
+      type: "string",
+    }),
+    defineField({
       name: "socialLinks",
       title: "Social Media Links",
       type: "object",

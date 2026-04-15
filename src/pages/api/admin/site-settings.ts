@@ -56,6 +56,8 @@ interface GeneralFields {
   contactEmail?: unknown;
   contactPhone?: unknown;
   studioLocation?: unknown;
+  defaultFromEmail?: unknown;
+  defaultCcEmail?: unknown;
 }
 
 interface SocialLinksFields {
@@ -96,6 +98,55 @@ function validateUpdateBody(body: Record<string, unknown>): string | null {
     const trimmed = general.contactEmail.trim();
     if (trimmed.length > 0 && !EMAIL_REGEX.test(trimmed)) {
       return "contactEmail must be a valid email address";
+    }
+  }
+
+  // defaultFromEmail — optional Send Update "from" override.
+  // D-09: accept either a bare email OR display-name form `"Name" <addr@domain>`.
+  // T-38-01: reject any value containing CR/LF to prevent SMTP header injection
+  // when Plan 02's send pipeline replays this value into Resend headers.
+  if (general.defaultFromEmail !== undefined) {
+    if (typeof general.defaultFromEmail !== "string") {
+      return "defaultFromEmail must be a string";
+    }
+    const raw = general.defaultFromEmail;
+    if (raw.length > 0) {
+      if (/[\r\n]/.test(raw)) {
+        return "defaultFromEmail must not contain newlines";
+      }
+      const trimmed = raw.trim();
+      if (trimmed.length > 0) {
+        const bracketMatch = trimmed.match(/^".*"\s*<([^>]+)>\s*$/);
+        const testValue = bracketMatch ? bracketMatch[1].trim() : trimmed;
+        if (!EMAIL_REGEX.test(testValue)) {
+          return "defaultFromEmail must be a valid email address";
+        }
+      }
+    }
+  }
+
+  // defaultCcEmail — optional, comma-separated list. Each entry regex-checked.
+  // D-05: empty entries (from trailing comma) are ignored, not errors.
+  // D-06: stored raw (no normalization on write); send-time normalization lives in Plan 02.
+  // T-38-01: reject CR/LF to prevent SMTP header injection.
+  if (general.defaultCcEmail !== undefined) {
+    if (typeof general.defaultCcEmail !== "string") {
+      return "defaultCcEmail must be a string";
+    }
+    const raw = general.defaultCcEmail;
+    if (raw.length > 0) {
+      if (/[\r\n]/.test(raw)) {
+        return "defaultCcEmail must not contain newlines";
+      }
+      const entries = raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+      for (const entry of entries) {
+        if (!EMAIL_REGEX.test(entry)) {
+          return "defaultCcEmail contains an invalid email address";
+        }
+      }
     }
   }
 
@@ -168,6 +219,13 @@ function buildUpdatePayload(
   }
   if (general.studioLocation !== undefined) {
     out.studioLocation = general.studioLocation;
+  }
+  if (general.defaultFromEmail !== undefined) {
+    out.defaultFromEmail = (general.defaultFromEmail as string).trim();
+  }
+  if (general.defaultCcEmail !== undefined) {
+    // D-06: store raw string; normalization happens at send time (Plan 02).
+    out.defaultCcEmail = general.defaultCcEmail as string;
   }
 
   if (
