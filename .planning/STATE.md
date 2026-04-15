@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: Ready to execute
-stopped_at: Completed 38-01-PLAN.md
-last_updated: "2026-04-15T18:23:57.715Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 38-02-PLAN.md
+last_updated: "2026-04-15T18:31:04.699Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 14
-  completed_plans: 13
-  percent: 93
+  completed_plans: 14
+  percent: 100
 ---
 
 # Project State
@@ -74,6 +74,7 @@ Carried from v5.0 boundary. Full history:
 - [Phase 37]: Inline modal render (not createPortal) in ProcurementItemModal so jsdom container queries reach inputs/tiles; AdminModal size=lg token still present for sizing contract
 - [Phase 37]: Internal-mode mirror in modal so Edit-click advances UI regardless of whether parent wires onModeChange (Wave 0 + production both work)
 - [Phase 38]: Phase 38 Plan 01: Send Update From/CC settings fields shipped with inline-on-blur validation; D-09 bracketed display-name form supported; T-38-01 CRLF guard added on both From and CC validators
+- [Phase 38]: Phase 38 Plan 02: Send Update pipeline now reads siteSettings.defaultFromEmail / defaultCcEmail at send time; hardcoded liz@ / onboarding@resend.dev literals removed; ccLiz renamed to ccDefault across client + server; dynamic CC toggle label in modal
 
 ### Pending Todos
 
@@ -89,7 +90,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-15T18:23:57.712Z
-Stopped at: Completed 38-01-PLAN.md
+Last session: 2026-04-15T18:31:04.694Z
+Stopped at: Completed 38-02-PLAN.md
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

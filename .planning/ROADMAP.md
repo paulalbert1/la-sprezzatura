@@ -105,7 +105,7 @@ v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase
 - [x] **Phase 35: Dashboard Polish & Global UX Cleanup** — 13 reqs (DASH-10..22) (completed 2026-04-14)
 - [x] **Phase 36: Projects List & Archive Lifecycle** — 5 reqs (PROJ-01..05) (completed 2026-04-14)
 - [x] **Phase 37: Procurement Privacy & Modal Editor** — 5 reqs (PROC-10..14) (completed 2026-04-15)
-- [ ] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12)
+- [x] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12) (completed 2026-04-15)
 - [ ] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03)
 - [ ] **Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support** — 5 reqs (VEND-01..05)
 - [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
@@ -179,7 +179,7 @@ Plans:
 
 Plans:
 - [x] 38-01-PLAN.md — Settings schema + UI + API passthrough for defaultFromEmail / defaultCcEmail (SETT-10, SETT-11)
-- [ ] 38-02-PLAN.md — Send pipeline wiring + SendUpdateModal dynamic label (SETT-12)
+- [x] 38-02-PLAN.md — Send pipeline wiring + SendUpdateModal dynamic label (SETT-12)
 
 ### Phase 39: Work Order & Documents Panels
 **Goal**: Project detail gains two new panels — Work Order (compose + email a work order from selected procurement items, custom fields, and special instructions) and Documents (upload, list, preview, and delete project documents)
@@ -235,7 +235,7 @@ Plans:
 | 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
 | 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
 | 37 | v5.1 | 3/3 | Complete   | 2026-04-15 |
-| 38 | v5.1 | 1/2 | In Progress|  |
+| 38 | v5.1 | 2/2 | Complete   | 2026-04-15 |
 | 39 | v5.1 | 0/4 | Not started | - |
 | 40 | v5.1 | 0/3 | Not started | - |
 | 41 | v5.1 | 0/3 | Not started | - |
