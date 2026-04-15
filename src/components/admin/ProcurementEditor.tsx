@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { format, parseISO } from "date-fns";
 import {
   Plus,
-  Pencil,
   Trash2,
   RefreshCw,
   Loader2,
@@ -12,6 +11,10 @@ import {
 import { isProcurementOverdue } from "../../lib/dashboardUtils";
 import { getTrackingInfo } from "../../lib/trackingUrl";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import ProcurementItemModal, {
+  type ProcurementItemModalItem,
+  type ProcurementItemPayload,
+} from "./ProcurementItemModal";
 
 interface ProcurementItem {
   _key: string;
@@ -22,6 +25,8 @@ interface ProcurementItem {
   installDate: string | null;
   trackingNumber: string | null;
   vendor: string | null;
+  manufacturer?: string | null;
+  qty?: number | null;
   notes: string | null;
   carrierETA: string | null;
   carrierName: string | null;
@@ -29,9 +34,12 @@ interface ProcurementItem {
   lastSyncAt: string | null;
   syncSource: string | null;
   retrievedStatus: string | null;
-  // Phase 37: images gallery metadata, to be rendered/managed by Plan 03's modal.
+  productUrl?: string | null;
+  itemUrl?: string | null;
   images?: Array<{
     _key: string;
+    _type?: string;
+    asset?: { _ref: string; _type: "reference" } | { url?: string; _ref?: string };
     url?: string;
     isPrimary?: boolean;
     caption?: string | null;
@@ -41,9 +49,15 @@ interface ProcurementItem {
 interface Props {
   items: ProcurementItem[];
   projectId: string;
+  // Phase 37: tests inject a spy to assert row-click dispatch.
+  onOpenModal?: (event: {
+    mode?: "view" | "edit" | "create";
+    _key?: string;
+    item?: ProcurementItem | null;
+  }) => void;
 }
 
-// Luxury status pills -- border-outlined on tinted backgrounds
+// Luxury status pills — border-outlined on tinted backgrounds
 const STATUS_PILL_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   scheduled: { bg: "#F3EFE9", text: "#6B5E52", border: "#E0D5C5" },
   warehouse: { bg: "#F3EDE3", text: "#6B5E52", border: "#D4C8B8" },
@@ -52,16 +66,6 @@ const STATUS_PILL_STYLES: Record<string, { bg: string; text: string; border: str
   pending: { bg: "#FDEEE6", text: "#9B3A2A", border: "#F2C9B8" },
   delivered: { bg: "#EDF5E8", text: "#3A6620", border: "#C4DBA8" },
   installed: { bg: "#EDF5E8", text: "#3A6620", border: "#A8C98C" },
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  scheduled: "bg-stone-light/20 text-stone",
-  warehouse: "bg-blue-50 text-blue-700",
-  "in-transit": "bg-terracotta/10 text-terracotta",
-  ordered: "bg-amber-50 text-amber-700",
-  pending: "bg-red-50 text-red-700",
-  delivered: "bg-emerald-50 text-emerald-700",
-  installed: "bg-emerald-100 text-emerald-800",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -85,19 +89,12 @@ const STATUS_ORDER = [
   "installed",
 ];
 
-export default function ProcurementEditor({ items, projectId }: Props) {
+export default function ProcurementEditor({ items, projectId, onOpenModal }: Props) {
   const [localItems, setLocalItems] = useState<ProcurementItem[]>(items);
-  const [editingKey, setEditingKey] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<Record<string, string>>({});
-  const [creatingNew, setCreatingNew] = useState(false);
-  const [newItemForm, setNewItemForm] = useState<Record<string, string>>({
-    name: "",
-  });
   const [statusDropdownKey, setStatusDropdownKey] = useState<string | null>(
     null,
   );
   const [savingStatus, setSavingStatus] = useState<string | null>(null);
-  const [savingRow, setSavingRow] = useState(false);
   const [refreshingKey, setRefreshingKey] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     key: string;
@@ -105,7 +102,13 @@ export default function ProcurementEditor({ items, projectId }: Props) {
   } | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Phase 37 modal state
+  const [modalState, setModalState] = useState<{
+    open: boolean;
+    mode: "view" | "edit" | "create";
+    item: ProcurementItem | null;
+  }>({ open: false, mode: "view", item: null });
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -124,24 +127,16 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [statusDropdownKey]);
 
-  // Close status dropdown on Escape; cancel edit on Escape
+  // Close status dropdown on Escape
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        if (statusDropdownKey) {
-          setStatusDropdownKey(null);
-        } else if (editingKey) {
-          cancelEdit();
-        } else if (creatingNew) {
-          setCreatingNew(false);
-          setNewItemForm({ name: "" });
-          setValidationError(null);
-        }
+      if (e.key === "Escape" && statusDropdownKey) {
+        setStatusDropdownKey(null);
       }
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [statusDropdownKey, editingKey, creatingNew]);
+  }, [statusDropdownKey]);
 
   // Auto-dismiss error after 3000ms
   useEffect(() => {
@@ -153,6 +148,19 @@ export default function ProcurementEditor({ items, projectId }: Props) {
   function showError(msg: string) {
     setError(msg);
   }
+
+  const handleRowClick = useCallback(
+    (item: ProcurementItem) => {
+      setModalState({ open: true, mode: "view", item });
+      onOpenModal?.({ mode: "view", _key: item._key, item });
+    },
+    [onOpenModal],
+  );
+
+  const handleAddItemClick = useCallback(() => {
+    setModalState({ open: true, mode: "create", item: null });
+    onOpenModal?.({ mode: "create", item: null });
+  }, [onOpenModal]);
 
   async function handleStatusChange(key: string, newStatus: string) {
     const item = localItems.find((i) => i._key === key);
@@ -194,129 +202,6 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       showError("Could not save changes. Please try again.");
     } finally {
       setSavingStatus(null);
-    }
-  }
-
-  async function handleSaveEdit() {
-    if (!editingKey) return;
-    const name = (editForm.name || "").trim();
-    if (!name) {
-      setValidationError("Item name is required");
-      return;
-    }
-
-    setSavingRow(true);
-    setValidationError(null);
-
-    const payload: Record<string, unknown> = {
-      action: "update",
-      projectId,
-      itemKey: editingKey,
-      name,
-      vendor: editForm.vendor || null,
-      orderDate: editForm.orderDate || null,
-      expectedDeliveryDate: editForm.expectedDeliveryDate || null,
-      installDate: editForm.installDate || null,
-      trackingNumber: editForm.trackingNumber || null,
-      carrierName: editForm.carrierName || null,
-      notes: editForm.notes || null,
-    };
-
-    try {
-      const res = await fetch("/api/admin/procurement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error();
-
-      // Update localItems with new values
-      setLocalItems((prev) =>
-        prev.map((i) =>
-          i._key === editingKey
-            ? {
-                ...i,
-                name,
-                vendor: (editForm.vendor || null) as string | null,
-                orderDate: (editForm.orderDate || null) as string | null,
-                expectedDeliveryDate: (editForm.expectedDeliveryDate ||
-                  null) as string | null,
-                installDate: (editForm.installDate || null) as string | null,
-                trackingNumber: (editForm.trackingNumber || null) as
-                  | string
-                  | null,
-                notes: (editForm.notes || null) as string | null,
-              }
-            : i,
-        ),
-      );
-      setEditingKey(null);
-      setEditForm({});
-    } catch {
-      showError("Could not save changes. Please try again.");
-    } finally {
-      setSavingRow(false);
-    }
-  }
-
-  async function handleCreate() {
-    const name = (newItemForm.name || "").trim();
-    if (!name) {
-      setValidationError("Item name is required");
-      return;
-    }
-
-    setSavingRow(true);
-    setValidationError(null);
-
-    const payload: Record<string, unknown> = {
-      action: "create",
-      projectId,
-      name,
-      vendor: newItemForm.vendor || null,
-      orderDate: newItemForm.orderDate || null,
-      expectedDeliveryDate: newItemForm.expectedDeliveryDate || null,
-      installDate: newItemForm.installDate || null,
-      trackingNumber: newItemForm.trackingNumber || null,
-      notes: newItemForm.notes || null,
-    };
-
-    try {
-      const res = await fetch("/api/admin/procurement", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error();
-      const result = await res.json();
-
-      const newItem: ProcurementItem = {
-        _key: result.itemKey,
-        name,
-        status: "pending",
-        orderDate: (newItemForm.orderDate as string) || null,
-        expectedDeliveryDate:
-          (newItemForm.expectedDeliveryDate as string) || null,
-        installDate: (newItemForm.installDate as string) || null,
-        trackingNumber: (newItemForm.trackingNumber as string) || null,
-        vendor: (newItemForm.vendor as string) || null,
-        notes: (newItemForm.notes as string) || null,
-        carrierETA: null,
-        carrierName: null,
-        trackingUrl: null,
-        lastSyncAt: null,
-        syncSource: null,
-        retrievedStatus: null,
-        images: [],
-      };
-
-      setLocalItems((prev) => [...prev, newItem]);
-      setNewItemForm({ name: "" });
-      setCreatingNew(false);
-    } catch {
-      showError("Could not add item. Please try again.");
-    } finally {
-      setSavingRow(false);
     }
   }
 
@@ -390,40 +275,138 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     }
   }
 
-  function startEdit(item: ProcurementItem) {
-    setCreatingNew(false);
-    setValidationError(null);
-    setEditingKey(item._key);
-    setEditForm({
-      name: item.name,
-      vendor: item.vendor || "",
-      orderDate: item.orderDate || "",
-      expectedDeliveryDate: item.expectedDeliveryDate || "",
-      installDate: item.installDate || "",
-      trackingNumber: item.trackingNumber || "",
-      carrierName: item.carrierName || "",
-      notes: item.notes || "",
-    });
-  }
+  // --- Modal save / delete handlers ---
+  const handleModalSave = useCallback(
+    async (payload: ProcurementItemPayload) => {
+      const isCreate = modalState.mode === "create";
+      const action = isCreate ? "create" : "update";
+      const body: Record<string, unknown> = {
+        action,
+        projectId,
+        name: payload.name,
+        vendor: payload.vendor ?? null,
+        manufacturer: payload.manufacturer ?? null,
+        qty: payload.qty ?? null,
+        orderDate: payload.orderDate || undefined,
+        expectedDeliveryDate: payload.expectedDeliveryDate || undefined,
+        installDate: payload.installDate || undefined,
+        trackingNumber: payload.trackingNumber ?? null,
+        carrierName: payload.carrierName ?? null,
+        notes: payload.notes ?? null,
+        itemUrl: payload.productUrl ?? payload.itemUrl ?? null,
+        images: payload.images ?? [],
+      };
+      if (!isCreate) {
+        body.itemKey = payload._key;
+      }
+      const res = await fetch("/api/admin/procurement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        let msg = "Couldn't save — try again.";
+        try {
+          const data = await res.json();
+          if (data?.error) msg = String(data.error);
+        } catch {
+          /* noop */
+        }
+        throw new Error(msg);
+      }
 
-  function cancelEdit() {
-    setEditingKey(null);
-    setEditForm({});
-    setValidationError(null);
-  }
+      if (isCreate) {
+        const result = await res.json().catch(() => ({}));
+        const newKey = (result?.itemKey as string) || payload._key;
+        const newItem: ProcurementItem = {
+          _key: newKey,
+          name: payload.name || "",
+          status: (payload.status as string) || "pending",
+          orderDate: payload.orderDate || null,
+          expectedDeliveryDate: payload.expectedDeliveryDate || null,
+          installDate: payload.installDate || null,
+          trackingNumber: payload.trackingNumber || null,
+          vendor: payload.vendor || null,
+          manufacturer: payload.manufacturer || null,
+          qty: payload.qty ?? null,
+          notes: payload.notes || null,
+          carrierETA: payload.carrierETA || null,
+          carrierName: payload.carrierName || null,
+          trackingUrl: payload.trackingUrl || null,
+          lastSyncAt: null,
+          syncSource: null,
+          retrievedStatus: null,
+          productUrl: payload.productUrl || null,
+          itemUrl: payload.itemUrl || null,
+          images: payload.images || [],
+        };
+        setLocalItems((prev) => [...prev, newItem]);
+      } else {
+        setLocalItems((prev) =>
+          prev.map((i) =>
+            i._key === payload._key
+              ? {
+                  ...i,
+                  name: payload.name || i.name,
+                  vendor: payload.vendor ?? i.vendor,
+                  manufacturer: payload.manufacturer ?? i.manufacturer,
+                  qty: payload.qty ?? i.qty,
+                  orderDate: payload.orderDate ?? i.orderDate,
+                  expectedDeliveryDate:
+                    payload.expectedDeliveryDate ?? i.expectedDeliveryDate,
+                  installDate: payload.installDate ?? i.installDate,
+                  trackingNumber: payload.trackingNumber ?? i.trackingNumber,
+                  carrierName: payload.carrierName ?? i.carrierName,
+                  notes: payload.notes ?? i.notes,
+                  status: payload.status ?? i.status,
+                  productUrl: payload.productUrl ?? i.productUrl,
+                  itemUrl: payload.itemUrl ?? i.itemUrl,
+                  images: payload.images ?? i.images,
+                }
+              : i,
+          ),
+        );
+      }
+    },
+    [modalState.mode, projectId],
+  );
+
+  const handleModalDelete = useCallback(
+    async (itemKey: string) => {
+      const item = localItems.find((i) => i._key === itemKey);
+      const itemName = item?.name || "Unknown";
+      const res = await fetch("/api/admin/procurement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          projectId,
+          itemKey,
+          itemName,
+        }),
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      setLocalItems((prev) => prev.filter((i) => i._key !== itemKey));
+    },
+    [localItems, projectId],
+  );
 
   function truncateTracking(num: string): string {
     return num.length > 12 ? num.slice(0, 12) + "..." : num;
   }
 
   function renderTrackingLink(item: ProcurementItem) {
+    const stop = (e: React.MouseEvent) => e.stopPropagation();
     if (item.trackingUrl) {
       return (
         <a
           href={item.trackingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[11.5px] underline hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
+          onClick={stop}
+          aria-label={`Tracking ${item.trackingNumber || item.carrierName || ""}`}
+          className="text-[11.5px] underline hover:opacity-70"
+          style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
         >
           {item.carrierName || truncateTracking(item.trackingNumber || "")}
         </a>
@@ -437,7 +420,9 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             href={info.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11.5px] underline hover:opacity-70" style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
+            onClick={stop}
+            className="text-[11.5px] underline hover:opacity-70"
+            style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
           >
             {info.carrier !== "unknown"
               ? info.carrier.toUpperCase()
@@ -463,9 +448,11 @@ export default function ProcurementEditor({ items, projectId }: Props) {
       <div className="relative" ref={isOpen ? dropdownRef : undefined}>
         <button
           type="button"
-          onClick={() =>
-            setStatusDropdownKey(isOpen ? null : item._key)
-          }
+          aria-label={STATUS_LABELS[item.status] || item.status}
+          onClick={(e) => {
+            e.stopPropagation();
+            setStatusDropdownKey(isOpen ? null : item._key);
+          }}
           className={`inline-flex items-center gap-1 cursor-pointer transition-opacity ${isSaving ? "opacity-50" : ""}`}
           style={{
             padding: "3px 9px",
@@ -488,6 +475,7 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             className="absolute left-0 top-full mt-1 rounded-lg shadow-lg py-1 z-10 min-w-[140px]"
             style={{ backgroundColor: "#FFFEFB", border: "0.5px solid #E8DDD0" }}
             role="listbox"
+            onClick={(e) => e.stopPropagation()}
           >
             {STATUS_ORDER.map((s) => {
               const sPill = STATUS_PILL_STYLES[s];
@@ -497,7 +485,10 @@ export default function ProcurementEditor({ items, projectId }: Props) {
                   type="button"
                   role="option"
                   aria-selected={item.status === s}
-                  onClick={() => handleStatusChange(item._key, s)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusChange(item._key, s);
+                  }}
                   className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
                   style={{
                     fontSize: "11.5px",
@@ -539,8 +530,19 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     return (
       <tr
         key={item._key}
-        className="hover:bg-[#FAF7F2]"
+        data-procurement-row
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${item.name || "item"}`}
+        className="cursor-pointer hover:bg-[#FAF7F2]"
         style={{ borderBottom: "0.5px solid #E8DDD0" }}
+        onClick={() => handleRowClick(item)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleRowClick(item);
+          }
+        }}
       >
         {/* Item + Vendor */}
         <td style={{ padding: "12px 16px" }}>
@@ -633,17 +635,10 @@ export default function ProcurementEditor({ items, projectId }: Props) {
           <div className="flex items-center justify-center gap-0.5">
             <button
               type="button"
-              onClick={() => startEdit(item)}
-              aria-label="Edit item"
-              className="p-2 rounded-md text-stone-light hover:text-charcoal hover:bg-stone-light/10 transition-colors"
-            >
-              <Pencil className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setDeleteTarget({ key: item._key, name: item.name })
-              }
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteTarget({ key: item._key, name: item.name });
+              }}
               aria-label="Delete item"
               className="p-2 rounded-md text-stone-light hover:text-red-600 hover:bg-red-50 transition-colors"
             >
@@ -652,13 +647,19 @@ export default function ProcurementEditor({ items, projectId }: Props) {
             {canRefresh && (
               <>
                 {refreshingKey === item._key ? (
-                  <div className="p-2"><Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#9A7B4B" }} /></div>
+                  <div className="p-2">
+                    <Loader2
+                      className="w-3.5 h-3.5 animate-spin"
+                      style={{ color: "#9A7B4B" }}
+                    />
+                  </div>
                 ) : (
                   <button
                     type="button"
-                    onClick={() =>
-                      handleForceRefresh(item._key, item.trackingNumber!)
-                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleForceRefresh(item._key, item.trackingNumber!);
+                    }}
                     aria-label="Refresh tracking"
                     className="p-2 rounded-md hover:bg-[#F5EDD8] transition-colors"
                     style={{ color: "#9E8E80" }}
@@ -674,541 +675,162 @@ export default function ProcurementEditor({ items, projectId }: Props) {
     );
   }
 
-  function renderEditRow(item: ProcurementItem) {
-    const inputClass = "luxury-input w-full";
-    const drawerLabelStyle = {
-      fontFamily: "var(--font-sans)",
-      fontSize: "11px",
-      fontWeight: 500,
-      color: "#9E8E80",
-      letterSpacing: "0.08em",
-      textTransform: "uppercase" as const,
-      marginBottom: "4px",
-      display: "block",
-    };
-
-    return (
-      <tr key={item._key + "-edit"} style={{ backgroundColor: "#F5EDD8" }}>
-        <td colSpan={5} style={{ padding: "16px 18px 18px" }}>
-          {/* Row 1: Item, Vendor, Order Date */}
-          <div
-            className="grid gap-[10px] mb-[12px]"
-            style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-          >
-            <div>
-              <div style={drawerLabelStyle}>Item</div>
-              <input
-                type="text"
-                value={editForm.name || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, name: e.target.value }))
-                }
-                className="luxury-input w-full"
-              />
-              {validationError && !(editForm.name || "").trim() && (
-                <span
-                  className="text-[11px]"
-                  style={{
-                    color: "#9B3A2A",
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  {validationError}
-                </span>
-              )}
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Vendor</div>
-              <input
-                type="text"
-                value={editForm.vendor || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, vendor: e.target.value }))
-                }
-                placeholder="Vendor"
-                className="luxury-input w-full"
-              />
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Order Date</div>
-              <input
-                type="date"
-                value={editForm.orderDate || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, orderDate: e.target.value }))
-                }
-                className="luxury-input w-full"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: Carrier, Tracking, Retrieved Status, Expected Install Date */}
-          <div
-            className="grid gap-[10px] mb-[12px]"
-            style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-          >
-            <div>
-              <div style={drawerLabelStyle}>Carrier</div>
-              <input
-                type="text"
-                list={`carrier-suggestions-${item._key}`}
-                value={editForm.carrierName || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    carrierName: e.target.value,
-                  }))
-                }
-                placeholder="FedEx, UPS, USPS, custom..."
-                className="luxury-input w-full"
-              />
-              <datalist id={`carrier-suggestions-${item._key}`}>
-                <option value="FedEx" />
-                <option value="UPS" />
-                <option value="USPS" />
-                <option value="DHL" />
-                <option value="OnTrac" />
-                <option value="Bill of Lading" />
-              </datalist>
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Tracking</div>
-              <input
-                type="text"
-                value={editForm.trackingNumber || ""}
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    trackingNumber: e.target.value,
-                  }))
-                }
-                placeholder="Tracking #"
-                className="luxury-input w-full"
-              />
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Retrieved Status</div>
-              <input
-                type="text"
-                value={item.retrievedStatus || ""}
-                readOnly
-                placeholder="—"
-                className="luxury-input w-full"
-                style={{ color: "#6B5E52", cursor: "default" }}
-                title="Read-only. Populated by tracking sync (FedEx/UPS/USPS/Ship24)."
-              />
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Expected install date</div>
-              <input
-                type="date"
-                value={
-                  editForm.installDate || editForm.expectedDeliveryDate || ""
-                }
-                onChange={(e) =>
-                  setEditForm((f) => ({
-                    ...f,
-                    installDate: e.target.value,
-                  }))
-                }
-                className="luxury-input w-full"
-              />
-            </div>
-          </div>
-
-          {/* Row 4: Additional Notes */}
-          <div className="mb-[14px]">
-            <div style={drawerLabelStyle}>Additional Notes</div>
-            <textarea
-              value={editForm.notes || ""}
-              onChange={(e) =>
-                setEditForm((f) => ({ ...f, notes: e.target.value }))
-              }
-              placeholder="Internal notes..."
-              className="luxury-input w-full"
-              style={{
-                minHeight: "58px",
-                lineHeight: 1.55,
-                resize: "vertical",
-              }}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={cancelEdit}
-              style={{
-                fontSize: "12.5px",
-                color: "#6B5E52",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: "var(--font-sans)",
-                padding: "6px 12px",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveEdit}
-              disabled={savingRow}
-              style={{
-                padding: "7px 18px",
-                backgroundColor: "#9A7B4B",
-                color: "#FAF5EC",
-                border: "none",
-                borderRadius: "6px",
-                fontSize: "12.5px",
-                fontWeight: 500,
-                letterSpacing: "0.04em",
-                fontFamily: "var(--font-sans)",
-                cursor: savingRow ? "not-allowed" : "pointer",
-                opacity: savingRow ? 0.7 : 1,
-              }}
-            >
-              {savingRow && (
-                <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-              )}
-              Save
-            </button>
-          </div>
-        </td>
-      </tr>
-    );
-  }
-
-  function renderNewItemRow() {
-    if (!creatingNew) {
-      return (
-        <tr
-          className="cursor-pointer hover:text-[#9A7B4B]"
-          onClick={() => {
-            setCreatingNew(true);
-            cancelEdit();
-          }}
-          style={{ borderTop: "0.5px solid #E8DDD0" }}
-        >
-          <td colSpan={6} style={{ padding: "11px 16px" }}>
-            <div
-              className="flex items-center gap-[6px]"
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "12px",
-                color: "#9E8E80",
-                letterSpacing: "0.03em",
-              }}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add item</span>
-            </div>
-          </td>
-        </tr>
-      );
-    }
-
-    const drawerLabelStyle = {
-      fontFamily: "var(--font-sans)",
-      fontSize: "11px",
-      fontWeight: 500,
-      color: "#9E8E80",
-      letterSpacing: "0.08em",
-      textTransform: "uppercase" as const,
-      marginBottom: "4px",
-      display: "block",
-    };
-
-    return (
-      <>
-        {/* Main new-item row -- gold-light tint */}
-        <tr
-          style={{
-            backgroundColor: "#F5EDD8",
-            borderBottom: "0.5px solid #E8D5A8",
-          }}
-        >
-          {/* Item + Vendor */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="text"
-              value={newItemForm.name || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({ ...f, name: e.target.value }))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleCreate();
-                }
-              }}
-              placeholder="Item name"
-              autoFocus
-              className="luxury-input w-full"
-            />
-            {validationError && !(newItemForm.name || "").trim() && (
-              <span className="text-[11px]" style={{ color: "#9B3A2A", fontFamily: "var(--font-sans)" }}>
-                {validationError}
-              </span>
-            )}
-            <input
-              type="text"
-              value={newItemForm.vendor || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({ ...f, vendor: e.target.value }))
-              }
-              placeholder="Vendor"
-              className="luxury-input w-full"
-              style={{ marginTop: "5px" }}
-            />
-          </td>
-          {/* Status (default Pending) */}
-          <td style={{ padding: "10px 14px" }}>
-            <span
-              className="inline-flex items-center"
-              style={{
-                padding: "3px 9px",
-                borderRadius: "20px",
-                fontSize: "10.5px",
-                fontWeight: 500,
-                letterSpacing: "0.04em",
-                backgroundColor: "#F3EDE3",
-                color: "#9E8E80",
-                border: "0.5px solid #E8DDD0",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              Pending
-            </span>
-          </td>
-          {/* Expected install */}
-          <td style={{ padding: "10px 14px" }}>
-            <input
-              type="date"
-              value={newItemForm.expectedDeliveryDate || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({
-                  ...f,
-                  expectedDeliveryDate: e.target.value,
-                }))
-              }
-              className="luxury-input w-full"
-            />
-          </td>
-          {/* Track */}
-          <td className="hidden sm:table-cell" style={{ padding: "10px 14px" }}>
-            <input
-              type="text"
-              value={newItemForm.trackingNumber || ""}
-              onChange={(e) =>
-                setNewItemForm((f) => ({
-                  ...f,
-                  trackingNumber: e.target.value,
-                }))
-              }
-              placeholder="Tracking #"
-              className="luxury-input w-full"
-            />
-          </td>
-          {/* Actions */}
-          <td style={{ padding: "10px 14px" }}>
-            <button
-              type="button"
-              onClick={handleCreate}
-              disabled={savingRow}
-              className="block w-full hover:bg-[#7A5E32] transition-colors"
-              style={{
-                padding: "6px 0",
-                backgroundColor: "#9A7B4B",
-                color: "#FAF5EC",
-                border: "none",
-                borderRadius: "6px",
-                fontSize: "12px",
-                fontWeight: 500,
-                letterSpacing: "0.04em",
-                fontFamily: "var(--font-sans)",
-                marginBottom: "5px",
-                opacity: savingRow ? 0.7 : 1,
-              }}
-            >
-              {savingRow && (
-                <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-              )}
-              Save
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setCreatingNew(false);
-                setNewItemForm({ name: "" });
-                setValidationError(null);
-              }}
-              className="block w-full text-center hover:text-[#6B5E52] transition-colors"
-              style={{
-                fontSize: "11.5px",
-                color: "#9E8E80",
-                padding: "2px 0",
-                letterSpacing: "0.02em",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              Cancel
-            </button>
-          </td>
-        </tr>
-
-        {/* Edit drawer for new item -- parchment bg */}
-        <tr style={{ backgroundColor: "#F3EDE3" }}>
-          <td colSpan={5} style={{ padding: "14px 14px 16px" }}>
-            <div
-              className="grid gap-[10px] mb-[14px]"
-              style={{ gridTemplateColumns: "repeat(2, 1fr)" }}
-            >
-              <div>
-                <div style={drawerLabelStyle}>Order Date</div>
-                <input
-                  type="date"
-                  value={newItemForm.orderDate || ""}
-                  onChange={(e) =>
-                    setNewItemForm((f) => ({
-                      ...f,
-                      orderDate: e.target.value,
-                    }))
-                  }
-                  className="luxury-input w-full"
-                />
-              </div>
-              <div>
-                <div style={drawerLabelStyle}>Install Date</div>
-                <input
-                  type="date"
-                  value={newItemForm.installDate || ""}
-                  onChange={(e) =>
-                    setNewItemForm((f) => ({
-                      ...f,
-                      installDate: e.target.value,
-                    }))
-                  }
-                  className="luxury-input w-full"
-                />
-              </div>
-            </div>
-            <div>
-              <div style={drawerLabelStyle}>Notes</div>
-              <textarea
-                value={newItemForm.notes || ""}
-                onChange={(e) =>
-                  setNewItemForm((f) => ({ ...f, notes: e.target.value }))
-                }
-                placeholder="Internal notes..."
-                className="luxury-input w-full"
-                style={{
-                  minHeight: "58px",
-                  lineHeight: 1.55,
-                  resize: "vertical",
-                }}
-              />
-            </div>
-          </td>
-        </tr>
-      </>
-    );
-  }
+  const modalItem: ProcurementItemModalItem | null = modalState.item
+    ? {
+        _key: modalState.item._key,
+        _type: "procurementItem",
+        name: modalState.item.name,
+        vendor: modalState.item.vendor,
+        manufacturer: modalState.item.manufacturer ?? null,
+        qty: modalState.item.qty ?? null,
+        status: modalState.item.status,
+        orderDate: modalState.item.orderDate,
+        expectedDeliveryDate: modalState.item.expectedDeliveryDate,
+        installDate: modalState.item.installDate,
+        trackingNumber: modalState.item.trackingNumber,
+        carrierName: modalState.item.carrierName,
+        carrierETA: modalState.item.carrierETA,
+        trackingUrl: modalState.item.trackingUrl,
+        productUrl: modalState.item.productUrl ?? null,
+        itemUrl: modalState.item.itemUrl ?? null,
+        notes: modalState.item.notes,
+        lastSyncAt: modalState.item.lastSyncAt,
+        syncSource: modalState.item.syncSource,
+        retrievedStatus: modalState.item.retrievedStatus,
+        images: modalState.item.images,
+      }
+    : null;
 
   return (
     <>
+      {/* Section header with Add item action */}
+      <div className="flex items-center justify-between mb-3">
+        <h2
+          className="font-semibold"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "13px",
+            color: "#2C2520",
+            letterSpacing: "0.02em",
+          }}
+        >
+          Procurement
+        </h2>
+        <button
+          type="button"
+          onClick={handleAddItemClick}
+          aria-label="Add item"
+          className="text-xs font-semibold flex items-center gap-1 hover:opacity-80"
+          style={{ color: "#9A7B4B", fontFamily: "var(--font-sans)" }}
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Add item
+        </button>
+      </div>
+
       <div
         className="rounded-[10px] overflow-hidden"
         style={{ backgroundColor: "#FFFEFB", border: "0.5px solid #E8DDD0" }}
       >
-        {localItems.length === 0 && !creatingNew && (
+        {localItems.length === 0 && (
           <div className="py-8 px-5 text-center">
-            <p style={{ fontFamily: "var(--font-sans)", fontSize: "12.5px", color: "#9E8E80" }}>
+            <p
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "12.5px",
+                color: "#9E8E80",
+              }}
+            >
               No procurement items yet
             </p>
-            <p className="mt-1" style={{ fontFamily: "var(--font-sans)", fontSize: "11px", color: "#9E8E80" }}>
-              Use the row below to add items as they are ordered for this
-              project.
+            <p
+              className="mt-1"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontSize: "11px",
+                color: "#9E8E80",
+              }}
+            >
+              Use the + Add item button above to add items as they are ordered
+              for this project.
             </p>
           </div>
         )}
 
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse">
-          {(localItems.length > 0 || creatingNew) && (
-            <thead>
-              <tr style={{ backgroundColor: "#F3EDE3", borderBottom: "0.5px solid #D4C8B8" }}>
-                <th
-                  className="text-left"
+          <table className="w-full min-w-[640px] border-collapse">
+            {localItems.length > 0 && (
+              <thead>
+                <tr
                   style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "10.5px",
-                    fontWeight: 500,
-                    color: "#9E8E80",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "11px 16px",
+                    backgroundColor: "#F3EDE3",
+                    borderBottom: "0.5px solid #D4C8B8",
                   }}
                 >
-                  Item
-                </th>
-                <th
-                  className="text-left"
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "10.5px",
-                    fontWeight: 500,
-                    color: "#9E8E80",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "11px 16px",
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  className="text-left"
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "10.5px",
-                    fontWeight: 500,
-                    color: "#9E8E80",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "11px 16px",
-                  }}
-                >
-                  EXPECTED INSTALL
-                </th>
-                <th
-                  className="text-left hidden sm:table-cell"
-                  style={{
-                    fontFamily: "var(--font-sans)",
-                    fontSize: "10.5px",
-                    fontWeight: 500,
-                    color: "#9E8E80",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    padding: "11px 16px",
-                  }}
-                >
-                  Tracking
-                </th>
-                <th style={{ padding: "11px 16px", width: "80px" }}>
-                </th>
-              </tr>
-            </thead>
-          )}
-          <tbody>
-            {localItems.map((item) =>
-              editingKey === item._key
-                ? renderEditRow(item)
-                : renderReadRow(item),
+                  <th
+                    className="text-left"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "10.5px",
+                      fontWeight: 500,
+                      color: "#9E8E80",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "11px 16px",
+                    }}
+                  >
+                    Item
+                  </th>
+                  <th
+                    className="text-left"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "10.5px",
+                      fontWeight: 500,
+                      color: "#9E8E80",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "11px 16px",
+                    }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="text-left"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "10.5px",
+                      fontWeight: 500,
+                      color: "#9E8E80",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "11px 16px",
+                    }}
+                  >
+                    EXPECTED INSTALL
+                  </th>
+                  <th
+                    className="text-left hidden sm:table-cell"
+                    style={{
+                      fontFamily: "var(--font-sans)",
+                      fontSize: "10.5px",
+                      fontWeight: 500,
+                      color: "#9E8E80",
+                      letterSpacing: "0.1em",
+                      textTransform: "uppercase",
+                      padding: "11px 16px",
+                    }}
+                  >
+                    Tracking
+                  </th>
+                  <th style={{ padding: "11px 16px", width: "80px" }}></th>
+                </tr>
+              </thead>
             )}
-            {renderNewItemRow()}
-          </tbody>
-        </table>
+            <tbody>
+              {localItems.map((item) => renderReadRow(item))}
+            </tbody>
+          </table>
         </div>
 
         {error && (
@@ -1225,6 +847,20 @@ export default function ProcurementEditor({ items, projectId }: Props) {
         entityType="procurement-item"
         entityName={deleteTarget?.name || ""}
         isLoading={!!deletingKey}
+      />
+
+      <ProcurementItemModal
+        open={modalState.open}
+        mode={modalState.mode}
+        item={modalItem}
+        onClose={() =>
+          setModalState((s) => ({ ...s, open: false, item: null }))
+        }
+        onModeChange={(mode) =>
+          setModalState((s) => ({ ...s, mode }))
+        }
+        onSave={handleModalSave}
+        onDelete={handleModalDelete}
       />
     </>
   );
