@@ -208,8 +208,12 @@ export function ProcurementItemModal({
   const editBtnRef = useRef<HTMLButtonElement | null>(null);
   const statusDropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset draft when item changes OR when mode transitions.
+  // Reset draft when the target item changes OR when the modal (re-)opens.
+  // Depend on item?._key, not item itself — the parent rebuilds the item
+  // object on every render, which would otherwise clobber in-progress edits
+  // (e.g. just-uploaded gallery images) before they can paint.
   useEffect(() => {
+    if (!open) return;
     if (mode === "create" || !item) {
       setDraft(makeEmptyItem());
     } else {
@@ -217,7 +221,7 @@ export function ProcurementItemModal({
     }
     setError(null);
     setHeroPreviewKey(null);
-  }, [item, mode, open]);
+  }, [item?._key, mode, open]);
 
   // Focus management
   useEffect(() => {
