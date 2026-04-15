@@ -68,6 +68,7 @@ function renderModal(
         open={extras.open ?? true}
         onClose={onClose}
         project={project}
+        senderSettings={{ defaultFromEmail: "", defaultCcEmail: "" }}
       />
     </ToastContainer>,
   );

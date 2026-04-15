@@ -19,9 +19,16 @@ import SendUpdateModal, {
 
 export interface SendUpdateButtonProps {
   project: SendUpdateModalProject;
+  senderSettings: {
+    defaultFromEmail: string;
+    defaultCcEmail: string;
+  };
 }
 
-export default function SendUpdateButton({ project }: SendUpdateButtonProps) {
+export default function SendUpdateButton({
+  project,
+  senderSettings,
+}: SendUpdateButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,6 +46,7 @@ export default function SendUpdateButton({ project }: SendUpdateButtonProps) {
         open={open}
         onClose={() => setOpen(false)}
         project={project}
+        senderSettings={senderSettings}
       />
     </ToastContainer>
   );

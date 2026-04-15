@@ -44,6 +44,10 @@ export interface SendUpdateModalProps {
   open: boolean;
   onClose: () => void;
   project: SendUpdateModalProject;
+  senderSettings: {
+    defaultFromEmail: string;
+    defaultCcEmail: string;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -185,6 +189,7 @@ export default function SendUpdateModal({
   open,
   onClose,
   project,
+  senderSettings,
 }: SendUpdateModalProps) {
   const { show } = useToast();
 
@@ -203,9 +208,23 @@ export default function SendUpdateModal({
   );
   const [includePendingReviews, setIncludePendingReviews] = useState(false); // D-15
   const [usePersonalLinks, setUsePersonalLinks] = useState(true); // D-17
-  const [ccLiz, setCcLiz] = useState(true); // CC liz@lasprezz.com on all sends
+  const [ccDefault, setCcDefault] = useState(true); // CC Settings-derived list (D-10/D-12)
   const [sending, setSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Phase 38 Plan 02 — derive dynamic CC toggle label from Settings (D-10, D-11).
+  const ccLabelParts = (senderSettings.defaultCcEmail ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  const ccLabelText =
+    ccLabelParts.length === 0
+      ? "CC liz@lasprezz.com"
+      : ccLabelParts.length === 1
+        ? `CC ${ccLabelParts[0]}`
+        : `CC ${ccLabelParts[0]}, +${ccLabelParts.length - 1} more`;
+  const ccTitleAttr =
+    ccLabelParts.length > 1 ? ccLabelParts.join(", ") : undefined;
 
   const recipients = project.clients;
   const hasRecipients = recipients.length > 0;
@@ -244,7 +263,7 @@ export default function SendUpdateModal({
             artifacts: includePendingReviews, // D-15 mapping
           },
           usePersonalLinks,
-          ccLiz,
+          ccDefault,
         }),
       });
       if (!res.ok) {
@@ -534,9 +553,9 @@ export default function SendUpdateModal({
             Turn off to send the generic portal link.
           </p>
 
-          {/* CC Liz toggle — default checked */}
+          {/* CC default toggle — label + default driven by Settings (Phase 38) */}
           <div className="flex items-center gap-3" style={{ marginTop: "12px" }}>
-            <PersonalLinkToggle checked={ccLiz} onChange={setCcLiz} />
+            <PersonalLinkToggle checked={ccDefault} onChange={setCcDefault} />
             <label
               style={{
                 fontSize: "13px",
@@ -544,9 +563,10 @@ export default function SendUpdateModal({
                 cursor: "pointer",
                 fontFamily: "var(--font-sans)",
               }}
-              onClick={() => setCcLiz(!ccLiz)}
+              title={ccTitleAttr}
+              onClick={() => setCcDefault(!ccDefault)}
             >
-              CC liz@lasprezz.com
+              {ccLabelText}
             </label>
           </div>
           <p

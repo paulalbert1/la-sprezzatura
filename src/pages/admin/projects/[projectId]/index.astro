@@ -14,6 +14,7 @@ import ProjectArchiveMenu from "../../../../components/admin/ProjectArchiveMenu.
 import {
   getAdminProjectDetail,
   RENDERING_SESSIONS_BY_PROJECT_QUERY,
+  SITE_SETTINGS_QUERY,
 } from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { STAGE_META } from "../../../../lib/portalStages";
@@ -87,6 +88,17 @@ const pendingReviewsResult = (await client.fetch(
   { projectId },
 )) as number | null;
 const pendingReviewsCount = pendingReviewsResult ?? 0;
+
+// Phase 38 Plan 02 — prefetch sender config so SendUpdateModal renders the CC
+// toggle label from Settings without a client-side fetch.
+const settingsRow = (await client.fetch(SITE_SETTINGS_QUERY)) as {
+  defaultFromEmail?: string;
+  defaultCcEmail?: string;
+} | null;
+const senderSettings = {
+  defaultFromEmail: settingsRow?.defaultFromEmail ?? "",
+  defaultCcEmail: settingsRow?.defaultCcEmail ?? "",
+};
 
 const sendUpdateProjectSummary = {
   _id: project._id,
@@ -192,7 +204,7 @@ const breadcrumbs = [
             </span>
           )}
         </a>
-        <SendUpdateButton client:load project={sendUpdateProjectSummary} />
+        <SendUpdateButton client:load project={sendUpdateProjectSummary} senderSettings={senderSettings} />
       </div>
     </div>
 
