@@ -77,7 +77,13 @@ export interface ProcurementImageGalleryProps {
 }
 
 const MAX_BYTES = 4_500_000;
-const ALLOWED_TYPES = ["image/png", "image/jpeg"] as const;
+const ALLOWED_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+] as const;
 const DEFAULT_MAX_IMAGES = 20;
 
 type InFlightUpload = {
@@ -343,7 +349,7 @@ function DropZoneTile({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/png,image/jpeg"
+        accept="image/png,image/jpeg,image/webp,image/heic,image/heif"
         multiple
         onChange={handleChange}
         disabled={disabled}
