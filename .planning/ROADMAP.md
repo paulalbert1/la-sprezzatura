@@ -174,8 +174,12 @@ Plans:
   1. Settings exposes a default "from" address for Send Update that defaults to office@lasprezz.com
   2. Settings exposes a default "cc" address for Send Update that defaults to liz@lasprezz.com
   3. Send Update emails are sent using the from/cc values read from Settings at send time
-**Plans**: TBD (estimated 2)
+**Plans**: 2 plans
 **UI hint**: yes
+
+Plans:
+- [x] 38-01-PLAN.md — Settings schema + UI + API passthrough for defaultFromEmail / defaultCcEmail (SETT-10, SETT-11)
+- [ ] 38-02-PLAN.md — Send pipeline wiring + SendUpdateModal dynamic label (SETT-12)
 
 ### Phase 39: Work Order & Documents Panels
 **Goal**: Project detail gains two new panels — Work Order (compose + email a work order from selected procurement items, custom fields, and special instructions) and Documents (upload, list, preview, and delete project documents)
@@ -231,7 +235,7 @@ Plans:
 | 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
 | 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
 | 37 | v5.1 | 3/3 | Complete   | 2026-04-15 |
-| 38 | v5.1 | 0/2 | Not started | - |
+| 38 | v5.1 | 1/2 | In Progress|  |
 | 39 | v5.1 | 0/4 | Not started | - |
 | 40 | v5.1 | 0/3 | Not started | - |
 | 41 | v5.1 | 0/3 | Not started | - |

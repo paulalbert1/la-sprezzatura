@@ -53,8 +53,8 @@
 
 ### Send Update Sender Config (SETT)
 
-- [ ] **SETT-10**: Settings stores the default "from" address for Send Update (default: office@lasprezz.com)
-- [ ] **SETT-11**: Settings stores the default "cc" address for Send Update (default: liz@lasprezz.com)
+- [x] **SETT-10**: Settings stores the default "from" address for Send Update (default: office@lasprezz.com)
+- [x] **SETT-11**: Settings stores the default "cc" address for Send Update (default: liz@lasprezz.com)
 - [ ] **SETT-12**: Send Update composes and sends emails using the sender values configured in Settings
 
 ### Contractors / Vendors (VEND)
@@ -120,8 +120,8 @@
 | PROC-12 | Phase 37 | Complete |
 | PROC-13 | Phase 37 | Complete |
 | PROC-14 | Phase 37 | Complete |
-| SETT-10 | Phase 38 | Pending |
-| SETT-11 | Phase 38 | Pending |
+| SETT-10 | Phase 38 | Complete |
+| SETT-11 | Phase 38 | Complete |
 | SETT-12 | Phase 38 | Pending |
 | WORK-01 | Phase 39 | Pending |
 | WORK-02 | Phase 39 | Pending |

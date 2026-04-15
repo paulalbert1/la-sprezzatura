@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: executing
-stopped_at: Completed 37-03-PLAN.md (admin modal editor)
-last_updated: "2026-04-15T13:07:43.182Z"
+status: Ready to execute
+stopped_at: Completed 38-01-PLAN.md
+last_updated: "2026-04-15T18:23:57.715Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 8
   completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
-  percent: 100
+  total_plans: 14
+  completed_plans: 13
+  percent: 93
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 36 — projects-list-archive-lifecycle
+**Current focus:** Phase 38 — send-update-sender-config
 
 ## Current Position
 
-Phase: 36 (projects-list-archive-lifecycle) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
+Phase: 38 (send-update-sender-config) — EXECUTING
+Plan: 2 of 2
+Next: Phase 38 (send-update-sender-config) — READY TO DISCUSS
 Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
@@ -73,6 +73,7 @@ Carried from v5.0 boundary. Full history:
 - [Phase 37]: Phase 37 Plan 02: Schema strip shipped -- procurementItems lost clientCost/retailPrice/itemImage, gained images[] w/ isPrimary+caption; activityEntry.action enum gained procurement-item-updated (Plan 03 prerequisite); live Sanity migration run clean (3 projects patched, 14 price fields unset, 0 residual references)
 - [Phase 37]: Inline modal render (not createPortal) in ProcurementItemModal so jsdom container queries reach inputs/tiles; AdminModal size=lg token still present for sizing contract
 - [Phase 37]: Internal-mode mirror in modal so Edit-click advances UI regardless of whether parent wires onModeChange (Wave 0 + production both work)
+- [Phase 38]: Phase 38 Plan 01: Send Update From/CC settings fields shipped with inline-on-blur validation; D-09 bracketed display-name form supported; T-38-01 CRLF guard added on both From and CC validators
 
 ### Pending Todos
 
@@ -88,7 +89,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-15T13:07:35.390Z
-Stopped at: Completed 37-03-PLAN.md (admin modal editor)
+Last session: 2026-04-15T18:23:57.712Z
+Stopped at: Completed 38-01-PLAN.md
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`
