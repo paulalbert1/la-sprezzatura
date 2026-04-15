@@ -281,8 +281,6 @@ const procurementItems = [
     orderDate: daysFromNow(-45),
     expectedDeliveryDate: daysFromNow(-15),
     installDate: daysFromNow(-10),      // installed early, before everything
-    clientCost: 180000,
-    retailPrice: 245000,
   },
   {
     _key: KEYS.vcPendants,
@@ -291,8 +289,6 @@ const procurementItems = [
     orderDate: daysFromNow(-20),
     expectedDeliveryDate: daysFromNow(1),
     installDate: daysFromNow(3),         // arrives day 3, before lighting starts day 5
-    clientCost: 285000,
-    retailPrice: 375000,
   },
   {
     _key: KEYS.wwFixtures,
@@ -301,8 +297,6 @@ const procurementItems = [
     orderDate: daysFromNow(-20),
     expectedDeliveryDate: daysFromNow(8),
     installDate: daysFromNow(10),        // arrives day 10, before plumbing starts day 12
-    clientCost: 425000,
-    retailPrice: 560000,
   },
   {
     _key: KEYS.wallcovering,
@@ -311,8 +305,6 @@ const procurementItems = [
     orderDate: daysFromNow(-5),
     expectedDeliveryDate: daysFromNow(18),
     installDate: daysFromNow(24),
-    clientCost: 320000,
-    retailPrice: 420000,
   },
   {
     _key: KEYS.rhSofa,
@@ -321,8 +313,6 @@ const procurementItems = [
     orderDate: daysFromNow(-30),
     expectedDeliveryDate: daysFromNow(-5),
     installDate: daysFromNow(34),        // furniture delivery window
-    clientCost: 899500,
-    retailPrice: 1199900,
   },
   {
     _key: KEYS.diningTable,
@@ -331,8 +321,6 @@ const procurementItems = [
     orderDate: null,
     expectedDeliveryDate: daysFromNow(30),
     installDate: daysFromNow(34),        // same delivery window as sofa
-    clientCost: 650000,
-    retailPrice: 850000,
   },
 ];
 

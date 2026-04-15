@@ -22,6 +22,9 @@ const VALID_STATUSES = Object.keys(STATUS_LABELS);
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
+// Phase 37: procurement privacy strip -- retailPrice / clientCost dropped from
+// the schema. Any legacy caller that sends those fields will have them ignored
+// (they are simply not in UPDATABLE_FIELDS).
 /** Updatable fields for the "update" action (excludes status, sync fields) */
 const UPDATABLE_FIELDS = [
   "name",
@@ -29,38 +32,107 @@ const UPDATABLE_FIELDS = [
   "orderDate",
   "expectedDeliveryDate",
   "installDate",
-  "retailPrice",
-  "clientCost",
   "trackingNumber",
   "carrierName",
   "notes",
   "itemUrl",
+  "images",
 ] as const;
+
+const SANITY_IMAGE_REF_REGEX =
+  /^image-[a-f0-9]+-\d+x\d+-(png|jpg|jpeg|gif|webp|svg)$/i;
+
+const MAX_IMAGES_PER_ITEM = 20;
+const MAX_CAPTION_LENGTH = 500;
 
 function isValidDate(val: unknown): boolean {
   return typeof val === "string" && DATE_REGEX.test(val);
 }
 
-function isValidPrice(val: unknown): boolean {
-  return typeof val === "number" && Number.isInteger(val) && val >= 0;
-}
-
-function validateDatesAndPrices(
-  body: Record<string, unknown>,
-): string | null {
+function validateDates(body: Record<string, unknown>): string | null {
   if (body.expectedDeliveryDate !== undefined && !isValidDate(body.expectedDeliveryDate)) {
     return "Invalid date format. Use YYYY-MM-DD.";
   }
   if (body.installDate !== undefined && !isValidDate(body.installDate)) {
     return "Invalid date format. Use YYYY-MM-DD.";
   }
-  if (body.retailPrice !== undefined && !isValidPrice(body.retailPrice)) {
-    return "Invalid price value. Must be a non-negative integer (cents).";
-  }
-  if (body.clientCost !== undefined && !isValidPrice(body.clientCost)) {
-    return "Invalid price value. Must be a non-negative integer (cents).";
+  if (body.orderDate !== undefined && !isValidDate(body.orderDate)) {
+    return "Invalid date format. Use YYYY-MM-DD.";
   }
   return null;
+}
+
+/** Strip control chars from a caption and cap length. Returns null if input is null/undefined. */
+function sanitizeCaption(val: unknown): string | null {
+  if (val === null || val === undefined) return null;
+  if (typeof val !== "string") return null;
+  return val.replace(/[\x00-\x1F\x7F]/g, "").slice(0, MAX_CAPTION_LENGTH);
+}
+
+type ImageInput = {
+  _key?: string;
+  _type?: string;
+  asset?: { _ref?: string; _type?: string };
+  isPrimary?: boolean;
+  caption?: string | null;
+};
+
+/**
+ * Validate + sanitize an images[] payload.
+ * Returns a normalized array on success, or a string error message on failure.
+ */
+function validateImages(raw: unknown): ImageInput[] | { error: string } {
+  if (!Array.isArray(raw)) {
+    return { error: "images must be an array" };
+  }
+  if (raw.length > MAX_IMAGES_PER_ITEM) {
+    return { error: `Too many images (max ${MAX_IMAGES_PER_ITEM})` };
+  }
+
+  const normalized: ImageInput[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") {
+      return { error: "Invalid image entry" };
+    }
+    const img = entry as ImageInput;
+    const ref = img.asset?._ref;
+    if (!ref || typeof ref !== "string" || !SANITY_IMAGE_REF_REGEX.test(ref)) {
+      return { error: "Invalid image asset reference" };
+    }
+    if (img.isPrimary !== undefined && typeof img.isPrimary !== "boolean") {
+      return { error: "isPrimary must be a boolean" };
+    }
+    if (
+      img.caption !== undefined &&
+      img.caption !== null &&
+      typeof img.caption !== "string"
+    ) {
+      return { error: "caption must be a string or null" };
+    }
+    normalized.push({
+      _key: typeof img._key === "string" ? img._key : generatePortalToken(8),
+      _type: "image",
+      asset: { _type: "reference", _ref: ref },
+      isPrimary: img.isPrimary === true,
+      caption: sanitizeCaption(img.caption),
+    });
+  }
+  return normalized;
+}
+
+/** Build the "procurement-item-updated" activity-log description from a whitelist of changed fields. */
+function buildItemUpdatedDescription(
+  itemName: string,
+  changedFields: string[],
+): string {
+  const safeName = String(itemName || "")
+    .replace(/[\x00-\x1F\x7F]/g, "")
+    .slice(0, 40);
+  const shown = changedFields.slice(0, 6).join(", ");
+  const more = changedFields.length > 6
+    ? ` +${changedFields.length - 6} more`
+    : "";
+  return `Item "${safeName}" updated -- ${shown}${more}`;
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -111,7 +183,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         );
       }
 
-      const validationError = validateDatesAndPrices(body);
+      const validationError = validateDates(body);
       if (validationError) {
         return new Response(
           JSON.stringify({ error: validationError }),
@@ -127,14 +199,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         _type: "procurementItem",
         name: name.trim(),
         status: "pending",
+        // Phase 37: new items start with an empty images[] so the modal can
+        // append without a setIfMissing round-trip.
+        images: [],
       };
 
       // Add optional fields if provided
       if (body.vendor) itemObject.vendor = body.vendor;
       if (body.expectedDeliveryDate) itemObject.expectedDeliveryDate = body.expectedDeliveryDate;
       if (body.installDate) itemObject.installDate = body.installDate;
-      if (body.retailPrice !== undefined) itemObject.retailPrice = body.retailPrice;
-      if (body.clientCost !== undefined) itemObject.clientCost = body.clientCost;
       if (body.trackingNumber) itemObject.trackingNumber = body.trackingNumber;
       if (body.notes) itemObject.notes = body.notes;
 
@@ -172,7 +245,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         );
       }
 
-      const validationError = validateDatesAndPrices(body);
+      const validationError = validateDates(body);
       if (validationError) {
         return new Response(
           JSON.stringify({ error: validationError }),
@@ -180,18 +253,63 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         );
       }
 
+      // Validate + sanitize images[] payload up front so a bad payload
+      // short-circuits before any write.
+      let normalizedImages: ImageInput[] | null = null;
+      if (body.images !== undefined) {
+        const imageResult = validateImages(body.images);
+        if ("error" in imageResult) {
+          return new Response(
+            JSON.stringify({ error: imageResult.error }),
+            { status: 400, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        normalizedImages = imageResult;
+      }
+
       // Build set object with path notation for each provided field
       const setObject: Record<string, unknown> = {};
+      const changedFields: string[] = [];
       for (const field of UPDATABLE_FIELDS) {
         if (body[field] !== undefined) {
-          const value = field === "name" && typeof body[field] === "string"
-            ? (body[field] as string).trim()
-            : body[field];
+          let value: unknown;
+          if (field === "name" && typeof body[field] === "string") {
+            value = (body[field] as string).trim();
+          } else if (field === "images") {
+            value = normalizedImages;
+          } else {
+            value = body[field];
+          }
           setObject[`procurementItems[_key=="${itemKey}"].${field}`] = value;
+          changedFields.push(field);
         }
       }
 
-      await client.patch(projectId).set(setObject).commit();
+      // Phase 37: modal-based edits (i.e. anything that touches UPDATABLE_FIELDS)
+      // write a "procurement-item-updated" activity log entry; status cycling
+      // continues to go through update-status.
+      const now = new Date().toISOString();
+      const itemName = typeof body.name === "string"
+        ? body.name
+        : typeof body.itemName === "string"
+          ? body.itemName
+          : "";
+      const activityEntry = {
+        _key: generatePortalToken(8),
+        _type: "activityEntry",
+        action: "procurement-item-updated",
+        description: buildItemUpdatedDescription(itemName, changedFields),
+        actor: session.entityId,
+        timestamp: now,
+      };
+
+      let patch = client.patch(projectId).set(setObject);
+      if (changedFields.length > 0) {
+        patch = patch
+          .setIfMissing({ activityLog: [] })
+          .append("activityLog", [activityEntry]);
+      }
+      await patch.commit();
 
       return new Response(
         JSON.stringify({ success: true }),

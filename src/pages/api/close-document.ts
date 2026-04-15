@@ -27,7 +27,6 @@ export const GET: APIRoute = async (context) => {
       engagementType,
       clients[] { client-> { name } },
       milestones[] | order(date asc) { name, date, completed },
-      "totalSavings": math::sum(procurementItems[].retailPrice) - math::sum(procurementItems[].clientCost),
       artifacts[] {
         artifactType,
         customTypeName,
@@ -58,7 +57,6 @@ export const GET: APIRoute = async (context) => {
     projectTitle: project.title,
     clientNames,
     milestones: project.milestones || [],
-    totalSavings: project.totalSavings || 0,
     approvedArtifacts,
   });
 

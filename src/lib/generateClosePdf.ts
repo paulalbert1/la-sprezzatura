@@ -1,11 +1,9 @@
 import PDFDocument from "pdfkit";
-import { formatCurrency } from "./formatCurrency";
 
 interface CloseDocData {
   projectTitle: string;
   clientNames: string[];
   milestones: Array<{ name: string; date: string; completed: boolean }>;
-  totalSavings: number; // cents
   approvedArtifacts: string[];
   personalNote?: string;
 }
@@ -61,16 +59,6 @@ export async function generateClosePdf(data: CloseDocData): Promise<Buffer> {
         doc.fontSize(10).font("Helvetica").fillColor("#2C2926")
           .text(`${checkmark} ${m.name} -- ${dateStr}`);
       });
-      doc.moveDown(1);
-    }
-
-    // Savings section
-    if (data.totalSavings > 0) {
-      doc.fontSize(14).font("Helvetica-Bold").fillColor("#2C2926")
-        .text("Procurement Savings");
-      doc.moveDown(0.5);
-      doc.fontSize(12).font("Helvetica").fillColor("#059669")
-        .text(`Total savings vs. retail: ${formatCurrency(data.totalSavings)}`);
       doc.moveDown(1);
     }
 

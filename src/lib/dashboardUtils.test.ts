@@ -6,7 +6,6 @@ import {
   getDaysInStage,
   getOverdueBannerData,
   isProcurementOverdue,
-  getNetPrice,
 } from "./dashboardUtils";
 
 describe("isTaskOverdue", () => {
@@ -181,28 +180,4 @@ describe("isProcurementOverdue", () => {
   });
 });
 
-describe("getNetPrice", () => {
-  it("returns retailPrice - clientCost when both are defined (values in cents)", () => {
-    expect(getNetPrice(150000, 200000)).toBe(50000); // $1500 - $2000 = $500 net
-  });
-
-  it("returns null when clientCost is null", () => {
-    expect(getNetPrice(null, 200000)).toBeNull();
-  });
-
-  it("returns null when retailPrice is null", () => {
-    expect(getNetPrice(150000, null)).toBeNull();
-  });
-
-  it("returns null when retailPrice is undefined", () => {
-    expect(getNetPrice(150000, undefined)).toBeNull();
-  });
-
-  it("returns 0 when retailPrice - clientCost is negative (clamp to zero)", () => {
-    expect(getNetPrice(200000, 150000)).toBe(0); // clientCost > retailPrice
-  });
-
-  it("returns 0 when both values are equal", () => {
-    expect(getNetPrice(100000, 100000)).toBe(0);
-  });
-});
+// Phase 37: getNetPrice removed (D-13) -- no price data remains in the app.

@@ -5,13 +5,12 @@
 //   - Personalized greeting with client first name + date
 //   - Procurement table drops the pricing column; 3 cols: Item, Status, ETA
 //   - New "Client Action Items" section (sits between milestones and procurement)
-//   - Removes the "You saved $X vs. retail" line (per product direction)
+//   - Phase 37: removed all procurement pricing data from the template type
+//     (D-13/D-14); no retail/savings/cost fields projected into the email.
 //   - Adds a plain-text "Reply with feedback" CTA below the portal CTA
 //   - Closing signature + footer unsubscribe line
 //
 // Called from BOTH /api/send-update (real send) and /api/send-update/preview.
-
-import { formatCurrency } from "../formatCurrency";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,9 +36,6 @@ export interface SendUpdateProcurementItem {
   status?: string;
   installDate?: string;
   expectedDeliveryDate?: string;
-  retailPrice?: number;
-  clientCost?: number;
-  savings?: number;
 }
 
 export interface SendUpdateArtifact {
@@ -371,5 +367,3 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
 </html>`;
 }
 
-// Re-export for legacy callers that imported formatCurrency indirectly.
-export { formatCurrency };

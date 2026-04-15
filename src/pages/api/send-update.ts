@@ -80,8 +80,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         },
         ...select(engagementType == "full-interior-design" => {
           "procurementItems": procurementItems[] {
-            _key, name, status, installDate, expectedDeliveryDate, retailPrice,
-            "savings": retailPrice - clientCost
+            _key, name, status, installDate, expectedDeliveryDate
           }
         }),
         artifacts[] {

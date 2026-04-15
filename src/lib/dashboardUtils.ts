@@ -45,16 +45,6 @@ export function isProcurementOverdue(item: {
   return item.expectedDeliveryDate < today;
 }
 
-/** Compute net price (retailPrice - clientCost) in cents. Returns null if either input is null/undefined. Clamps negative to zero. */
-export function getNetPrice(
-  clientCost: number | null | undefined,
-  retailPrice: number | null | undefined,
-): number | null {
-  if (clientCost == null || retailPrice == null) return null;
-  const net = retailPrice - clientCost;
-  return net < 0 ? 0 : net;
-}
-
 /** Aggregate overdue counts for the dashboard banner */
 export interface OverdueBannerData {
   total: number;

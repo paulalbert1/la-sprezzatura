@@ -229,7 +229,7 @@ export async function getClientById(clientId: string) {
 // -- Phase 6: Project Detail Query --
 
 // Full project detail for the portal project page.
-// IMPORTANT: clientCost is NEVER included in projections -- only used to compute savings.
+// Phase 37: procurement no longer projects pricing data (D-13, D-14, D-15).
 export const PROJECT_DETAIL_QUERY = `
   *[_type == "project" && _id == $projectId && portalEnabled == true && references($clientId)][0] {
     _id,
@@ -260,8 +260,6 @@ export const PROJECT_DETAIL_QUERY = `
         name,
         status,
         installDate,
-        retailPrice,
-        "savings": retailPrice - clientCost,
         trackingNumber
       },
       "contractors": contractors[] {
@@ -560,7 +558,7 @@ export async function getSiteContactInfo() {
 // -- Phase 9: Send Update Query --
 
 // GROQ: Full project snapshot for Send Update email
-// IMPORTANT: clientCost is NEVER included -- only used to compute savings server-side.
+// Phase 37: procurement no longer projects pricing data (D-13, D-14).
 export const SEND_UPDATE_PROJECT_QUERY = `
   *[_type == "project" && _id == $projectId][0] {
     _id,
@@ -572,8 +570,7 @@ export const SEND_UPDATE_PROJECT_QUERY = `
     },
     ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {
-        name, status, installDate, retailPrice,
-        "savings": retailPrice - clientCost
+        name, status, installDate
       }
     }),
     artifacts[] {
@@ -955,11 +952,11 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {
         _key, name, status, orderDate, expectedDeliveryDate, installDate,
-        clientCost, retailPrice, trackingNumber, vendor, notes,
+        trackingNumber, vendor, notes,
         carrierETA, carrierName, trackingUrl, lastSyncAt, syncSource,
         retrievedStatus,
         itemUrl,
-        "itemImage": itemImage{ "assetRef": asset._ref, "url": asset->url }
+        images[]{ "assetRef": asset._ref, "url": asset->url, isPrimary, caption, _key }
       }
     })
   }

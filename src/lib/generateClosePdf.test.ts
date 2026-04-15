@@ -10,7 +10,6 @@ describe("generateClosePdf", () => {
         { name: "Discovery Complete", date: "2026-01-15", completed: true },
         { name: "Design Approved", date: "2026-02-01", completed: true },
       ],
-      totalSavings: 450000, // $4,500.00
       approvedArtifacts: ["Floor Plan", "Design Board"],
     });
     expect(result).toBeInstanceOf(Buffer);
@@ -22,7 +21,6 @@ describe("generateClosePdf", () => {
       projectTitle: "Test",
       clientNames: ["Test Client"],
       milestones: [],
-      totalSavings: 0,
       approvedArtifacts: [],
     });
     expect(result.toString("ascii", 0, 5)).toBe("%PDF-");
@@ -33,7 +31,6 @@ describe("generateClosePdf", () => {
       projectTitle: "Test",
       clientNames: ["Test Client"],
       milestones: [],
-      totalSavings: 0,
       approvedArtifacts: [],
       personalNote: "Thank you for trusting us with your home!",
     });

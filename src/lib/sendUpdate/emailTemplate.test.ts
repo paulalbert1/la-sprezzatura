@@ -28,9 +28,6 @@ function fixtureProject(): SendUpdateProject {
         name: "Sofa",
         status: "ordered",
         installDate: "2026-05-01",
-        retailPrice: 400000,
-        clientCost: 350000,
-        savings: 50000,
       },
     ],
     artifacts: [
@@ -106,9 +103,9 @@ describe("buildSendUpdateEmail (Phase 34 Plan 04)", () => {
     expect(html).toContain("Procurement");
     expect(html).toContain("Sofa");
     expect(html).toContain("Ordered"); // formatStatusText
-    // Savings line renders when totalSavings > 0
-    expect(html).toContain("You saved");
-    expect(html).toContain("vs. retail");
+    // Phase 37: no savings/retail copy in the email template
+    expect(html).not.toContain("You saved");
+    expect(html).not.toContain("vs. retail");
   });
 
   it("omits Procurement section when engagementType !== 'full-interior-design' regardless of showProcurement", () => {

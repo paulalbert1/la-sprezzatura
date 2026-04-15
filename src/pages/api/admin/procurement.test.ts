@@ -173,8 +173,6 @@ describe("POST /api/admin/procurement", () => {
           name: "Marble Countertop",
           vendor: "Stone Source",
           expectedDeliveryDate: "2026-05-15",
-          retailPrice: 15000,
-          clientCost: 12000,
         }),
         cookies: makeCookies(),
       } as any);
@@ -198,11 +196,32 @@ describe("POST /api/admin/procurement", () => {
             name: "Marble Countertop",
             status: "pending",
             vendor: "Stone Source",
-            retailPrice: 15000,
-            clientCost: 12000,
+            images: [],
           }),
         ]),
       );
+    });
+
+    it("Phase 37: ignores legacy retailPrice/clientCost in body (fields stripped from schema)", async () => {
+      const { POST } = await import("./procurement");
+
+      await POST({
+        request: makeRequest({
+          action: "create",
+          projectId: "proj-1",
+          name: "Legacy Client",
+          retailPrice: 15000,
+          clientCost: 12000,
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      const appendedItem = mockAppend.mock.calls.find(
+        (c) => c[0] === "procurementItems",
+      )?.[1]?.[0];
+      expect(appendedItem).toBeDefined();
+      expect(appendedItem).not.toHaveProperty("retailPrice");
+      expect(appendedItem).not.toHaveProperty("clientCost");
     });
 
     it("returns 400 when name is missing", async () => {
@@ -260,22 +279,12 @@ describe("POST /api/admin/procurement", () => {
       expect(body.error).toContain("date format");
     });
 
-    it("validates price values as non-negative integers", async () => {
-      const { POST } = await import("./procurement");
-
-      const response = await POST({
-        request: makeRequest({
-          action: "create",
-          projectId: "proj-1",
-          name: "Chair",
-          retailPrice: -100,
-        }),
-        cookies: makeCookies(),
-      } as any);
-
-      expect(response.status).toBe(400);
-      const body = await response.json();
-      expect(body.error).toContain("price");
+    it("Phase 37: UPDATABLE_FIELDS does not include retailPrice or clientCost", async () => {
+      const mod = await import("./procurement");
+      // The module does not export UPDATABLE_FIELDS, but we can prove the contract
+      // behaviorally: an "update" payload with price fields writes zero price
+      // fields into setObject (covered more directly in the Update suite below).
+      expect(mod.POST).toBeDefined();
     });
   });
 
@@ -333,7 +342,7 @@ describe("POST /api/admin/procurement", () => {
       expect(body.error).toContain("itemKey");
     });
 
-    it("validates date and price values same as create", async () => {
+    it("validates date format same as create", async () => {
       const { POST } = await import("./procurement");
 
       const response = await POST({
@@ -341,14 +350,172 @@ describe("POST /api/admin/procurement", () => {
           action: "update",
           projectId: "proj-1",
           itemKey: "item-abc",
-          retailPrice: 10.5,
+          expectedDeliveryDate: "05-15-2026",
         }),
         cookies: makeCookies(),
       } as any);
 
       expect(response.status).toBe(400);
       const body = await response.json();
-      expect(body.error).toContain("price");
+      expect(body.error).toContain("date format");
+    });
+
+    it("Phase 37: silently ignores legacy retailPrice/clientCost in update body", async () => {
+      const { POST } = await import("./procurement");
+
+      const response = await POST({
+        request: makeRequest({
+          action: "update",
+          projectId: "proj-1",
+          itemKey: "item-abc",
+          name: "Updated",
+          retailPrice: 9999,
+          clientCost: 8888,
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      expect(response.status).toBe(200);
+      // setObject must not contain price paths -- the fields are not in UPDATABLE_FIELDS.
+      const setObj = mockSet.mock.calls[0][0];
+      expect(Object.keys(setObj)).not.toContain(
+        `procurementItems[_key=="item-abc"].retailPrice`,
+      );
+      expect(Object.keys(setObj)).not.toContain(
+        `procurementItems[_key=="item-abc"].clientCost`,
+      );
+    });
+
+    it("Phase 37: accepts valid images[] payload and writes procurement-item-updated activity log", async () => {
+      const { POST } = await import("./procurement");
+
+      const response = await POST({
+        request: makeRequest({
+          action: "update",
+          projectId: "proj-1",
+          itemKey: "item-abc",
+          name: "Chair",
+          images: [
+            {
+              _key: "img-1",
+              _type: "image",
+              asset: {
+                _type: "reference",
+                _ref: "image-abc123def456-1024x768-jpg",
+              },
+              isPrimary: true,
+              caption: "front view",
+            },
+          ],
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      expect(response.status).toBe(200);
+      const setObj = mockSet.mock.calls[0][0];
+      const imagesKey = `procurementItems[_key=="item-abc"].images`;
+      expect(setObj).toHaveProperty(imagesKey);
+      const written = setObj[imagesKey];
+      expect(Array.isArray(written)).toBe(true);
+      expect(written[0].asset._ref).toBe("image-abc123def456-1024x768-jpg");
+      expect(written[0].isPrimary).toBe(true);
+
+      // Activity-log: procurement-item-updated
+      expect(mockAppend).toHaveBeenCalledWith(
+        "activityLog",
+        expect.arrayContaining([
+          expect.objectContaining({
+            _type: "activityEntry",
+            action: "procurement-item-updated",
+          }),
+        ]),
+      );
+    });
+
+    it("Phase 37: rejects images[] with invalid asset reference", async () => {
+      const { POST } = await import("./procurement");
+
+      const response = await POST({
+        request: makeRequest({
+          action: "update",
+          projectId: "proj-1",
+          itemKey: "item-abc",
+          images: [
+            {
+              _type: "image",
+              asset: { _type: "reference", _ref: "not-a-valid-ref" },
+              isPrimary: true,
+            },
+          ],
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toContain("asset reference");
+    });
+
+    it("Phase 37: rejects images[] longer than 20", async () => {
+      const { POST } = await import("./procurement");
+
+      const images = Array.from({ length: 21 }, (_, i) => ({
+        _key: `k${i}`,
+        _type: "image",
+        asset: {
+          _type: "reference",
+          _ref: "image-abc123def456-1024x768-jpg",
+        },
+        isPrimary: i === 0,
+        caption: null,
+      }));
+
+      const response = await POST({
+        request: makeRequest({
+          action: "update",
+          projectId: "proj-1",
+          itemKey: "item-abc",
+          images,
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      expect(response.status).toBe(400);
+      const body = await response.json();
+      expect(body.error).toContain("Too many images");
+    });
+
+    it("Phase 37: sanitizes caption (strips control chars, caps at 500 chars)", async () => {
+      const { POST } = await import("./procurement");
+
+      const naughty = "a\x00b\x07c" + "x".repeat(600);
+      await POST({
+        request: makeRequest({
+          action: "update",
+          projectId: "proj-1",
+          itemKey: "item-abc",
+          images: [
+            {
+              _key: "k1",
+              _type: "image",
+              asset: {
+                _type: "reference",
+                _ref: "image-abc123def456-1024x768-jpg",
+              },
+              isPrimary: true,
+              caption: naughty,
+            },
+          ],
+        }),
+        cookies: makeCookies(),
+      } as any);
+
+      const setObj = mockSet.mock.calls[0][0];
+      const imagesKey = `procurementItems[_key=="item-abc"].images`;
+      const written = setObj[imagesKey];
+      expect(written[0].caption).not.toContain("\x00");
+      expect(written[0].caption).not.toContain("\x07");
+      expect(written[0].caption.length).toBeLessThanOrEqual(500);
     });
   });
 

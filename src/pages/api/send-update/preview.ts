@@ -41,8 +41,7 @@ const PROJECT_FOR_PREVIEW_QUERY = `*[_type == "project" && _id == $projectId][0]
   },
   ...select(engagementType == "full-interior-design" => {
     "procurementItems": procurementItems[] {
-      _key, name, status, installDate, expectedDeliveryDate, retailPrice,
-      "savings": retailPrice - clientCost
+      _key, name, status, installDate, expectedDeliveryDate
     }
   }),
   artifacts[] {
