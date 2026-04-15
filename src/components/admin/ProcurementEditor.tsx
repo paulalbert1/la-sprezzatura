@@ -341,31 +341,36 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
           images: payload.images || [],
         };
         setLocalItems((prev) => [...prev, newItem]);
+        setModalState((s) => ({ ...s, item: newItem }));
       } else {
+        let updatedItem: ProcurementItem | null = null;
         setLocalItems((prev) =>
-          prev.map((i) =>
-            i._key === payload._key
-              ? {
-                  ...i,
-                  name: payload.name || i.name,
-                  vendor: payload.vendor ?? i.vendor,
-                  manufacturer: payload.manufacturer ?? i.manufacturer,
-                  qty: payload.qty ?? i.qty,
-                  orderDate: payload.orderDate ?? i.orderDate,
-                  expectedDeliveryDate:
-                    payload.expectedDeliveryDate ?? i.expectedDeliveryDate,
-                  installDate: payload.installDate ?? i.installDate,
-                  trackingNumber: payload.trackingNumber ?? i.trackingNumber,
-                  carrierName: payload.carrierName ?? i.carrierName,
-                  notes: payload.notes ?? i.notes,
-                  status: payload.status ?? i.status,
-                  productUrl: payload.productUrl ?? i.productUrl,
-                  itemUrl: payload.itemUrl ?? i.itemUrl,
-                  images: payload.images ?? i.images,
-                }
-              : i,
-          ),
+          prev.map((i) => {
+            if (i._key !== payload._key) return i;
+            updatedItem = {
+              ...i,
+              name: payload.name || i.name,
+              vendor: payload.vendor ?? i.vendor,
+              manufacturer: payload.manufacturer ?? i.manufacturer,
+              qty: payload.qty ?? i.qty,
+              orderDate: payload.orderDate ?? i.orderDate,
+              expectedDeliveryDate:
+                payload.expectedDeliveryDate ?? i.expectedDeliveryDate,
+              installDate: payload.installDate ?? i.installDate,
+              trackingNumber: payload.trackingNumber ?? i.trackingNumber,
+              carrierName: payload.carrierName ?? i.carrierName,
+              notes: payload.notes ?? i.notes,
+              status: payload.status ?? i.status,
+              productUrl: payload.productUrl ?? i.productUrl,
+              itemUrl: payload.itemUrl ?? i.itemUrl,
+              images: payload.images ?? i.images,
+            };
+            return updatedItem;
+          }),
         );
+        if (updatedItem) {
+          setModalState((s) => ({ ...s, item: updatedItem }));
+        }
       }
     },
     [modalState.mode, projectId],
