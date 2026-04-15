@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
 status: executing
-stopped_at: Completed 37-01-PLAN.md (Wave 0 RED test harness)
-last_updated: "2026-04-15T01:29:23.449Z"
-last_activity: 2026-04-14 -- Phase 36 execution started
+stopped_at: Completed 37-02-PLAN.md (price strip + images schema + migration)
+last_updated: "2026-04-15T12:31:59.708Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 8
   completed_phases: 2
   total_plans: 12
-  completed_plans: 10
-  percent: 83
+  completed_plans: 11
+  percent: 92
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 ## Current Position
 
 Phase: 36 (projects-list-archive-lifecycle) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 36
-Last activity: 2026-04-14 -- Phase 36 execution started
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-04-15
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 
@@ -70,6 +70,7 @@ Carried from v5.0 boundary. Full history:
 - [Phase 36]: Cron endpoint ships at /api/cron/auto-archive (not /api/admin/auto-archive) to match existing tracking-sync.ts convention; dual-header auth accepts Authorization: Bearer OR x-cron-secret against CRON_SECRET env.
 - [Phase 36]: Plan 04 redesigns card lifecycle presentation: projectStatus + archivedAt drive a CardTreatment helper (left border + opacity + top status label); two-section (Active / Non-active) layout replaces the three-tier model; archive wins over projectStatus
 - [Phase 37]: Phase 37 Plan 01: Wave 0 RED test harness shipped -- 7 test files, 57 it() blocks, all 5 PROC requirements covered; plans 02/03 can cite these in <automated> verify commands
+- [Phase 37]: Phase 37 Plan 02: Schema strip shipped -- procurementItems lost clientCost/retailPrice/itemImage, gained images[] w/ isPrimary+caption; activityEntry.action enum gained procurement-item-updated (Plan 03 prerequisite); live Sanity migration run clean (3 projects patched, 14 price fields unset, 0 residual references)
 
 ### Pending Todos
 
@@ -85,7 +86,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-15T01:29:19.065Z
-Stopped at: Completed 37-01-PLAN.md (Wave 0 RED test harness)
+Last session: 2026-04-15T12:31:59.702Z
+Stopped at: Completed 37-02-PLAN.md (price strip + images schema + migration)
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

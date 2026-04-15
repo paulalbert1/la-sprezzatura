@@ -21,7 +21,7 @@ export interface AdminModalProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   disableDismiss?: boolean;
   children: ReactNode;
   footer?: ReactNode;
@@ -98,7 +98,12 @@ export default function AdminModal({
 
   if (!open) return null;
 
-  const sizeClass = size === "sm" ? "max-w-[440px]" : "max-w-[540px]";
+  const sizeClass =
+    size === "sm"
+      ? "max-w-[440px]"
+      : size === "lg"
+        ? "max-w-[720px]"
+        : "max-w-[540px]";
 
   const handleOverlayClick = () => {
     if (disableDismiss) return;
