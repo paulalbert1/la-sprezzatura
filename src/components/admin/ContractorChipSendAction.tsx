@@ -143,8 +143,8 @@ function ContractorChipSendActionInner({
         disabled={isResending}
         data-testid={`chip-action-${contractor._key}`}
         onClick={(e) => {
+          e.preventDefault();
           e.stopPropagation();
-          // Sent state → direct resend (POST /[id]/send). Unsent → open modal.
           if (isSent) {
             void handleResend();
           } else {

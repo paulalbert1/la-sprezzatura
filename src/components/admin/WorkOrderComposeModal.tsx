@@ -316,12 +316,14 @@ export default function WorkOrderComposeModal({
       aria-labelledby="work-order-compose-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-[#2C2520]/40"
       onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (e.target === e.currentTarget && !isSubmitting) onClose();
       }}
     >
       <div
         className="bg-[#FFFEFB] border border-[#E8DDD0] rounded-[10px] max-w-[720px] w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
       >
         <header className="mb-4">
           <h2
