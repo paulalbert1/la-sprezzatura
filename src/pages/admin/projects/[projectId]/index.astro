@@ -9,6 +9,8 @@ import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import DocumentsPanel from "../../../../components/admin/DocumentsPanel.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
+import ContractorChipSendAction from "../../../../components/admin/ContractorChipSendAction.tsx";
+import { getLatestWorkOrderByContractor } from "../../../../lib/workOrder/getLatestWorkOrderByContractor";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
 import ProjectArchiveMenu from "../../../../components/admin/ProjectArchiveMenu.tsx";
@@ -132,6 +134,34 @@ const sendUpdateProjectSummary = {
   procurement: { items: procurementTotal, delivered: procurementDelivered },
   pendingReviews: { count: pendingReviewsCount },
 };
+
+// Phase 39 Plan 03 — per-contractor latest workOrder fetch for chip send/resend.
+// Runs in parallel so the Contractors card render has { _id, lastSentAt } | null
+// for every assigned contractor before hydration. Tenant-scoped via
+// getLatestWorkOrderByContractor → getTenantClient(tenantId).
+const projectContractors = (project.projectContractors ?? []) as Array<{
+  _key: string;
+  trade?: string;
+  contractor?: { _id?: string; name?: string; email?: string; trades?: string[] };
+}>;
+const latestWorkOrders = await Promise.all(
+  projectContractors.map(async (pc) => {
+    if (!pc.contractor?._id) return null;
+    return await getLatestWorkOrderByContractor(
+      tenantId,
+      project._id,
+      pc.contractor._id,
+    );
+  }),
+);
+const latestByContractorKey: Record<
+  string,
+  { _id: string; lastSentAt: string | null }
+> = {};
+projectContractors.forEach((pc, idx) => {
+  const lwo = latestWorkOrders[idx];
+  if (lwo) latestByContractorKey[pc._key] = lwo;
+});
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
@@ -284,7 +314,7 @@ const breadcrumbs = [
               className="inline-flex cursor-pointer"
             >
               <span
-                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px]"
+                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px] group"
                 style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
               >
                 <span
@@ -295,6 +325,24 @@ const breadcrumbs = [
                 </span>
                 {pc.contractor.name}
                 {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
+                <ContractorChipSendAction
+                  client:load
+                  projectId={projectId}
+                  project={{
+                    _id: project._id,
+                    title: project.title,
+                    procurementItems: project.procurementItems,
+                    projectAddress: project.projectAddress,
+                  }}
+                  contractor={{
+                    _id: pc.contractor._id,
+                    _key: pc._key,
+                    name: pc.contractor.name,
+                    email: pc.contractor.email || "",
+                    trades: pc.contractor.trades,
+                  }}
+                  latestWorkOrder={latestByContractorKey[pc._key] ?? null}
+                />
               </span>
             </ContactCardWrapper>
           ))}
