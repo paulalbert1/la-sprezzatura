@@ -128,6 +128,36 @@ describe("ContractorChipSendAction — Sent link stopPropagation", () => {
   });
 });
 
+describe("ContractorChipSendAction — Plan 04 direct resend in sent state", () => {
+  it("clicking the RotateCcw icon in sent state POSTs /api/admin/work-orders/{id}/send (no modal open)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, sentAt: "2026-04-15T20:00:00Z" }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const { container } = renderChip({
+      latestWorkOrder: { _id: "WO-EXIST", lastSentAt: "2026-04-12T15:14:00Z" },
+    });
+    const btn = container.querySelector(
+      '[data-testid="chip-action-pc-key-1"]',
+    ) as HTMLButtonElement;
+    await act(async () => {
+      fireEvent.click(btn);
+      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "/api/admin/work-orders/WO-EXIST/send",
+    );
+    expect((fetchMock.mock.calls[0][1] as { method: string }).method).toBe("POST");
+    // No modal opened (special-instructions not in DOM)
+    expect(container.querySelector('[data-testid="special-instructions"]')).toBeNull();
+  });
+});
+
 describe("ContractorChipSendAction — optimistic flip after submit", () => {
   it("after modal onSent fires, chip shows 'Sent today' link with new workOrderId href", async () => {
     const fetchMock = vi.fn().mockResolvedValue({

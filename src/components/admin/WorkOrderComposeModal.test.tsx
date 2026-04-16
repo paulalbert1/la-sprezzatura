@@ -184,7 +184,10 @@ describe("WorkOrderComposeModal — WORK-04 (submit gate)", () => {
 });
 
 describe("WorkOrderComposeModal — submit flow", () => {
-  it("POSTs /api/admin/work-orders with correct body and fires onSent + onClose on success", async () => {
+  it("POSTs /api/admin/work-orders + chains POST /[id]/send and fires onSent + onClose on success", async () => {
+    // Phase 39 Plan 04 Task 4 — modal now chains a second POST to /[id]/send
+    // when sendAfter=true (default). This test asserts the create body shape
+    // on call[0] and the send URL on call[1].
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true, workOrderId: "WO-X" }),
@@ -219,19 +222,95 @@ describe("WorkOrderComposeModal — submit flow", () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe("/api/admin/work-orders");
-    expect(init.method).toBe("POST");
-    const body = JSON.parse(init.body);
+    // Two fetch calls: create then send.
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    // call[0] — create
+    const [createUrl, createInit] = fetchMock.mock.calls[0];
+    expect(createUrl).toBe("/api/admin/work-orders");
+    expect(createInit.method).toBe("POST");
+    const body = JSON.parse(createInit.body);
     expect(body.contractorId).toBe("c-1");
     expect(body.projectId).toBe("proj-1");
     expect(body.selectedItemKeys).toEqual(["it-1"]);
     expect(body.specialInstructions).toBe("Please confirm.");
     expect(Array.isArray(body.customFields)).toBe(true);
 
+    // call[1] — send
+    const [sendUrl, sendInit] = fetchMock.mock.calls[1];
+    expect(sendUrl).toBe("/api/admin/work-orders/WO-X/send");
+    expect(sendInit.method).toBe("POST");
+
     expect(onSent).toHaveBeenCalledWith({ workOrderId: "WO-X" });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("when sendAfter=false, only POSTs the create endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true, workOrderId: "WO-Y" }),
+    });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const onSent = vi.fn();
+    const { container } = renderModal({ onSent, sendAfter: false });
+
+    fireEvent.change(
+      container.querySelector<HTMLTextAreaElement>(
+        '[data-testid="special-instructions"]',
+      )!,
+      { target: { value: "Save only." } },
+    );
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector<HTMLButtonElement>(
+          '[data-testid="submit-work-order"]',
+        )!,
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/admin/work-orders");
+    expect(onSent).toHaveBeenCalledWith({ workOrderId: "WO-Y" });
+  });
+
+  it("surfaces inline error and skips onSent when the chained send fails", async () => {
+    // First call (create) succeeds; second call (send) returns ok:false.
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true, workOrderId: "WO-Z" }),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ error: "Email send failed" }),
+      });
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const onSent = vi.fn();
+    const { container } = renderModal({ onSent });
+    fireEvent.change(
+      container.querySelector<HTMLTextAreaElement>(
+        '[data-testid="special-instructions"]',
+      )!,
+      { target: { value: "X" } },
+    );
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector<HTMLButtonElement>(
+          '[data-testid="submit-work-order"]',
+        )!,
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(container.textContent).toContain("Email send failed");
+    expect(onSent).not.toHaveBeenCalled();
   });
 
   it("surfaces inline error on non-ok response and does not fire onSent", async () => {

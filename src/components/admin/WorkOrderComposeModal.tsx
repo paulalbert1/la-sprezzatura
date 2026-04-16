@@ -93,6 +93,13 @@ export interface WorkOrderComposeModalProps {
     trades?: string[];
   };
   defaultFromDisplayName?: string;
+  /**
+   * Phase 39 Plan 04 Task 4 — when true (default), the modal chains a second
+   * POST to /api/admin/work-orders/[id]/send after the create succeeds. Set
+   * to false when the caller wants to persist the work order without firing
+   * the email (saved-for-later flow).
+   */
+  sendAfter?: boolean;
   onClose: () => void;
   onSent?: (result: { workOrderId: string }) => void;
 }
@@ -114,6 +121,7 @@ export default function WorkOrderComposeModal({
   project,
   contractor,
   defaultFromDisplayName,
+  sendAfter = true,
   onClose,
   onSent,
 }: WorkOrderComposeModalProps) {
@@ -264,12 +272,32 @@ export default function WorkOrderComposeModal({
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to create work order");
       }
+
+      // Phase 39 Plan 04 Task 4 — chain second POST to /[id]/send when
+      // sendAfter=true (default). Failure here surfaces inline; the work
+      // order is already persisted so we still notify onSent.
+      const workOrderId = data.workOrderId ?? "";
+      if (sendAfter && workOrderId) {
+        const sendRes = await fetch(
+          `/api/admin/work-orders/${workOrderId}/send`,
+          { method: "POST" },
+        );
+        if (!sendRes.ok) {
+          const sendErr = (await sendRes.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          throw new Error(sendErr.error || "Created but send failed");
+        }
+      }
+
       show({
         variant: "success",
-        title: `Work order created for ${contractor.name}`,
+        title: sendAfter
+          ? `Work order sent to ${contractor.name}`
+          : `Work order saved for ${contractor.name}`,
         duration: 3000,
       });
-      onSent?.({ workOrderId: data.workOrderId ?? "" });
+      onSent?.({ workOrderId });
       onClose();
     } catch (err) {
       setError((err as Error).message || "Failed to create work order");

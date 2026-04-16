@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send, RotateCcw, Check } from "lucide-react";
-import ToastContainer from "./ui/ToastContainer";
+import ToastContainer, { useToast } from "./ui/ToastContainer";
 import WorkOrderComposeModal from "./WorkOrderComposeModal";
 
 // Phase 39 Plan 03 Task 2 — ContractorChipSendAction
@@ -69,7 +69,9 @@ function ContractorChipSendActionInner({
   latestWorkOrder,
   defaultFromDisplayName,
 }: ContractorChipSendActionProps) {
+  const { show } = useToast();
   const [open, setOpen] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [optimisticLatest, setOptimisticLatest] = useState<{
     _id: string;
     lastSentAt: string;
@@ -81,6 +83,40 @@ function ContractorChipSendActionInner({
       ? { _id: latestWorkOrder._id, lastSentAt: latestWorkOrder.lastSentAt }
       : null);
   const isSent = effectiveLatest !== null;
+
+  // Phase 39 Plan 04 Task 4 — RotateCcw click in sent state fires direct
+  // resend (no modal). Send (unsent) click still opens the compose modal.
+  async function handleResend() {
+    if (!effectiveLatest || isResending) return;
+    setIsResending(true);
+    try {
+      const res = await fetch(
+        `/api/admin/work-orders/${effectiveLatest._id}/send`,
+        { method: "POST" },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error || "Resend failed");
+      }
+      setOptimisticLatest({
+        _id: effectiveLatest._id,
+        lastSentAt: new Date().toISOString(),
+      });
+      show({
+        variant: "success",
+        title: `Work order resent to ${contractor.name}`,
+        duration: 3000,
+      });
+    } catch (err) {
+      show({
+        variant: "error",
+        title: (err as Error).message || "Resend failed",
+        duration: 4000,
+      });
+    } finally {
+      setIsResending(false);
+    }
+  }
 
   return (
     <span className="inline-flex items-center gap-1.5 ml-1 group">
@@ -104,12 +140,18 @@ function ContractorChipSendActionInner({
         // aria-label literals "Send work order to ..." / "Resend work order to ..."
         aria-label={isSent ? `Resend work order to ${contractor.name}` : `Send work order to ${contractor.name}`}
         title={isSent ? "Resend work order" : "Send work order"}
+        disabled={isResending}
         data-testid={`chip-action-${contractor._key}`}
         onClick={(e) => {
           e.stopPropagation();
-          setOpen(true);
+          // Sent state → direct resend (POST /[id]/send). Unsent → open modal.
+          if (isSent) {
+            void handleResend();
+          } else {
+            setOpen(true);
+          }
         }}
-        className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 focus:opacity-100 transition-opacity duration-150 text-[#9A7B4B] hover:bg-[#F5EDD8] rounded-[6px] p-1"
+        className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 focus:opacity-100 transition-opacity duration-150 text-[#9A7B4B] hover:bg-[#F5EDD8] rounded-[6px] p-1 disabled:opacity-50"
       >
         {isSent ? (
           <RotateCcw size={13} strokeWidth={1.3} />

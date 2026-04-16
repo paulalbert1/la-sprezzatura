@@ -3,6 +3,7 @@ export const prerender = false;
 
 import PortalLayout from "../../components/portal/PortalLayout.astro";
 import { getContractorById, getProjectsByContractorId } from "../../sanity/queries";
+import { sanityClient } from "sanity:client";
 
 // contractorId injected by middleware (guaranteed by auth guard)
 const contractorId = Astro.locals.contractorId!;
@@ -13,6 +14,27 @@ const firstName = contractor?.name?.split(" ")[0] || "there";
 
 // Fetch all assigned projects for this contractor
 const projects = await getProjectsByContractorId(contractorId) || [];
+
+// Phase 39 Plan 04 Task 4 — "All work orders" list for this contractor.
+// Sorted by lastSentAt desc; only includes work orders that have actually
+// been sent (defined(lastSentAt)).
+type ContractorWorkOrder = {
+  _id: string;
+  projectId: string;
+  projectTitle: string;
+  lastSentAt: string;
+};
+const workOrders: ContractorWorkOrder[] =
+  (await sanityClient.fetch(
+    `*[_type == "workOrder" && contractor._ref == $contractorId && defined(lastSentAt)]
+      | order(lastSentAt desc) {
+        _id,
+        "projectId": project._ref,
+        "projectTitle": project->title,
+        lastSentAt
+      }`,
+    { contractorId },
+  )) ?? [];
 
 // Single-project contractors see their project card (no auto-redirect)
 ---
@@ -64,6 +86,38 @@ const projects = await getProjectsByContractorId(contractorId) || [];
           </p>
         </div>
       )}
+
+      {/* Phase 39 Plan 04 Task 4 — All work orders */}
+      <section class="mt-12">
+        <h2 class="text-[11.5px] font-semibold uppercase tracking-[0.14em] text-stone mb-4">
+          All work orders
+        </h2>
+        {workOrders.length === 0 ? (
+          <div class="text-center py-8">
+            <h3 class="text-[13px] font-semibold text-charcoal">No work orders yet</h3>
+            <p class="text-[11.5px] text-stone mt-2">
+              Your designer hasn't sent any work orders. Check back when one is issued.
+            </p>
+          </div>
+        ) : (
+          <div class="bg-cream-dark border border-stone-light/20 rounded-lg overflow-hidden">
+            {workOrders.map((wo) => (
+              <a
+                href={`/workorder/project/${wo.projectId}/orders/${wo._id}`}
+                class="flex items-center justify-between px-4 py-3 border-b border-stone-light/20 last:border-0 hover:bg-cream transition-colors"
+              >
+                <div>
+                  <div class="text-sm text-charcoal font-body">{wo.projectTitle}</div>
+                  <div class="text-[11.5px] text-stone font-body mt-0.5">
+                    Sent {new Date(wo.lastSentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </div>
+                </div>
+                <span class="text-stone">›</span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Sign out link */}
       <div class="mt-16 text-center">
