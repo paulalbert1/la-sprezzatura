@@ -143,20 +143,14 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
 
   return (
     <div id="client-action-items" style={cardStyle}>
-      {/* Header — title + right-aligned Add task CTA (DASH-20).
-          UI-SPEC mandates the label read "Add task" here even though the
-          component calls these "action items" internally. */}
-      <div
-        className="flex items-center justify-between mb-[14px] pb-[10px]"
-        style={{ borderBottom: "0.5px solid #E8DDD0" }}
-      >
+      <div className="flex items-center justify-between mb-[14px]">
         <h2 style={titleStyle}>Client Action Items</h2>
         <button
           type="button"
           onClick={handleAddTaskClick}
-          className="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
+          className="inline-flex items-center gap-1 text-[11.5px] font-body text-terracotta hover:text-[#9A7B4B] transition-colors focus:outline-none"
         >
-          <Plus size={14} />
+          <Plus size={11} />
           Add task
         </button>
       </div>

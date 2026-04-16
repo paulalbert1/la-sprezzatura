@@ -47,10 +47,7 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
 
   return (
     <div style={cardStyle}>
-      <div
-        className="flex items-center justify-between mb-[14px] pb-[10px]"
-        style={{ borderBottom: "0.5px solid #E8DDD0" }}
-      >
+      <div className="flex items-center justify-between mb-[14px]">
         <h2 style={titleStyle}>Milestones</h2>
         <a
           href={scheduleUrl}

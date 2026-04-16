@@ -177,17 +177,6 @@ const breadcrumbs = [
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
           <EditableTitle client:load title={project.title} projectId={projectId} />
-          {stageMeta && (
-            <span
-              class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
-              style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em; margin-top: -3px;"
-            >
-              {stageMeta.title}
-            </span>
-          )}
-          {stageChangedLabel && (
-            <span class="text-[11.5px] ml-1" style="color: #9E8E80; margin-top: -3px;">{stageChangedLabel}</span>
-          )}
           <ProjectArchiveMenu
             client:load
             projectId={projectId}
@@ -195,6 +184,21 @@ const breadcrumbs = [
             archivedAt={project.archivedAt ?? null}
           />
         </div>
+        {(stageMeta || stageChangedLabel) && (
+          <div class="flex items-center gap-2 mt-2">
+            {stageMeta && (
+              <span
+                class="inline-flex px-[11px] py-[3px] rounded-full text-[10.5px] font-medium uppercase"
+                style="background-color: #F5EDD8; color: #9A7B4B; border: 0.5px solid #E8D5A8; letter-spacing: 0.06em;"
+              >
+                {stageMeta.title}
+              </span>
+            )}
+            {stageChangedLabel && (
+              <span class="text-[11.5px]" style="color: #9E8E80;">{stageChangedLabel}</span>
+            )}
+          </div>
+        )}
         {project.projectClients && project.projectClients[0] && (
           <div class="flex items-center gap-2 mt-1">
             <a
@@ -295,27 +299,26 @@ const breadcrumbs = [
         >
           Contractors
         </h2>
-        <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0 0 14px 0;" />
         <div class="flex flex-wrap gap-[7px] items-center">
           {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
-            <ContactCardWrapper
-              client:load
-              entityId={pc.contractor._id}
-              entityType="contractor"
-              name={pc.contractor.name}
-              href={`/admin/contractors/${pc.contractor._id}`}
-              contactData={{
-                _id: pc.contractor._id,
-                name: pc.contractor.name,
-                email: pc.contractor.email || "",
-                phone: pc.contractor.phone || "",
-                entityType: "contractor" as const,
-              }}
-              className="inline-flex cursor-pointer"
+            <span
+              class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px] group"
+              style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
             >
-              <span
-                class="inline-flex items-center gap-[7px] pl-[7px] pr-[11px] py-[5px] rounded-full text-[12.5px] group"
-                style="background-color: #FAF7F2; color: #2C2520; border: 0.5px solid #D4C8B8;"
+              <ContactCardWrapper
+                client:load
+                entityId={pc.contractor._id}
+                entityType="contractor"
+                name={pc.contractor.name}
+                href={`/admin/contractors/${pc.contractor._id}`}
+                contactData={{
+                  _id: pc.contractor._id,
+                  name: pc.contractor.name,
+                  email: pc.contractor.email || "",
+                  phone: pc.contractor.phone || "",
+                  entityType: "contractor" as const,
+                }}
+                className="inline-flex items-center gap-[7px] cursor-pointer"
               >
                 <span
                   class="w-5 h-5 rounded-full flex items-center justify-center text-[8.5px] font-medium"
@@ -323,28 +326,28 @@ const breadcrumbs = [
                 >
                   {pc.contractor.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
                 </span>
-                {pc.contractor.name}
+                <span>{pc.contractor.name}</span>
                 {pc.trade && <span style="color: #9E8E80; font-size: 11px;">({pc.trade})</span>}
-                <ContractorChipSendAction
-                  client:load
-                  projectId={projectId}
-                  project={{
-                    _id: project._id,
-                    title: project.title,
-                    procurementItems: project.procurementItems,
-                    projectAddress: project.projectAddress,
-                  }}
-                  contractor={{
-                    _id: pc.contractor._id,
-                    _key: pc._key,
-                    name: pc.contractor.name,
-                    email: pc.contractor.email || "",
-                    trades: pc.contractor.trades,
-                  }}
-                  latestWorkOrder={latestByContractorKey[pc._key] ?? null}
-                />
-              </span>
-            </ContactCardWrapper>
+              </ContactCardWrapper>
+              <ContractorChipSendAction
+                client:load
+                projectId={projectId}
+                project={{
+                  _id: project._id,
+                  title: project.title,
+                  procurementItems: project.procurementItems,
+                  projectAddress: project.projectAddress,
+                }}
+                contractor={{
+                  _id: pc.contractor._id,
+                  _key: pc._key,
+                  name: pc.contractor.name,
+                  email: pc.contractor.email || "",
+                  trades: pc.contractor.trades,
+                }}
+                latestWorkOrder={latestByContractorKey[pc._key] ?? null}
+              />
+            </span>
           ))}
 
           <button

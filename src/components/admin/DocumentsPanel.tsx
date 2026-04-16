@@ -152,7 +152,6 @@ function DocumentsPanelInner({
             Upload
           </button>
         </header>
-        <hr className="border-t-[0.5px] border-[#E8DDD0] mb-4" />
 
         <div className="flex gap-1 my-4">
           {TABS.map((tab) => {
