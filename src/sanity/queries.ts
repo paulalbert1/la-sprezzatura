@@ -960,7 +960,18 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
         itemUrl,
         images[]{ "assetRef": asset._ref, "url": asset->url, isPrimary, caption, _key }
       }
-    })
+    }),
+    "projectDocuments": projectDocuments[]{
+      _key,
+      label,
+      category,
+      uploadedAt,
+      uploadedByName,
+      "url": file.asset->url,
+      "size": file.asset->size,
+      "originalFilename": file.asset->originalFilename,
+      "mimeType": file.asset->mimeType
+    }
   }
 `;
 

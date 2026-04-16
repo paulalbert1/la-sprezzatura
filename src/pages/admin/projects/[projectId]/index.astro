@@ -7,6 +7,7 @@ import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
 import ClientActionItemsList from "../../../../components/admin/ClientActionItemsList.tsx";
 import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
+import DocumentsPanel from "../../../../components/admin/DocumentsPanel.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
@@ -99,6 +100,22 @@ const senderSettings = {
   defaultFromEmail: settingsRow?.defaultFromEmail ?? "",
   defaultCcEmail: settingsRow?.defaultCcEmail ?? "",
 };
+
+// Phase 39 Plan 02 — DocumentsPanel island data.
+// projectDocuments[] is projected in ADMIN_PROJECT_DETAIL_QUERY with resolved
+// asset url/size/originalFilename/mimeType. Coerce to array for the island
+// so consumers can rely on map() without null checks.
+const initialDocuments = (project.projectDocuments ?? []) as Array<{
+  _key: string;
+  label: string;
+  category: "Contracts" | "Drawings" | "Selections" | "Presentations";
+  uploadedAt: string;
+  uploadedByName: string;
+  url: string;
+  size: number;
+  originalFilename: string;
+  mimeType: string;
+}>;
 
 const sendUpdateProjectSummary = {
   _id: project._id,
@@ -318,5 +335,14 @@ const breadcrumbs = [
         />
       </div>
     )}
+
+    {/* Documents section - full width (Phase 39 Plan 02) */}
+    <section id="documents">
+      <DocumentsPanel
+        client:load
+        projectId={projectId}
+        initialDocuments={initialDocuments}
+      />
+    </section>
   </div>
 </AdminLayout>

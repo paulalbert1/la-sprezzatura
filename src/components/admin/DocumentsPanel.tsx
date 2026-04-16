@@ -134,8 +134,7 @@ function DocumentsPanelInner({
 
   const hasDocsAtAll = documents.length > 0;
   const showEmptyAll = !hasDocsAtAll;
-  const showEmptyFiltered =
-    hasDocsAtAll && filtered.length === 0 && activeCategory !== "all";
+  const showEmptyFiltered = hasDocsAtAll && filtered.length === 0;
 
   return (
     <>
