@@ -119,7 +119,7 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
     const magicToken = generatePortalToken(32);
     const portalPath = `/workorder/project/${wo.project._id}/orders/${wo._id}`;
     const verifyUrl = `${baseUrl}/workorder/verify?token=${magicToken}&redirect=${encodeURIComponent(portalPath)}`;
-    await redis.set(`magic:${magicToken}`, JSON.stringify({ entityId: wo.contractor._id, role: "contractor" }), { ex: 604800 });
+    await redis.set(`magic:${magicToken}`, JSON.stringify({ entityId: wo.contractor._id, role: "contractor", reusable: true }), { ex: 604800 });
 
     // Resend send (skip if no API key — sandbox-friendly per Pitfall 4).
     const apiKey = import.meta.env.RESEND_API_KEY;

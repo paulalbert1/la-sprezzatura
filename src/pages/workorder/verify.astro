@@ -10,10 +10,16 @@ if (!token) {
   return Astro.redirect("/workorder/login?error=expired");
 }
 
-// Demo tokens (prefixed "demo-") are reusable; real tokens are single-use
+// Peek first to check reusable flag; only consume if single-use.
 const isDemo = token.startsWith("demo-");
-const rawValue = isDemo
-  ? await redis.get(`magic:${token}`) as string | null
+const peeked = await redis.get(`magic:${token}`) as string | object | null;
+let parsedPeek: any = null;
+if (peeked) {
+  parsedPeek = typeof peeked === "object" ? peeked : (() => { try { return JSON.parse(peeked); } catch { return null; } })();
+}
+const isReusable = isDemo || parsedPeek?.reusable === true;
+const rawValue = isReusable
+  ? peeked
   : await redis.getdel(`magic:${token}`) as string | null;
 
 if (!rawValue) {
