@@ -1,0 +1,47 @@
+---
+export const prerender = false;
+
+import PortalLayout from "../../../../../components/portal/PortalLayout.astro";
+import WorkOrderView from "../../../../../components/shared/WorkOrderView.tsx";
+import { sanityClient } from "sanity:client";
+
+// Phase 39 Plan 04 Task 3 — Contractor portal work-order rendered page.
+// Source of truth:
+//   .planning/phases/39-work-order-documents-panels/39-04-PLAN.md § Task 3
+//   .planning/phases/39-work-order-documents-panels/39-RESEARCH.md § Pitfall 5 + Pattern 5
+//
+// CRITICAL: middleware only verifies role=contractor. This page MUST verify
+// resource ownership (workOrder.contractor._ref === Astro.locals.contractorId)
+// before rendering — otherwise any authenticated contractor could view any
+// other contractor's work order by guessing the workOrderId (T-39-04-04).
+
+const contractorId = Astro.locals.contractorId!;
+const { projectId, workOrderId } = Astro.params;
+if (!projectId || !workOrderId) {
+  return Astro.redirect("/workorder/dashboard");
+}
+
+const wo = await sanityClient.fetch(
+  `*[_type == "workOrder" && _id == $id][0]{
+    _id, "projectId": project._ref, "contractorId": contractor._ref,
+    selectedItemKeys, specialInstructions, customFields, lastSentAt,
+    "project": project->{_id, title, projectAddress, "procurementItems": procurementItems[]{_key, itemName, roomOrLocation, quantity, unit}},
+    "contractor": contractor->{_id, name, email}
+  }`,
+  { id: workOrderId },
+);
+
+if (!wo) {
+  return Astro.rewrite("/404");
+}
+// Pitfall 5 / Pattern 5: page-level IDOR check on top of middleware role gate.
+if (wo.contractorId !== contractorId) {
+  return new Response("Forbidden", { status: 403 });
+}
+---
+
+<PortalLayout title={`Work Order | ${wo.project.title}`}>
+  <main class="flex-1">
+    <WorkOrderView client:load workOrder={wo} mode="portal" />
+  </main>
+</PortalLayout>

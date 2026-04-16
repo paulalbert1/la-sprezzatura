@@ -1,0 +1,50 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../../layouts/AdminLayout.astro";
+import WorkOrderView from "../../../../../components/shared/WorkOrderView.tsx";
+import { getTenantClient } from "../../../../../lib/tenantClient";
+
+// Phase 39 Plan 04 Task 3 — Admin work-order rendered page.
+// Source of truth:
+//   .planning/phases/39-work-order-documents-panels/39-04-PLAN.md § Task 3
+//
+// Admin permalink for any persisted workOrder under this project. Auth gate
+// uses Astro.locals.tenantId (populated by middleware for /admin/* routes).
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) {
+  return Astro.redirect("/admin/login");
+}
+
+const { projectId, workOrderId } = Astro.params;
+if (!projectId || !workOrderId) {
+  return Astro.redirect("/admin/projects");
+}
+
+const client = getTenantClient(tenantId);
+const wo = await client.fetch(
+  `*[_type == "workOrder" && _id == $id][0]{
+    _id, selectedItemKeys, specialInstructions, customFields, lastSentAt,
+    "project": project->{_id, title, projectAddress, "procurementItems": procurementItems[]{_key, itemName, roomOrLocation, quantity, unit}},
+    "contractor": contractor->{_id, name, email}
+  }`,
+  { id: workOrderId },
+);
+
+if (!wo) {
+  return Astro.redirect(`/admin/projects/${projectId}`);
+}
+---
+
+<AdminLayout title={`Work order | ${wo.project.title}`}>
+  <div class="max-w-3xl mx-auto px-6 pt-6">
+    <a
+      href={`/admin/projects/${projectId}`}
+      class="inline-flex items-center gap-1 text-[11.5px] text-[#9E8E80] hover:text-[#9A7B4B] uppercase tracking-[0.14em]"
+    >
+      ‹ Back to {wo.project.title}
+    </a>
+  </div>
+  <WorkOrderView client:load workOrder={wo} mode="admin" />
+</AdminLayout>
