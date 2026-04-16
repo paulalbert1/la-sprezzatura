@@ -1119,6 +1119,60 @@ export const project = defineType({
         }),
       ],
     }),
+    // Phase 39 Plan 01: Project Documents panel -- general-purpose uploads
+    // (Contracts, Drawings, Selections, Presentations). Intentionally separate
+    // from `artifacts[]` (which carries proposal/contract workflow state).
+    defineField({
+      name: "projectDocuments",
+      title: "Project Documents",
+      type: "array",
+      group: "artifacts",
+      of: [
+        defineArrayMember({
+          type: "object",
+          name: "projectDocument",
+          fields: [
+            defineField({
+              name: "file",
+              title: "File",
+              type: "file",
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "label",
+              title: "Label",
+              type: "string",
+            }),
+            defineField({
+              name: "category",
+              title: "Category",
+              type: "string",
+              options: {
+                list: ["Contracts", "Drawings", "Selections", "Presentations"],
+              },
+              validation: (r) => r.required(),
+            }),
+            defineField({
+              name: "uploadedAt",
+              title: "Uploaded At",
+              type: "datetime",
+            }),
+            defineField({
+              name: "uploadedByName",
+              title: "Uploaded By",
+              type: "string",
+            }),
+          ],
+          preview: {
+            select: { title: "label", subtitle: "category" },
+            prepare: ({ title, subtitle }) => ({
+              title: title || "Untitled document",
+              subtitle: subtitle || "",
+            }),
+          },
+        }),
+      ],
+    }),
     // Phase 9: Update Log
     defineField({
       name: "updateLog",
