@@ -37,7 +37,15 @@ if (!wo) {
 }
 ---
 
-<AdminLayout title={`Work order | ${wo.project.title}`}>
+<AdminLayout
+  title={`Work order | ${wo.project.title}`}
+  pageTitle={`Work Order — ${wo.project.title}`}
+  breadcrumbs={[
+    { label: "Projects", href: "/admin/projects" },
+    { label: wo.project.title, href: `/admin/projects/${projectId}` },
+    { label: "Work order" },
+  ]}
+>
   <div class="max-w-3xl mx-auto px-6 pt-6">
     <a
       href={`/admin/projects/${projectId}`}
