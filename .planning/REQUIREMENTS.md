@@ -39,11 +39,11 @@
 
 ### Work Order Panel (WORK)
 
-- [ ] **WORK-01**: Project detail page has a "Work Order" panel alongside existing panels
+- [x] **WORK-01**: Project detail page has a "Work Order" panel alongside existing panels
 - [x] **WORK-02**: "Create work order" action lets the user select N procurement items from the project to include on the work order
 - [x] **WORK-03**: Work order supports adding custom fields beyond the linked procurement items
 - [x] **WORK-04**: Work order supports a free-text "special instructions" section
-- [ ] **WORK-05**: Work order can be sent as an email from office@lasprezz.com with liz@lasprezz.com on cc
+- [x] **WORK-05**: Work order can be sent as an email from office@lasprezz.com with liz@lasprezz.com on cc
 
 ### Documents Panel (DOCS)
 
@@ -123,11 +123,11 @@
 | SETT-10 | Phase 38 | Complete |
 | SETT-11 | Phase 38 | Complete |
 | SETT-12 | Phase 38 | Complete |
-| WORK-01 | Phase 39 | Pending |
+| WORK-01 | Phase 39 | Complete |
 | WORK-02 | Phase 39 | Complete |
 | WORK-03 | Phase 39 | Complete |
 | WORK-04 | Phase 39 | Complete |
-| WORK-05 | Phase 39 | Pending |
+| WORK-05 | Phase 39 | Complete |
 | DOCS-01 | Phase 39 | Complete |
 | DOCS-02 | Phase 39 | Complete |
 | DOCS-03 | Phase 39 | Complete |

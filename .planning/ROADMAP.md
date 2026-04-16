@@ -106,7 +106,7 @@ v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase
 - [x] **Phase 36: Projects List & Archive Lifecycle** — 5 reqs (PROJ-01..05) (completed 2026-04-14)
 - [x] **Phase 37: Procurement Privacy & Modal Editor** — 5 reqs (PROC-10..14) (completed 2026-04-15)
 - [x] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12) (completed 2026-04-15)
-- [ ] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03)
+- [x] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03) (completed 2026-04-15)
 - [ ] **Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support** — 5 reqs (VEND-01..05)
 - [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
 
@@ -197,8 +197,8 @@ Plans:
 Plans:
 - [x] 39-01-PLAN.md — Wave 1: workOrder schema + projectDocuments[] + API scaffolding (WORK-02, WORK-03, WORK-04, DOCS-02, DOCS-03)
 - [x] 39-02-PLAN.md — Wave 2: DocumentsPanel + UploadDocumentModal + project-detail mount (DOCS-01, DOCS-02, DOCS-03)
-- [ ] 39-03-PLAN.md — Wave 2: WorkOrderComposeModal + ContractorChipSendAction + chip integration (WORK-01, WORK-02, WORK-03, WORK-04)
-- [ ] 39-04-PLAN.md — Wave 3: Email template + send endpoint + WorkOrderView + admin+portal pages + dashboard list + chip/modal send wiring (WORK-01, WORK-05)
+- [x] 39-03-PLAN.md — Wave 2: WorkOrderComposeModal + ContractorChipSendAction + chip integration (WORK-01, WORK-02, WORK-03, WORK-04)
+- [x] 39-04-PLAN.md — Wave 3: Email template + send endpoint + WorkOrderView + admin+portal pages + dashboard list + chip/modal send wiring (WORK-01, WORK-05)
 
 ### Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support
 **Goal**: "Contractor" becomes "Contractor / Vendor" across the admin UI; trades are first-class records Liz can manage (create/rename/delete); contractor records gain physical address fields and a 1099 document slot with a visible badge
@@ -242,7 +242,7 @@ Plans:
 | 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
 | 37 | v5.1 | 3/3 | Complete   | 2026-04-15 |
 | 38 | v5.1 | 2/2 | Complete   | 2026-04-15 |
-| 39 | v5.1 | 2/4 | In Progress|  |
+| 39 | v5.1 | 3/4 | In Progress|  |
 | 40 | v5.1 | 0/3 | Not started | - |
 | 41 | v5.1 | 0/3 | Not started | - |
 

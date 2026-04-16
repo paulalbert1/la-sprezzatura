@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: Ready to execute
-stopped_at: Completed 39-02-PLAN.md (DocumentsPanel + UploadDocumentModal + project detail integration)
-last_updated: "2026-04-16T00:28:15.831Z"
-last_activity: 2026-04-16
+status: Phase 39 complete; ready for next phase
+stopped_at: Completed 39-04-PLAN.md (Work Order send + WorkOrderView + admin/portal pages + dashboard list); Phase 39 done
+last_updated: "2026-04-15T20:55:00.000Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-14)
 
 ## Current Position
 
-Phase: 39 (work-order-documents-panels) — EXECUTING
-Plan: 3 of 4
-Next: Phase 38 (send-update-sender-config) — READY TO DISCUSS
-Last activity: 2026-04-16
+Phase: 39 (work-order-documents-panels) — COMPLETE
+Plan: 4 of 4 (all complete)
+Next: Phase 35 (Dashboard Polish & Global UX Cleanup) — READY TO DISCUSS
+Last activity: 2026-04-15
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [████████████████████] 100%
 
 ## v5.1 Phase Map
 
@@ -81,6 +81,15 @@ Carried from v5.0 boundary. Full history:
 - [Phase 39]: Plan 02: DocumentsPanel mounted for every engagementType, not just full-interior-design — documents apply to all project types (contracts/drawings/selections/presentations)
 - [Phase 39]: Plan 02: DocumentsPanel wraps inner component in local ToastContainer because React context does not cross Astro island boundaries (Phase 36 pattern)
 - [Phase 39]: Plan 02: Inline-render modal preamble (void AdminModal) reused from ProcurementItemModal so jsdom tests can reach inputs via container.querySelectorAll
+- [Phase 39]: Plan 03: Inline-render WorkOrderComposeModal preamble (void AdminModal) reused from ProcurementItemModal so jsdom tests reach inputs via container.querySelectorAll
+- [Phase 39]: Plan 03: ContractorChipSendAction wraps inner component in local ToastContainer because React context does not cross Astro island boundaries (Phase 34 D-22 pattern)
+- [Phase 39]: Plan 03: Both chip states (unsent + sent) open the compose modal; Plan 04 will introduce direct resend wiring on RotateCcw
+- [Phase 39]: Plan 03: ADMIN_PROJECT_DETAIL_QUERY extended with projectAddress projection; delivery-address auto-fill uses project.projectAddress (Pitfall 7)
+- [Phase 39]: Plan 04: Email send pipeline copies Phase 38 Settings-first resolver verbatim (CRLF guard + EMAIL_REGEX + Resend dynamic import); sendLog + lastSentAt updated atomically in single commit
+- [Phase 39]: Plan 04: WorkOrderView is mode-shared (admin | portal); portal route enforces page-level IDOR check (wo.contractor._ref !== Astro.locals.contractorId → 403) — middleware role gate alone is insufficient (Pitfall 5)
+- [Phase 39]: Plan 04: ContractorChipSendAction RotateCcw click in sent state now fires direct POST /[id]/send (no modal); completes UI-SPEC Surface 1 § Resend click behavior deferred from Plan 03
+- [Phase 39]: Plan 04: WorkOrderComposeModal sendAfter prop defaults true; chains second POST to /[id]/send after successful create — saved-for-later flow available via sendAfter={false}
+- [Phase 39]: Plan 04: tenantAudit failures inherited and extended (3 new lasprezz.com literals in /work-orders/[id]/send.ts are plan-mandated defaults; resolution requires shared constants module + audit allowlist in a separate maintenance PR)
 
 ### Pending Todos
 
@@ -89,6 +98,8 @@ Carried from v5.0:
 - DNS record audit needed for all 4 domains before cutover (v3.0 Phase 12)
 - Pre-existing test failures (14 tests) need cleanup
 - Phase 34 APIs (site-settings, upload-sanity-image, send-update) should migrate to getTenantClient (v6.0)
+- Phase 39 work-orders/[id]/send.ts also uses sanityWriteClient (not tenant-scoped) — same v6.0 migration target as send-update.ts
+- tenantAudit allowlist extension needed for Phase-38 + Phase-39 plan-mandated lasprezz.com defaults (separate maintenance PR)
 
 ### Blockers/Concerns
 
@@ -96,7 +107,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-16T00:28:15.828Z
-Stopped at: Completed 39-02-PLAN.md (DocumentsPanel + UploadDocumentModal + project detail integration)
+Last session: 2026-04-15T20:55:00.000Z
+Stopped at: Completed 39-04-PLAN.md (Work Order send pipeline + WorkOrderView + admin/portal pages + dashboard list); Phase 39 fully shipped
 Resume file: None
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`
