@@ -191,8 +191,14 @@ Plans:
   3. A work order can be sent as email from the Settings-configured from address with the Settings-configured cc address (default office@lasprezz.com / liz@lasprezz.com)
   4. Project detail page shows a Documents panel alongside existing panels
   5. Liz can upload PDF and image documents to a project and then list, preview, and delete them
-**Plans**: TBD (estimated 4)
+**Plans**: 4 plans
 **UI hint**: yes
+
+Plans:
+- [x] 39-01-PLAN.md — Wave 1: workOrder schema + projectDocuments[] + API scaffolding (WORK-02, WORK-03, WORK-04, DOCS-02, DOCS-03)
+- [x] 39-02-PLAN.md — Wave 2: DocumentsPanel + UploadDocumentModal + project-detail mount (DOCS-01, DOCS-02, DOCS-03)
+- [ ] 39-03-PLAN.md — Wave 2: WorkOrderComposeModal + ContractorChipSendAction + chip integration (WORK-01, WORK-02, WORK-03, WORK-04)
+- [ ] 39-04-PLAN.md — Wave 3: Email template + send endpoint + WorkOrderView + admin+portal pages + dashboard list + chip/modal send wiring (WORK-01, WORK-05)
 
 ### Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support
 **Goal**: "Contractor" becomes "Contractor / Vendor" across the admin UI; trades are first-class records Liz can manage (create/rename/delete); contractor records gain physical address fields and a 1099 document slot with a visible badge
@@ -236,7 +242,7 @@ Plans:
 | 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
 | 37 | v5.1 | 3/3 | Complete   | 2026-04-15 |
 | 38 | v5.1 | 2/2 | Complete   | 2026-04-15 |
-| 39 | v5.1 | 0/4 | Not started | - |
+| 39 | v5.1 | 2/4 | In Progress|  |
 | 40 | v5.1 | 0/3 | Not started | - |
 | 41 | v5.1 | 0/3 | Not started | - |
 

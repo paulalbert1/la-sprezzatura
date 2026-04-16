@@ -40,16 +40,16 @@
 ### Work Order Panel (WORK)
 
 - [ ] **WORK-01**: Project detail page has a "Work Order" panel alongside existing panels
-- [ ] **WORK-02**: "Create work order" action lets the user select N procurement items from the project to include on the work order
-- [ ] **WORK-03**: Work order supports adding custom fields beyond the linked procurement items
-- [ ] **WORK-04**: Work order supports a free-text "special instructions" section
+- [x] **WORK-02**: "Create work order" action lets the user select N procurement items from the project to include on the work order
+- [x] **WORK-03**: Work order supports adding custom fields beyond the linked procurement items
+- [x] **WORK-04**: Work order supports a free-text "special instructions" section
 - [ ] **WORK-05**: Work order can be sent as an email from office@lasprezz.com with liz@lasprezz.com on cc
 
 ### Documents Panel (DOCS)
 
-- [ ] **DOCS-01**: Project detail page has a "Documents" panel alongside existing panels
-- [ ] **DOCS-02**: User can upload contracts, addenda, and other documents (PDF and image) to a project
-- [ ] **DOCS-03**: User can list, preview, and delete uploaded project documents
+- [x] **DOCS-01**: Project detail page has a "Documents" panel alongside existing panels
+- [x] **DOCS-02**: User can upload contracts, addenda, and other documents (PDF and image) to a project
+- [x] **DOCS-03**: User can list, preview, and delete uploaded project documents
 
 ### Send Update Sender Config (SETT)
 
@@ -124,13 +124,13 @@
 | SETT-11 | Phase 38 | Complete |
 | SETT-12 | Phase 38 | Complete |
 | WORK-01 | Phase 39 | Pending |
-| WORK-02 | Phase 39 | Pending |
-| WORK-03 | Phase 39 | Pending |
-| WORK-04 | Phase 39 | Pending |
+| WORK-02 | Phase 39 | Complete |
+| WORK-03 | Phase 39 | Complete |
+| WORK-04 | Phase 39 | Complete |
 | WORK-05 | Phase 39 | Pending |
-| DOCS-01 | Phase 39 | Pending |
-| DOCS-02 | Phase 39 | Pending |
-| DOCS-03 | Phase 39 | Pending |
+| DOCS-01 | Phase 39 | Complete |
+| DOCS-02 | Phase 39 | Complete |
+| DOCS-03 | Phase 39 | Complete |
 | VEND-01 | Phase 40 | Pending |
 | VEND-02 | Phase 40 | Pending |
 | VEND-03 | Phase 40 | Pending |
