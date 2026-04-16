@@ -41,9 +41,14 @@ if (tokenData.dualRole) {
   );
 }
 
-// Single role: create session and redirect to appropriate dashboard
+// Single role: create session and redirect
 const role = tokenData.role || 'contractor';
 await createSession(Astro.cookies, tokenData.entityId, role);
-const dashboard = role === 'client' ? '/portal/dashboard' : '/workorder/dashboard';
-return Astro.redirect(dashboard);
+
+const redirectTo = Astro.url.searchParams.get("redirect");
+const safeRedirect =
+  redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")
+    ? redirectTo
+    : (role === 'client' ? '/portal/dashboard' : '/workorder/dashboard');
+return Astro.redirect(safeRedirect);
 ---

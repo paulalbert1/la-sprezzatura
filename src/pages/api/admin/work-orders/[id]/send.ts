@@ -4,6 +4,7 @@ import type { APIRoute } from "astro";
 import { sanityWriteClient } from "../../../../../sanity/writeClient";
 import { generatePortalToken } from "../../../../../lib/generateToken";
 import { getSession } from "../../../../../lib/session";
+import { redis } from "../../../../../lib/redis";
 import {
   buildWorkOrderEmail,
   buildWorkOrderPlainText,
@@ -114,6 +115,12 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
         ? requestOrigin
         : (import.meta.env.SITE as string) || "https://lasprezz.com";
 
+    // Generate magic-link token so the email CTA auto-authenticates the contractor.
+    const magicToken = generatePortalToken(32);
+    const portalPath = `/workorder/project/${wo.project._id}/orders/${wo._id}`;
+    const verifyUrl = `${baseUrl}/workorder/verify?token=${magicToken}&redirect=${encodeURIComponent(portalPath)}`;
+    await redis.set(`magic:${magicToken}`, JSON.stringify({ entityId: wo.contractor._id, role: "contractor" }), { ex: 604800 });
+
     // Resend send (skip if no API key — sandbox-friendly per Pitfall 4).
     const apiKey = import.meta.env.RESEND_API_KEY;
     let resendId = "";
@@ -126,6 +133,7 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
         workOrderId: wo._id,
         baseUrl,
         fromDisplayName,
+        verifyUrl,
       });
       const textBody = buildWorkOrderPlainText({
         project: wo.project,
@@ -133,6 +141,7 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
         workOrderId: wo._id,
         baseUrl,
         fromDisplayName,
+        verifyUrl,
       });
       const result = await resend.emails.send({
         from: resolvedFrom,

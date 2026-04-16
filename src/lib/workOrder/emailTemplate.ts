@@ -13,14 +13,15 @@ export interface WorkOrderEmailInput {
   project: { _id: string; title: string };
   contractor: { _id: string; name: string; email: string };
   workOrderId: string;
-  baseUrl: string; // resolveBaseUrl(request) per send-update L34
-  fromDisplayName: string; // derived from siteSettings.defaultFromEmail owner
+  baseUrl: string;
+  fromDisplayName: string;
+  verifyUrl?: string;
 }
 
 export function buildWorkOrderEmail(input: WorkOrderEmailInput): string {
-  const { project, contractor, workOrderId, baseUrl, fromDisplayName } = input;
+  const { project, contractor, workOrderId, baseUrl, fromDisplayName, verifyUrl } = input;
   const firstName = contractor.name?.split(" ")[0] || "there";
-  const ctaHref = `${baseUrl}/workorder/project/${project._id}/orders/${workOrderId}`;
+  const ctaHref = verifyUrl || `${baseUrl}/workorder/project/${project._id}/orders/${workOrderId}`;
   const sentDate = new Date().toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
@@ -60,13 +61,14 @@ export function buildWorkOrderEmail(input: WorkOrderEmailInput): string {
 }
 
 export function buildWorkOrderPlainText(input: WorkOrderEmailInput): string {
-  const { project, contractor, workOrderId, baseUrl } = input;
+  const { project, contractor, workOrderId, baseUrl, verifyUrl } = input;
   const firstName = contractor.name?.split(" ")[0] || "there";
+  const link = verifyUrl || `${baseUrl}/workorder/project/${project._id}/orders/${workOrderId}`;
   return `${firstName},
 
 Your work order for ${project.title} is ready.
 
-View the latest version: ${baseUrl}/workorder/project/${project._id}/orders/${workOrderId}
+View the latest version: ${link}
 
 La Sprezzatura
 Linha Studio
