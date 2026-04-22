@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: executing
-stopped_at: "Completed Phase 41 Plan 01: formatPhone utility + preferredContact backend removal"
-last_updated: "2026-04-22T17:07:54.349Z"
+status: verifying
+stopped_at: "Completed Phase 41 Plan 02: UI sweep — client list reshape, formatPhone wiring, preferredContact purge"
+last_updated: "2026-04-22T17:13:27.624Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 10
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 23
-  completed_plans: 22
-  percent: 96
+  completed_plans: 23
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 
 Phase: 41 (client-data-model-refinements) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-22
 
-Progress: [██████████] 96%
+Progress: [██████████] 100%
 
 ## v5.2 Phase Map
 
@@ -75,6 +75,9 @@ Carried from v5.1 boundary. Full history:
 - formatPhone extracts all digits via /\D/g; returns (NNN) NNN-NNNN for exactly 10 digits; raw input unchanged otherwise (safe fallback for non-US numbers)
 - Phone stored raw in Sanity — no normalization on save; display format is render-time only via formatPhone() from src/lib/format.ts
 - No Sanity data migration for orphaned preferredContact values — removed from schema/queries/API; existing documents retain inert orphaned data per D-18
+- Address cell renders [city, state].filter(Boolean).join(', ') with em-dash fallback — handles city-only, state-only, and both-present cases
+- Sort for nested address.city uses conditional accessor in comparator (sortColumn === 'address'); generic path handles all flat fields
+- tel: href in ContactCardPopover uses raw data.phone; only visible link text uses formatPhone() — raw digits required by native dialer
 
 ### Pending Todos
 
@@ -92,7 +95,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-22T17:07:54.344Z
-Stopped at: Completed Phase 41 Plan 01: formatPhone utility + preferredContact backend removal
+Last session: 2026-04-22T17:13:27.619Z
+Stopped at: Completed Phase 41 Plan 02: UI sweep — client list reshape, formatPhone wiring, preferredContact purge
 Resume file: None
 Next action: `/gsd-plan-phase 41`

@@ -11,7 +11,8 @@
 **: Phone numbers render in a single consistent format across the client list, contractor list, popovers, and detail views
 - [x] **CLNT-11
 **: Client record includes physical address fields (street, city, state, zip)
-- [ ] **CLNT-12**: Clients list columns are: name, address, email, phone (replaces current columns)
+- [x] **CLNT-12
+**: Clients list columns are: name, address, email, phone (replaces current columns)
 - [x] **CLNT-13
 **: "Preferred contact" field is removed from both the client schema and the UI
 
