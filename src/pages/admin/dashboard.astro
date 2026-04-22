@@ -115,7 +115,7 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
               <h2
                 style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
               >
-                Contractors
+                Contractor / Vendor
               </h2>
               <a
                 href="/admin/contractors/new"
@@ -136,14 +136,14 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
                   <path d="M5 12h14"></path>
                   <path d="M12 5v14"></path>
                 </svg>
-                Add new contractor
+                Add contractor / vendor
               </a>
             </div>
             <hr style="border: none; border-top: 0.5px solid #E8DDD0; margin: 0;" />
           </div>
 
           {data.contractors.length === 0 ? (
-            <p class="text-sm text-stone text-center py-6">No contractors yet.</p>
+            <p class="text-sm text-stone text-center py-6">No contractors / vendors yet.</p>
           ) : (
             <div>
               {data.contractors.map((contractor: { _id: string; name: string; company: string | null; trades: string[] | null }) => (
