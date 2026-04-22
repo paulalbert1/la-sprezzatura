@@ -7,10 +7,10 @@
 - ✅ **v2.5 Contractor & Commercial Workflows** - Phases 7-8 (completed 2026-04-03)
 - 📋 **v3.0 AI Rendering & Go-Live** - Phases 9-12 (Phase 12 deferred)
 - ✅ **v3.1 Rendering Tool Polish** - Phases 13-14 (completed 2026-04-03)
-- 🚫 **v4.0 Project Schedule** - Phase 15 complete; Phases 16-17 **superseded by v5.2 Schedule Rebuild**
+- 🚫 **v4.0 Project Schedule** - Phase 15 complete; Phases 16-17 **superseded (Schedule Rebuild displaced to a future milestone)**
 - ✅ **v5.0 Admin Platform Completion** - Phases 29-34 (shipped 2026-04-12)
-- 🚧 **v5.1 Admin UX Polish & Workflow Additions** - Phases 35-41 (in progress)
-- 📋 **v5.2 Schedule Rebuild** - TBD (needs brainstorming)
+- ✅ **v5.1 Admin UX Polish & Workflow Additions** - Phases 35-41 (completed 2026-04-22, Phase 41 carried to v5.2)
+- 🚧 **v5.2 Trades Directory** - Phases 41-43 (in progress)
 - 📋 **v6.0 Linha Platform** - TBD (planned)
 
 ## Phases
@@ -91,12 +91,12 @@ Plans:
 **Milestone Goal (original):** Visual, interactive project timeline in the admin app for sequencing contractors, procurement, milestones, and custom events.
 
 - [x] **Phase 15: Schema and Read-Only Timeline** (3/3 plans, completed)
-- 🚫 **Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips** — **Superseded by v5.2 Schedule Rebuild**
-- 🚫 **Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars** — **Superseded by v5.2 Schedule Rebuild**
+- 🚫 **Phase 16: Drag-and-Drop, Write-back, Undo, and Tooltips** — **Superseded (Schedule Rebuild deferred to a future milestone)**
+- 🚫 **Phase 17: Appointment Sub-markers, Overlap Highlighting, and Procurement Lifecycle Bars** — **Superseded (Schedule Rebuild deferred to a future milestone)**
 
-v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase 16-17 scope (drag-and-drop write-back, lifecycle bars, overlap highlighting) will be re-evaluated during v5.2 brainstorming and reincorporated only if still relevant to the new template approach.
+A future Schedule Rebuild milestone will replace Frappe Gantt with a configurable designer workflow template. Phase 16-17 scope (drag-and-drop write-back, lifecycle bars, overlap highlighting) will be re-evaluated during that milestone's brainstorming and reincorporated only if still relevant.
 
-### v5.1 Admin UX Polish & Workflow Additions (Phases 35-41) — In Progress
+### v5.1 Admin UX Polish & Workflow Additions (Phases 35-40) — Complete
 
 **Milestone Goal:** Refine the v5.0 admin app based on Liz's hands-on feedback, add Work Order and Documents panels to project detail, remove pricing exposure from procurement, and tighten vendor/client data models.
 
@@ -107,8 +107,7 @@ v5.2 replaces Frappe Gantt with a configurable designer workflow template. Phase
 - [x] **Phase 37: Procurement Privacy & Modal Editor** — 5 reqs (PROC-10..14) (completed 2026-04-15)
 - [x] **Phase 38: Send Update Sender Config** — 3 reqs (SETT-10..12) (completed 2026-04-15)
 - [x] **Phase 39: Work Order & Documents Panels** — 8 reqs (WORK-01..05, DOCS-01..03) (completed 2026-04-15)
-- [ ] **Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support** — 5 reqs (VEND-01..05)
-- [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
+- [x] **Phase 40: Contractor/Vendor Rename, Trades CRUD & 1099 Support** — 5 reqs (VEND-01..05) (completed 2026-04-22)
 
 ### Phase 35: Dashboard Polish & Global UX Cleanup
 **Goal**: Liz's dashboard surfaces only the signal she acts on: clean status chips, filterable Upcoming Deliveries and Projects cards, a working contractor quick-assign flow, and tasks cards that hide completed work by default
@@ -214,9 +213,19 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 40-01-PLAN.md — Wave 1: Schema fields + GROQ queries + API handlers (VEND-03, VEND-04, VEND-05)
-- [ ] 40-02-PLAN.md — Wave 1: Label rename across admin UI and portal (VEND-01, VEND-02)
-- [ ] 40-03-PLAN.md — Wave 2: TradesCatalogSection + Settings wiring + EntityDetailForm address/docType/catalog (VEND-03, VEND-04, VEND-05)
+- [x] 40-01-PLAN.md — Wave 1: Schema fields + GROQ queries + API handlers (VEND-03, VEND-04, VEND-05)
+- [x] 40-02-PLAN.md — Wave 1: Label rename across admin UI and portal (VEND-01, VEND-02)
+- [x] 40-03-PLAN.md — Wave 2: TradesCatalogSection + Settings wiring + EntityDetailForm address/docType/catalog (VEND-03, VEND-04, VEND-05)
+
+### v5.2 Trades Directory (Phases 41-43)
+
+**Milestone Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) carries forward from v5.1.
+
+- [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
+- [ ] **Phase 42: Trades Entity — Routes, Schema, and Display** — 5 reqs (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
+- [ ] **Phase 43: Document Checklists, Settings Config, and Completeness** — 3 reqs (TRAD-04, TRAD-06, TRAD-08)
+
+## Phase Details
 
 ### Phase 41: Client Data Model Refinements
 **Goal**: Client schema is tightened — phone numbers render consistently everywhere (clients, contractors, popovers), physical address fields are captured, the list columns reflect the new shape, and the unused preferred-contact field is removed
@@ -227,6 +236,30 @@ Plans:
   2. Client records capture physical address fields (street, city, state, zip)
   3. The Clients list columns are name, address, email, phone (no other columns)
   4. The "Preferred contact" field is absent from both the client schema and the UI
+**Plans**: TBD (estimated 2-3)
+**UI hint**: yes
+
+### Phase 42: Trades Entity — Routes, Schema, and Display
+**Goal**: The Trades entity has its own `/admin/trades` routes, a `contractor | vendor` relationship field that drives display names and meta line rendering, and the 1099 document slot is unified into the contractor checklist schema rather than living as a standalone badge
+**Depends on**: Phase 40 (contractor schema baseline, trades[], address{}, contractorDocuments[])
+**Requirements**: TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07
+**Success Criteria** (what must be TRUE):
+  1. All `/admin/contractors` URLs, nav links, and breadcrumbs throughout the admin app and portal resolve as `/admin/trades`
+  2. Each Trades record has a relationship field with exactly two options: contractor or vendor
+  3. The entity label reads "Contractor" or "Vendor" (never "Contractor / Vendor") wherever the record's relationship type is known — list view, detail view, popovers, nav context, and work order panels
+  4. Trades detail page shows a compact meta line below the name: primary trade · relationship type · city, state
+  5. No standalone 1099 badge or section exists on the detail page; the 1099 slot is part of the contractor document checklist schema
+**Plans**: TBD (estimated 2-3)
+**UI hint**: yes
+
+### Phase 43: Document Checklists, Settings Config, and Completeness
+**Goal**: Trades detail page shows a relationship-scoped document checklist; checklist item types are configurable from Settings; and the Trades list view shows an amber completeness indicator on any record missing required fields or documents
+**Depends on**: Phase 42 (relationship field, unified document schema); Phase 34 (Settings baseline)
+**Requirements**: TRAD-04, TRAD-06, TRAD-08
+**Success Criteria** (what must be TRUE):
+  1. Trades detail page shows a document checklist scoped to the record's relationship type: contractor checklist includes W-9, certificate of insurance, trade license, and 1099; vendor checklist includes vendor agreement and tax form
+  2. Liz can add and rename checklist item types per relationship type from Settings; an item type with any uploaded document cannot be removed
+  3. Trades list view shows an amber completeness indicator on any record where required fields or required documents are missing
 **Plans**: TBD (estimated 2-3)
 **UI hint**: yes
 
@@ -243,16 +276,19 @@ Plans:
 | 15 | v4.0 | 3/3 | Complete | 2026-04-04 |
 | 16-17 | v4.0 | — | Superseded by v5.2 | - |
 | 29-34 | v5.0 | 28/28 | Shipped | 2026-04-12 |
-| 35 | v5.1 | 5/5 | Complete    | 2026-04-14 |
-| 36 | v5.1 | 4/4 | Complete   | 2026-04-14 |
-| 37 | v5.1 | 3/3 | Complete   | 2026-04-15 |
-| 38 | v5.1 | 2/2 | Complete   | 2026-04-15 |
-| 39 | v5.1 | 3/4 | In Progress|  |
-| 40 | v5.1 | 0/3 | Not started | - |
-| 41 | v5.1 | 0/3 | Not started | - |
+| 35 | v5.1 | 5/5 | Complete | 2026-04-14 |
+| 36 | v5.1 | 4/4 | Complete | 2026-04-14 |
+| 37 | v5.1 | 3/3 | Complete | 2026-04-15 |
+| 38 | v5.1 | 2/2 | Complete | 2026-04-15 |
+| 39 | v5.1 | 4/4 | Complete | 2026-04-15 |
+| 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
+| 41 | v5.2 | 0/3 | Not started | - |
+| 42 | v5.2 | 0/3 | Not started | - |
+| 43 | v5.2 | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
 *v1.0 shipped: 2026-03-15*
 *v5.0 shipped: 2026-04-12 — archived to milestones/v5.0-ROADMAP.md*
 *v5.1 planned: 2026-04-14 — 7 phases, 43 requirements, 22 plans estimated*
+*v5.2 planned: 2026-04-22 — 3 phases, 12 requirements, ~9 plans estimated*

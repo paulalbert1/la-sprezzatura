@@ -53,20 +53,22 @@
 | CLNT-11 | Phase 41 | Pending |
 | CLNT-12 | Phase 41 | Pending |
 | CLNT-13 | Phase 41 | Pending |
-| TRAD-01 | TBD | Pending |
-| TRAD-02 | TBD | Pending |
-| TRAD-03 | TBD | Pending |
-| TRAD-04 | TBD | Pending |
-| TRAD-05 | TBD | Pending |
-| TRAD-06 | TBD | Pending |
-| TRAD-07 | TBD | Pending |
-| TRAD-08 | TBD | Pending |
+| TRAD-01 | Phase 42 | Pending |
+| TRAD-02 | Phase 42 | Pending |
+| TRAD-03 | Phase 42 | Pending |
+| TRAD-05 | Phase 42 | Pending |
+| TRAD-07 | Phase 42 | Pending |
+| TRAD-04 | Phase 43 | Pending |
+| TRAD-06 | Phase 43 | Pending |
+| TRAD-08 | Phase 43 | Pending |
 
 **Coverage:**
 - v5.2 requirements: 12 total
-- Mapped to phases: 4 (CLNT, Phase 41) + 8 TBD
-- Unmapped: 8 (roadmapper will assign)
+- Phase 41: 4 (CLNT-10..13)
+- Phase 42: 5 (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
+- Phase 43: 3 (TRAD-04, TRAD-06, TRAD-08)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-22*
-*Last updated: 2026-04-22 — v5.2 Trades Directory requirements*
+*Last updated: 2026-04-22 — Traceability filled; all 12 requirements mapped to phases 41-43*
