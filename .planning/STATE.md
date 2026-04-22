@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: Phase 40 context gathered; ready for planning
-stopped_at: Phase 40 context gathered — Trades catalog (siteSettings), 1099 badge (docType dropdown), rename scope (full UI), address on contractors
-last_updated: "2026-04-22T12:19:07.541Z"
-last_activity: 2026-04-22
+status: unknown
+stopped_at: Phase 40 UI-SPEC approved
+last_updated: "2026-04-22T12:34:03.785Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 8
   completed_phases: 5
@@ -108,6 +108,6 @@ Carried from v5.0:
 ## Session Continuity
 
 Last session: --stopped-at
-Stopped at: Phase 40 context gathered
+Stopped at: Phase 40 UI-SPEC approved
 Resume file: --resume-file
 Next action: `/gsd-preflight 35 --for plan-phase` then `/gsd-plan-phase 35`

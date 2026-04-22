@@ -210,8 +210,13 @@ Plans:
   3. Liz can create, rename, and delete trade names from a trades manager UI
   4. Contractor / Vendor records capture physical address fields (street, city, state, zip)
   5. Liz can upload a 1099 document to a contractor record and the record shows a clearly-designated 1099 badge
-**Plans**: TBD (estimated 3)
+**Plans**: 3 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 40-01-PLAN.md — Wave 1: Schema fields + GROQ queries + API handlers (VEND-03, VEND-04, VEND-05)
+- [ ] 40-02-PLAN.md — Wave 1: Label rename across admin UI and portal (VEND-01, VEND-02)
+- [ ] 40-03-PLAN.md — Wave 2: TradesCatalogSection + Settings wiring + EntityDetailForm address/docType/catalog (VEND-03, VEND-04, VEND-05)
 
 ### Phase 41: Client Data Model Refinements
 **Goal**: Client schema is tightened — phone numbers render consistently everywhere (clients, contractors, popovers), physical address fields are captured, the list columns reflect the new shape, and the unused preferred-contact field is removed
