@@ -729,8 +729,7 @@ const ADMIN_DASHBOARD_PROJECTS_QUERY = `
     "clientName": clients[0].client->name,
     "clientId": clients[0].client->._id,
     "clientEmail": clients[0].client->.email,
-    "clientPhone": clients[0].client->.phone,
-    "clientPreferredContact": clients[0].client->.preferredContact
+    "clientPhone": clients[0].client->.phone
   }
 `;
 
@@ -946,7 +945,7 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       createdAt
     },
     "projectClients": clients[defined(client)].client-> {
-      _id, name, email, phone, preferredContact
+      _id, name, email, phone
     },
     "projectContractors": contractors[defined(contractor)] {
       _key,
@@ -1072,7 +1071,7 @@ export async function getAllContractors(client: SanityClient) {
 export async function getAdminClients(client: SanityClient) {
   return client.fetch(`
     *[_type == "client"] | order(name asc) {
-      _id, name, email, phone, preferredContact
+      _id, name, email, phone
     }
   `);
 }
@@ -1081,7 +1080,7 @@ export async function getAdminClients(client: SanityClient) {
 export async function getAdminClientDetail(client: SanityClient, clientId: string) {
   return client.fetch(`{
     "client": *[_type == "client" && _id == $clientId][0] {
-      _id, name, email, phone, preferredContact, address, notes
+      _id, name, email, phone, address, notes
     },
     "projects": *[_type == "project" && references($clientId)] | order(title asc) {
       _id, title, pipelineStage, engagementType, projectStatus

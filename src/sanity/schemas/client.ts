@@ -23,20 +23,6 @@ export const client = defineType({
       type: "string",
     }),
     defineField({
-      name: "preferredContact",
-      title: "Preferred Contact Method",
-      type: "string",
-      description:
-        "How Liz prefers to reach this client \u2014 internal note only",
-      options: {
-        list: [
-          { title: "Phone", value: "phone" },
-          { title: "Email", value: "email" },
-          { title: "Text", value: "text" },
-        ],
-      },
-    }),
-    defineField({
       name: "address",
       title: "Home / Billing Address",
       type: "object",

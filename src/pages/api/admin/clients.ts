@@ -35,11 +35,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   try {
     if (action === "create") {
-      const { name, email, phone, preferredContact, address, notes } = body as {
+      const { name, email, phone, address, notes } = body as {
         name: string;
         email: string;
         phone?: string;
-        preferredContact?: string;
         address?: Record<string, string>;
         notes?: string;
       };
@@ -59,7 +58,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         ...(phone && { phone: phone.trim() }),
-        ...(preferredContact && { preferredContact }),
         ...(address && { address }),
         ...(notes && { notes: notes.trim() }),
       });
@@ -68,12 +66,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
 
     if (action === "update") {
-      const { clientId, name, email, phone, preferredContact, address, notes } = body as {
+      const { clientId, name, email, phone, address, notes } = body as {
         clientId: string;
         name: string;
         email: string;
         phone?: string;
-        preferredContact?: string;
         address?: Record<string, string>;
         notes?: string;
       };
@@ -97,7 +94,6 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           name: name.trim(),
           email: email.trim().toLowerCase(),
           phone: phone?.trim() || "",
-          preferredContact: preferredContact || "",
           address: address || {},
           notes: notes?.trim() || "",
         })
