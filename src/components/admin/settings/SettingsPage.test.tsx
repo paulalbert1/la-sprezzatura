@@ -31,6 +31,8 @@ function defaultSettings(): SiteSettingsPayload {
     // Phase 38 — Send Update sender config (SETT-10 / SETT-11)
     defaultFromEmail: "",
     defaultCcEmail: "",
+    // Phase 40 — VEND-03
+    trades: [],
   };
 }
 

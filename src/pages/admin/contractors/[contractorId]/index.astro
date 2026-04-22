@@ -5,7 +5,7 @@ import AdminLayout from "../../../../layouts/AdminLayout.astro";
 import EntityDetailForm from "../../../../components/admin/EntityDetailForm.tsx";
 import LinkedProjects from "../../../../components/admin/LinkedProjects.tsx";
 import { getTenantClient } from "../../../../lib/tenantClient";
-import { getAdminContractorDetail } from "../../../../sanity/queries";
+import { getAdminContractorDetail, SITE_SETTINGS_QUERY } from "../../../../sanity/queries";
 
 const contractorId = Astro.params.contractorId;
 if (!contractorId) {
@@ -21,6 +21,9 @@ const sanityClient = getTenantClient(tenantId);
 const isNew = contractorId === "new";
 let contractorData = null;
 let projects: any[] = [];
+
+const siteSettingsRaw = await sanityClient.fetch(SITE_SETTINGS_QUERY);
+const tradeCatalog: string[] = (siteSettingsRaw as any)?.trades ?? [];
 
 if (!isNew) {
   const result = await getAdminContractorDetail(sanityClient, contractorId);
@@ -46,6 +49,7 @@ const breadcrumbs = [
       entityType="contractor"
       entity={contractorData}
       isNew={isNew}
+      tradeCatalog={tradeCatalog}
     />
     {!isNew && (
       <LinkedProjects client:load projects={projects} />

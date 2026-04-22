@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
 import { Trash2, Upload, Loader2, Check, X } from "lucide-react";
+import { formatTrade } from "../../lib/trades";
 
 interface EntityDetailFormProps {
   entityType: "client" | "contractor";
   entity: Record<string, any> | null;
   isNew?: boolean;
+  tradeCatalog?: string[]; // Phase 40 VEND-03: plain string list from siteSettings
 }
 
 interface FieldError {
@@ -43,10 +45,25 @@ const TRADE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+const DOC_TYPE_LABELS: Record<string, string> = {
+  "1099": "1099",
+  insurance: "Insurance cert",
+  contract: "Contract",
+  other: "Other",
+};
+
+const DOC_TYPE_PILL_CLASSES: Record<string, string> = {
+  "1099": "bg-terracotta/10 text-terracotta border border-terracotta/20",
+  insurance: "bg-[#E3EDF2] text-[#3F6B82] border border-[#3F6B82]/20",
+  contract: "bg-gold-light text-gold border border-gold/20",
+  other: "bg-cream-dark text-stone-dark border border-stone-light/40",
+};
+
 export default function EntityDetailForm({
   entityType,
   entity,
   isNew = false,
+  tradeCatalog,
 }: EntityDetailFormProps) {
   const isCreateMode = isNew || !entity;
 
@@ -73,6 +90,7 @@ export default function EntityDetailForm({
       fileType: string;
       url: string;
       uploadedAt: string;
+      docType?: string;
     }>
   >(entity?.documents || []);
 
@@ -83,6 +101,7 @@ export default function EntityDetailForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [docType, setDocType] = useState<string>("");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deletingDocKey, setDeletingDocKey] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -144,6 +163,13 @@ export default function EntityDetailForm({
     } else {
       payload.company = company.trim();
       payload.trades = trades;
+      // Phase 40 VEND-04: include address for contractor saves
+      payload.address = {
+        street: street.trim(),
+        city: city.trim(),
+        state: state.trim(),
+        zip: zip.trim(),
+      };
     }
 
     try {
@@ -198,6 +224,7 @@ export default function EntityDetailForm({
     formData.append("action", "upload-doc");
     formData.append("_id", entity?._id || "");
     formData.append("file", file);
+    formData.append("docType", docType); // Phase 40 VEND-05
 
     try {
       const res = await fetch(`/api/admin/${entityType}s`, {
@@ -213,6 +240,7 @@ export default function EntityDetailForm({
       if (result.document) {
         setDocuments((prev) => [...prev, result.document]);
       }
+      setDocType(""); // reset after upload
     } catch {
       setUploadError("File upload failed. Check file size and try again.");
       setTimeout(() => setUploadError(null), 4000);
@@ -255,7 +283,8 @@ export default function EntityDetailForm({
     }
   }
 
-  const availableTrades = TRADE_OPTIONS.filter((t) => !trades.includes(t));
+  const catalogOptions = tradeCatalog && tradeCatalog.length > 0 ? tradeCatalog : TRADE_OPTIONS;
+  const availableTrades = catalogOptions.filter((t) => !trades.includes(t));
 
   return (
     <>
@@ -332,6 +361,45 @@ export default function EntityDetailForm({
             />
           </div>
 
+          {/* Address — rendered for both client and contractor (Phase 40 VEND-04) */}
+          <div>
+            <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
+              Address
+            </label>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Street"
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
+                className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="ZIP"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-1/2 focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+              />
+            </div>
+          </div>
+
           {/* Client-specific fields */}
           {entityType === "client" && (
             <>
@@ -359,45 +427,6 @@ export default function EntityDetailForm({
                     {errors.preferredContact}
                   </p>
                 )}
-              </div>
-
-              {/* Address */}
-              <div>
-                <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
-                  Address
-                </label>
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Street"
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="City"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="State"
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="ZIP"
-                    value={zip}
-                    onChange={(e) => setZip(e.target.value)}
-                    className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-1/2 focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-                  />
-                </div>
               </div>
 
               {/* Notes */}
@@ -456,7 +485,7 @@ export default function EntityDetailForm({
                       key={trade}
                       className="text-xs font-body bg-cream-dark text-charcoal px-2 py-1 rounded-full inline-flex items-center gap-1"
                     >
-                      {TRADE_LABELS[trade] || trade}
+                      {formatTrade(trade)}
                       <button
                         type="button"
                         onClick={() => removeTrade(trade)}
@@ -483,7 +512,7 @@ export default function EntityDetailForm({
                     <option value="">Add a trade...</option>
                     {availableTrades.map((trade) => (
                       <option key={trade} value={trade}>
-                        {TRADE_LABELS[trade] || trade}
+                        {formatTrade(trade)}
                       </option>
                     ))}
                   </select>
@@ -505,6 +534,11 @@ export default function EntityDetailForm({
                       key={doc._key}
                       className="flex items-center gap-3 px-4 py-3 bg-cream/50 rounded-lg mb-2"
                     >
+                      {doc.docType && (
+                        <span className={`text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded ${DOC_TYPE_PILL_CLASSES[doc.docType] ?? "bg-stone-100 text-stone-500"}`}>
+                          {DOC_TYPE_LABELS[doc.docType] ?? doc.docType}
+                        </span>
+                      )}
                       <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
                         {doc.fileType || "FILE"}
                       </span>
@@ -536,9 +570,27 @@ export default function EntityDetailForm({
 
                   {documents.length === 0 && (
                     <p className="text-sm text-stone font-body mb-3">
-                      No documents uploaded yet.
+                      Upload a 1099, insurance certificate, contract, or other document for this contractor / vendor.
                     </p>
                   )}
+
+                  {/* Document type select — Phase 40 VEND-05 */}
+                  <div className="mb-3">
+                    <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
+                      Document type
+                    </label>
+                    <select
+                      value={docType}
+                      onChange={(e) => setDocType(e.target.value)}
+                      className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                    >
+                      <option value="">Select type…</option>
+                      <option value="1099">1099</option>
+                      <option value="insurance">Insurance certificate</option>
+                      <option value="contract">Contract</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
 
                   {/* Upload button */}
                   <div className="flex items-center gap-3">
