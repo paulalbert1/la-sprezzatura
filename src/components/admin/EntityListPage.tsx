@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, ChevronUp, ChevronDown } from "lucide-react";
 import { formatTrade } from "../../lib/trades";
+import { formatPhone } from "../../lib/format";
 
 interface EntityListPageProps {
   entityType: "client" | "contractor";
@@ -11,9 +12,9 @@ type SortDirection = "asc" | "desc";
 
 const CLIENT_COLUMNS = [
   { key: "name", label: "Name" },
+  { key: "address", label: "Address" },
   { key: "email", label: "Email" },
   { key: "phone", label: "Phone" },
-  { key: "preferredContact", label: "Preferred Contact" },
 ];
 
 const CONTRACTOR_COLUMNS = [
@@ -51,6 +52,8 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
         const email = (entity.email || "").toLowerCase();
         const phone = (entity.phone || "").toLowerCase();
         const company = (entity.company || "").toLowerCase();
+        const city = (entity.address?.city || "").toLowerCase();
+        const state = (entity.address?.state || "").toLowerCase();
         const trades = Array.isArray(entity.trades)
           ? [...entity.trades, ...entity.trades.map(formatTrade)]
               .join(" ")
@@ -61,23 +64,33 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
           email.includes(query) ||
           phone.includes(query) ||
           company.includes(query) ||
+          city.includes(query) ||
+          state.includes(query) ||
           trades.includes(query)
         );
       });
     }
 
     result = [...result].sort((a, b) => {
-      let aVal = a[sortColumn];
-      let bVal = b[sortColumn];
+      let aVal: unknown;
+      let bVal: unknown;
+
+      if (sortColumn === "address") {
+        aVal = a.address?.city ?? "";
+        bVal = b.address?.city ?? "";
+      } else {
+        aVal = a[sortColumn];
+        bVal = b[sortColumn];
+      }
 
       if (Array.isArray(aVal)) aVal = aVal.join(", ");
       if (Array.isArray(bVal)) bVal = bVal.join(", ");
 
-      aVal = (aVal || "").toString().toLowerCase();
-      bVal = (bVal || "").toString().toLowerCase();
+      const aStr = (aVal || "").toString().toLowerCase();
+      const bStr = (bVal || "").toString().toLowerCase();
 
-      if (aVal < bVal) return sortDirection === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortDirection === "asc" ? 1 : -1;
+      if (aStr < bStr) return sortDirection === "asc" ? -1 : 1;
+      if (aStr > bStr) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -174,17 +187,19 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                   </td>
                   {entityType === "client" ? (
                     <>
-                      <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
-                      <td className="px-5 py-3 text-stone">{entity.phone || "--"}</td>
-                      <td className="px-5 py-3">
-                        {entity.preferredContact ? (
-                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600">
-                            {entity.preferredContact}
+                      <td className="px-5 py-3 text-stone">
+                        {entity.address?.city || entity.address?.state ? (
+                          <span>
+                            {[entity.address?.city, entity.address?.state]
+                              .filter(Boolean)
+                              .join(", ")}
                           </span>
                         ) : (
-                          <span className="text-stone-light">--</span>
+                          <span className="text-stone-light">—</span>
                         )}
                       </td>
+                      <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
+                      <td className="px-5 py-3 text-stone">{formatPhone(entity.phone) || "--"}</td>
                     </>
                   ) : (
                     <>
@@ -195,7 +210,7 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                         {formatTrades(entity.trades)}
                       </td>
                       <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
-                      <td className="px-5 py-3 text-stone">{entity.phone || "--"}</td>
+                      <td className="px-5 py-3 text-stone">{formatPhone(entity.phone) || "--"}</td>
                     </>
                   )}
                 </tr>
