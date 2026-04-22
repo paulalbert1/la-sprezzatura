@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
 status: unknown
-stopped_at: Completed 40-02-PLAN.md — Contractor / Vendor display-string rename
-last_updated: "2026-04-22T13:27:35.722Z"
+stopped_at: Completed 40-03-PLAN.md — Trades Catalog UI, Settings wire, EntityDetailForm extensions
+last_updated: "2026-04-22T13:34:53.589Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 21
-  completed_plans: 20
-  percent: 95
+  completed_plans: 21
+  percent: 100
 ---
 
 # Project State
@@ -30,7 +30,7 @@ Plan: 3 of 3
 Next: /gsd-execute-phase 40
 Last activity: 2026-04-22
 
-Progress: [██████████] 95%
+Progress: [██████████] 100%
 
 ## v5.1 Phase Map
 
@@ -94,6 +94,9 @@ Carried from v5.0 boundary. Full history:
 - docType string field on contractorDocument array member; upload-doc returns full document object in response (D-07)
 - trades string[] array on siteSettings after defaultCcEmail, no group/initialValue (D-01); updateTrades API action validates and patches
 - upload-doc _id FormData key accepted as fallback for contractorId — pre-existing field-name mismatch fixed
+- TradesCatalogSection is a fully controlled component — onChange on every mutation, no internal fetch; SettingsPage sends two sequential POSTs (update then updateTrades)
+- Address block lifted from client-only conditional to shared section — renders for both clients and contractors
+- Trade pill labels use formatTrade() from lib/trades.ts; catalog values fall through to normalizer for unknown slugs
 
 ### Pending Todos
 
@@ -111,7 +114,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-22T13:27:35.717Z
-Stopped at: Completed 40-02-PLAN.md — Contractor / Vendor display-string rename
+Last session: 2026-04-22T13:34:53.585Z
+Stopped at: Completed 40-03-PLAN.md — Trades Catalog UI, Settings wire, EntityDetailForm extensions
 Resume file: None
 Next action: `/gsd-execute-phase 40`
