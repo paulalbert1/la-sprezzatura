@@ -4,17 +4,17 @@ reviewed: 2026-04-22T00:00:00Z
 depth: standard
 files_reviewed: 11
 files_reviewed_list:
-  - src/lib/format.ts
-  - src/lib/format.test.ts
-  - src/sanity/schemas/client.ts
-  - src/sanity/queries.ts
-  - src/pages/api/admin/clients.ts
-  - src/sanity/schemas/client.test.ts
-  - src/components/admin/EntityListPage.tsx
-  - src/components/admin/EntityDetailForm.tsx
+  - src/components/admin/ClientChipWithRegenerate.tsx
   - src/components/admin/ContactCardPopover.tsx
   - src/components/admin/ContactCardWrapper.tsx
-  - src/components/admin/ClientChipWithRegenerate.tsx
+  - src/components/admin/EntityDetailForm.tsx
+  - src/components/admin/EntityListPage.tsx
+  - src/lib/format.test.ts
+  - src/lib/format.ts
+  - src/pages/api/admin/clients.ts
+  - src/sanity/queries.ts
+  - src/sanity/schemas/client.test.ts
+  - src/sanity/schemas/client.ts
 findings:
   critical: 0
   warning: 3
@@ -32,7 +32,7 @@ status: issues_found
 
 ## Summary
 
-Phase 41 adds `formatPhone`, extends `EntityDetailForm` and `EntityListPage` with phone display, wires up `ContactCardPopover`/`ContactCardWrapper` hover cards, and ships `ClientChipWithRegenerate`. The new `formatPhone` utility and its tests are solid. The `client.ts` schema and its tests are clean. The most important finding is a field-name mismatch in `EntityDetailForm`'s delete payload that will cause every client/contractor delete initiated from the detail form to fail silently with a 400. Two additional warnings cover a structural mismatch in `assign-to-project` and a stale fallback search in `ContactCardWrapper` that can surface a wrong-entity card.
+Phase 41 adds `formatPhone`, extends `EntityDetailForm` and `EntityListPage` with phone display, wires up `ContactCardPopover`/`ContactCardWrapper` hover cards, and ships `ClientChipWithRegenerate`. The new `formatPhone` utility and its tests are solid. The `client.ts` schema and its tests are clean. The most significant finding is a field-name mismatch in `EntityDetailForm`'s delete payload that causes every client/contractor delete initiated from the detail form to return a 400 and never execute. Two additional warnings cover a structural mismatch in `assign-to-project` that breaks downstream GROQ queries, and a fallback search in `ContactCardWrapper` that can fail to surface a card for entities outside the top-10 typeahead window.
 
 ---
 
@@ -42,24 +42,15 @@ Phase 41 adds `formatPhone`, extends `EntityDetailForm` and `EntityListPage` wit
 
 **File:** `src/components/admin/EntityDetailForm.tsx:654`
 
-**Issue:** `DeleteInlineDialog.handleDelete` builds the request body as `{ action: "delete", _id: entityId }`. The `clients.ts` POST handler's `action === "delete"` branch destructures `clientId` from the body (not `_id`), so `clientId` is always `undefined`, the guard at line 108 fires, and the API returns 400 "Missing clientId". The delete never executes and the user sees an `alert("Could not delete. Please try again.")`. The same pattern is used by `EntityDetailForm` for both `entityType === "client"` and `entityType === "contractor"` — both are broken.
+**Issue:** `DeleteInlineDialog.handleDelete` builds the request body as `{ action: "delete", _id: entityId }`. The `clients.ts` POST handler's `action === "delete"` branch destructures `clientId` from the body (line 106), not `_id`. `clientId` is always `undefined`, the guard at line 108 fires, and the API returns 400 "Missing clientId". The delete never executes and the user sees `alert("Could not delete. Please try again.")`. The same payload shape is used for both `entityType === "client"` and `entityType === "contractor"`, so both are broken.
 
-**Fix:** Align the payload field name with what the API reads:
-
-```tsx
-// EntityDetailForm.tsx — DeleteInlineDialog.handleDelete (line ~651)
-body: JSON.stringify({
-  action: "delete",
-  clientId: entityId,   // was: _id
-}),
-```
-
-For contractors, the contractor API presumably has the same contract. If `contractors.ts` also uses `contractorId`, the simplest generic fix is to send a dynamic key:
+**Fix:** Align the payload field name with what the API reads. The simplest generic fix that works for both entity types:
 
 ```tsx
+// EntityDetailForm.tsx — DeleteInlineDialog.handleDelete (~line 654)
 body: JSON.stringify({
   action: "delete",
-  [`${entityType}Id`]: entityId,
+  [`${entityType}Id`]: entityId,   // was: _id: entityId
 }),
 ```
 
@@ -67,7 +58,7 @@ body: JSON.stringify({
 
 ### WR-02: `assign-to-project` appends a raw reference instead of the clients-array member shape
 
-**File:** `src/pages/api/admin/clients.ts:144-145`
+**File:** `src/pages/api/admin/clients.ts:144-146`
 
 **Issue:** The `assign-to-project` action appends:
 
@@ -75,18 +66,18 @@ body: JSON.stringify({
 { _type: "reference", _ref: clientId, _key: generatePortalToken(8) }
 ```
 
-The project schema's `clients[]` array expects object members with the shape:
+The project schema's `clients[]` array expects members shaped as:
 
 ```ts
 { _key: string, client: { _type: "reference", _ref: string }, isPrimary: boolean }
 ```
 
-Appending the raw reference means the stored item has no `client` sub-field and no `isPrimary`. Downstream GROQ expressions that filter on `clients[client._ref == $clientId]` or `clients[isPrimary == true]` will never match the appended entry, so portal access and primary-client display will silently fail for clients assigned this way.
+Appending the flat reference means the stored item has no `client` sub-field and no `isPrimary`. All downstream GROQ expressions that filter on `clients[client._ref == $clientId]` (used in `PROJECTS_BY_CLIENT_QUERY`, `PROJECT_DETAIL_QUERY`, `WORK_ORDER_DETAIL_QUERY`) or `clients[isPrimary == true]` will never match the appended entry. Portal access and primary-client display silently fail for any client assigned through this action.
 
 **Fix:**
 
 ```ts
-// clients.ts assign-to-project (line ~144)
+// clients.ts assign-to-project (lines 144-146)
 .append("clients", [
   {
     _key: generatePortalToken(8),
@@ -98,25 +89,25 @@ Appending the raw reference means the stored item has no `client` sub-field and 
 
 ---
 
-### WR-03: `ContactCardWrapper` fallback fetch matches by name, not by ID — risk of wrong-entity card
+### WR-03: `ContactCardWrapper` fallback fetch matches by name, not by ID — may produce no card for valid entities
 
 **File:** `src/components/admin/ContactCardWrapper.tsx:87-116`
 
-**Issue:** When `contactData` is not pre-supplied and the entity is not cached, the component fetches `/api/admin/search?q={name}` and then picks the first result whose `_id` matches `entityId`. The search API is a substring match on name; if two entities share a name prefix, the search returns both and the ID filter selects correctly — but only if the entity is among the first 10 results (the search endpoint caps at `[0...10]`). A client whose name falls outside the top-10 typeahead window will never match, the popover silently shows nothing, and the `data` state stays `null`. This is a degraded-experience bug rather than a crash, but it can cause the hover card to never appear for legitimate entities without any visible error.
+**Issue:** When `contactData` is not pre-supplied and the entity is not cached, the component fetches `/api/admin/search?q={name}` and then picks the first result whose `_id === entityId`. The search endpoint caps results at `[0...10]` (see `searchEntities` in `queries.ts` line 1149). An entity whose name suffix matches many other records may not appear in the top-10 window; the `find()` returns `undefined`, `data` stays `null`, and the hover card never appears — with no error visible to the user.
 
-**Fix:** Add a dedicated `/api/admin/entity?id={entityId}&type={entityType}` endpoint that fetches by ID, or pass `contactData` from the Astro page wherever the entity `_id` is already known at render time (which is the case for all current call sites in the project detail page). The `contactData` prop path already exists on `ContactCardWrapper` and is used by `ClientChipWithRegenerate` — extend the same pattern to the project detail page chips.
+**Fix:** Pass `contactData` from the Astro page at every call site where the entity `_id` is already known at render time. This is already done in `ClientChipWithRegenerate` and is the preferred path. Alternatively, add a dedicated lookup endpoint (`/api/admin/entity?id=&type=`) that fetches by ID directly.
 
 ---
 
 ## Info
 
-### IN-01: `formatPhone` fallback returns raw whitespace-only string — minor UX inconsistency
+### IN-01: `formatPhone` fallback returns raw whitespace-only string — minor display inconsistency
 
-**File:** `src/lib/format.ts:16-21`
+**File:** `src/lib/format.ts:16`
 
-**Issue:** The spec comment says "Empty, null, or undefined input returns ''", but a whitespace-only string (e.g. `"   "`) passes the `!raw` falsy check (non-empty string is truthy), produces zero digits, and returns the original whitespace string. The test at `format.test.ts:41` explicitly validates this behaviour as intentional, so this is a spec decision — noting it here because the display result (a blank space rather than `--`) may look like missing data in the UI when `formatPhone(entity.phone) || "--"` is used, because `"   " || "--"` evaluates to `"   "`.
+**Issue:** A whitespace-only string like `"   "` is truthy, passes the `!raw` guard, produces zero digits after `.replace(/\D/g, "")`, and returns the original whitespace string. The test at `format.test.ts:41` documents this as intentional. However, `formatPhone(entity.phone) || "--"` in `EntityListPage` evaluates `"   " || "--"` to `"   "`, so a whitespace phone value renders as a blank cell rather than `--`.
 
-**Fix:** If whitespace-only phone values should render as `--` in the list, trim first:
+**Fix:** Trim before the truthy check if whitespace-only values should render as empty:
 
 ```ts
 export function formatPhone(raw: string | undefined | null): string {
@@ -129,17 +120,23 @@ export function formatPhone(raw: string | undefined | null): string {
 }
 ```
 
-Update the corresponding test if the behaviour is changed.
+Update the corresponding test if the behavior is intentionally changed.
 
 ---
 
-### IN-02: `TRADE_OPTIONS` / `TRADE_LABELS` static fallback in `EntityDetailForm` duplicates catalog data that should come from `tradeCatalog` prop
+### IN-02: Hardcoded `TRADE_OPTIONS` fallback in `EntityDetailForm` will diverge from `tradeCatalog` over time
 
-**File:** `src/components/admin/EntityDetailForm.tsx:19-45`
+**File:** `src/components/admin/EntityDetailForm.tsx:19-31`
 
-**Issue:** `TRADE_OPTIONS` and `TRADE_LABELS` are hardcoded constants used as fallback when `tradeCatalog` is not provided. Phase 40's `tradeCatalog` prop exists precisely to drive this from `siteSettings`, but `TRADE_LABELS` is still referenced unconditionally for display (`formatTrade` in the trades pills, line 456). If a trade slug comes from the catalog that has no entry in `TRADE_LABELS`, `formatTrade` will fall back gracefully (assuming it handles unknown slugs), but `TRADE_OPTIONS` acting as the fallback for `availableTrades` means a new install without `tradeCatalog` wired in will show the hardcoded list. This is not a bug today, but the two lists will diverge as the catalog evolves.
+**Issue:** `TRADE_OPTIONS` and `TRADE_LABELS` are hardcoded constants that act as the fallback when `tradeCatalog` is not provided (line 278). Phase 40's `tradeCatalog` prop exists to drive the trade list from `siteSettings`, but the fallback hardcoded list will become stale as the catalog evolves. No immediate bug — the `tradeCatalog` prop is supplied by all current Astro pages — but the divergence is a maintenance hazard.
 
-**Fix:** No immediate action required if `tradeCatalog` is always supplied by the Astro page. Document the prop as required for contractor forms, or add a `console.warn` in development when `entityType === "contractor" && !tradeCatalog`.
+**Fix:** No immediate action required if `tradeCatalog` is always supplied. Consider adding a development-mode warning:
+
+```ts
+if (entityType === "contractor" && !tradeCatalog && process.env.NODE_ENV !== "production") {
+  console.warn("EntityDetailForm: tradeCatalog not supplied; falling back to hardcoded TRADE_OPTIONS");
+}
+```
 
 ---
 
