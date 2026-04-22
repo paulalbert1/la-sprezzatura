@@ -59,8 +59,10 @@
 
 ### Contractors / Vendors (VEND)
 
-- [ ] **VEND-01**: "Contractor" is renamed to "Contractor / Vendor" across admin UI labels, headers, and nav
-- [ ] **VEND-02**: Trade column renders as distinct pill(s) in sentence case on the contractor list
+- [x] **VEND-01
+**: "Contractor" is renamed to "Contractor / Vendor" across admin UI labels, headers, and nav
+- [x] **VEND-02
+**: Trade column renders as distinct pill(s) in sentence case on the contractor list
 - [x] **VEND-03
 **: Admin can create, rename, and delete trade names from a trades manager UI
 - [x] **VEND-04
