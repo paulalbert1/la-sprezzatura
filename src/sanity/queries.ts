@@ -1071,7 +1071,7 @@ export async function getAllContractors(client: SanityClient) {
 export async function getAdminClients(client: SanityClient) {
   return client.fetch(`
     *[_type == "client"] | order(name asc) {
-      _id, name, email, phone
+      _id, name, email, phone, address { street, city, state, zip }
     }
   `);
 }
