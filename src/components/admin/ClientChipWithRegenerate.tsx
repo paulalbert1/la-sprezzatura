@@ -29,7 +29,6 @@ export interface ClientChipWithRegenerateProps {
     name: string;
     email?: string;
     phone?: string;
-    preferredContact?: string;
   };
 }
 
@@ -61,7 +60,6 @@ export default function ClientChipWithRegenerate({
             name: client.name,
             email: client.email || "",
             phone: client.phone || "",
-            preferredContact: client.preferredContact || "",
             entityType: "client" as const,
           }}
           className="inline-flex items-center gap-[7px] px-[11px] py-[5px] rounded-full text-[12.5px] cursor-pointer"

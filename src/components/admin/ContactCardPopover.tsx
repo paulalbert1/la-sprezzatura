@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
+import { formatPhone } from "../../lib/format";
 
 export interface ContactCardData {
   _id: string;
   name: string;
   email: string;
   phone?: string;
-  preferredContact?: string;
   entityType: "client" | "contractor";
 }
 
@@ -60,15 +60,8 @@ export default function ContactCardPopover({
           href={`tel:${data.phone}`}
           className="text-xs text-stone font-body hover:underline block mt-1"
         >
-          {data.phone}
+          {formatPhone(data.phone)}
         </a>
-      )}
-
-      {/* Preferred contact (conditional) */}
-      {data.preferredContact && (
-        <div className="text-xs text-stone font-body mt-1">
-          Prefers: {data.preferredContact}
-        </div>
       )}
 
       {/* Divider */}
