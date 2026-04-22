@@ -19,23 +19,22 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v3.1 Rendering Tool Polish | Fix wizard UX, image previews, multi-upload, blob reliability | 13-14 | Complete 2026-04-03 |
 | v4.0 Project Schedule | Interactive Gantt chart for project sequencing | 15-17 | Phase 15 complete |
 | v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 29-34 | Shipped 2026-04-12 |
-| v5.1 Admin UX Polish | Hands-on UX refinements, Work Order + Documents panels, vendor/client schema updates | 35-41 | In progress |
-| v5.2 Schedule Rebuild | Retire Frappe Gantt, configurable designer template workflow | TBD | Needs brainstorming |
+| v5.1 Admin UX Polish | Hands-on UX refinements, Work Order + Documents panels, vendor/client schema updates | 35-40 | Complete 2026-04-22 (Phase 41 carried to v5.2) |
+| v5.2 Trades Directory | Unified Trades entity, /admin/trades routes, relationship field, doc checklists, completeness indicator | 41-TBD | In progress |
 | v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD | Planned |
 
-## Current Milestone: v5.1 Admin UX Polish & Workflow Additions
+## Current Milestone: v5.2 Trades Directory
 
-**Goal:** Refine the v5.0 admin app based on Liz's hands-on feedback, add Work Order and Documents panels to project detail, remove pricing exposure from procurement, and tighten vendor/client data models.
+**Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) also carries forward from v5.1.
 
 **Target features:**
-- Dashboard polish — rename Deliveries → Upcoming Deliveries, free-text filters, remove relative-time status noise, fix Contractor card bugs, visible task add + hide-completed
-- Projects list — completed-project visual separation, manual + 90-day auto-archive, archived view
-- Procurement — row-to-modal view/edit, strip all pricing fields (privacy), rename Delivery → Expected install date, multi-image upload
-- NEW Work Order panel — select procurement items + custom fields + special instructions → send via office@lasprezz.com
-- NEW Documents panel — upload contracts and addenda to a project
-- Send Update sender config — from/cc sourced from Settings
-- Contractors/Vendors — rename to "Contractor / Vendor", trade pills + trades CRUD, address field, 1099 upload
-- Clients — consistent phone formatting, address field, updated columns, drop "preferred contact"
+- Clients (Phase 41 carryover) — consistent phone formatting, address field, updated columns, drop "preferred contact"
+- Unified Trades entity — `/admin/trades` routes replace `/admin/contractors`; nav and breadcrumbs updated
+- Relationship field — each Trades record has a `contractor | vendor` relationship type
+- Document checklists — relationship field drives which required documents are shown per record
+- Display name logic — entity label renders as "Contractor" or "Vendor" based on relationship
+- Completeness indicator — list view shows a visual signal when required fields or documents are missing
+- Detail page meta line — compact at-a-glance summary (trade, relationship type, location) below the name
 
 ## Current State (after v5.0)
 
@@ -82,20 +81,18 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] DNS consolidation — all 4 domains to Cloudflare
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
 
-### Active (v5.1 — in progress)
+### Active (v5.2 — in progress)
 
-- [ ] Dashboard polish — upcoming-deliveries rename, free-text filters, contractor card fixes, tasks add/hide, remove relative-time status noise
-- [ ] Projects list — completed-project styling, manual archive, 90-day auto-archive, archived view
-- [ ] Procurement — row-to-modal editor, strip pricing fields, rename install-date column, multi-image upload
-- [ ] Work Order panel — select procurement items, custom fields, special instructions, email send
-- [ ] Documents panel — upload contracts and project documentation
-- [ ] Send Update sender config sourced from Settings (office@ / cc liz@)
-- [ ] Contractors/Vendors rename + trade pills + trades CRUD + address + 1099 support
-- [ ] Client data model — phone formatting, address field, updated columns, drop preferred-contact
+- [ ] Client data model — phone formatting, address field, updated columns, drop preferred-contact (Phase 41 carryover from v5.1)
+- [ ] Unified Trades entity — `/admin/trades` routes replacing `/admin/contractors`
+- [ ] Relationship field — `contractor | vendor` per Trades record, drives document checklists
+- [ ] Display name logic — entity renders as "Contractor" or "Vendor" based on relationship type
+- [ ] Completeness indicator — list view signals missing required fields or documents
+- [ ] Detail page meta line — trade, relationship type, location shown below the name
 
 ### Deferred (v4.0 — Gantt)
 
-- Phases 16-17 superseded by v5.2 Schedule Rebuild (Frappe Gantt retirement)
+- Phases 16-17 superseded by a future Schedule Rebuild milestone (Frappe Gantt retirement — originally v5.2, now displaced by Trades Directory)
 
 ### Planned (v6.0 — Linha Platform)
 
@@ -174,4 +171,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-14 — v5.1 milestone started (Admin UX Polish & Workflow Additions)*
+*Last updated: 2026-04-22 — Milestone v5.2 Trades Directory started; Phase 41 carried forward from v5.1*
