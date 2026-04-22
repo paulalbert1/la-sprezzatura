@@ -236,8 +236,12 @@ Plans:
   2. Client records capture physical address fields (street, city, state, zip)
   3. The Clients list columns are name, address, email, phone (no other columns)
   4. The "Preferred contact" field is absent from both the client schema and the UI
-**Plans**: TBD (estimated 2-3)
+**Plans**: 2 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 41-01-PLAN.md — Wave 1: formatPhone utility + colocated tests + client schema/queries/API preferredContact purge (CLNT-10 foundation, CLNT-11 verification, CLNT-13 backend)
+- [ ] 41-02-PLAN.md — Wave 2: UI sweep across 5 admin components (formatPhone application, list column reshape, address sort/search, preferredContact UI purge) (CLNT-10, CLNT-11, CLNT-12, CLNT-13)
 
 ### Phase 42: Trades Entity — Routes, Schema, and Display
 **Goal**: The Trades entity has its own `/admin/trades` routes, a `contractor | vendor` relationship field that drives display names and meta line rendering, and the 1099 document slot is unified into the contractor checklist schema rather than living as a standalone badge
@@ -282,7 +286,7 @@ Plans:
 | 38 | v5.1 | 2/2 | Complete | 2026-04-15 |
 | 39 | v5.1 | 4/4 | Complete | 2026-04-15 |
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
-| 41 | v5.2 | 0/3 | Not started | - |
+| 41 | v5.2 | 0/2 | Planned | - |
 | 42 | v5.2 | 0/3 | Not started | - |
 | 43 | v5.2 | 0/3 | Not started | - |
 
@@ -292,3 +296,4 @@ Plans:
 *v5.0 shipped: 2026-04-12 — archived to milestones/v5.0-ROADMAP.md*
 *v5.1 planned: 2026-04-14 — 7 phases, 43 requirements, 22 plans estimated*
 *v5.2 planned: 2026-04-22 — 3 phases, 12 requirements, ~9 plans estimated*
+*Phase 41 planned: 2026-04-22 — 2 plans (backend foundation + UI sweep)*
