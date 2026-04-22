@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: Ready to execute — Phase 41 planned (2 plans, 2 waves)
-stopped_at: Phase 41 planned
-last_updated: "2026-04-22T17:00:00.000Z"
-last_activity: 2026-04-22 — Phase 41 planned (2 plans: formatPhone utility + preferredContact purge)
+status: executing
+stopped_at: "Completed Phase 41 Plan 01: formatPhone utility + preferredContact backend removal"
+last_updated: "2026-04-22T17:07:54.349Z"
+last_activity: 2026-04-22
 progress:
   total_phases: 10
   completed_phases: 6
-  total_plans: 21
-  completed_plans: 21
-  percent: 100
+  total_plans: 23
+  completed_plans: 22
+  percent: 96
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Milestone v5.2 — Trades Directory
+**Current focus:** Phase 41 — client-data-model-refinements
 
 ## Current Position
 
-Phase: 41 (planned — ready to execute)
-Plan: 41-01 (Wave 1), 41-02 (Wave 2)
-Status: Ready to execute — 2 plans, 2 waves
-Last activity: 2026-04-22 — Phase 41 planned (formatPhone utility, preferredContact purge, list columns reshape)
+Phase: 41 (client-data-model-refinements) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-22
 
-Progress: ░░░░░░░░░░ 0% (0/3 phases complete)
+Progress: [██████████] 96%
 
 ## v5.2 Phase Map
 
@@ -72,6 +72,9 @@ Carried from v5.1 boundary. Full history:
 - Phase 43 scope: TRAD-08 (Settings config) and TRAD-06 (checklist UI) land together — checklist UI is only renderable once types are configurable; TRAD-04 (completeness indicator) lands in the same phase since it reads required-document state
 - Checklist item types for TRAD-08 extend siteSettings with contractorChecklistItems[] and vendorChecklistItems[]
 - Work Order routing by relationship type deferred to v5.3 (out of scope per REQUIREMENTS.md)
+- formatPhone extracts all digits via /\D/g; returns (NNN) NNN-NNNN for exactly 10 digits; raw input unchanged otherwise (safe fallback for non-US numbers)
+- Phone stored raw in Sanity — no normalization on save; display format is render-time only via formatPhone() from src/lib/format.ts
+- No Sanity data migration for orphaned preferredContact values — removed from schema/queries/API; existing documents retain inert orphaned data per D-18
 
 ### Pending Todos
 
@@ -89,7 +92,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 41 context gathered
-Resume file: --resume-file
+Last session: 2026-04-22T17:07:54.344Z
+Stopped at: Completed Phase 41 Plan 01: formatPhone utility + preferredContact backend removal
+Resume file: None
 Next action: `/gsd-plan-phase 41`

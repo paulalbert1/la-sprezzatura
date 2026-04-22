@@ -7,10 +7,13 @@
 
 ### Client Refinements (CLNT — carryover from v5.1 Phase 41)
 
-- [ ] **CLNT-10**: Phone numbers render in a single consistent format across the client list, contractor list, popovers, and detail views
-- [ ] **CLNT-11**: Client record includes physical address fields (street, city, state, zip)
+- [x] **CLNT-10
+**: Phone numbers render in a single consistent format across the client list, contractor list, popovers, and detail views
+- [x] **CLNT-11
+**: Client record includes physical address fields (street, city, state, zip)
 - [ ] **CLNT-12**: Clients list columns are: name, address, email, phone (replaces current columns)
-- [ ] **CLNT-13**: "Preferred contact" field is removed from both the client schema and the UI
+- [x] **CLNT-13
+**: "Preferred contact" field is removed from both the client schema and the UI
 
 ### Trades Entity & Routing (TRAD)
 
