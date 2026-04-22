@@ -28,6 +28,17 @@ export const contractor = defineType({
       type: "string",
     }),
     defineField({
+      name: "address",
+      title: "Business Address",
+      type: "object",
+      fields: [
+        defineField({ name: "street", title: "Street", type: "string" }),
+        defineField({ name: "city", title: "City", type: "string" }),
+        defineField({ name: "state", title: "State", type: "string" }),
+        defineField({ name: "zip", title: "ZIP Code", type: "string" }),
+      ],
+    }),
+    defineField({
       name: "trades",
       title: "Trades",
       type: "array",
@@ -49,6 +60,12 @@ export const contractor = defineType({
             defineField({ name: "fileType", title: "File Type", type: "string" }),
             defineField({ name: "url", title: "URL", type: "url", validation: (r) => r.required() }),
             defineField({ name: "uploadedAt", title: "Uploaded At", type: "datetime" }),
+            defineField({
+              name: "docType",
+              title: "Document Type",
+              type: "string",
+              description: "Classification for 1099s, insurance certs, contracts, and other docs",
+            }),
           ],
           preview: {
             select: { title: "fileName", subtitle: "fileType" },

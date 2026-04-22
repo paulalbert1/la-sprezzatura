@@ -46,6 +46,13 @@ export const siteSettings = defineType({
       type: "string",
     }),
     defineField({
+      name: "trades",
+      title: "Trades Catalog",
+      type: "array",
+      description: "Managed list of trade names available in the contractor edit form.",
+      of: [{ type: "string" }],
+    }),
+    defineField({
       name: "socialLinks",
       title: "Social Media Links",
       type: "object",
