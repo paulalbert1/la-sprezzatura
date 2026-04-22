@@ -16,6 +16,7 @@ import RenderingConfigSection, {
   type RenderingConfigValues,
 } from "./RenderingConfigSection";
 import StudioRetirementNotice from "./StudioRetirementNotice";
+import TradesCatalogSection from "../TradesCatalogSection";
 
 // Phase 34 Plan 03 — SettingsPage
 // Source of truth:
@@ -41,6 +42,8 @@ export interface SiteSettingsPayload {
   // Phase 38 — Send Update sender config (SETT-10 / SETT-11)
   defaultFromEmail: string;
   defaultCcEmail: string;
+  // Phase 40 — VEND-03
+  trades: string[];
 }
 
 export interface SettingsPageProps {
@@ -54,6 +57,7 @@ function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
     heroSlideshow: s.heroSlideshow.map((slide) => ({ ...slide })),
     renderingImageTypes: [...s.renderingImageTypes],
     renderingExcludedUsers: [...s.renderingExcludedUsers],
+    trades: [...(s.trades ?? [])],
   };
 }
 
@@ -77,6 +81,7 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     renderingImageTypes: initialSettings.renderingImageTypes ?? [],
     renderingExcludedUsers: initialSettings.renderingExcludedUsers ?? [],
   });
+  const [trades, setTrades] = useState<string[]>(initialSettings.trades ?? []);
   const [dirty, setDirty] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
@@ -113,6 +118,14 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     [markDirty],
   );
 
+  const handleTradesChange = useCallback(
+    (next: string[]) => {
+      setTrades(next);
+      markDirty();
+    },
+    [markDirty],
+  );
+
   const handleHeroDirty = useCallback(
     (d: boolean) => {
       if (d) markDirty();
@@ -137,6 +150,7 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
       renderingImageTypes: [...reset.renderingImageTypes],
       renderingExcludedUsers: [...reset.renderingExcludedUsers],
     });
+    setTrades([...(reset.trades ?? [])]);
     setDirty(false);
     setErrorBanner(null);
   }, [initialSettings]);
@@ -164,6 +178,14 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
       if (!response.ok) {
         throw new Error("Save failed");
       }
+      const tradesResponse = await fetch("/api/admin/site-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "updateTrades", trades }),
+      });
+      if (!tradesResponse.ok) {
+        throw new Error("Could not save. Check your connection and try again.");
+      }
       setDirty(false);
       show({ variant: "success", title: "Settings saved", duration: 3000 });
     } catch (err) {
@@ -171,7 +193,7 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     } finally {
       setSaving(false);
     }
-  }, [general, socialLinks, rendering, heroValid, show]);
+  }, [general, socialLinks, rendering, trades, heroValid, show]);
 
   const initialHeroSlides = useMemo<HeroSlide[]>(
     () => initialSettings.heroSlideshow ?? [],
@@ -214,6 +236,10 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
             values={rendering}
             onChange={handleRenderingChange}
           />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Trades">
+          <TradesCatalogSection trades={trades} onChange={handleTradesChange} />
         </CollapsibleSection>
       </div>
 

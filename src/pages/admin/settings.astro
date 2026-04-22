@@ -43,6 +43,7 @@ type SiteSettingsRow = {
   renderingAllocation?: number;
   renderingImageTypes?: string[];
   renderingExcludedUsers?: string[];
+  trades?: string[];
 };
 
 const row = raw as SiteSettingsRow;
@@ -77,6 +78,7 @@ const initialSettings = {
   renderingAllocation: row.renderingAllocation ?? 50,
   renderingImageTypes: row.renderingImageTypes ?? [],
   renderingExcludedUsers: row.renderingExcludedUsers ?? [],
+  trades: row.trades ?? [],
 };
 ---
 
