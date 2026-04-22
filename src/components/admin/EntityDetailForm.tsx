@@ -148,7 +148,7 @@ export default function EntityDetailForm({
     };
 
     if (!isCreateMode && entity?._id) {
-      payload._id = entity._id;
+      payload[`${entityType}Id`] = entity._id;
     }
 
     if (entityType === "client") {
@@ -186,8 +186,9 @@ export default function EntityDetailForm({
 
       const result = await res.json();
 
-      if (isCreateMode && result._id) {
-        window.location.href = `/admin/${entityType}s/${result._id}`;
+      const createdId = result[`${entityType}Id`] ?? result._id;
+      if (isCreateMode && createdId) {
+        window.location.href = `/admin/${entityType}s/${createdId}`;
         return;
       }
 
