@@ -15,11 +15,11 @@ const contractors = await getAdminContractors(client);
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Contractors" },
+  { label: "Contractor / Vendor" },
 ];
 ---
 
-<AdminLayout title="Contractors - Studio" pageTitle="Contractors" breadcrumbs={breadcrumbs}>
+<AdminLayout title="Contractor / Vendor — La Sprezzatura Admin" pageTitle="Contractor / Vendor" breadcrumbs={breadcrumbs}>
   <EntityListPage
     client:load
     entityType="contractor"

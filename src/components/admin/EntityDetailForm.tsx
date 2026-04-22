@@ -657,7 +657,7 @@ function DeleteInlineDialog({
       <div className="bg-white rounded-xl shadow-xl w-[400px] p-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold font-body text-charcoal">
-            Delete {entityType === "client" ? "Client" : "Contractor"}
+            Delete {entityType === "client" ? "Client" : "Contractor / Vendor"}
           </h3>
           <button
             type="button"

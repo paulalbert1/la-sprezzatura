@@ -19,7 +19,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Projects", href: "/admin/projects", icon: FolderKanban },
   { label: "Clients", href: "/admin/clients", icon: Users },
-  { label: "Contractors", href: "/admin/contractors", icon: HardHat },
+  { label: "Contractor / Vendor", href: "/admin/contractors", icon: HardHat },
   { label: "Portfolio", href: "/admin/portfolio", icon: Image },
   { label: "Rendering", href: "/admin/rendering", icon: Sparkles },
   { label: "Settings", href: "/admin/settings", icon: Settings },

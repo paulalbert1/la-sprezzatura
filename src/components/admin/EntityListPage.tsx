@@ -30,7 +30,7 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const columns = entityType === "client" ? CLIENT_COLUMNS : CONTRACTOR_COLUMNS;
-  const label = entityType === "client" ? "Client" : "Contractor";
+  const label = entityType === "client" ? "Client" : "Contractor / Vendor";
 
   function handleSort(columnKey: string) {
     if (sortColumn === columnKey) {
@@ -151,12 +151,12 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
               <tr>
                 <td colSpan={columns.length} className="text-center py-12">
                   <p className="text-sm text-stone font-body font-semibold">
-                    {entityType === "client" ? "No clients yet" : "No contractors yet"}
+                    {entityType === "client" ? "No clients yet" : "No contractors / vendors yet"}
                   </p>
                   <p className="text-sm text-stone font-body mt-1">
                     {entityType === "client"
                       ? "Create your first client record to start tracking contacts and project assignments."
-                      : "Add your first contractor to manage trades, documents, and project assignments."}
+                      : "Add your first contractor / vendor to manage trades, documents, and project assignments."}
                   </p>
                 </td>
               </tr>

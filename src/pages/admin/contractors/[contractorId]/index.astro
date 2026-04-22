@@ -31,15 +31,15 @@ if (!isNew) {
   projects = result.projects || [];
 }
 
-const pageTitle = isNew ? "New Contractor" : (contractorData?.name || "Contractor");
+const pageTitle = isNew ? "New Contractor / Vendor" : (contractorData?.name || "Contractor / Vendor");
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Contractors", href: "/admin/contractors" },
+  { label: "Contractor / Vendor", href: "/admin/contractors" },
   { label: pageTitle },
 ];
 ---
 
-<AdminLayout title={pageTitle + " - Studio"} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
+<AdminLayout title={isNew ? "New Contractor / Vendor — La Sprezzatura Admin" : pageTitle + " — Contractor / Vendor — La Sprezzatura Admin"} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
   <div class="max-w-4xl">
     <EntityDetailForm
       client:load
