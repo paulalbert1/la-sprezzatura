@@ -37,7 +37,8 @@ type ActionName =
   | "appendHeroSlide"
   | "updateHeroSlide"
   | "reorderHeroSlideshow"
-  | "removeHeroSlide";
+  | "removeHeroSlide"
+  | "updateTrades";
 
 function jsonResponse(data: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -435,6 +436,29 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .patch(SETTINGS_DOC_ID)
         .setIfMissing({ updateLog: [] })
         .unset([`heroSlideshow[_key=="${_key}"]`])
+        .append("updateLog", [logEntry])
+        .commit();
+
+      return jsonResponse({ success: true });
+    }
+
+    if (action === "updateTrades") {
+      const { trades } = body as { trades?: unknown };
+      if (!Array.isArray(trades)) {
+        return errorResponse("trades must be an array", 400);
+      }
+      for (const t of trades) {
+        if (typeof t !== "string" || t.trim().length === 0) {
+          return errorResponse("trades entries must be non-empty strings", 400);
+        }
+      }
+
+      const logEntry = buildUpdateLogEntry(action, session.entityId);
+
+      await sanityWriteClient
+        .patch(SETTINGS_DOC_ID)
+        .setIfMissing({ _type: "siteSettings", trades: [], updateLog: [] })
+        .set({ trades: (trades as string[]).map((t) => t.trim()) })
         .append("updateLog", [logEntry])
         .commit();
 

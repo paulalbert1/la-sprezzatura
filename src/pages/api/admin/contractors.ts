@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return jsonResponse({ error: "Invalid form action" }, 400);
     }
 
-    const contractorId = formData.get("contractorId") as string;
+    const contractorId = (formData.get("contractorId") ?? formData.get("_id")) as string;
     const file = formData.get("file") as File | null;
 
     if (!contractorId || typeof contractorId !== "string") {
@@ -65,6 +65,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         contentType: file.type,
       });
 
+      const docType = formData.get("docType") as string | null;
+
       const docEntry = {
         _key: generatePortalToken(8),
         _type: "contractorDocument",
@@ -72,6 +74,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         fileType: file.type,
         url: asset.url,
         uploadedAt: new Date().toISOString(),
+        ...(docType && docType.trim().length > 0 && { docType: docType.trim() }),
       };
 
       await client
@@ -80,7 +83,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .append("documents", [docEntry])
         .commit();
 
-      return jsonResponse({ success: true, documentKey: docEntry._key, url: asset.url });
+      return jsonResponse({ success: true, document: docEntry, documentKey: docEntry._key, url: asset.url });
     } catch (err) {
       console.error("Failed to upload contractor document:", err);
       return jsonResponse({ error: "Failed to upload document" }, 500);
@@ -99,12 +102,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   try {
     if (action === "create") {
-      const { name, email, phone, company, trades } = body as {
+      const { name, email, phone, company, trades, address } = body as {
         name: string;
         email: string;
         phone?: string;
         company?: string;
         trades: string[];
+        address?: { street?: string; city?: string; state?: string; zip?: string };
       };
 
       if (!name || typeof name !== "string" || name.trim().length < 2) {
@@ -124,19 +128,28 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         ...(phone && { phone: phone.trim() }),
         ...(company && { company: company.trim() }),
         trades,
+        ...(address && {
+          address: {
+            street: address.street?.trim() || "",
+            city: address.city?.trim() || "",
+            state: address.state?.trim() || "",
+            zip: address.zip?.trim() || "",
+          },
+        }),
       });
 
       return jsonResponse({ success: true, contractorId: result._id });
     }
 
     if (action === "update") {
-      const { contractorId, name, email, phone, company, trades } = body as {
+      const { contractorId, name, email, phone, company, trades, address } = body as {
         contractorId: string;
         name: string;
         email: string;
         phone?: string;
         company?: string;
         trades: string[];
+        address?: { street?: string; city?: string; state?: string; zip?: string };
       };
 
       if (!contractorId || typeof contractorId !== "string") {
@@ -161,6 +174,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           phone: phone?.trim() || "",
           company: company?.trim() || "",
           trades,
+          address: address
+            ? {
+                street: address.street?.trim() || "",
+                city: address.city?.trim() || "",
+                state: address.state?.trim() || "",
+                zip: address.zip?.trim() || "",
+              }
+            : undefined,
         })
         .commit();
 

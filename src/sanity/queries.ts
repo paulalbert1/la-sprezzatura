@@ -544,6 +544,7 @@ export const SITE_SETTINGS_QUERY = `
     renderingAllocation,
     renderingImageTypes,
     renderingExcludedUsers,
+    trades,
     updateLog[] | order(savedAt desc)[0...5] {
       _key,
       savedAt,
@@ -1101,7 +1102,7 @@ export async function getAdminContractors(client: SanityClient) {
 export async function getAdminContractorDetail(client: SanityClient, contractorId: string) {
   return client.fetch(`{
     "contractor": *[_type == "contractor" && _id == $contractorId][0] {
-      _id, name, email, phone, company, trades, documents[] { _key, fileName, fileType, url, uploadedAt }
+      _id, name, email, phone, company, trades, address, documents[] { _key, fileName, fileType, url, uploadedAt, docType }
     },
     "projects": *[_type == "project" && references($contractorId)] | order(title asc) {
       _id, title, pipelineStage, engagementType, projectStatus
