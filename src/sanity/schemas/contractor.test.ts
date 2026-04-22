@@ -7,13 +7,15 @@ describe("contractor schema", () => {
     expect(contractor.type).toBe("document");
   });
 
-  it("has fields: name, email, phone, company, trades", () => {
+  it("has fields: name, email, phone, company, trades, address, documents", () => {
     const fieldNames = contractor.fields?.map((f) => f.name);
     expect(fieldNames).toContain("name");
     expect(fieldNames).toContain("email");
     expect(fieldNames).toContain("phone");
     expect(fieldNames).toContain("company");
     expect(fieldNames).toContain("trades");
+    expect(fieldNames).toContain("address");
+    expect(fieldNames).toContain("documents");
   });
 
   it("name field has required validation", () => {
@@ -30,24 +32,56 @@ describe("contractor schema", () => {
     expect(field?.validation).toBeDefined();
   });
 
-  it("trades field is array type with predefined list", () => {
+  it("trades field is array type of strings", () => {
     const field = contractor.fields?.find((f) => f.name === "trades");
     expect(field).toBeDefined();
     expect(field?.type).toBe("array");
-    const ofArray = (field as { of?: { type: string; options?: { list: { value: string }[] } }[] })?.of;
+    const ofArray = (field as { of?: { type: string }[] })?.of;
     expect(ofArray).toBeDefined();
     expect(ofArray!.length).toBeGreaterThan(0);
     const stringMember = ofArray![0];
     expect(stringMember.type).toBe("string");
-    const list = stringMember.options?.list;
-    expect(list).toBeDefined();
-    const values = list!.map((item) => item.value);
-    expect(values).toContain("electrician");
-    expect(values).toContain("general-contractor");
-    expect(values).toContain("custom-millwork");
-    expect(values).toContain("plumber");
-    expect(values).toContain("hvac");
-    expect(values).toContain("other");
+  });
+
+  // Phase 40 Plan 01 — VEND-04: address field
+  it("address field is an object type with street, city, state, zip sub-fields", () => {
+    const field = contractor.fields?.find((f) => f.name === "address");
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("object");
+    const subFields = (field as { fields?: { name: string }[] })?.fields;
+    expect(subFields).toBeDefined();
+    const subFieldNames = subFields!.map((f) => f.name);
+    expect(subFieldNames).toContain("street");
+    expect(subFieldNames).toContain("city");
+    expect(subFieldNames).toContain("state");
+    expect(subFieldNames).toContain("zip");
+  });
+
+  it("address field appears between company and trades in field order", () => {
+    const fieldNames = contractor.fields?.map((f) => f.name) ?? [];
+    const companyIdx = fieldNames.indexOf("company");
+    const addressIdx = fieldNames.indexOf("address");
+    const tradesIdx = fieldNames.indexOf("trades");
+    expect(companyIdx).toBeGreaterThanOrEqual(0);
+    expect(addressIdx).toBeGreaterThan(companyIdx);
+    expect(tradesIdx).toBeGreaterThan(addressIdx);
+  });
+
+  // Phase 40 Plan 01 — VEND-05: docType on contractorDocument array member
+  it("documents array member contractorDocument has a docType field", () => {
+    const documentsField = contractor.fields?.find((f) => f.name === "documents");
+    expect(documentsField).toBeDefined();
+    expect(documentsField?.type).toBe("array");
+    const ofArray = (documentsField as { of?: { name?: string; fields?: { name: string }[] }[] })?.of;
+    expect(ofArray).toBeDefined();
+    const docMember = ofArray!.find((m) => m.name === "contractorDocument");
+    expect(docMember).toBeDefined();
+    const memberFieldNames = docMember!.fields!.map((f) => f.name);
+    expect(memberFieldNames).toContain("fileName");
+    expect(memberFieldNames).toContain("fileType");
+    expect(memberFieldNames).toContain("url");
+    expect(memberFieldNames).toContain("uploadedAt");
+    expect(memberFieldNames).toContain("docType");
   });
 
   it("has preview selecting title from name and subtitle from company", () => {

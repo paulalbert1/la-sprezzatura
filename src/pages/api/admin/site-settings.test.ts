@@ -372,3 +372,96 @@ describe("POST /api/admin/site-settings (Phase 34 Plan 03)", () => {
     expect(typeof entry._key).toBe("string");
   });
 });
+
+// Phase 40 Plan 01 — VEND-03: updateTrades action
+describe("POST /api/admin/site-settings — updateTrades (Phase 40 Plan 01)", () => {
+  it("rejects non-admin session with 401", async () => {
+    mockGetSession.mockResolvedValueOnce({ entityId: "c-1", role: "client" });
+    const res = await callPost({
+      request: makeRequest({ action: "updateTrades", trades: ["electrician"] }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(401);
+    expect(mockPatch).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when trades is not an array", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ action: "updateTrades", trades: "electrician" }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/array/);
+  });
+
+  it("returns 400 when trades contains an empty string", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ action: "updateTrades", trades: ["electrician", ""] }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/non-empty/);
+  });
+
+  it("returns 400 when trades contains a whitespace-only string", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ action: "updateTrades", trades: ["electrician", "   "] }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toMatch(/non-empty/);
+  });
+
+  it("patches siteSettings with trimmed trades array on valid input", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({
+        action: "updateTrades",
+        trades: ["  electrician  ", "plumber", "hvac"],
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    expect(mockPatch).toHaveBeenCalledWith("siteSettings");
+    const setCall = mockSet.mock.calls.find(
+      (call) => call[0] && "trades" in call[0],
+    );
+    expect(setCall).toBeTruthy();
+    expect(setCall![0].trades).toEqual(["electrician", "plumber", "hvac"]);
+  });
+
+  it("accepts an empty array to clear the trades catalog", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ action: "updateTrades", trades: [] }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    const setCall = mockSet.mock.calls.find(
+      (call) => call[0] && "trades" in call[0],
+    );
+    expect(setCall).toBeTruthy();
+    expect(setCall![0].trades).toEqual([]);
+  });
+
+  it("appends an updateLog entry with action='updateTrades'", async () => {
+    adminSession();
+    await callPost({
+      request: makeRequest({ action: "updateTrades", trades: ["electrician"] }),
+      cookies: makeCookies(),
+    });
+    const logAppendCall = mockAppend.mock.calls.find(
+      (call) => call[0] === "updateLog",
+    );
+    expect(logAppendCall).toBeTruthy();
+    const [, entries] = logAppendCall!;
+    expect(entries).toHaveLength(1);
+    expect(entries[0].action).toBe("updateTrades");
+  });
+});
