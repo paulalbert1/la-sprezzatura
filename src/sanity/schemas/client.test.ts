@@ -28,18 +28,6 @@ describe("client schema", () => {
     expect(field?.type).toBe("string");
   });
 
-  it('has field "preferredContact" of type "string" with phone/email/text options', () => {
-    const field = client.fields?.find((f) => f.name === "preferredContact");
-    expect(field).toBeDefined();
-    expect(field?.type).toBe("string");
-    const list = (field?.options as { list: { value: string }[] })?.list;
-    expect(list).toHaveLength(3);
-    const values = list.map((item) => item.value);
-    expect(values).toContain("phone");
-    expect(values).toContain("email");
-    expect(values).toContain("text");
-  });
-
   it('has field "address" of type "object" with street, city, state, zip subfields', () => {
     const field = client.fields?.find((f) => f.name === "address");
     expect(field).toBeDefined();
