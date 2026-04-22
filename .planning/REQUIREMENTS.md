@@ -61,9 +61,12 @@
 
 - [ ] **VEND-01**: "Contractor" is renamed to "Contractor / Vendor" across admin UI labels, headers, and nav
 - [ ] **VEND-02**: Trade column renders as distinct pill(s) in sentence case on the contractor list
-- [ ] **VEND-03**: Admin can create, rename, and delete trade names from a trades manager UI
-- [ ] **VEND-04**: Contractor / Vendor record includes physical address fields (street, city, state, zip)
-- [ ] **VEND-05**: Contractor / Vendor record supports uploading a 1099 document with a clearly-designated 1099 badge
+- [x] **VEND-03
+**: Admin can create, rename, and delete trade names from a trades manager UI
+- [x] **VEND-04
+**: Contractor / Vendor record includes physical address fields (street, city, state, zip)
+- [x] **VEND-05
+**: Contractor / Vendor record supports uploading a 1099 document with a clearly-designated 1099 badge
 
 ### Clients (CLNT)
 

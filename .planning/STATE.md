@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.1
 milestone_name: Admin UX Polish & Workflow Additions
-status: in_progress
-stopped_at: Phase 40 planned — ready to execute
-last_updated: "2026-04-22T14:00:00.000Z"
+status: unknown
+stopped_at: Completed 40-01-PLAN.md — data layer (schemas, GROQ, API handlers)
+last_updated: "2026-04-22T13:23:48.378Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 21
-  completed_plans: 18
-  percent: 86
+  completed_plans: 19
+  percent: 90
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-14)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 39 — work-order-documents-panels
+**Current focus:** Phase 40 — contractor-vendor-rename-trades-crud-1099-support
 
 ## Current Position
 
-Phase: 40 (contractor-vendor-rename-trades-crud-1099-support) — READY TO EXECUTE
-Plan: 0 of 3 (planned)
+Phase: 40 — EXECUTING
+Plan: 2 of 3
 Next: /gsd-execute-phase 40
 Last activity: 2026-04-22
 
-Progress: [████████████████░░░░] 86%
+Progress: [█████████░] 90%
 
 ## v5.1 Phase Map
 
@@ -90,6 +90,10 @@ Carried from v5.0 boundary. Full history:
 - [Phase 39]: Plan 04: ContractorChipSendAction RotateCcw click in sent state now fires direct POST /[id]/send (no modal); completes UI-SPEC Surface 1 § Resend click behavior deferred from Plan 03
 - [Phase 39]: Plan 04: WorkOrderComposeModal sendAfter prop defaults true; chains second POST to /[id]/send after successful create — saved-for-later flow available via sendAfter={false}
 - [Phase 39]: Plan 04: tenantAudit failures inherited and extended (3 new lasprezz.com literals in /work-orders/[id]/send.ts are plan-mandated defaults; resolution requires shared constants module + audit allowlist in a separate maintenance PR)
+- address object field inserted between company and trades in contractor schema (D-09)
+- docType string field on contractorDocument array member; upload-doc returns full document object in response (D-07)
+- trades string[] array on siteSettings after defaultCcEmail, no group/initialValue (D-01); updateTrades API action validates and patches
+- upload-doc _id FormData key accepted as fallback for contractorId — pre-existing field-name mismatch fixed
 
 ### Pending Todos
 
@@ -107,7 +111,7 @@ Carried from v5.0:
 
 ## Session Continuity
 
-Last session: 2026-04-22
-Stopped at: Phase 40 planned — 3 plans in 2 waves, verification passed
-Resume file: --resume-file
+Last session: 2026-04-22T13:23:48.373Z
+Stopped at: Completed 40-01-PLAN.md — data layer (schemas, GROQ, API handlers)
+Resume file: None
 Next action: `/gsd-execute-phase 40`
