@@ -12,7 +12,6 @@ interface EntityDetailFormProps {
 interface FieldError {
   name?: string;
   email?: string;
-  preferredContact?: string;
   trades?: string;
   notes?: string;
 }
@@ -71,9 +70,6 @@ export default function EntityDetailForm({
   const [name, setName] = useState(entity?.name || "");
   const [email, setEmail] = useState(entity?.email || "");
   const [phone, setPhone] = useState(entity?.phone || "");
-  const [preferredContact, setPreferredContact] = useState(
-    entity?.preferredContact || "",
-  );
   const [street, setStreet] = useState(entity?.address?.street || "");
   const [city, setCity] = useState(entity?.address?.city || "");
   const [state, setState] = useState(entity?.address?.state || "");
@@ -118,10 +114,6 @@ export default function EntityDetailForm({
       newErrors.email = "Enter a valid email address";
     }
 
-    if (entityType === "client" && !preferredContact) {
-      newErrors.preferredContact = "Select a preferred contact method";
-    }
-
     if (entityType === "contractor" && trades.length === 0) {
       newErrors.trades = "Select at least one trade";
     }
@@ -152,7 +144,6 @@ export default function EntityDetailForm({
     }
 
     if (entityType === "client") {
-      payload.preferredContact = preferredContact;
       payload.address = {
         street: street.trim(),
         city: city.trim(),
@@ -404,32 +395,6 @@ export default function EntityDetailForm({
           {/* Client-specific fields */}
           {entityType === "client" && (
             <>
-              {/* Preferred Contact */}
-              <div>
-                <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
-                  Preferred Contact *
-                </label>
-                <select
-                  value={preferredContact}
-                  onChange={(e) => setPreferredContact(e.target.value)}
-                  className={`text-sm font-body text-charcoal bg-white border rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none ${
-                    errors.preferredContact
-                      ? "ring-1 ring-red-500 border-red-500"
-                      : "border-stone-light/40"
-                  }`}
-                >
-                  <option value="">Select...</option>
-                  <option value="Email">Email</option>
-                  <option value="Phone">Phone</option>
-                  <option value="Text">Text</option>
-                </select>
-                {errors.preferredContact && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.preferredContact}
-                  </p>
-                )}
-              </div>
-
               {/* Notes */}
               <div>
                 <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
