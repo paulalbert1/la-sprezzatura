@@ -23,8 +23,7 @@ const CONTRACTOR_COLUMNS = [
   { key: "relationship", label: "Type" },
   { key: "company", label: "Company" },
   { key: "trades", label: "Trade" },
-  { key: "email", label: "Email" },
-  { key: "phone", label: "Phone" },
+  { key: "contact", label: "Contact" },
 ];
 
 export default function EntityListPage({ entityType, entities }: EntityListPageProps) {
@@ -33,10 +32,7 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const columns = entityType === "client" ? CLIENT_COLUMNS : CONTRACTOR_COLUMNS;
-  // `label` is used for the New-record CTA ("New Contractor / Vendor") — the
-  // one place the ambiguous collective label is intentional per UI-SPEC. The
-  // form then forces the choice via the Relationship radio group.
-  const label = entityType === "client" ? "Client" : "Contractor / Vendor";
+  const label = entityType === "client" ? "Client" : "Trade";
 
   function handleSort(columnKey: string) {
     if (sortColumn === columnKey) {
@@ -212,7 +208,7 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                         )}
                       </td>
                       <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
-                      <td className="px-5 py-3 text-stone">{formatPhone(entity.phone) || "--"}</td>
+                      <td className="px-5 py-3 text-stone whitespace-nowrap">{formatPhone(entity.phone) || "--"}</td>
                     </>
                   ) : (
                     <>
@@ -225,8 +221,23 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                       <td className="px-5 py-3">
                         {formatTrades(entity.trades)}
                       </td>
-                      <td className="px-5 py-3 text-stone">{entity.email || "--"}</td>
-                      <td className="px-5 py-3 text-stone">{formatPhone(entity.phone) || "--"}</td>
+                      <td className="px-5 py-3 max-w-[200px]">
+                        {entity.email ? (
+                          <span
+                            className="block truncate text-stone"
+                            title={entity.email}
+                          >
+                            {entity.email}
+                          </span>
+                        ) : (
+                          <span className="text-stone-light">--</span>
+                        )}
+                        {entity.phone ? (
+                          <span className="block text-[11.5px] text-stone-light whitespace-nowrap mt-0.5">
+                            {formatPhone(entity.phone)}
+                          </span>
+                        ) : null}
+                      </td>
                     </>
                   )}
                 </tr>
