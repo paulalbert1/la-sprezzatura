@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-07-PLAN.md: WorkflowTracker shell + Header + Metrics + Warnings + BlankWorkflowState"
-last_updated: "2026-04-23T23:19:13.802Z"
+stopped_at: "Completed 44-08-PLAN.md: WorkflowTemplatesSection + WorkflowTemplateEditor tests (26 passing)"
+last_updated: "2026-04-23T23:24:22.478Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -118,6 +118,8 @@ Carried from v5.1 boundary. Full history:
 - afterEach(cleanup) required in portal component tests — jsdom shares document.body across tests causing accumulated portal nodes
 - afterEach(cleanup) required in all React island tests — jsdom accumulates portal/DOM nodes across tests without it (Plan 07)
 - derivePhaseStatus is a local pure function in WorkflowTracker (not imported from engine.ts) — engine is server-only, cannot run on client (Plan 07)
+- WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
+- WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
 
 ### Pending Todos
 
@@ -135,8 +137,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T23:19:13.797Z
-Stopped at: Completed 44-07-PLAN.md: WorkflowTracker shell + Header + Metrics + Warnings + BlankWorkflowState
+Last session: 2026-04-23T23:24:22.473Z
+Stopped at: Completed 44-08-PLAN.md: WorkflowTemplatesSection + WorkflowTemplateEditor tests (26 passing)
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
