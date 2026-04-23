@@ -24,7 +24,8 @@
 **: Each Trades record has a `relationship` field with two values: `contractor` or `vendor`
 - [x] **TRAD-03
 **: The entity display name renders as "Contractor" or "Vendor" (not "Contractor / Vendor") based on the record's relationship field — applied consistently in list view, detail view, popovers, nav, and work order context
-- [ ] **TRAD-04**: Trades list view shows a completeness indicator (e.g., amber dot) on any record where required fields or required documents are missing
+- [x] **TRAD-04
+**: Trades list view shows a completeness indicator (e.g., amber dot) on any record where required fields or required documents are missing
 - [x] **TRAD-05
 **: Trades detail page shows a meta line directly below the name: primary trade · relationship type · city, state
 
