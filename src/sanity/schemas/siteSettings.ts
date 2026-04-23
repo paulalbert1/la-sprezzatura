@@ -53,6 +53,24 @@ export const siteSettings = defineType({
       of: [{ type: "string" }],
     }),
     defineField({
+      name: "contractorChecklistItems",
+      title: "Contractor Checklist Items",
+      type: "array",
+      description:
+        "Required document types for contractor records (W-9, certificate of insurance, trade license, 1099). Editable via Settings in Phase 43.",
+      initialValue: ["W-9", "Certificate of insurance", "Trade license", "1099"],
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "vendorChecklistItems",
+      title: "Vendor Checklist Items",
+      type: "array",
+      description:
+        "Required document types for vendor records (vendor agreement, tax form). Editable via Settings in Phase 43.",
+      initialValue: ["Vendor agreement", "Tax form"],
+      of: [{ type: "string" }],
+    }),
+    defineField({
       name: "socialLinks",
       title: "Social Media Links",
       type: "object",

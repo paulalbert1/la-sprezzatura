@@ -1,3 +1,4 @@
+// UI-facing entity name: "Trades". _type stays "contractor" — see Phase 42 decision D-01.
 import { defineType, defineField, defineArrayMember } from "sanity";
 
 export const contractor = defineType({
@@ -26,6 +27,20 @@ export const contractor = defineType({
       name: "company",
       title: "Company",
       type: "string",
+    }),
+    defineField({
+      name: "relationship",
+      title: "Relationship Type",
+      type: "string",
+      description: "Whether this record is a contractor or vendor. Drives display name and document checklist.",
+      options: {
+        list: [
+          { title: "Contractor", value: "contractor" },
+          { title: "Vendor", value: "vendor" },
+        ],
+        layout: "radio",
+      },
+      validation: (r) => r.required().error("Relationship is required. Choose Contractor or Vendor."),
     }),
     defineField({
       name: "address",
