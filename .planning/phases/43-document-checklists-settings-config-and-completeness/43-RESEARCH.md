@@ -522,22 +522,13 @@ const IN_USE_DOC_TYPES_QUERY = `
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **"Other documents" upload behavior**
-   - What we know: D-04 says unmatched docs go to "Other documents" section
-   - What's unclear: Should the Upload button in "Other documents" store `docType = ""` or allow a freeform label? Claude's discretion area.
-   - Recommendation: Store `docType = ""` (empty string). Simplest. The item will remain in "Other documents" regardless, and Liz can re-upload with correct type if needed.
+1. **"Other documents" upload behavior** — RESOLVED: No Upload button in "Other documents" section. New uploads must originate from a checklist row only (D-05). "Other documents" is read-only (View + delete). Resolved via UI-SPEC.md §Copywriting Contract.
 
-2. **In-use types API surface**
-   - What we know: The delete guard needs to know which docType values are in use across all contractor records
-   - What's unclear: Should this be a dedicated GET endpoint or fetched via an inline query on Settings page load?
-   - Recommendation: Add a `GET /api/admin/site-settings?action=inUseDocTypes` or perform the GROQ query in a `useEffect` on SettingsPage mount. The second approach requires no new API route and is consistent with how SettingsPage loads initial data.
+2. **In-use types API surface** — RESOLVED: `GET /api/admin/site-settings?action=inUseDocTypes` endpoint added in Plan 01. Fetched in a `useEffect` on SettingsPage mount; result held as `Set<string>` passed to both ChecklistConfigSection instances.
 
-3. **TypeScript ActionName union in site-settings.ts**
-   - What we know: The `ActionName` type (line 36) is a union of all valid action strings
-   - What's unclear: N/A — straightforward extension
-   - Recommendation: Add `"updateContractorChecklistItems" | "updateVendorChecklistItems"` to the union.
+3. **TypeScript ActionName union in site-settings.ts** — RESOLVED: Plan 01 Task 2 extends the union with `"updateContractorChecklistItems" | "updateVendorChecklistItems" | "inUseDocTypes"`.
 
 ---
 
