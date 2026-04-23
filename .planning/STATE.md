@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: ready_to_execute
-stopped_at: Phase 42 planned — 2 plans (42-01 wave 1, 42-02 wave 2)
-last_updated: "2026-04-23T03:00:00.000Z"
+status: executing
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-04-23T03:45:42.829Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 10
   completed_phases: 7
-  total_plans: 24
-  completed_plans: 24
-  percent: 100
+  total_plans: 26
+  completed_plans: 25
+  percent: 96
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase --phase — 41
+**Current focus:** Phase 42 — trades-entity-routes-schema-and-display
 
 ## Current Position
 
-Phase: 42
-Plan: 2 plans ready (42-01, 42-02)
+Phase: 42 (trades-entity-routes-schema-and-display) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
 Last activity: 2026-04-23
 
-Progress: [██████████] 100%
+Progress: [██████████] 96%
 
 ## v5.2 Phase Map
 
@@ -78,6 +78,10 @@ Carried from v5.1 boundary. Full history:
 - Address cell renders [city, state].filter(Boolean).join(', ') with em-dash fallback — handles city-only, state-only, and both-present cases
 - Sort for nested address.city uses conditional accessor in comparator (sortColumn === 'address'); generic path handles all flat fields
 - tel: href in ContactCardPopover uses raw data.phone; only visible link text uses formatPhone() — raw digits required by native dialer
+- Phase 42 Plan 01: Sanity _type stays 'contractor'; relationship field (required, radio) carries the UI-facing meaning per D-01
+- Phase 42 Plan 01: PATCH update uses hasOwnProperty on body to distinguish omitted key (leave alone) vs. explicit null (clear to null) vs. string (trim+set)
+- Phase 42 Plan 01: relationshipLabel() helper is case-sensitive by design — only canonical 'vendor' slug returns 'Vendor'; null/undefined/other → 'Contractor' per D-04
+- Phase 42 Plan 01: siteSettings.contractorChecklistItems[] and vendorChecklistItems[] are schema-only in Phase 42 per D-09 — rendered by Phase 43 checklist UI
 
 ### Pending Todos
 
@@ -95,7 +99,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 42 UI-SPEC approved
-Resume file: --resume-file
+Last session: 2026-04-23T03:45:42.823Z
+Stopped at: Completed 42-01-PLAN.md
+Resume file: None
 Next action: `/gsd-plan-phase 41`

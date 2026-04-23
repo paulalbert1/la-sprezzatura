@@ -19,7 +19,8 @@
 ### Trades Entity & Routing (TRAD)
 
 - [ ] **TRAD-01**: `/admin/trades` route replaces `/admin/contractors`; all URLs, nav links, and breadcrumbs are updated throughout the admin app and portal
-- [ ] **TRAD-02**: Each Trades record has a `relationship` field with two values: `contractor` or `vendor`
+- [x] **TRAD-02
+**: Each Trades record has a `relationship` field with two values: `contractor` or `vendor`
 - [ ] **TRAD-03**: The entity display name renders as "Contractor" or "Vendor" (not "Contractor / Vendor") based on the record's relationship field — applied consistently in list view, detail view, popovers, nav, and work order context
 - [ ] **TRAD-04**: Trades list view shows a completeness indicator (e.g., amber dot) on any record where required fields or required documents are missing
 - [ ] **TRAD-05**: Trades detail page shows a meta line directly below the name: primary trade · relationship type · city, state
@@ -27,7 +28,8 @@
 ### Document Checklists (TRAD)
 
 - [ ] **TRAD-06**: Trades detail page shows a document checklist scoped to the record's relationship type — contractor checklist: W-9, certificate of insurance, trade license, 1099; vendor checklist: vendor agreement, tax form
-- [ ] **TRAD-07**: The existing 1099 document slot from Phase 40 is unified into the contractor document checklist as a checklist item; no standalone 1099 section remains on the detail page
+- [x] **TRAD-07
+**: The existing 1099 document slot from Phase 40 is unified into the contractor document checklist as a checklist item; no standalone 1099 section remains on the detail page
 - [ ] **TRAD-08**: Checklist item types are configurable from Settings per relationship type (add, rename); a checklist item type cannot be removed while any Trades records have a document uploaded for that type
 
 ## Future Requirements (Deferred)
