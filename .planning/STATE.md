@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: planning
-stopped_at: Phase 43 planned (4 plans, 2 waves)
-last_updated: "2026-04-23T15:30:00.000Z"
+status: executing
+stopped_at: Completed 43-02-PLAN.md
+last_updated: "2026-04-23T16:36:06.150Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 10
   completed_phases: 8
-  total_plans: 27
-  completed_plans: 27
-  percent: 100
+  total_plans: 31
+  completed_plans: 29
+  percent: 94
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase --phase — 42
+**Current focus:** Phase --phase — 43
 
 ## Current Position
 
-Phase: 43
-Plan: Ready to execute (4 plans)
-Status: Planning complete
+Phase: 43 — EXECUTING
+Plan: 3 of 4 (Plan 01 complete)
+Status: Ready to execute
 Last activity: 2026-04-23
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## v5.2 Phase Map
 
@@ -86,6 +86,12 @@ Carried from v5.1 boundary. Full history:
 - Phase 42 Plan 02: Relationship field renders as a 2-card radio group, not a dropdown. Rationale: 2 mutually-exclusive options semantically heavy enough (drives checklist + label) to warrant both being visible.
 - Phase 42 Plan 02: EntityListPage primary CTA keeps 'New Contractor / Vendor' collective label per UI-SPEC — the ambiguous label is intentional at the CTA; the form forces the choice via the required radio group.
 - Phase 42 Plan 02: projectContractors GROQ projection extended with relationship so chip popovers on the project detail page show the correct Contractor|Vendor label (Rule 2 correctness addition beyond plan scope).
+- Phase 43 Plan 01: GET handler in site-settings.ts uses getSession(cookies) matching existing POST handler convention, not locals
+- Phase 43 Plan 01: Settings checklist API returns {types: string[]} envelope from GET inUseDocTypes; non-string and empty values filtered server-side
+- Phase 43 Plan 01: 50-item DoS cap on updateContractorChecklistItems / updateVendorChecklistItems enforced BEFORE per-entry validation (T-43-03)
+- Phase 43 Plan 02: Shared hidden file input + activeLabelRef (not per-row inputs) drives row-scoped upload in TradeChecklist — simpler DOM and matches RESEARCH Pattern 1
+- Phase 43 Plan 02: EntityDetailForm Documents block is gated by !isCreateMode && entityType === 'contractor' — TradeChecklist is contractor-only and only rendered in edit mode (Pitfall 6)
+- Phase 43 Plan 02: TRAD-06 delivered; pre-existing dead code (unused TRADE_LABELS constant in EntityDetailForm) left intact per scope boundary
 
 ### Pending Todos
 
@@ -103,7 +109,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 43 UI-SPEC approved
-Resume file: --resume-file
+Last session: 2026-04-23T16:36:06.145Z
+Stopped at: Completed 43-02-PLAN.md
+Resume file: None
 Next action: `/gsd-execute-phase 43`

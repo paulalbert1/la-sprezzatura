@@ -272,8 +272,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 43-01-PLAN.md — Wave 0: GROQ extensions + API action branches + Wave 0 test scaffolding (TRAD-04, TRAD-06, TRAD-08 enablement)
-- [ ] 43-02-PLAN.md — Wave 1: TradeChecklist component + EntityDetailForm integration + detail page wiring (TRAD-06)
+- [x] 43-01-PLAN.md — Wave 0: GROQ extensions + API action branches + Wave 0 test scaffolding (TRAD-04, TRAD-06, TRAD-08 enablement)
+- [x] 43-02-PLAN.md — Wave 1: TradeChecklist component + EntityDetailForm integration + detail page wiring (TRAD-06)
 - [ ] 43-03-PLAN.md — Wave 1: ChecklistConfigSection + SettingsPage wiring (Contractor/Vendor Checklist sections) (TRAD-08)
 - [ ] 43-04-PLAN.md — Wave 1: EntityListPage amber completeness dot + Trades list Astro page wiring (TRAD-04)
 
@@ -298,7 +298,7 @@ Plans:
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
 | 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 42 | v5.2 | 3/3 | Complete    | 2026-04-23 |
-| 43 | v5.2 | 0/4 | Ready to execute | - |
+| 43 | v5.2 | 2/4 | In progress | - |
 
 ---
 *Roadmap created: 2026-03-14*
