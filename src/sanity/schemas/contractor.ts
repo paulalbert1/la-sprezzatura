@@ -58,7 +58,7 @@ export const contractor = defineType({
       title: "Trades",
       type: "array",
       description:
-        "Freeform — type any trade name. Added via the /admin/contractors edit form.",
+        "Freeform — type any trade name. Added via the /admin/trades edit form.",
       of: [defineArrayMember({ type: "string" })],
     }),
     defineField({

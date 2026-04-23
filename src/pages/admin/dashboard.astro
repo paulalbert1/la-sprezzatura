@@ -107,7 +107,7 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
 
         {/* Contractors card — Phase 35 Plan 04 (DASH-17).
             Header-right `+ Add new contractor` CTA routes to the full
-            /admin/contractors/new create page (D-12: no modal, no inline
+            /admin/trades/new create page (D-12: no modal, no inline
             form). Lists the top-6 most-recently-created contractors. */}
         <div class="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
           <div class="px-5 pt-[18px] pb-0">
@@ -118,7 +118,7 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
                 Contractor / Vendor
               </h2>
               <a
-                href="/admin/contractors/new"
+                href="/admin/trades/new"
                 class="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
               >
                 <svg
@@ -148,7 +148,7 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
             <div>
               {data.contractors.map((contractor: { _id: string; name: string; company: string | null; trades: string[] | null }) => (
                 <a
-                  href={`/admin/contractors/${contractor._id}`}
+                  href={`/admin/trades/${contractor._id}`}
                   class="flex items-start gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
                 >
                   <div class="flex-1 min-w-0">

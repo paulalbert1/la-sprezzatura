@@ -807,7 +807,7 @@ const ADMIN_DASHBOARD_ACTIVITY_QUERY = `
 // Top-N recently-created contractors for the dashboard Contractor card.
 // Phase 35 Plan 04 (DASH-17): tenant-scoped contractor list used by the
 // dashboard Contractor card. Render-only projection (id/name/company/trades);
-// the full CRUD view lives on /admin/contractors.
+// the full CRUD view lives on /admin/trades.
 const ADMIN_DASHBOARD_CONTRACTORS_QUERY = `
   *[_type == "contractor"] | order(_createdAt desc) [0...6] {
     _id, name, company, trades

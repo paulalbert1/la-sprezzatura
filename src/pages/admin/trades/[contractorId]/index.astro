@@ -6,10 +6,11 @@ import EntityDetailForm from "../../../../components/admin/EntityDetailForm.tsx"
 import LinkedProjects from "../../../../components/admin/LinkedProjects.tsx";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { getAdminContractorDetail, SITE_SETTINGS_QUERY } from "../../../../sanity/queries";
+import { relationshipLabel } from "../../../../lib/relationshipLabel";
 
 const contractorId = Astro.params.contractorId;
 if (!contractorId) {
-  return Astro.redirect("/admin/contractors");
+  return Astro.redirect("/admin/trades");
 }
 
 const tenantId = Astro.locals.tenantId;
@@ -28,21 +29,27 @@ const tradeCatalog: string[] = (siteSettingsRaw as any)?.trades ?? [];
 if (!isNew) {
   const result = await getAdminContractorDetail(sanityClient, contractorId);
   if (!result?.contractor) {
-    return Astro.redirect("/admin/contractors");
+    return Astro.redirect("/admin/trades");
   }
   contractorData = result.contractor;
   projects = result.projects || [];
 }
 
-const pageTitle = isNew ? "New Contractor / Vendor" : (contractorData?.name || "Contractor / Vendor");
+const pageTitle = isNew ? "New Trade" : (contractorData?.name || "Trade");
+
+const relLabel = !isNew && contractorData ? relationshipLabel((contractorData as any).relationship) : null;
+const browserTitle = isNew
+  ? "New Trade — La Sprezzatura Admin"
+  : `${pageTitle} — ${relLabel ?? "Trade"} — La Sprezzatura Admin`;
+
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
-  { label: "Contractor / Vendor", href: "/admin/contractors" },
+  { label: "Trades", href: "/admin/trades" },
   { label: pageTitle },
 ];
 ---
 
-<AdminLayout title={isNew ? "New Contractor / Vendor — La Sprezzatura Admin" : pageTitle + " — Contractor / Vendor — La Sprezzatura Admin"} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
+<AdminLayout title={browserTitle} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
   <div class="max-w-4xl">
     <EntityDetailForm
       client:load
