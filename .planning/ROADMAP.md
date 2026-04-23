@@ -253,8 +253,12 @@ Plans:
   3. The entity label reads "Contractor" or "Vendor" (never "Contractor / Vendor") wherever the record's relationship type is known — list view, detail view, popovers, nav context, and work order panels
   4. Trades detail page shows a compact meta line below the name: primary trade · relationship type · city, state
   5. No standalone 1099 badge or section exists on the detail page; the 1099 slot is part of the contractor document checklist schema
-**Plans**: TBD (estimated 2-3)
+**Plans**: 2 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 42-01-PLAN.md — Wave 1: Schema foundation (relationship field + checklistItems[] + GROQ + API + relationshipLabel helper) (TRAD-02, TRAD-07)
+- [ ] 42-02-PLAN.md — Wave 2: Route rename + UI sweep + detail meta line (TRAD-01, TRAD-03, TRAD-05)
 
 ### Phase 43: Document Checklists, Settings Config, and Completeness
 **Goal**: Trades detail page shows a relationship-scoped document checklist; checklist item types are configurable from Settings; and the Trades list view shows an amber completeness indicator on any record missing required fields or documents
@@ -287,7 +291,7 @@ Plans:
 | 39 | v5.1 | 4/4 | Complete | 2026-04-15 |
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
 | 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
-| 42 | v5.2 | 0/3 | Not started | - |
+| 42 | v5.2 | 0/2 | Not started | - |
 | 43 | v5.2 | 0/3 | Not started | - |
 
 ---
