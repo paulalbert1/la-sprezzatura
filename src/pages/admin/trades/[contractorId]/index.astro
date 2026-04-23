@@ -7,6 +7,7 @@ import LinkedProjects from "../../../../components/admin/LinkedProjects.tsx";
 import { getTenantClient } from "../../../../lib/tenantClient";
 import { getAdminContractorDetail, SITE_SETTINGS_QUERY } from "../../../../sanity/queries";
 import { relationshipLabel } from "../../../../lib/relationshipLabel";
+import { formatTrade } from "../../../../lib/trades";
 
 const contractorId = Astro.params.contractorId;
 if (!contractorId) {
@@ -42,6 +43,24 @@ const browserTitle = isNew
   ? "New Trade — La Sprezzatura Admin"
   : `${pageTitle} — ${relLabel ?? "Trade"} — La Sprezzatura Admin`;
 
+// Phase 42 TRAD-05 — meta line: {primary trade} · {Contractor|Vendor} · {City, ST}
+// Segments are filtered so missing values leave no empty slots and no
+// leading/trailing separators. New records render no meta line.
+const metaSegments: string[] = [];
+if (!isNew && contractorData) {
+  const primaryTrade = (contractorData as any).trades?.[0];
+  if (primaryTrade) metaSegments.push(formatTrade(primaryTrade));
+  metaSegments.push(relationshipLabel((contractorData as any).relationship));
+  const cityState = [
+    (contractorData as any).address?.city,
+    (contractorData as any).address?.state,
+  ]
+    .filter(Boolean)
+    .join(", ");
+  if (cityState) metaSegments.push(cityState);
+}
+const metaLine = metaSegments.join(" · ");
+
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
   { label: "Trades", href: "/admin/trades" },
@@ -51,6 +70,14 @@ const breadcrumbs = [
 
 <AdminLayout title={browserTitle} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
   <div class="max-w-4xl">
+    {!isNew && metaLine && (
+      <p
+        class="font-body font-normal mt-1 mb-5"
+        style="font-size: 12.5px; line-height: 1.4; letter-spacing: 0.02em; color: var(--color-text-mid);"
+      >
+        {metaLine}
+      </p>
+    )}
     <EntityDetailForm
       client:load
       entityType="contractor"
