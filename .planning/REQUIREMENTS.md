@@ -34,7 +34,8 @@
 **: Trades detail page shows a document checklist scoped to the record's relationship type — contractor checklist: W-9, certificate of insurance, trade license, 1099; vendor checklist: vendor agreement, tax form
 - [x] **TRAD-07
 **: The existing 1099 document slot from Phase 40 is unified into the contractor document checklist as a checklist item; no standalone 1099 section remains on the detail page
-- [ ] **TRAD-08**: Checklist item types are configurable from Settings per relationship type (add, rename); a checklist item type cannot be removed while any Trades records have a document uploaded for that type
+- [x] **TRAD-08
+**: Checklist item types are configurable from Settings per relationship type (add, rename); a checklist item type cannot be removed while any Trades records have a document uploaded for that type
 
 ## Future Requirements (Deferred)
 

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: Completed 43-02-PLAN.md
-last_updated: "2026-04-23T16:36:06.150Z"
+stopped_at: Completed 43-03-PLAN.md
+last_updated: "2026-04-23T16:45:03.104Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 10
   completed_phases: 8
   total_plans: 31
-  completed_plans: 29
-  percent: 94
+  completed_plans: 30
+  percent: 97
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 ## Current Position
 
 Phase: 43 — EXECUTING
-Plan: 3 of 4 (Plan 01 complete)
+Plan: 4 of 4 (Plan 01 complete)
 Status: Ready to execute
 Last activity: 2026-04-23
 
-Progress: [█████████░] 94%
+Progress: [██████████] 97%
 
 ## v5.2 Phase Map
 
@@ -92,6 +92,9 @@ Carried from v5.1 boundary. Full history:
 - Phase 43 Plan 02: Shared hidden file input + activeLabelRef (not per-row inputs) drives row-scoped upload in TradeChecklist — simpler DOM and matches RESEARCH Pattern 1
 - Phase 43 Plan 02: EntityDetailForm Documents block is gated by !isCreateMode && entityType === 'contractor' — TradeChecklist is contractor-only and only rendered in edit mode (Pitfall 6)
 - Phase 43 Plan 02: TRAD-06 delivered; pre-existing dead code (unused TRADE_LABELS constant in EntityDetailForm) left intact per scope boundary
+- Phase 43 Plan 03: ChecklistConfigSection.variant is optional with a 'contractor' default — keeps the Wave 0 RED test's 3-prop signature valid while the acceptance grep still matches the variant union type
+- Phase 43 Plan 03: Delete confirmation uses a modal (with a visible 'Delete checklist item' button) — inline Check/X pattern has no text and would fail the Wave 0 RED test's /delete|confirm|remove/i button lookup
+- Phase 43 Plan 03: settings.astro extended to populate contractorChecklistItems and vendorChecklistItems in the initialSettings normalization step — required since SiteSettingsPayload promotes those fields to non-optional
 
 ### Pending Todos
 
@@ -109,7 +112,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T16:36:06.145Z
-Stopped at: Completed 43-02-PLAN.md
+Last session: 2026-04-23T16:45:03.099Z
+Stopped at: Completed 43-03-PLAN.md
 Resume file: None
 Next action: `/gsd-execute-phase 43`
