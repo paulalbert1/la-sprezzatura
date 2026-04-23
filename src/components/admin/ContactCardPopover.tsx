@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { formatPhone } from "../../lib/format";
+import { relationshipLabel } from "../../lib/relationshipLabel";
 
 export interface ContactCardData {
   _id: string;
   name: string;
   email: string;
   phone?: string;
+  relationship?: string | null;
   entityType: "client" | "contractor";
 }
 
@@ -28,7 +30,9 @@ export default function ContactCardPopover({
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const profileHref = `/admin/${data.entityType}s/${data._id}`;
+  const profileHref = data.entityType === "contractor"
+    ? `/admin/trades/${data._id}`
+    : `/admin/${data.entityType}s/${data._id}`;
 
   return (
     <div
@@ -45,6 +49,13 @@ export default function ContactCardPopover({
       <div className="text-sm font-semibold text-charcoal font-body">
         {data.name}
       </div>
+
+      {/* Relationship label — Phase 42 TRAD-03 */}
+      {data.entityType === "contractor" && (
+        <p className="text-[11px] text-stone font-body mt-0.5">
+          {relationshipLabel(data.relationship)}
+        </p>
+      )}
 
       {/* Email */}
       <a

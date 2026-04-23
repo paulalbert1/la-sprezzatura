@@ -950,7 +950,7 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     "projectContractors": contractors[defined(contractor)] {
       _key,
       trade,
-      "contractor": contractor-> { _id, name, email, phone, company, trades }
+      "contractor": contractor-> { _id, name, email, phone, company, trades, relationship }
     },
     ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {

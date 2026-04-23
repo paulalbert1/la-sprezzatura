@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Search, ChevronUp, ChevronDown } from "lucide-react";
 import { formatTrade } from "../../lib/trades";
 import { formatPhone } from "../../lib/format";
+import { relationshipLabel } from "../../lib/relationshipLabel";
 
 interface EntityListPageProps {
   entityType: "client" | "contractor";
@@ -19,6 +20,7 @@ const CLIENT_COLUMNS = [
 
 const CONTRACTOR_COLUMNS = [
   { key: "name", label: "Name" },
+  { key: "relationship", label: "Type" },
   { key: "company", label: "Company" },
   { key: "trades", label: "Trade" },
   { key: "email", label: "Email" },
@@ -31,6 +33,9 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   const columns = entityType === "client" ? CLIENT_COLUMNS : CONTRACTOR_COLUMNS;
+  // `label` is used for the New-record CTA ("New Contractor / Vendor") — the
+  // one place the ambiguous collective label is intentional per UI-SPEC. The
+  // form then forces the choice via the Relationship radio group.
   const label = entityType === "client" ? "Client" : "Contractor / Vendor";
 
   function handleSort(columnKey: string) {
@@ -59,6 +64,11 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
               .join(" ")
               .toLowerCase()
           : "";
+        const relationshipMatch =
+          entityType === "contractor" &&
+          relationshipLabel((entity as any).relationship)
+            .toLowerCase()
+            .includes(query);
         return (
           name.includes(query) ||
           email.includes(query) ||
@@ -66,7 +76,8 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
           company.includes(query) ||
           city.includes(query) ||
           state.includes(query) ||
-          trades.includes(query)
+          trades.includes(query) ||
+          relationshipMatch
         );
       });
     }
@@ -117,14 +128,14 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-light" />
           <input
             type="text"
-            placeholder={`Search ${entityType}s...`}
+            placeholder={entityType === "contractor" ? "Search trades..." : `Search ${entityType}s...`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="text-sm font-body bg-white border border-stone-light/40 rounded-lg pl-10 pr-4 py-2 w-80 focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
           />
         </div>
         <a
-          href={`/admin/${entityType}s/new`}
+          href={entityType === "contractor" ? "/admin/trades/new" : `/admin/${entityType}s/new`}
           className="bg-terracotta text-white text-sm font-semibold font-body px-4 py-2 rounded-lg hover:bg-terracotta/90 transition-colors inline-block"
         >
           New {label}
@@ -164,12 +175,12 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
               <tr>
                 <td colSpan={columns.length} className="text-center py-12">
                   <p className="text-sm text-stone font-body font-semibold">
-                    {entityType === "client" ? "No clients yet" : "No contractors / vendors yet"}
+                    {entityType === "client" ? "No clients yet" : "No trades yet"}
                   </p>
                   <p className="text-sm text-stone font-body mt-1">
                     {entityType === "client"
                       ? "Create your first client record to start tracking contacts and project assignments."
-                      : "Add your first contractor / vendor to manage trades, documents, and project assignments."}
+                      : "Add your first contractor or vendor to manage trades, documents, and project assignments."}
                   </p>
                 </td>
               </tr>
@@ -178,7 +189,9 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                 <tr
                   key={entity._id}
                   onClick={() => {
-                    window.location.href = `/admin/${entityType}s/${entity._id}`;
+                    window.location.href = entityType === "contractor"
+                      ? `/admin/trades/${entity._id}`
+                      : `/admin/${entityType}s/${entity._id}`;
                   }}
                   className="text-sm font-body text-charcoal border-b border-stone-light/10 hover:bg-cream/50 transition-colors cursor-pointer"
                 >
@@ -203,6 +216,9 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                     </>
                   ) : (
                     <>
+                      <td className="px-5 py-3 text-stone font-body text-sm">
+                        {relationshipLabel((entity as any).relationship)}
+                      </td>
                       <td className="px-5 py-3 text-stone">
                         {entity.company || "--"}
                       </td>

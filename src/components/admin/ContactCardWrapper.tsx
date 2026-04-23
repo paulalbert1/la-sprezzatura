@@ -110,6 +110,7 @@ export default function ContactCardWrapper({
           name: match.name,
           email: match.email || "",
           phone: match.phone || "",
+          relationship: match.relationship ?? null,
           entityType: match.entityType,
         };
         cacheRef.current.set(entityId, cardData);

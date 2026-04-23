@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Trash2, Upload, Loader2, Check, X } from "lucide-react";
 import { formatTrade } from "../../lib/trades";
+import { relationshipLabel } from "../../lib/relationshipLabel";
 
 interface EntityDetailFormProps {
   entityType: "client" | "contractor";
@@ -13,6 +14,7 @@ interface FieldError {
   name?: string;
   email?: string;
   trades?: string;
+  relationship?: string;
   notes?: string;
 }
 
@@ -78,6 +80,9 @@ export default function EntityDetailForm({
 
   // Contractor fields
   const [company, setCompany] = useState(entity?.company || "");
+  const [relationship, setRelationship] = useState<string>(
+    (entity as any)?.relationship || "",
+  );
   const [trades, setTrades] = useState<string[]>(entity?.trades || []);
   const [documents, setDocuments] = useState<
     Array<{
@@ -118,6 +123,10 @@ export default function EntityDetailForm({
       newErrors.trades = "Select at least one trade";
     }
 
+    if (entityType === "contractor" && !relationship) {
+      newErrors.relationship = "Select a relationship before saving";
+    }
+
     if (notes.length > 2000) {
       newErrors.notes = "Notes must be under 2000 characters";
     }
@@ -154,6 +163,7 @@ export default function EntityDetailForm({
     } else {
       payload.company = company.trim();
       payload.trades = trades;
+      payload.relationship = relationship || null;
       // Phase 40 VEND-04: include address for contractor saves
       payload.address = {
         street: street.trim(),
@@ -179,7 +189,9 @@ export default function EntityDetailForm({
 
       const createdId = result[`${entityType}Id`] ?? result._id;
       if (isCreateMode && createdId) {
-        window.location.href = `/admin/${entityType}s/${createdId}`;
+        window.location.href = entityType === "contractor"
+          ? `/admin/trades/${createdId}`
+          : `/admin/${entityType}s/${createdId}`;
         return;
       }
 
@@ -297,7 +309,7 @@ export default function EntityDetailForm({
               className="text-sm text-stone hover:text-red-600 transition-colors inline-flex items-center gap-1.5 font-body"
             >
               <Trash2 className="w-4 h-4" />
-              Delete
+              Delete {entityType === "client" ? "Client" : relationshipLabel(relationship)}
             </button>
           </div>
         )}
@@ -439,6 +451,66 @@ export default function EntityDetailForm({
                 />
               </div>
 
+              {/* Relationship — Phase 42 TRAD-02 radio group */}
+              <div>
+                <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
+                  Relationship *
+                </label>
+                <p className="text-xs text-stone-muted font-body mb-2">
+                  Required — determines display name and document checklist
+                </p>
+                <div className="flex gap-3">
+                  {[
+                    {
+                      value: "contractor",
+                      label: "Contractor",
+                      desc: "Licensed trade performing installation or construction work",
+                    },
+                    {
+                      value: "vendor",
+                      label: "Vendor",
+                      desc: "Supplier, showroom, or material source",
+                    },
+                  ].map((opt) => {
+                    const selected = relationship === opt.value;
+                    return (
+                      <label
+                        key={opt.value}
+                        className={`flex-1 cursor-pointer border rounded-lg px-3 py-2 transition-colors ${
+                          selected
+                            ? "border-terracotta bg-terracotta/5"
+                            : "border-stone-light/40 hover:border-stone-light"
+                        } ${
+                          errors.relationship
+                            ? "ring-1 ring-red-500 border-red-500"
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="relationship"
+                          value={opt.value}
+                          checked={selected}
+                          onChange={() => setRelationship(opt.value)}
+                          className="sr-only"
+                        />
+                        <div className="text-sm font-semibold text-charcoal font-body">
+                          {opt.label}
+                        </div>
+                        <div className="text-[11px] text-stone font-body mt-0.5">
+                          {opt.desc}
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+                {errors.relationship && (
+                  <p className="text-xs text-red-600 mt-1">
+                    {errors.relationship}
+                  </p>
+                )}
+              </div>
+
               {/* Trades */}
               <div>
                 <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
@@ -536,7 +608,7 @@ export default function EntityDetailForm({
 
                   {documents.length === 0 && (
                     <p className="text-sm text-stone font-body mb-3">
-                      Upload a 1099, insurance certificate, contract, or other document for this contractor / vendor.
+                      Upload a 1099, insurance certificate, contract, or other document for this {relationshipLabel(relationship).toLowerCase()}.
                     </p>
                   )}
 
@@ -621,6 +693,7 @@ export default function EntityDetailForm({
           entityType={entityType}
           entityName={entity?.name || ""}
           entityId={entity?._id || ""}
+          relationship={relationship}
           onClose={() => setShowDeleteDialog(false)}
         />
       )}
@@ -636,11 +709,13 @@ function DeleteInlineDialog({
   entityType,
   entityName,
   entityId,
+  relationship,
   onClose,
 }: {
   entityType: "client" | "contractor";
   entityName: string;
   entityId: string;
+  relationship?: string;
   onClose: () => void;
 }) {
   const [deleting, setDeleting] = useState(false);
@@ -663,19 +738,24 @@ function DeleteInlineDialog({
         return;
       }
 
-      window.location.href = `/admin/${entityType}s`;
+      window.location.href = entityType === "contractor"
+        ? "/admin/trades"
+        : `/admin/${entityType}s`;
     } catch {
       alert("Could not delete. Please try again.");
       setDeleting(false);
     }
   }
 
+  const deleteLabel =
+    entityType === "client" ? "Client" : relationshipLabel(relationship);
+
   return (
     <div className="fixed inset-0 bg-charcoal/40 z-50 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-xl w-[400px] p-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-semibold font-body text-charcoal">
-            Delete {entityType === "client" ? "Client" : "Contractor / Vendor"}
+            Delete {deleteLabel}
           </h3>
           <button
             type="button"
@@ -687,8 +767,7 @@ function DeleteInlineDialog({
           </button>
         </div>
         <p className="text-sm text-stone font-body mb-6">
-          Are you sure you want to delete {entityName}? This action cannot be
-          undone.
+          Are you sure you want to delete {entityName || "this record"}? This cannot be undone.
         </p>
         <div className="flex items-center justify-end gap-3">
           <button
@@ -705,7 +784,7 @@ function DeleteInlineDialog({
             className="text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg inline-flex items-center gap-2 font-body disabled:opacity-50"
           >
             {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
-            Delete
+            Delete {deleteLabel}
           </button>
         </div>
       </div>

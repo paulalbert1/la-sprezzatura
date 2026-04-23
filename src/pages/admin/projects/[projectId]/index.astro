@@ -316,6 +316,7 @@ const breadcrumbs = [
                   name: pc.contractor.name,
                   email: pc.contractor.email || "",
                   phone: pc.contractor.phone || "",
+                  relationship: pc.contractor.relationship ?? null,
                   entityType: "contractor" as const,
                 }}
                 className="inline-flex items-center gap-[7px] cursor-pointer"
