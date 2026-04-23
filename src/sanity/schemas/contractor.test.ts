@@ -90,4 +90,26 @@ describe("contractor schema", () => {
     expect(preview?.select?.title).toBe("name");
     expect(preview?.select?.subtitle).toBe("company");
   });
+
+  // Phase 42 Plan 01 — TRAD-02
+  it("has a `relationship` field of type string with options.list of [contractor, vendor]", () => {
+    const field = contractor.fields?.find((f) => f.name === "relationship") as
+      | { type: string; options?: { list?: Array<{ value: string; title: string }> }; validation?: unknown }
+      | undefined;
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("string");
+    expect(field?.options?.list).toBeDefined();
+    const values = field!.options!.list!.map((o) => o.value);
+    expect(values).toEqual(["contractor", "vendor"]);
+    expect(field?.validation).toBeDefined();
+  });
+
+  it("`relationship` field is positioned between `company` and `address`", () => {
+    const names = contractor.fields!.map((f) => f.name);
+    const companyIdx = names.indexOf("company");
+    const relIdx = names.indexOf("relationship");
+    const addressIdx = names.indexOf("address");
+    expect(relIdx).toBe(companyIdx + 1);
+    expect(addressIdx).toBe(relIdx + 1);
+  });
 });

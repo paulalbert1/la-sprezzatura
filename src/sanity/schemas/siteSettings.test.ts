@@ -47,4 +47,23 @@ describe("siteSettings schema", () => {
     expect(tradesIdx).toBeGreaterThan(ccIdx);
     expect(socialIdx).toBeGreaterThan(tradesIdx);
   });
+
+  // Phase 42 Plan 01 — TRAD-07 schema foundation
+  it("has `contractorChecklistItems` array field of strings", () => {
+    const field = siteSettings.fields?.find((f) => f.name === "contractorChecklistItems") as
+      | { type: string; of?: { type: string }[] }
+      | undefined;
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("array");
+    expect(field?.of?.[0]?.type).toBe("string");
+  });
+
+  it("has `vendorChecklistItems` array field of strings", () => {
+    const field = siteSettings.fields?.find((f) => f.name === "vendorChecklistItems") as
+      | { type: string; of?: { type: string }[] }
+      | undefined;
+    expect(field).toBeDefined();
+    expect(field?.type).toBe("array");
+    expect(field?.of?.[0]?.type).toBe("string");
+  });
 });
