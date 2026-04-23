@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-01-PLAN.md: schema foundation and type surface"
-last_updated: "2026-04-23T22:22:10.117Z"
+stopped_at: "Completed 44-02-PLAN.md: workflow engine pure logic module"
+last_updated: "2026-04-23T22:29:16.080Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -98,6 +98,8 @@ Carried from v5.1 boundary. Full history:
 - Phase 43 Plan 04: EntityListPage amber dot uses dual-text pattern — aria-label 'Incomplete — missing required documents' (full UI-SPEC label) and title 'Missing required documents' (short tooltip) on the same span; RED test matches either, acceptance grep validates both
 - Phase 43 Plan 04: isIncomplete() exported from EntityListPage.tsx so future verifiers/tests can import the D-12 branching logic directly instead of reimplementing it
 - templateId on projectWorkflow is a plain string (not Sanity reference) per Pitfall 3 — templates can be deleted while project workflows survive
+- UTC-noon normalization in businessDaysBetween: date-fns differenceInBusinessDays uses local time; midnight UTC timestamps become the previous evening in Eastern timezone, shifting biz-day counts by one; fix normalizes both dates to UTC noon before calling date-fns
+- skipped satisfies hard prereqs (A1): isPrereqSatisfied returns true for complete and skipped statuses; enables optional milestones to be skipped without blocking downstream work
 
 ### Pending Todos
 
@@ -115,8 +117,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T22:22:10.112Z
-Stopped at: Completed 44-01-PLAN.md: schema foundation and type surface
+Last session: 2026-04-23T22:29:16.075Z
+Stopped at: Completed 44-02-PLAN.md: workflow engine pure logic module
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
