@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-05-PLAN.md: project workflow API endpoints (lifecycle, milestone-status, instance)"
-last_updated: "2026-04-23T23:02:39.598Z"
+stopped_at: "Completed 44-06-PLAN.md: StatusCircle, StatusPickerPopover, MilestoneRow, PhaseAccordion tracker primitives"
+last_updated: "2026-04-23T23:10:34.884Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -113,6 +113,9 @@ Carried from v5.1 boundary. Full history:
 - Task 1 (queries.ts) was pre-completed in Plan 01; recognized as done, no duplicate commit
 - milestone-status uses ALLOWED_STATUSES allowlist before canTransition() engine call (T-44-05-07 defense in depth)
 - Both instance endpoints re-fetch workflow via PROJECT_WORKFLOW_QUERY after mutation to return authoritative state
+- StatusPickerPopover uses createPortal to document.body so it escapes overflow-hidden containers in the accordion body
+- Date formatting in MilestoneRow uses date-part slicing (isoStr.slice(0,10)) not parseISO to avoid UTC-midnight timezone shift in Eastern time
+- afterEach(cleanup) required in portal component tests — jsdom shares document.body across tests causing accumulated portal nodes
 
 ### Pending Todos
 
@@ -130,8 +133,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T23:02:39.593Z
-Stopped at: Completed 44-05-PLAN.md: project workflow API endpoints (lifecycle, milestone-status, instance)
+Last session: 2026-04-23T23:10:34.877Z
+Stopped at: Completed 44-06-PLAN.md: StatusCircle, StatusPickerPopover, MilestoneRow, PhaseAccordion tracker primitives
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
