@@ -17,8 +17,7 @@ import {
   cleanup,
   within,
 } from "@testing-library/react";
-// Intentional RED import — module created in Plan 03.
-// @ts-expect-error — module does not exist yet.
+// Module now exists (Plan 03 created it). Import resolves cleanly.
 import ChecklistConfigSection from "./ChecklistConfigSection";
 
 afterEach(cleanup);
