@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import CollapsibleSection from "../ui/CollapsibleSection";
 import ToastContainer, { useToast } from "../ui/ToastContainer";
@@ -17,6 +17,7 @@ import RenderingConfigSection, {
 } from "./RenderingConfigSection";
 import StudioRetirementNotice from "./StudioRetirementNotice";
 import TradesCatalogSection from "../TradesCatalogSection";
+import ChecklistConfigSection from "../ChecklistConfigSection";
 
 // Phase 34 Plan 03 — SettingsPage
 // Source of truth:
@@ -44,6 +45,9 @@ export interface SiteSettingsPayload {
   defaultCcEmail: string;
   // Phase 40 — VEND-03
   trades: string[];
+  // Phase 43 — TRAD-08
+  contractorChecklistItems: string[];
+  vendorChecklistItems: string[];
 }
 
 export interface SettingsPageProps {
@@ -58,6 +62,8 @@ function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
     renderingImageTypes: [...s.renderingImageTypes],
     renderingExcludedUsers: [...s.renderingExcludedUsers],
     trades: [...(s.trades ?? [])],
+    contractorChecklistItems: [...(s.contractorChecklistItems ?? [])],
+    vendorChecklistItems: [...(s.vendorChecklistItems ?? [])],
   };
 }
 
@@ -82,6 +88,13 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     renderingExcludedUsers: initialSettings.renderingExcludedUsers ?? [],
   });
   const [trades, setTrades] = useState<string[]>(initialSettings.trades ?? []);
+  const [contractorChecklistItems, setContractorChecklistItems] = useState<
+    string[]
+  >(initialSettings.contractorChecklistItems ?? []);
+  const [vendorChecklistItems, setVendorChecklistItems] = useState<string[]>(
+    initialSettings.vendorChecklistItems ?? [],
+  );
+  const [inUseDocTypes, setInUseDocTypes] = useState<Set<string>>(new Set());
   const [dirty, setDirty] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
@@ -92,6 +105,28 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
   const markDirty = useCallback(() => {
     setDirty(true);
     setErrorBanner(null);
+  }, []);
+
+  // Phase 43 TRAD-08 — load in-use docType set for ChecklistConfigSection's
+  // D-15 delete guard. Non-blocking: if the fetch fails, the guard falls open
+  // (delete stays enabled) which is preferable to a visible loading state.
+  useEffect(() => {
+    fetch("/api/admin/site-settings?action=inUseDocTypes")
+      .then((r) =>
+        r.ok ? r.json() : Promise.reject(new Error("inUseDocTypes fetch failed")),
+      )
+      .then((data: { types?: string[] }) => {
+        setInUseDocTypes(
+          new Set(
+            (data.types ?? []).filter(
+              (t): t is string => typeof t === "string" && t.length > 0,
+            ),
+          ),
+        );
+      })
+      .catch(() => {
+        // non-blocking
+      });
   }, []);
 
   const handleGeneralChange = useCallback(
@@ -126,6 +161,22 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     [markDirty],
   );
 
+  const handleContractorChecklistChange = useCallback(
+    (next: string[]) => {
+      setContractorChecklistItems(next);
+      markDirty();
+    },
+    [markDirty],
+  );
+
+  const handleVendorChecklistChange = useCallback(
+    (next: string[]) => {
+      setVendorChecklistItems(next);
+      markDirty();
+    },
+    [markDirty],
+  );
+
   const handleHeroDirty = useCallback(
     (d: boolean) => {
       if (d) markDirty();
@@ -151,6 +202,8 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
       renderingExcludedUsers: [...reset.renderingExcludedUsers],
     });
     setTrades([...(reset.trades ?? [])]);
+    setContractorChecklistItems([...(reset.contractorChecklistItems ?? [])]);
+    setVendorChecklistItems([...(reset.vendorChecklistItems ?? [])]);
     setDirty(false);
     setErrorBanner(null);
   }, [initialSettings]);
@@ -186,6 +239,34 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
       if (!tradesResponse.ok) {
         throw new Error("Could not save. Check your connection and try again.");
       }
+      const contractorChecklistResponse = await fetch(
+        "/api/admin/site-settings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "updateContractorChecklistItems",
+            contractorChecklistItems,
+          }),
+        },
+      );
+      if (!contractorChecklistResponse.ok) {
+        throw new Error("Could not save. Check your connection and try again.");
+      }
+      const vendorChecklistResponse = await fetch(
+        "/api/admin/site-settings",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "updateVendorChecklistItems",
+            vendorChecklistItems,
+          }),
+        },
+      );
+      if (!vendorChecklistResponse.ok) {
+        throw new Error("Could not save. Check your connection and try again.");
+      }
       setDirty(false);
       show({ variant: "success", title: "Settings saved", duration: 3000 });
     } catch (err) {
@@ -193,7 +274,16 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
     } finally {
       setSaving(false);
     }
-  }, [general, socialLinks, rendering, trades, heroValid, show]);
+  }, [
+    general,
+    socialLinks,
+    rendering,
+    trades,
+    contractorChecklistItems,
+    vendorChecklistItems,
+    heroValid,
+    show,
+  ]);
 
   const initialHeroSlides = useMemo<HeroSlide[]>(
     () => initialSettings.heroSlideshow ?? [],
@@ -240,6 +330,24 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
 
         <CollapsibleSection title="Trades">
           <TradesCatalogSection trades={trades} onChange={handleTradesChange} />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Contractor Checklist" defaultOpen>
+          <ChecklistConfigSection
+            items={contractorChecklistItems}
+            inUseTypes={inUseDocTypes}
+            variant="contractor"
+            onChange={handleContractorChecklistChange}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Vendor Checklist">
+          <ChecklistConfigSection
+            items={vendorChecklistItems}
+            inUseTypes={inUseDocTypes}
+            variant="vendor"
+            onChange={handleVendorChecklistChange}
+          />
         </CollapsibleSection>
       </div>
 

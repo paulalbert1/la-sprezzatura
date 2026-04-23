@@ -10,13 +10,16 @@ import {
   fireEvent,
   cleanup,
   act,
+  waitFor,
   within,
 } from "@testing-library/react";
 import SettingsPage, { type SiteSettingsPayload } from "./SettingsPage";
 
 afterEach(cleanup);
 
-function defaultSettings(): SiteSettingsPayload {
+function defaultSettings(
+  overrides: Partial<SiteSettingsPayload> = {},
+): SiteSettingsPayload {
   return {
     siteTitle: "La Sprezzatura",
     tagline: "",
@@ -33,7 +36,21 @@ function defaultSettings(): SiteSettingsPayload {
     defaultCcEmail: "",
     // Phase 40 — VEND-03
     trades: [],
+    // Phase 43 — TRAD-08
+    contractorChecklistItems: [],
+    vendorChecklistItems: [],
+    ...overrides,
   };
+}
+
+// Default fetch mock used by tests that don't care about specific responses —
+// the inUseDocTypes fetch fires on mount and must resolve successfully so
+// unrelated tests don't see an unhandled rejection.
+function mockInUseDocTypesFetch(types: string[] = []) {
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    ok: true,
+    json: async () => ({ types }),
+  } as Response);
 }
 
 beforeEach(() => {
@@ -183,5 +200,130 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
     );
     expect(banner).not.toBeNull();
     expect(banner!.textContent).toContain("Could not save");
+  });
+});
+
+describe("SettingsPage — Phase 43 checklist sections (TRAD-08)", () => {
+  it("renders Contractor Checklist section open by default", () => {
+    mockInUseDocTypesFetch();
+    render(
+      <SettingsPage
+        initialSettings={defaultSettings({
+          contractorChecklistItems: ["W-9"],
+          vendorChecklistItems: [],
+        })}
+      />,
+    );
+    // CollapsibleSection header exposes a role=button with the title as name.
+    expect(
+      screen.getByRole("button", { name: /Contractor Checklist/ }),
+    ).not.toBeNull();
+    // Open-by-default means the item label inside the section is rendered.
+    expect(screen.getByText("W-9")).not.toBeNull();
+  });
+
+  it("renders Vendor Checklist section closed by default", () => {
+    mockInUseDocTypesFetch();
+    render(
+      <SettingsPage
+        initialSettings={defaultSettings({
+          contractorChecklistItems: [],
+          vendorChecklistItems: ["Vendor agreement"],
+        })}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: /Vendor Checklist/ }),
+    ).not.toBeNull();
+    // Body is unmounted while collapsed, so the item label must NOT appear.
+    expect(screen.queryByText("Vendor agreement")).toBeNull();
+  });
+
+  it("fetches inUseDocTypes on mount", async () => {
+    const fetchMock = mockInUseDocTypesFetch(["W-9"]);
+    render(<SettingsPage initialSettings={defaultSettings()} />);
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/admin/site-settings?action=inUseDocTypes",
+      );
+    });
+  });
+
+  it("handleSave issues updateContractorChecklistItems and updateVendorChecklistItems POSTs", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({ types: [], success: true }),
+    } as Response);
+
+    render(
+      <SettingsPage
+        initialSettings={defaultSettings({
+          contractorChecklistItems: ["W-9"],
+          vendorChecklistItems: ["Vendor agreement"],
+        })}
+      />,
+    );
+
+    // Mark the form dirty so Save is enabled — edit any visible field.
+    const siteTitleInput = screen.getByPlaceholderText(
+      "Your studio name",
+    ) as HTMLInputElement;
+    fireEvent.change(siteTitleInput, { target: { value: "Updated" } });
+
+    const saveBtn = screen.getByRole("button", { name: /Save settings/ });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+      // Allow the sequential fetch chain (update → updateTrades →
+      // updateContractorChecklistItems → updateVendorChecklistItems) to run.
+      await new Promise((r) => setTimeout(r, 0));
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      const bodies = fetchMock.mock.calls
+        .map(([, init]) => (init as RequestInit | undefined)?.body)
+        .filter(
+          (b): b is string => typeof b === "string",
+        );
+      expect(
+        bodies.some((b) =>
+          b.includes('"action":"updateContractorChecklistItems"'),
+        ),
+      ).toBe(true);
+      expect(
+        bodies.some((b) =>
+          b.includes('"action":"updateVendorChecklistItems"'),
+        ),
+      ).toBe(true);
+    });
+  });
+
+  it("handleCancel resets both new checklist arrays to initialSettings values", () => {
+    mockInUseDocTypesFetch();
+    render(
+      <SettingsPage
+        initialSettings={defaultSettings({
+          contractorChecklistItems: ["W-9"],
+          vendorChecklistItems: ["Vendor agreement"],
+        })}
+      />,
+    );
+
+    // Dirty the form so Cancel is enabled.
+    const siteTitleInput = screen.getByPlaceholderText(
+      "Your studio name",
+    ) as HTMLInputElement;
+    fireEvent.change(siteTitleInput, { target: { value: "Dirty" } });
+
+    const cancelBtn = document.querySelector(
+      "[data-settings-cancel]",
+    ) as HTMLButtonElement | null;
+    expect(cancelBtn).not.toBeNull();
+    fireEvent.click(cancelBtn!);
+
+    // After cancel, the contractor checklist is still open and still shows the
+    // original item label (proving state was reset, not blown away).
+    expect(screen.getByText("W-9")).not.toBeNull();
   });
 });

@@ -44,6 +44,8 @@ type SiteSettingsRow = {
   renderingImageTypes?: string[];
   renderingExcludedUsers?: string[];
   trades?: string[];
+  contractorChecklistItems?: string[];
+  vendorChecklistItems?: string[];
 };
 
 const row = raw as SiteSettingsRow;
@@ -79,6 +81,8 @@ const initialSettings = {
   renderingImageTypes: row.renderingImageTypes ?? [],
   renderingExcludedUsers: row.renderingExcludedUsers ?? [],
   trades: row.trades ?? [],
+  contractorChecklistItems: row.contractorChecklistItems ?? [],
+  vendorChecklistItems: row.vendorChecklistItems ?? [],
 };
 ---
 
