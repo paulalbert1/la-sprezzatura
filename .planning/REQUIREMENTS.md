@@ -62,11 +62,11 @@
 | CLNT-11 | Phase 41 | Complete |
 | CLNT-12 | Phase 41 | Complete |
 | CLNT-13 | Phase 41 | Complete |
-| TRAD-01 | Phase 42 | Pending |
-| TRAD-02 | Phase 42 | Pending |
-| TRAD-03 | Phase 42 | Pending |
-| TRAD-05 | Phase 42 | Pending |
-| TRAD-07 | Phase 42 | Pending |
+| TRAD-01 | Phase 42 | Complete |
+| TRAD-02 | Phase 42 | Complete |
+| TRAD-03 | Phase 42 | Complete |
+| TRAD-05 | Phase 42 | Complete |
+| TRAD-07 | Phase 42 | Complete |
 | TRAD-04 | Phase 43 | Pending |
 | TRAD-06 | Phase 43 | Pending |
 | TRAD-08 | Phase 43 | Pending |
