@@ -222,7 +222,7 @@ Plans:
 **Milestone Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) carries forward from v5.1.
 
 - [x] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13) (completed 2026-04-23)
-- [ ] **Phase 42: Trades Entity — Routes, Schema, and Display** — 5 reqs (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
+- [x] **Phase 42: Trades Entity — Routes, Schema, and Display** — 5 reqs (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
 - [ ] **Phase 43: Document Checklists, Settings Config, and Completeness** — 3 reqs (TRAD-04, TRAD-06, TRAD-08)
 
 ## Phase Details
@@ -257,8 +257,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 42-01-PLAN.md — Wave 1: Schema foundation (relationship field + checklistItems[] + GROQ + API + relationshipLabel helper) (TRAD-02, TRAD-07)
-- [ ] 42-02-PLAN.md — Wave 2: Route rename + UI sweep + detail meta line (TRAD-01, TRAD-03, TRAD-05)
+- [x] 42-01-PLAN.md — Wave 1: Schema foundation (relationship field + checklistItems[] + GROQ + API + relationshipLabel helper) (TRAD-02, TRAD-07)
+- [x] 42-02-PLAN.md — Wave 2: Route rename + UI sweep + detail meta line (TRAD-01, TRAD-03, TRAD-05)
 
 ### Phase 43: Document Checklists, Settings Config, and Completeness
 **Goal**: Trades detail page shows a relationship-scoped document checklist; checklist item types are configurable from Settings; and the Trades list view shows an amber completeness indicator on any record missing required fields or documents
@@ -291,7 +291,7 @@ Plans:
 | 39 | v5.1 | 4/4 | Complete | 2026-04-15 |
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
 | 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
-| 42 | v5.2 | 0/2 | Not started | - |
+| 42 | v5.2 | 2/2 | Complete    | 2026-04-23 |
 | 43 | v5.2 | 0/3 | Not started | - |
 
 ---

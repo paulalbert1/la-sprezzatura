@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: executing
-stopped_at: Completed 42-01-PLAN.md
-last_updated: "2026-04-23T03:45:42.829Z"
+status: verifying
+stopped_at: Completed 42-02-PLAN.md
+last_updated: "2026-04-23T03:57:24.644Z"
 last_activity: 2026-04-23
 progress:
   total_phases: 10
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 26
-  completed_plans: 25
-  percent: 96
+  completed_plans: 26
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 
 Phase: 42 (trades-entity-routes-schema-and-display) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-23
 
-Progress: [██████████] 96%
+Progress: [██████████] 100%
 
 ## v5.2 Phase Map
 
@@ -82,6 +82,10 @@ Carried from v5.1 boundary. Full history:
 - Phase 42 Plan 01: PATCH update uses hasOwnProperty on body to distinguish omitted key (leave alone) vs. explicit null (clear to null) vs. string (trim+set)
 - Phase 42 Plan 01: relationshipLabel() helper is case-sensitive by design — only canonical 'vendor' slug returns 'Vendor'; null/undefined/other → 'Contractor' per D-04
 - Phase 42 Plan 01: siteSettings.contractorChecklistItems[] and vendorChecklistItems[] are schema-only in Phase 42 per D-09 — rendered by Phase 43 checklist UI
+- Phase 42 Plan 02: /admin/contractors hard-renamed to /admin/trades (no redirect per D-02); old path now 404s natively.
+- Phase 42 Plan 02: Relationship field renders as a 2-card radio group, not a dropdown. Rationale: 2 mutually-exclusive options semantically heavy enough (drives checklist + label) to warrant both being visible.
+- Phase 42 Plan 02: EntityListPage primary CTA keeps 'New Contractor / Vendor' collective label per UI-SPEC — the ambiguous label is intentional at the CTA; the form forces the choice via the required radio group.
+- Phase 42 Plan 02: projectContractors GROQ projection extended with relationship so chip popovers on the project detail page show the correct Contractor|Vendor label (Rule 2 correctness addition beyond plan scope).
 
 ### Pending Todos
 
@@ -99,7 +103,7 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T03:45:42.823Z
-Stopped at: Completed 42-01-PLAN.md
+Last session: 2026-04-23T03:57:24.639Z
+Stopped at: Completed 42-02-PLAN.md
 Resume file: None
 Next action: `/gsd-plan-phase 41`
