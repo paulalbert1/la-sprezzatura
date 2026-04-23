@@ -1092,7 +1092,7 @@ export async function getAdminClientDetail(client: SanityClient, clientId: strin
 export async function getAdminContractors(client: SanityClient) {
   return client.fetch(`
     *[_type == "contractor"] | order(name asc) {
-      _id, name, email, phone, company, trades
+      _id, name, email, phone, company, trades, relationship
     }
   `);
 }
@@ -1101,7 +1101,7 @@ export async function getAdminContractors(client: SanityClient) {
 export async function getAdminContractorDetail(client: SanityClient, contractorId: string) {
   return client.fetch(`{
     "contractor": *[_type == "contractor" && _id == $contractorId][0] {
-      _id, name, email, phone, company, trades, address, documents[] { _key, fileName, fileType, url, uploadedAt, docType }
+      _id, name, email, phone, company, trades, relationship, address, documents[] { _key, fileName, fileType, url, uploadedAt, docType }
     },
     "projects": *[_type == "project" && references($contractorId)] | order(title asc) {
       _id, title, pipelineStage, engagementType, projectStatus
@@ -1150,7 +1150,7 @@ export async function searchEntities(client: SanityClient, searchTerm: string) {
       _id, name, email, "entityType": "client"
     },
     "contractors": *[_type == "contractor" && name match $searchTerm + "*"] | order(name asc) [0...10] {
-      _id, name, email, trades, "entityType": "contractor"
+      _id, name, email, trades, relationship, "entityType": "contractor"
     }
   }`, { searchTerm });
 }

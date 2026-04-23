@@ -102,12 +102,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   try {
     if (action === "create") {
-      const { name, email, phone, company, trades, address } = body as {
+      const { name, email, phone, company, trades, relationship, address } = body as {
         name: string;
         email: string;
         phone?: string;
         company?: string;
         trades: string[];
+        relationship?: string;
         address?: { street?: string; city?: string; state?: string; zip?: string };
       };
 
@@ -128,6 +129,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         ...(phone && { phone: phone.trim() }),
         ...(company && { company: company.trim() }),
         trades,
+        ...(relationship && { relationship: relationship.trim() }),
         ...(address && {
           address: {
             street: address.street?.trim() || "",
@@ -142,13 +144,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     }
 
     if (action === "update") {
-      const { contractorId, name, email, phone, company, trades, address } = body as {
+      const hasRelationshipKey = Object.prototype.hasOwnProperty.call(body, "relationship");
+      const { contractorId, name, email, phone, company, trades, relationship, address } = body as {
         contractorId: string;
         name: string;
         email: string;
         phone?: string;
         company?: string;
         trades: string[];
+        relationship?: string | null;
         address?: { street?: string; city?: string; state?: string; zip?: string };
       };
 
@@ -174,6 +178,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           phone: phone?.trim() || "",
           company: company?.trim() || "",
           trades,
+          ...(hasRelationshipKey && {
+            relationship:
+              relationship === null || relationship === undefined || relationship === ""
+                ? null
+                : relationship.trim(),
+          }),
           address: address
             ? {
                 street: address.street?.trim() || "",
