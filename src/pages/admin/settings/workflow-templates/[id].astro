@@ -1,0 +1,43 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../../layouts/AdminLayout.astro";
+import WorkflowTemplateEditor from "../../../../components/admin/workflow/WorkflowTemplateEditor.tsx";
+import { getTenantClient } from "../../../../lib/tenantClient";
+import { WORKFLOW_TEMPLATE_BY_ID_QUERY } from "../../../../sanity/queries";
+import type { WorkflowTemplate } from "../../../../lib/workflow/types";
+
+// Phase 44 Plan 10 — /admin/settings/workflow-templates/[id]
+// Full-screen template editor page.
+// Source of truth: .planning/phases/44-workflow-engine/44-UI-SPEC.md § Surface 2
+
+const templateId = Astro.params.id;
+if (!templateId) return Astro.redirect("/admin/settings");
+
+const tenantId = Astro.locals.tenantId;
+if (!tenantId) return Astro.redirect("/admin/login");
+const client = getTenantClient(tenantId);
+
+const template = await client.fetch(WORKFLOW_TEMPLATE_BY_ID_QUERY, { id: templateId }) as WorkflowTemplate | null;
+if (!template) return Astro.redirect("/admin/settings");
+
+const inUseCount = await client.fetch(
+  `count(*[_type == "projectWorkflow" && templateId == $id])`,
+  { id: templateId },
+) as number;
+
+const breadcrumbs = [
+  { label: "Dashboard", href: "/admin/dashboard" },
+  { label: "Settings", href: "/admin/settings" },
+  { label: "Workflow Templates", href: "/admin/settings" },
+  { label: template.name },
+];
+---
+
+<AdminLayout
+  title={`${template.name} — Template Editor`}
+  pageTitle={template.name}
+  breadcrumbs={breadcrumbs}
+>
+  <WorkflowTemplateEditor client:load template={template} inUseCount={inUseCount} />
+</AdminLayout>
