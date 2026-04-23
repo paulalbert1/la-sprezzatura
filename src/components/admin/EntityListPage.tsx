@@ -7,9 +7,36 @@ import { relationshipLabel } from "../../lib/relationshipLabel";
 interface EntityListPageProps {
   entityType: "client" | "contractor";
   entities: Array<Record<string, any>>;
+  contractorChecklistItems?: string[];
+  vendorChecklistItems?: string[];
 }
 
 type SortDirection = "asc" | "desc";
+
+// Phase 43 TRAD-04 — completeness computation for the Trades list amber dot.
+// D-12: null/undefined relationship is treated as contractor.
+// Empty checklist → never incomplete (no dot even when no documents uploaded).
+export function isIncomplete(
+  entity:
+    | {
+        relationship?: string | null;
+        documents?: Array<{ docType?: string | null }> | null;
+      }
+    | null,
+  contractorChecklistItems: string[],
+  vendorChecklistItems: string[],
+): boolean {
+  if (!entity) return false;
+  const items =
+    entity.relationship === "vendor" ? vendorChecklistItems : contractorChecklistItems;
+  if (!items || items.length === 0) return false;
+  const uploadedTypes = new Set(
+    (entity.documents ?? [])
+      .map((d) => d?.docType ?? null)
+      .filter((t): t is string => typeof t === "string" && t.length > 0),
+  );
+  return items.some((label) => !uploadedTypes.has(label));
+}
 
 const CLIENT_COLUMNS = [
   { key: "name", label: "Name" },
@@ -26,7 +53,12 @@ const CONTRACTOR_COLUMNS = [
   { key: "contact", label: "Contact" },
 ];
 
-export default function EntityListPage({ entityType, entities }: EntityListPageProps) {
+export default function EntityListPage({
+  entityType,
+  entities,
+  contractorChecklistItems = [],
+  vendorChecklistItems = [],
+}: EntityListPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortColumn, setSortColumn] = useState("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -192,7 +224,28 @@ export default function EntityListPage({ entityType, entities }: EntityListPageP
                   className="text-sm font-body text-charcoal border-b border-stone-light/10 hover:bg-cream/50 transition-colors cursor-pointer"
                 >
                   <td className="px-5 py-3 font-medium text-charcoal">
-                    {entity.name || "--"}
+                    <span className="inline-flex items-center gap-2">
+                      {entityType === "contractor" &&
+                        isIncomplete(
+                          entity as any,
+                          contractorChecklistItems,
+                          vendorChecklistItems,
+                        ) && (
+                          <span
+                            aria-label="Incomplete — missing required documents"
+                            title="Missing required documents"
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              backgroundColor: "#D97706",
+                              flexShrink: 0,
+                              display: "inline-block",
+                            }}
+                          />
+                        )}
+                      <span>{entity.name || "--"}</span>
+                    </span>
                   </td>
                   {entityType === "client" ? (
                     <>
