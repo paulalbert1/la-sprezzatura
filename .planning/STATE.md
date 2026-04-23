@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-03-PLAN.md: seed data and Frappe Gantt retirement"
-last_updated: "2026-04-23T22:36:00.593Z"
+stopped_at: "Completed 44-09-PLAN.md: rebuild schedule.astro as workflow tracker page"
+last_updated: "2026-04-23T22:41:04.365Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -101,6 +101,8 @@ Carried from v5.1 boundary. Full history:
 - UTC-noon normalization in businessDaysBetween: date-fns differenceInBusinessDays uses local time; midnight UTC timestamps become the previous evening in Eastern timezone, shifting biz-day counts by one; fix normalizes both dates to UTC noon before calling date-fns
 - skipped satisfies hard prereqs (A1): isPrereqSatisfied returns true for complete and skipped statuses; enables optional milestones to be skipped without blocking downstream work
 - schedule.astro patched with inline GROQ fetch for project title (no non-existent getProjectById import) — minimal stub until Plan 09 WorkflowTracker replaces it
+- schedule.astro SSR engine precomputation: engine.ts runs server-side only, serialized maps (transitionsById/blockedById/gateSubMessageById/overdueReasonById) pass to WorkflowTracker as props — client never imports engine.ts
+- Template name fetched on-demand for schedule.astro header (not snapshotted on projectWorkflow) — '(deleted template)' fallback when template no longer exists
 
 ### Pending Todos
 
@@ -118,8 +120,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T22:35:57.793Z
-Stopped at: Completed 44-03-PLAN.md: seed data and Frappe Gantt retirement
+Last session: 2026-04-23T22:40:57.337Z
+Stopped at: Completed 44-09-PLAN.md: rebuild schedule.astro as workflow tracker page
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
