@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
-status: completed
-stopped_at: Phase 44 context gathered
-last_updated: "2026-04-23T19:53:33.216Z"
-last_activity: 2026-04-23
+status: executing
+stopped_at: "Completed 44-01-PLAN.md: schema foundation and type surface"
+last_updated: "2026-04-23T22:22:10.117Z"
+last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
   completed_phases: 9
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase --phase — 43
+**Current focus:** Phase --phase — 44
 
 ## Current Position
 
-Phase: 43
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-04-23
+Phase: --phase (44) — EXECUTING
+Plan: 1 of --name
+Status: Executing Phase --phase
+Last activity: 2026-04-23 -- Phase --phase execution started
 
 Progress: [██████████] 100%
 
@@ -97,6 +97,7 @@ Carried from v5.1 boundary. Full history:
 - Phase 43 Plan 03: settings.astro extended to populate contractorChecklistItems and vendorChecklistItems in the initialSettings normalization step — required since SiteSettingsPayload promotes those fields to non-optional
 - Phase 43 Plan 04: EntityListPage amber dot uses dual-text pattern — aria-label 'Incomplete — missing required documents' (full UI-SPEC label) and title 'Missing required documents' (short tooltip) on the same span; RED test matches either, acceptance grep validates both
 - Phase 43 Plan 04: isIncomplete() exported from EntityListPage.tsx so future verifiers/tests can import the D-12 branching logic directly instead of reimplementing it
+- templateId on projectWorkflow is a plain string (not Sanity reference) per Pitfall 3 — templates can be deleted while project workflows survive
 
 ### Pending Todos
 
@@ -114,7 +115,9 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 44 context gathered
-Resume file: --resume-file
+Last session: 2026-04-23T22:22:10.112Z
+Stopped at: Completed 44-01-PLAN.md: schema foundation and type surface
+Resume file: None
 Next action: `/gsd-execute-phase 43`
+
+**Planned Phase:** 44 (Workflow Engine) — 11 plans — 2026-04-23T21:20:18.157Z

@@ -70,9 +70,9 @@
 | TRAD-03 | Phase 42 | Complete |
 | TRAD-05 | Phase 42 | Complete |
 | TRAD-07 | Phase 42 | Complete |
-| TRAD-04 | Phase 43 | Pending |
-| TRAD-06 | Phase 43 | Pending |
-| TRAD-08 | Phase 43 | Pending |
+| TRAD-04 | Phase 43 | Complete |
+| TRAD-06 | Phase 43 | Complete |
+| TRAD-08 | Phase 43 | Complete |
 
 **Coverage:**
 - v5.2 requirements: 12 total
