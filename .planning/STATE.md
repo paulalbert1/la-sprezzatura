@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-04-PLAN.md: workflow template CRUD API endpoints"
-last_updated: "2026-04-23T22:55:15.397Z"
+stopped_at: "Completed 44-05-PLAN.md: project workflow API endpoints (lifecycle, milestone-status, instance)"
+last_updated: "2026-04-23T23:02:39.598Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -110,6 +110,9 @@ Carried from v5.1 boundary. Full history:
 - DELETE refuses 409 when projectWorkflow references templateId — prevents orphaned workflows (T-44-04-03)
 - regenKeys() recursively regenerates all Sanity _key values via crypto.randomUUID() on duplicate — prevents duplicate-key errors (T-44-04-05)
 - Seed idempotency: per-seed count check + createIfNotExists with deterministic _id as defense in depth (T-44-04-06)
+- Task 1 (queries.ts) was pre-completed in Plan 01; recognized as done, no duplicate commit
+- milestone-status uses ALLOWED_STATUSES allowlist before canTransition() engine call (T-44-05-07 defense in depth)
+- Both instance endpoints re-fetch workflow via PROJECT_WORKFLOW_QUERY after mutation to return authoritative state
 
 ### Pending Todos
 
@@ -127,8 +130,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T22:55:15.392Z
-Stopped at: Completed 44-04-PLAN.md: workflow template CRUD API endpoints
+Last session: 2026-04-23T23:02:39.593Z
+Stopped at: Completed 44-05-PLAN.md: project workflow API endpoints (lifecycle, milestone-status, instance)
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
