@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-09-PLAN.md: rebuild schedule.astro as workflow tracker page"
-last_updated: "2026-04-23T22:41:04.365Z"
+stopped_at: "Completed 44-10-PLAN.md: wire workflow templates into settings + editor page"
+last_updated: "2026-04-23T22:50:20.935Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -103,6 +103,9 @@ Carried from v5.1 boundary. Full history:
 - schedule.astro patched with inline GROQ fetch for project title (no non-existent getProjectById import) — minimal stub until Plan 09 WorkflowTracker replaces it
 - schedule.astro SSR engine precomputation: engine.ts runs server-side only, serialized maps (transitionsById/blockedById/gateSubMessageById/overdueReasonById) pass to WorkflowTracker as props — client never imports engine.ts
 - Template name fetched on-demand for schedule.astro header (not snapshotted on projectWorkflow) — '(deleted template)' fallback when template no longer exists
+- WorkflowTemplateItem inline type exported from SettingsPage.tsx so settings.astro can cast GROQ fetch result without unknown[] mismatch
+- WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
+- WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
 
 ### Pending Todos
 
@@ -120,8 +123,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T22:40:57.337Z
-Stopped at: Completed 44-09-PLAN.md: rebuild schedule.astro as workflow tracker page
+Last session: 2026-04-23T22:50:15.158Z
+Stopped at: Completed 44-10-PLAN.md: wire workflow templates into settings + editor page
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
