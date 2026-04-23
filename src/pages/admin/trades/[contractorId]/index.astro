@@ -36,6 +36,14 @@ if (!isNew) {
   projects = result.projects || [];
 }
 
+// Phase 43 TRAD-06 — relationship-scoped document checklist labels.
+// For new records (no relationship yet) the detail form is in create mode and
+// TradeChecklist is not rendered, so an empty array is safe.
+const relationship = !isNew ? (contractorData as any)?.relationship ?? null : null;
+const checklistItems: string[] = relationship === "vendor"
+  ? (siteSettingsRaw as any)?.vendorChecklistItems ?? []
+  : (siteSettingsRaw as any)?.contractorChecklistItems ?? [];
+
 const pageTitle = isNew ? "New Trade" : (contractorData?.name || "Trade");
 
 const relLabel = !isNew && contractorData ? relationshipLabel((contractorData as any).relationship) : null;
@@ -84,6 +92,7 @@ const breadcrumbs = [
       entity={contractorData}
       isNew={isNew}
       tradeCatalog={tradeCatalog}
+      checklistItems={checklistItems}
     />
     {!isNew && (
       <LinkedProjects client:load projects={projects} />
