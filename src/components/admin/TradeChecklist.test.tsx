@@ -18,8 +18,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
-// Intentional RED import — component does not exist yet; Plan 02 creates it.
-// @ts-expect-error — module created in Plan 02.
+// Plan 02 Task 1 — component now exists; directive removed.
 import TradeChecklist from "./TradeChecklist";
 
 interface DocEntry {
