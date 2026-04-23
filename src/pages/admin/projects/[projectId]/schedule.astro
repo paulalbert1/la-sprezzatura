@@ -2,8 +2,6 @@
 export const prerender = false;
 
 import AdminLayout from "../../../../layouts/AdminLayout.astro";
-import ScheduleEditor from "../../../../components/admin/ScheduleEditor.tsx";
-import { getAdminScheduleData, getAllContractors } from "../../../../sanity/queries";
 import { getTenantClient } from "../../../../lib/tenantClient";
 
 const projectId = Astro.params.projectId;
@@ -17,26 +15,23 @@ if (!tenantId) {
 }
 const client = getTenantClient(tenantId);
 
-const [data, allContractors] = await Promise.all([
-  getAdminScheduleData(client, projectId),
-  getAllContractors(client),
-]);
-if (!data) {
+const project = await client.fetch<{ _id: string; title: string } | null>(
+  `*[_type == "project" && _id == $projectId][0] { _id, title }`,
+  { projectId },
+);
+if (!project) {
   return Astro.redirect("/admin/projects");
 }
 
 const breadcrumbs = [
   { label: "Projects", href: "/admin/projects" },
-  { label: data.title, href: `/admin/projects/${projectId}` },
+  { label: project.title, href: `/admin/projects/${projectId}` },
   { label: "Schedule" },
 ];
 ---
 
-<AdminLayout title={data.title + " — Schedule"} pageTitle="Schedule" breadcrumbs={breadcrumbs}>
-  <ScheduleEditor
-    client:load
-    scheduleData={data}
-    projectId={projectId}
-    allContractors={allContractors || []}
-  />
+<AdminLayout title={project.title + " — Schedule"} pageTitle="Schedule" breadcrumbs={breadcrumbs}>
+  <p style="padding: 2rem; color: #6b7280; font-style: italic;">
+    Schedule UI under construction (Phase 44 in progress).
+  </p>
 </AdminLayout>
