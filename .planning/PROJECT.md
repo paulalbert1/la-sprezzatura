@@ -171,4 +171,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-22 — Milestone v5.2 Trades Directory started; Phase 41 carried forward from v5.1*
+*Last updated: 2026-04-23 — Phase 42 complete: Trades entity (contractor|vendor relationship field, /admin/trades routes, derived labels across all surfaces, WorkOrderComposeModal header gap closed)*
