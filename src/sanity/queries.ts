@@ -1228,3 +1228,21 @@ export const WORKFLOW_TEMPLATE_BY_ID_QUERY = `*[_type == "workflowTemplate" && _
   },
   createdAt, updatedAt
 }`;
+
+// Lightweight workflow payload for the Dashboard Workflow Status card (Plan 44-11).
+// Intentionally omits phase.order, phase.execution, and milestone gate fields
+// to keep the payload small. The dashboard card uses in-memory aggregation
+// (Pitfall 8 + A4) rather than one mega-GROQ projection.
+export const DASHBOARD_WORKFLOW_STATS_QUERY = `*[_type == "projectWorkflow" && status in ["active", "dormant"]]{
+  _id,
+  status,
+  defaults,
+  lastActivityAt,
+  "projectId": project._ref,
+  phases[]{
+    id,
+    milestones[]{
+      id, status, hardPrereqs
+    }
+  }
+}`;
