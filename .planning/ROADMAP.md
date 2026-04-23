@@ -221,7 +221,7 @@ Plans:
 
 **Milestone Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) carries forward from v5.1.
 
-- [ ] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13)
+- [x] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13) (completed 2026-04-23)
 - [ ] **Phase 42: Trades Entity — Routes, Schema, and Display** — 5 reqs (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
 - [ ] **Phase 43: Document Checklists, Settings Config, and Completeness** — 3 reqs (TRAD-04, TRAD-06, TRAD-08)
 
@@ -240,8 +240,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 41-01-PLAN.md — Wave 1: formatPhone utility + colocated tests + client schema/queries/API preferredContact purge (CLNT-10 foundation, CLNT-11 verification, CLNT-13 backend)
-- [ ] 41-02-PLAN.md — Wave 2: UI sweep across 5 admin components (formatPhone application, list column reshape, address sort/search, preferredContact UI purge) (CLNT-10, CLNT-11, CLNT-12, CLNT-13)
+- [x] 41-01-PLAN.md — Wave 1: formatPhone utility + colocated tests + client schema/queries/API preferredContact purge (CLNT-10 foundation, CLNT-11 verification, CLNT-13 backend)
+- [x] 41-02-PLAN.md — Wave 2: UI sweep across 5 admin components (formatPhone application, list column reshape, address sort/search, preferredContact UI purge) (CLNT-10, CLNT-11, CLNT-12, CLNT-13)
 
 ### Phase 42: Trades Entity — Routes, Schema, and Display
 **Goal**: The Trades entity has its own `/admin/trades` routes, a `contractor | vendor` relationship field that drives display names and meta line rendering, and the 1099 document slot is unified into the contractor checklist schema rather than living as a standalone badge
@@ -286,7 +286,7 @@ Plans:
 | 38 | v5.1 | 2/2 | Complete | 2026-04-15 |
 | 39 | v5.1 | 4/4 | Complete | 2026-04-15 |
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
-| 41 | v5.2 | 0/2 | Planned | - |
+| 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 42 | v5.2 | 0/3 | Not started | - |
 | 43 | v5.2 | 0/3 | Not started | - |
 

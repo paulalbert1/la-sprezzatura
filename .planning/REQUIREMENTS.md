@@ -53,10 +53,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLNT-10 | Phase 41 | Pending |
-| CLNT-11 | Phase 41 | Pending |
-| CLNT-12 | Phase 41 | Pending |
-| CLNT-13 | Phase 41 | Pending |
+| CLNT-10 | Phase 41 | Complete |
+| CLNT-11 | Phase 41 | Complete |
+| CLNT-12 | Phase 41 | Complete |
+| CLNT-13 | Phase 41 | Complete |
 | TRAD-01 | Phase 42 | Pending |
 | TRAD-02 | Phase 42 | Pending |
 | TRAD-03 | Phase 42 | Pending |
