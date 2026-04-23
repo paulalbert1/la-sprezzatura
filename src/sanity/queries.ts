@@ -545,6 +545,8 @@ export const SITE_SETTINGS_QUERY = `
     renderingImageTypes,
     renderingExcludedUsers,
     trades,
+    contractorChecklistItems,
+    vendorChecklistItems,
     updateLog[] | order(savedAt desc)[0...5] {
       _key,
       savedAt,
@@ -1092,7 +1094,8 @@ export async function getAdminClientDetail(client: SanityClient, clientId: strin
 export async function getAdminContractors(client: SanityClient) {
   return client.fetch(`
     *[_type == "contractor"] | order(name asc) {
-      _id, name, email, phone, company, trades, relationship
+      _id, name, email, phone, company, trades, relationship,
+      "documents": documents[]{ docType }
     }
   `);
 }
