@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-10-PLAN.md: wire workflow templates into settings + editor page"
-last_updated: "2026-04-23T22:50:20.935Z"
+stopped_at: "Completed 44-04-PLAN.md: workflow template CRUD API endpoints"
+last_updated: "2026-04-23T22:55:15.397Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -106,6 +106,10 @@ Carried from v5.1 boundary. Full history:
 - WorkflowTemplateItem inline type exported from SettingsPage.tsx so settings.astro can cast GROQ fetch result without unknown[] mismatch
 - WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
 - WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
+- Server-side version auto-increment on PATCH: server fetches current version, computes current.version + 1, client-supplied version is never trusted (T-44-04-02)
+- DELETE refuses 409 when projectWorkflow references templateId — prevents orphaned workflows (T-44-04-03)
+- regenKeys() recursively regenerates all Sanity _key values via crypto.randomUUID() on duplicate — prevents duplicate-key errors (T-44-04-05)
+- Seed idempotency: per-seed count check + createIfNotExists with deterministic _id as defense in depth (T-44-04-06)
 
 ### Pending Todos
 
@@ -123,8 +127,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T22:50:15.158Z
-Stopped at: Completed 44-10-PLAN.md: wire workflow templates into settings + editor page
+Last session: 2026-04-23T22:55:15.392Z
+Stopped at: Completed 44-04-PLAN.md: workflow template CRUD API endpoints
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
