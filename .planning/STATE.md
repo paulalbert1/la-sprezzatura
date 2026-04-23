@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-08-PLAN.md: WorkflowTemplatesSection + WorkflowTemplateEditor tests (26 passing)"
-last_updated: "2026-04-23T23:24:22.478Z"
+stopped_at: "Completed 44-11-PLAN.md: WorkflowStatusCard + dashboard integration (paused at Task 3 human-verify checkpoint)"
+last_updated: "2026-04-23T23:29:20.758Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -120,6 +120,8 @@ Carried from v5.1 boundary. Full history:
 - derivePhaseStatus is a local pure function in WorkflowTracker (not imported from engine.ts) — engine is server-only, cannot run on client (Plan 07)
 - WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
 - WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
+- WorkflowStatusCard placed in right column above Tasks card — dashboard uses 2-col grid (not 12-col), so top of right column is the correct placement
+- Blocked milestone count in WorkflowStatusCard uses status-based approximation (not full engine.computeMetrics) — dashboard is a signal, tracker page is source of truth
 
 ### Pending Todos
 
@@ -137,8 +139,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T23:24:22.473Z
-Stopped at: Completed 44-08-PLAN.md: WorkflowTemplatesSection + WorkflowTemplateEditor tests (26 passing)
+Last session: 2026-04-23T23:29:20.753Z
+Stopped at: Completed 44-11-PLAN.md: WorkflowStatusCard + dashboard integration (paused at Task 3 human-verify checkpoint)
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
