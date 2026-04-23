@@ -323,3 +323,103 @@ describe("POST /api/admin/contractors — upload-doc docType (Phase 40 Plan 01 V
     expect(mockPatch).toHaveBeenCalledWith("contractor-abc");
   });
 });
+
+// Phase 42 Plan 01 — TRAD-02
+describe("POST /api/admin/contractors — relationship field (Phase 42 TRAD-02)", () => {
+  it("persists `relationship: 'vendor'` on create when body includes it", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeJsonRequest({
+        action: "create",
+        name: "Acme Supplies",
+        email: "sales@acme.example",
+        trades: ["general-contractor"],
+        relationship: "vendor",
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    expect(mockCreate).toHaveBeenCalledOnce();
+    const createArg = mockCreate.mock.calls[0][0];
+    expect(createArg.relationship).toBe("vendor");
+  });
+
+  it("does NOT include `relationship` in create payload when omitted from body", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeJsonRequest({
+        action: "create",
+        name: "Bob Builder",
+        email: "bob@example.com",
+        trades: ["general-contractor"],
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    const createArg = mockCreate.mock.calls[0][0];
+    expect("relationship" in createArg).toBe(false);
+  });
+
+  it("updates `relationship` on PATCH (action=update) when provided", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeJsonRequest({
+        action: "update",
+        contractorId: "contractor-abc",
+        name: "Bob Builder",
+        email: "bob@example.com",
+        trades: ["general-contractor"],
+        relationship: "contractor",
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    const setCall = mockSet.mock.calls.find(
+      (call) => call[0] && "name" in call[0],
+    );
+    expect(setCall).toBeTruthy();
+    expect(setCall![0].relationship).toBe("contractor");
+  });
+
+  it("clears `relationship` to null on update when body passes relationship: null", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeJsonRequest({
+        action: "update",
+        contractorId: "contractor-abc",
+        name: "Bob Builder",
+        email: "bob@example.com",
+        trades: ["general-contractor"],
+        relationship: null,
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    const setCall = mockSet.mock.calls.find(
+      (call) => call[0] && "name" in call[0],
+    );
+    expect(setCall).toBeTruthy();
+    expect("relationship" in setCall![0]).toBe(true);
+    expect(setCall![0].relationship).toBeNull();
+  });
+
+  it("leaves `relationship` untouched on update when body omits the key", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeJsonRequest({
+        action: "update",
+        contractorId: "contractor-abc",
+        name: "Bob Builder",
+        email: "bob@example.com",
+        trades: ["general-contractor"],
+      }),
+      cookies: makeCookies(),
+    });
+    expect(res.status).toBe(200);
+    const setCall = mockSet.mock.calls.find(
+      (call) => call[0] && "name" in call[0],
+    );
+    expect(setCall).toBeTruthy();
+    expect("relationship" in setCall![0]).toBe(false);
+  });
+});
