@@ -6,8 +6,9 @@ import DashboardTasksCard from "../../components/admin/DashboardTasksCard.tsx";
 import UpcomingDeliveriesCard from "../../components/admin/UpcomingDeliveriesCard.tsx";
 import ActiveProjectsCard from "../../components/admin/ActiveProjectsCard.tsx";
 import ContactCardWrapper from "../../components/admin/ContactCardWrapper.tsx";
+import WorkflowStatusCard from "../../components/admin/workflow/WorkflowStatusCard.tsx";
 import { getTenantClient } from "../../lib/tenantClient";
-import { getAdminDashboardData } from "../../sanity/queries";
+import { getAdminDashboardData, DASHBOARD_WORKFLOW_STATS_QUERY } from "../../sanity/queries";
 import {
   getOverdueBannerData,
   isMilestoneOverdue,
@@ -48,6 +49,53 @@ function formatMilestoneDate(dateStr: string | null): string {
 }
 
 const today = format(new Date(), "EEEE, MMMM d, yyyy");
+
+// ── Workflow Status card (Plan 44-11, WF-08) ──────────────────────────────
+// Lightweight projection — no phase.order / phase.execution / gate fields.
+// Blocked count uses a status-based approximation (milestone.status ===
+// "not_started" AND at least one hardPrereq's status is NOT complete/skipped).
+// This is a signal, not source of truth; the tracker page has full fidelity.
+interface LiteMilestone { id: string; status: string; hardPrereqs: string[]; }
+interface LiteWorkflow {
+  _id: string;
+  status: string;
+  defaults: { clientApprovalDays: number; dormancyDays: number; revisionRounds: number };
+  lastActivityAt: string;
+  projectId: string;
+  phases: Array<{ id: string; milestones: LiteMilestone[] }>;
+}
+
+const liteWorkflows = await client.fetch(DASHBOARD_WORKFLOW_STATS_QUERY) as LiteWorkflow[];
+
+let awaitingClientCount = 0;
+let approachingDormancyCount = 0;
+let blockedMilestonesCount = 0;
+const now = Date.now();
+
+for (const wf of liteWorkflows) {
+  const allMs = wf.phases.flatMap((p) => p.milestones);
+  const statusById = new Map(allMs.map((m) => [m.id, m.status]));
+
+  if (allMs.some((m) => m.status === "awaiting_client" || m.status === "awaiting_payment")) {
+    awaitingClientCount += 1;
+  }
+
+  if (wf.status === "active") {
+    const days = Math.floor((now - new Date(wf.lastActivityAt).getTime()) / 86_400_000);
+    if (days >= Math.floor(wf.defaults.dormancyDays * 0.75)) approachingDormancyCount += 1;
+  }
+
+  for (const m of allMs) {
+    if (m.status !== "not_started") continue;
+    const blocked = m.hardPrereqs.some((pid) => {
+      const s = statusById.get(pid);
+      return s !== undefined && s !== "complete" && s !== "skipped";
+    });
+    if (blocked) blockedMilestonesCount += 1;
+  }
+}
+
+const hasAnyWorkflows = liteWorkflows.length > 0;
 ---
 
 <AdminLayout title="Dashboard - Studio" pageTitle="Dashboard" breadcrumbs={[{ label: "Dashboard" }]}>
@@ -94,8 +142,18 @@ const today = format(new Date(), "EEEE, MMMM d, yyyy");
         <UpcomingDeliveriesCard client:load deliveries={data.deliveries} />
       </div>
 
-      {/* RIGHT COLUMN: Tasks + Contractors */}
+      {/* RIGHT COLUMN: Tasks + Contractors + Workflow Status */}
       <div class="flex flex-col gap-5">
+
+        {/* Workflow Status — React island (Phase 44 Plan 11, WF-08) */}
+        <WorkflowStatusCard
+          client:load
+          awaitingClientCount={awaitingClientCount}
+          approachingDormancyCount={approachingDormancyCount}
+          blockedMilestonesCount={blockedMilestonesCount}
+          hasAnyWorkflows={hasAnyWorkflows}
+        />
+
         <DashboardTasksCard
           client:load
           tasks={data.tasks}
