@@ -1190,3 +1190,41 @@ export async function getAdminProcurementCronData(
 ): Promise<CronProject[]> {
   return client.fetch(ADMIN_PROCUREMENT_CRON_QUERY);
 }
+
+// ============================================================================
+// Phase 44 — Workflow engine queries
+// ============================================================================
+
+export const PROJECT_WORKFLOW_QUERY = `*[_type == "projectWorkflow" && project._ref == $projectId][0]{
+  _id,
+  _type,
+  "project": project,
+  templateId,
+  templateVersion,
+  status,
+  defaults,
+  phases[]{
+    _key, id, name, order, execution, canOverlapWith,
+    milestones[]{
+      _key, id, name, assignee, gate, optional, multiInstance,
+      hardPrereqs, softPrereqs, status,
+      startedAt, completedAt, linkedPaymentId,
+      approvalReceivedAt, signedAt, deliveredAt,
+      instances[]{ _key, name, status, fromTemplate, startedAt, completedAt }
+    }
+  },
+  createdAt, lastActivityAt, terminatedAt, completedAt
+}`;
+
+export const WORKFLOW_TEMPLATE_BY_ID_QUERY = `*[_type == "workflowTemplate" && _id == $id][0]{
+  _id, _type, name, version, defaults,
+  phases[]{
+    _key, id, name, order, execution, canOverlapWith,
+    milestones[]{
+      _key, id, name, assignee, gate, optional, multiInstance,
+      hardPrereqs, softPrereqs,
+      defaultInstances[]{ _key, name }
+    }
+  },
+  createdAt, updatedAt
+}`;
