@@ -38,7 +38,9 @@ type ActionName =
   | "updateHeroSlide"
   | "reorderHeroSlideshow"
   | "removeHeroSlide"
-  | "updateTrades";
+  | "updateTrades"
+  | "updateContractorChecklistItems"
+  | "updateVendorChecklistItems";
 
 function jsonResponse(data: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -465,6 +467,95 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return jsonResponse({ success: true });
     }
 
+    // T-43-01: inherits admin gate at line ~283.
+    // T-43-03: 50-item cap enforced BEFORE per-entry validation to short-circuit DoS attempts.
+    if (action === "updateContractorChecklistItems") {
+      const { contractorChecklistItems } = body as {
+        contractorChecklistItems?: unknown;
+      };
+      if (!Array.isArray(contractorChecklistItems)) {
+        return errorResponse(
+          "contractorChecklistItems must be an array",
+          400,
+        );
+      }
+      if (contractorChecklistItems.length > 50) {
+        return errorResponse(
+          "contractorChecklistItems may not exceed 50 items",
+          400,
+        );
+      }
+      for (const t of contractorChecklistItems) {
+        if (typeof t !== "string" || t.trim().length === 0) {
+          return errorResponse(
+            "contractorChecklistItems entries must be non-empty strings",
+            400,
+          );
+        }
+      }
+
+      const logEntry = buildUpdateLogEntry(action, session.entityId);
+
+      await sanityWriteClient
+        .patch(SETTINGS_DOC_ID)
+        .setIfMissing({
+          _type: "siteSettings",
+          contractorChecklistItems: [],
+          updateLog: [],
+        })
+        .set({
+          contractorChecklistItems: (contractorChecklistItems as string[]).map(
+            (t) => t.trim(),
+          ),
+        })
+        .append("updateLog", [logEntry])
+        .commit();
+
+      return jsonResponse({ success: true });
+    }
+
+    if (action === "updateVendorChecklistItems") {
+      const { vendorChecklistItems } = body as {
+        vendorChecklistItems?: unknown;
+      };
+      if (!Array.isArray(vendorChecklistItems)) {
+        return errorResponse("vendorChecklistItems must be an array", 400);
+      }
+      if (vendorChecklistItems.length > 50) {
+        return errorResponse(
+          "vendorChecklistItems may not exceed 50 items",
+          400,
+        );
+      }
+      for (const t of vendorChecklistItems) {
+        if (typeof t !== "string" || t.trim().length === 0) {
+          return errorResponse(
+            "vendorChecklistItems entries must be non-empty strings",
+            400,
+          );
+        }
+      }
+
+      const logEntry = buildUpdateLogEntry(action, session.entityId);
+
+      await sanityWriteClient
+        .patch(SETTINGS_DOC_ID)
+        .setIfMissing({
+          _type: "siteSettings",
+          vendorChecklistItems: [],
+          updateLog: [],
+        })
+        .set({
+          vendorChecklistItems: (vendorChecklistItems as string[]).map((t) =>
+            t.trim(),
+          ),
+        })
+        .append("updateLog", [logEntry])
+        .commit();
+
+      return jsonResponse({ success: true });
+    }
+
     return errorResponse(`Unknown action: ${action}`, 400);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to save";
@@ -472,4 +563,38 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     console.error("[api/admin/site-settings] save failed", err);
     return jsonResponse({ error: message }, 500);
   }
+};
+
+// GET /api/admin/site-settings
+// - action=inUseDocTypes: returns a deduped string[] of docType values
+//   currently in use across all contractor records. Used by the Settings
+//   ChecklistConfigSection delete-guard (D-15).
+// T-43-04: admin-gated; returns non-sensitive metadata only (docType labels).
+export const GET: APIRoute = async ({ request, cookies }) => {
+  const session = await getSession(cookies);
+  if (!session || session.role !== "admin") {
+    return errorResponse("Unauthorized", 401);
+  }
+
+  const url = new URL(request.url);
+  const action = url.searchParams.get("action");
+
+  if (action === "inUseDocTypes") {
+    try {
+      const types = await sanityWriteClient.fetch<unknown>(
+        `array::unique(*[_type == "contractor" && defined(documents)].documents[].docType)`,
+      );
+      const cleaned = Array.isArray(types)
+        ? types.filter((t): t is string => typeof t === "string" && t.length > 0)
+        : [];
+      return jsonResponse({ types: cleaned });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[api/admin/site-settings] inUseDocTypes failed", err);
+      const message = err instanceof Error ? err.message : "Failed to load";
+      return jsonResponse({ error: message }, 500);
+    }
+  }
+
+  return errorResponse("Unknown action", 400);
 };
