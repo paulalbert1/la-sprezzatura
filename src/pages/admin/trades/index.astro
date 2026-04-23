@@ -4,7 +4,7 @@ export const prerender = false;
 import AdminLayout from "../../../layouts/AdminLayout.astro";
 import EntityListPage from "../../../components/admin/EntityListPage.tsx";
 import { getTenantClient } from "../../../lib/tenantClient";
-import { getAdminContractors } from "../../../sanity/queries";
+import { getAdminContractors, SITE_SETTINGS_QUERY } from "../../../sanity/queries";
 
 const tenantId = Astro.locals.tenantId;
 if (!tenantId) {
@@ -12,6 +12,13 @@ if (!tenantId) {
 }
 const client = getTenantClient(tenantId);
 const contractors = await getAdminContractors(client);
+
+// Phase 43 TRAD-04 — completeness dot on the Trades list view.
+// Load checklist arrays from siteSettings so EntityListPage can compute
+// per-row completeness. Missing or empty arrays resolve to [] and render no dot.
+const siteSettingsRaw = await client.fetch(SITE_SETTINGS_QUERY);
+const contractorChecklistItems: string[] = (siteSettingsRaw as any)?.contractorChecklistItems ?? [];
+const vendorChecklistItems: string[] = (siteSettingsRaw as any)?.vendorChecklistItems ?? [];
 
 const breadcrumbs = [
   { label: "Dashboard", href: "/admin/dashboard" },
@@ -24,5 +31,7 @@ const breadcrumbs = [
     client:load
     entityType="contractor"
     entities={contractors}
+    contractorChecklistItems={contractorChecklistItems}
+    vendorChecklistItems={vendorChecklistItems}
   />
 </AdminLayout>
