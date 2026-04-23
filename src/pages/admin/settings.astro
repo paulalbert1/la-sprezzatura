@@ -21,6 +21,15 @@ const tenantBusinessName = tenant?.businessName ?? "Studio";
 const client = getTenantClient(tenantId);
 const raw = (await client.fetch(SITE_SETTINGS_QUERY)) ?? {};
 
+// Phase 44 Plan 10 — fetch workflowTemplate documents with inUseCount
+import type { WorkflowTemplateItem } from "../../components/admin/settings/SettingsPage.tsx";
+const workflowTemplates = (await client.fetch(
+  `*[_type == "workflowTemplate"] | order(name asc) {
+    _id, name, version, phases,
+    "inUseCount": count(*[_type == "projectWorkflow" && templateId == ^._id])
+  }`,
+)) as WorkflowTemplateItem[];
+
 // Normalize the GROQ result into a fully-populated payload so the React
 // island never has to branch on undefined fields.
 type SiteSettingsRow = {
@@ -94,5 +103,5 @@ const initialSettings = {
     { label: "Settings" },
   ]}
 >
-  <SettingsPage client:load initialSettings={initialSettings} />
+  <SettingsPage client:load initialSettings={initialSettings} initialWorkflowTemplates={workflowTemplates} />
 </AdminLayout>

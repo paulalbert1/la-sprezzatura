@@ -18,6 +18,7 @@ import RenderingConfigSection, {
 import StudioRetirementNotice from "./StudioRetirementNotice";
 import TradesCatalogSection from "../TradesCatalogSection";
 import ChecklistConfigSection from "../ChecklistConfigSection";
+import WorkflowTemplatesSection from "../workflow/WorkflowTemplatesSection";
 
 // Phase 34 Plan 03 — SettingsPage
 // Source of truth:
@@ -50,8 +51,17 @@ export interface SiteSettingsPayload {
   vendorChecklistItems: string[];
 }
 
+export interface WorkflowTemplateItem {
+  _id: string;
+  name: string;
+  version: number;
+  phases: Array<{ _key: string; id: string; name: string; order: number; execution: string; canOverlapWith: string[]; milestones: Array<{ _key: string; id: string; name: string; assignee: string; gate: string | null; optional: boolean; multiInstance: boolean; hardPrereqs: string[]; softPrereqs: string[]; defaultInstances: Array<{ _key: string; name: string }> }> }>;
+  inUseCount: number;
+}
+
 export interface SettingsPageProps {
   initialSettings: SiteSettingsPayload;
+  initialWorkflowTemplates?: WorkflowTemplateItem[];
 }
 
 function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
@@ -67,7 +77,7 @@ function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
   };
 }
 
-function SettingsPageInner({ initialSettings }: SettingsPageProps) {
+function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [] }: SettingsPageProps) {
   const [general, setGeneral] = useState<GeneralValues>({
     siteTitle: initialSettings.siteTitle ?? "",
     tagline: initialSettings.tagline ?? "",
@@ -349,6 +359,13 @@ function SettingsPageInner({ initialSettings }: SettingsPageProps) {
             onChange={handleVendorChecklistChange}
           />
         </CollapsibleSection>
+
+        <CollapsibleSection title="Workflow Templates" defaultOpen={false}>
+          <p className="text-sm font-body text-stone" style={{ marginBottom: "16px", fontSize: "13px", color: "#6B5E52" }}>
+            Reusable process definitions you can apply to projects. Each template defines phases, milestones, gates, and default contractors. Edit or duplicate an existing template, or create a new one from scratch.
+          </p>
+          <WorkflowTemplatesSection templates={initialWorkflowTemplates} />
+        </CollapsibleSection>
       </div>
 
       <StudioRetirementNotice />
@@ -452,3 +469,4 @@ export default function SettingsPage(props: SettingsPageProps) {
     </ToastContainer>
   );
 }
+
