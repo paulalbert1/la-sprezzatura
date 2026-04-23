@@ -344,6 +344,7 @@ const breadcrumbs = [
                   _key: pc._key,
                   name: pc.contractor.name,
                   email: pc.contractor.email || "",
+                  relationship: pc.contractor.relationship ?? null,
                   trades: pc.contractor.trades,
                 }}
                 latestWorkOrder={latestByContractorKey[pc._key] ?? null}

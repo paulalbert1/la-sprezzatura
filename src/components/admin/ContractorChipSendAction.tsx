@@ -48,6 +48,7 @@ export interface ContractorChipSendActionProps {
     _key: string;
     name: string;
     email: string;
+    relationship?: string | null;
     trades?: string[];
   };
   latestWorkOrder: { _id: string; lastSentAt: string | null } | null;

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import AdminModal from "./ui/AdminModal";
 import { useToast } from "./ui/ToastContainer";
+import { relationshipLabel } from "../../lib/relationshipLabel";
 // AdminModal is imported and its size="lg" preset (max-w-[720px]) would apply
 // via a matching Tailwind class on the inline dialog below. We render inline
 // rather than through the AdminModal portal path so that jsdom test harnesses
@@ -90,6 +91,7 @@ export interface WorkOrderComposeModalProps {
     _id: string;
     name: string;
     email: string;
+    relationship?: string | null;
     trades?: string[];
   };
   defaultFromDisplayName?: string;
@@ -333,7 +335,7 @@ export default function WorkOrderComposeModal({
             Send work order
           </h2>
           <p className="text-[11.5px] text-[#9E8E80] mt-1">
-            To {contractor.name} · {contractor.email}
+            To {contractor.name} · {contractor.email} · {relationshipLabel(contractor.relationship)}
           </p>
         </header>
 
