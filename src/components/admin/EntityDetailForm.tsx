@@ -1,13 +1,15 @@
-import { useState, useRef } from "react";
-import { Trash2, Upload, Loader2, Check, X } from "lucide-react";
+import { useState } from "react";
+import { Trash2, Loader2, Check, X } from "lucide-react";
 import { formatTrade } from "../../lib/trades";
 import { relationshipLabel } from "../../lib/relationshipLabel";
+import TradeChecklist from "./TradeChecklist";
 
 interface EntityDetailFormProps {
   entityType: "client" | "contractor";
   entity: Record<string, any> | null;
   isNew?: boolean;
   tradeCatalog?: string[]; // Phase 40 VEND-03: plain string list from siteSettings
+  checklistItems?: string[]; // Phase 43 TRAD-06: relationship-scoped checklist labels
 }
 
 interface FieldError {
@@ -46,25 +48,12 @@ const TRADE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
-const DOC_TYPE_LABELS: Record<string, string> = {
-  "1099": "1099",
-  insurance: "Insurance cert",
-  contract: "Contract",
-  other: "Other",
-};
-
-const DOC_TYPE_PILL_CLASSES: Record<string, string> = {
-  "1099": "bg-terracotta/10 text-terracotta border border-terracotta/20",
-  insurance: "bg-[#E3EDF2] text-[#3F6B82] border border-[#3F6B82]/20",
-  contract: "bg-gold-light text-gold border border-gold/20",
-  other: "bg-cream-dark text-stone-dark border border-stone-light/40",
-};
-
 export default function EntityDetailForm({
   entityType,
   entity,
   isNew = false,
   tradeCatalog,
+  checklistItems,
 }: EntityDetailFormProps) {
   const isCreateMode = isNew || !entity;
 
@@ -84,28 +73,12 @@ export default function EntityDetailForm({
     (entity as any)?.relationship || "",
   );
   const [trades, setTrades] = useState<string[]>(entity?.trades || []);
-  const [documents, setDocuments] = useState<
-    Array<{
-      _key: string;
-      fileName: string;
-      fileType: string;
-      url: string;
-      uploadedAt: string;
-      docType?: string;
-    }>
-  >(entity?.documents || []);
-
   // UI state
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState<FieldError>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [docType, setDocType] = useState<string>("");
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [deletingDocKey, setDeletingDocKey] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function validate(): boolean {
     const newErrors: FieldError = {};
@@ -201,79 +174,6 @@ export default function EntityDetailForm({
       setServerError(err.message || "Could not save changes. Please try again.");
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleUploadDoc(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // File validation
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-    ];
-    if (!allowedTypes.includes(file.type) || file.size > 10 * 1024 * 1024) {
-      setUploadError("File must be PDF, JPEG, or PNG under 10MB");
-      setTimeout(() => setUploadError(null), 4000);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      return;
-    }
-
-    setUploading(true);
-    setUploadError(null);
-
-    const formData = new FormData();
-    formData.append("action", "upload-doc");
-    formData.append("_id", entity?._id || "");
-    formData.append("file", file);
-    formData.append("docType", docType); // Phase 40 VEND-05
-
-    try {
-      const res = await fetch(`/api/admin/${entityType}s`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error("File upload failed. Check file size and try again.");
-      }
-
-      const result = await res.json();
-      if (result.document) {
-        setDocuments((prev) => [...prev, result.document]);
-      }
-      setDocType(""); // reset after upload
-    } catch {
-      setUploadError("File upload failed. Check file size and try again.");
-      setTimeout(() => setUploadError(null), 4000);
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }
-
-  async function handleDeleteDoc(docKey: string) {
-    setDeletingDocKey(docKey);
-
-    try {
-      const res = await fetch(`/api/admin/${entityType}s`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "delete-doc",
-          _id: entity?._id,
-          docKey,
-        }),
-      });
-
-      if (!res.ok) throw new Error();
-      setDocuments((prev) => prev.filter((d) => d._key !== docKey));
-    } catch {
-      setServerError("Could not delete document. Please try again.");
-    } finally {
-      setDeletingDocKey(null);
     }
   }
 
@@ -560,104 +460,15 @@ export default function EntityDetailForm({
                 )}
               </div>
 
-              {/* Documents section */}
-              {!isCreateMode && (
-                <div>
-                  <h3 className="text-sm font-semibold font-body text-charcoal mt-6 mb-3">
-                    Documents
-                  </h3>
-
-                  {documents.map((doc) => (
-                    <div
-                      key={doc._key}
-                      className="flex items-center gap-3 px-4 py-3 bg-cream/50 rounded-lg mb-2"
-                    >
-                      {doc.docType && (
-                        <span className={`text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded ${DOC_TYPE_PILL_CLASSES[doc.docType] ?? "bg-stone-100 text-stone-500"}`}>
-                          {DOC_TYPE_LABELS[doc.docType] ?? doc.docType}
-                        </span>
-                      )}
-                      <span className="text-[11px] font-semibold uppercase px-1.5 py-0.5 rounded bg-stone-100 text-stone-500">
-                        {doc.fileType || "FILE"}
-                      </span>
-                      <span className="text-sm font-body text-charcoal truncate flex-1">
-                        {doc.fileName}
-                      </span>
-                      <a
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-terracotta hover:underline font-body"
-                      >
-                        View
-                      </a>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteDoc(doc._key)}
-                        disabled={deletingDocKey === doc._key}
-                        className="text-stone-light hover:text-red-500 transition-colors"
-                      >
-                        {deletingDocKey === doc._key ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  ))}
-
-                  {documents.length === 0 && (
-                    <p className="text-sm text-stone font-body mb-3">
-                      Upload a 1099, insurance certificate, contract, or other document for this {relationshipLabel(relationship).toLowerCase()}.
-                    </p>
-                  )}
-
-                  {/* Document type select — Phase 40 VEND-05 */}
-                  <div className="mb-3">
-                    <label className="text-[11px] font-semibold text-stone uppercase tracking-wider mb-1 block">
-                      Document type
-                    </label>
-                    <select
-                      value={docType}
-                      onChange={(e) => setDocType(e.target.value)}
-                      className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-                    >
-                      <option value="">Select type…</option>
-                      <option value="1099">1099</option>
-                      <option value="insurance">Insurance certificate</option>
-                      <option value="contract">Contract</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Upload button */}
-                  <div className="flex items-center gap-3">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.jpeg,.jpg,.png"
-                      onChange={handleUploadDoc}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                      className="text-sm text-terracotta border border-terracotta/30 rounded-lg px-3 py-1.5 hover:bg-terracotta/5 transition-colors inline-flex items-center gap-1.5 font-body"
-                    >
-                      {uploading ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Upload className="w-3.5 h-3.5" />
-                      )}
-                      Upload
-                    </button>
-                    {uploadError && (
-                      <p className="text-xs text-red-600 font-body">
-                        {uploadError}
-                      </p>
-                    )}
-                  </div>
+              {/* Documents section — Phase 43 TRAD-06 */}
+              {!isCreateMode && entityType === "contractor" && (
+                <div className="mt-6">
+                  <TradeChecklist
+                    contractorId={entity!._id}
+                    checklistItems={checklistItems ?? []}
+                    initialDocuments={(entity?.documents ?? []) as Parameters<typeof TradeChecklist>[0]["initialDocuments"]}
+                    relationship={(entity as any)?.relationship ?? null}
+                  />
                 </div>
               )}
             </>
