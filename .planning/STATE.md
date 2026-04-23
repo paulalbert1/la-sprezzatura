@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.2
 milestone_name: Trades Directory
 status: executing
-stopped_at: "Completed 44-06-PLAN.md: StatusCircle, StatusPickerPopover, MilestoneRow, PhaseAccordion tracker primitives"
-last_updated: "2026-04-23T23:10:34.884Z"
+stopped_at: "Completed 44-07-PLAN.md: WorkflowTracker shell + Header + Metrics + Warnings + BlankWorkflowState"
+last_updated: "2026-04-23T23:19:13.802Z"
 last_activity: 2026-04-23 -- Phase --phase execution started
 progress:
   total_phases: 10
@@ -116,6 +116,8 @@ Carried from v5.1 boundary. Full history:
 - StatusPickerPopover uses createPortal to document.body so it escapes overflow-hidden containers in the accordion body
 - Date formatting in MilestoneRow uses date-part slicing (isoStr.slice(0,10)) not parseISO to avoid UTC-midnight timezone shift in Eastern time
 - afterEach(cleanup) required in portal component tests — jsdom shares document.body across tests causing accumulated portal nodes
+- afterEach(cleanup) required in all React island tests — jsdom accumulates portal/DOM nodes across tests without it (Plan 07)
+- derivePhaseStatus is a local pure function in WorkflowTracker (not imported from engine.ts) — engine is server-only, cannot run on client (Plan 07)
 
 ### Pending Todos
 
@@ -133,8 +135,8 @@ Carried from v5.1:
 
 ## Session Continuity
 
-Last session: 2026-04-23T23:10:34.877Z
-Stopped at: Completed 44-06-PLAN.md: StatusCircle, StatusPickerPopover, MilestoneRow, PhaseAccordion tracker primitives
+Last session: 2026-04-23T23:19:13.797Z
+Stopped at: Completed 44-07-PLAN.md: WorkflowTracker shell + Header + Metrics + Warnings + BlankWorkflowState
 Resume file: None
 Next action: `/gsd-execute-phase 43`
 
