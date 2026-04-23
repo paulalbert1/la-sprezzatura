@@ -11,6 +11,7 @@
 - ✅ **v5.0 Admin Platform Completion** - Phases 29-34 (shipped 2026-04-12)
 - ✅ **v5.1 Admin UX Polish & Workflow Additions** - Phases 35-41 (completed 2026-04-22, Phase 41 carried to v5.2)
 - 🚧 **v5.2 Trades Directory** - Phases 41-43 (in progress)
+- 🚧 **v5.3 Workflow Engine** - Phase 44 (in progress)
 - 📋 **v6.0 Linha Platform** - TBD (planned)
 
 ## Phases
@@ -223,7 +224,7 @@ Plans:
 
 - [x] **Phase 41: Client Data Model Refinements** — 4 reqs (CLNT-10..13) (completed 2026-04-23)
 - [x] **Phase 42: Trades Entity — Routes, Schema, and Display** — 5 reqs (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
-- [ ] **Phase 43: Document Checklists, Settings Config, and Completeness** — 3 reqs (TRAD-04, TRAD-06, TRAD-08)
+- [x] **Phase 43: Document Checklists, Settings Config, and Completeness** — 3 reqs (TRAD-04, TRAD-06, TRAD-08) (completed 2026-04-23)
 
 ## Phase Details
 
@@ -274,8 +275,35 @@ Plans:
 Plans:
 - [x] 43-01-PLAN.md — Wave 0: GROQ extensions + API action branches + Wave 0 test scaffolding (TRAD-04, TRAD-06, TRAD-08 enablement)
 - [x] 43-02-PLAN.md — Wave 1: TradeChecklist component + EntityDetailForm integration + detail page wiring (TRAD-06)
-- [ ] 43-03-PLAN.md — Wave 1: ChecklistConfigSection + SettingsPage wiring (Contractor/Vendor Checklist sections) (TRAD-08)
-- [ ] 43-04-PLAN.md — Wave 1: EntityListPage amber completeness dot + Trades list Astro page wiring (TRAD-04)
+- [x] 43-03-PLAN.md — Wave 1: ChecklistConfigSection + SettingsPage wiring (Contractor/Vendor Checklist sections) (TRAD-08)
+- [x] 43-04-PLAN.md — Wave 1: EntityListPage amber completeness dot + Trades list Astro page wiring (TRAD-04)
+
+### v5.3 Workflow Engine (Phase 44)
+
+**Milestone Goal:** Replace the Frappe Gantt chart with a configurable designer workflow engine. Liz defines reusable workflow templates (phases, milestones, gates, multi-instance contractors) in Settings and instantiates them per project. The engine enforces prerequisite logic, client approval gates, dormancy detection, and payment gates derived from her design services agreement.
+
+- 🚧 **Phase 44: Workflow Engine** — template management, project tracker UI, engine rules, and instantiation flow
+
+### Phase 44: Workflow Engine
+**Goal**: Replace the Frappe Gantt with a three-layer workflow system: Templates (designer-defined in Settings), Instances (per-project snapshots), and Engine (prerequisite + gate enforcement). Liz can define workflow types (Full-service residential, Design consultation, Staging), instantiate them per project, and track milestone status with gate indicators, multi-instance contractor sub-rows, and dormancy/approval warnings.
+**Depends on**: Phase 34 (Settings baseline); Phase 43 (Trades schema for contractor references)
+**Requirements**: WF-01, WF-02, WF-03, WF-04, WF-05, WF-06, WF-07, WF-08
+**Canonical refs**: /Users/paulalbert/Downloads/workflow-engine-spec.md, /Users/paulalbert/Downloads/project_tracker_koenig.html
+**Plans**: 11 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 44-01-PLAN.md — Wave 1: Sanity schemas (workflowTemplate + projectWorkflow) + shared type surface (WF-01, WF-03, WF-04)
+- [ ] 44-02-PLAN.md — Wave 1: Pure engine module + businessDays + arrayUtils + fixtures (TDD) (WF-04, WF-07)
+- [ ] 44-03-PLAN.md — Wave 1: Starter template seed data + Frappe Gantt retirement (16 deletions + 2 npm deps) (WF-03)
+- [ ] 44-04-PLAN.md — Wave 2: Workflow template API routes (index/[id]/duplicate/seed) with in-use delete guard + version auto-increment (WF-01, WF-02)
+- [ ] 44-05-PLAN.md — Wave 2: Project workflow lifecycle + engine-gated milestone-status + instance endpoints + GROQ queries (WF-03, WF-04, WF-06, WF-07)
+- [ ] 44-06-PLAN.md — Wave 2: Tracker primitive components (StatusCircle, StatusPickerPopover, MilestoneRow, PhaseAccordion) (WF-05, WF-06)
+- [ ] 44-07-PLAN.md — Wave 3: Tracker shell components (WorkflowTracker, Header, Metrics, Warnings, BlankWorkflowState) with optimistic+rollback (WF-03, WF-05, WF-06, WF-07)
+- [ ] 44-08-PLAN.md — Wave 3: WorkflowTemplatesSection + WorkflowTemplateEditor with inline-edit, cycle detection, save/delete/duplicate (WF-01, WF-02)
+- [ ] 44-09-PLAN.md — Wave 4: schedule.astro gutted + rebuilt; lazy dormancy; server-side engine precomputation (WF-03, WF-05, WF-06, WF-07)
+- [ ] 44-10-PLAN.md — Wave 4: Settings integration + /admin/settings/workflow-templates/[id] editor page (WF-01, WF-02)
+- [ ] 44-11-PLAN.md — Wave 4: Dashboard WorkflowStatusCard + SSR stats + end-to-end smoke checkpoint (WF-08)
 
 ## Progress
 
@@ -298,7 +326,7 @@ Plans:
 | 40 | v5.1 | 3/3 | Complete | 2026-04-22 |
 | 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 42 | v5.2 | 3/3 | Complete    | 2026-04-23 |
-| 43 | v5.2 | 2/4 | In progress | - |
+| 43 | v5.2 | 4/4 | Complete    | 2026-04-23 |
 
 ---
 *Roadmap created: 2026-03-14*
