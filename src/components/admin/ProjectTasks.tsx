@@ -155,7 +155,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
   return (
     <div id="tasks" style={cardStyle}>
       <div className="flex items-center justify-between mb-[14px]">
-        <h2 style={titleStyle}>Tasks</h2>
+        <h2 style={titleStyle}>Tasks — Designer</h2>
         <button
           type="button"
           onClick={handleAddTaskClick}

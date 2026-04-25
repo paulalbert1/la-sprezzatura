@@ -115,20 +115,18 @@ describe("WorkflowTracker", () => {
     expect(screen.getByText(/approaching dormancy/i)).toBeDefined();
   });
 
-  it("renders WorkflowMetrics with correct data", () => {
-    const propsWithMetrics = {
-      ...baseProps,
-      metrics: {
-        complete: 3,
-        inProgress: 1,
-        awaitingClient: 0,
-        blocked: 2,
-        progressPct: 25,
-      },
-    };
-    render(
-      <WorkflowTracker workflow={baseWorkflow()} {...propsWithMetrics} />,
-    );
+  it("renders WorkflowMetrics derived from the live workflow", () => {
+    // Tracker derives metrics from the workflow state, not props.metrics —
+    // ensures counts stay in sync after optimistic status changes. Build a
+    // workflow with 1 of 4 milestones complete → 25% progress.
+    const wf = baseWorkflow();
+    wf.phases[0].milestones = [
+      { ...wf.phases[0].milestones[0], status: "complete" },
+      { ...wf.phases[0].milestones[0], _key: "m2", id: "m2", status: "in_progress" },
+      { ...wf.phases[0].milestones[0], _key: "m3", id: "m3", status: "not_started" },
+      { ...wf.phases[0].milestones[0], _key: "m4", id: "m4", status: "not_started" },
+    ];
+    render(<WorkflowTracker workflow={wf} {...baseProps} />);
     expect(screen.getByText("25%")).toBeDefined();
     expect(screen.getByText(/Overall progress/i)).toBeDefined();
   });

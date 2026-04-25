@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { format, parseISO } from "date-fns";
 import {
   Plus,
@@ -110,18 +111,25 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
     item: ProcurementItem | null;
   }>({ open: false, mode: "view", item: null });
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const dropdownMenuRef = useRef<HTMLDivElement | null>(null);
+  const [dropdownAnchorRect, setDropdownAnchorRect] = useState<DOMRect | null>(
+    null,
+  );
 
-  // Close status dropdown on click outside
+  // Close status dropdown on click outside (must check both trigger and
+  // portaled menu since the menu is no longer a DOM-child of the trigger).
   useEffect(() => {
     if (!statusDropdownKey) return;
     function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
+        dropdownMenuRef.current?.contains(target) ||
+        dropdownTriggerRef.current?.contains(target)
       ) {
-        setStatusDropdownKey(null);
+        return;
       }
+      setStatusDropdownKey(null);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -450,13 +458,22 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
     const pill = STATUS_PILL_STYLES[item.status] || STATUS_PILL_STYLES.pending;
 
     return (
-      <div className="relative" ref={isOpen ? dropdownRef : undefined}>
+      <>
         <button
           type="button"
+          ref={isOpen ? dropdownTriggerRef : undefined}
           aria-label={STATUS_LABELS[item.status] || item.status}
           onClick={(e) => {
             e.stopPropagation();
-            setStatusDropdownKey(isOpen ? null : item._key);
+            if (isOpen) {
+              setStatusDropdownKey(null);
+              setDropdownAnchorRect(null);
+            } else {
+              setDropdownAnchorRect(
+                (e.currentTarget as HTMLButtonElement).getBoundingClientRect(),
+              );
+              setStatusDropdownKey(item._key);
+            }
           }}
           className={`inline-flex items-center gap-1 cursor-pointer transition-opacity ${isSaving ? "opacity-50" : ""}`}
           style={{
@@ -475,42 +492,54 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
           {STATUS_LABELS[item.status] || item.status}
           <ChevronDown className="w-3 h-3" />
         </button>
-        {isOpen && (
-          <div
-            className="absolute left-0 top-full mt-1 rounded-lg shadow-lg py-1 z-10 min-w-[140px]"
-            style={{ backgroundColor: "#FFFEFB", border: "0.5px solid #E8DDD0" }}
-            role="listbox"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {STATUS_ORDER.map((s) => {
-              const sPill = STATUS_PILL_STYLES[s];
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  role="option"
-                  aria-selected={item.status === s}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleStatusChange(item._key, s);
-                  }}
-                  className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
-                  style={{
-                    fontSize: "11.5px",
-                    color: sPill.text,
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  {item.status === s && <Check className="w-3.5 h-3.5" />}
-                  <span className={item.status !== s ? "ml-[22px]" : ""}>
-                    {STATUS_LABELS[s]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+        {isOpen &&
+          dropdownAnchorRect &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div
+              ref={dropdownMenuRef}
+              className="rounded-lg shadow-lg py-1 min-w-[140px]"
+              style={{
+                position: "absolute",
+                top: dropdownAnchorRect.bottom + window.scrollY + 4,
+                left: dropdownAnchorRect.left + window.scrollX,
+                backgroundColor: "#FFFEFB",
+                border: "0.5px solid #E8DDD0",
+                zIndex: 50,
+              }}
+              role="listbox"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {STATUS_ORDER.map((s) => {
+                const sPill = STATUS_PILL_STYLES[s];
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    role="option"
+                    aria-selected={item.status === s}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusChange(item._key, s);
+                    }}
+                    className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
+                    style={{
+                      fontSize: "11.5px",
+                      color: sPill.text,
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    {item.status === s && <Check className="w-3.5 h-3.5" />}
+                    <span className={item.status !== s ? "ml-[22px]" : ""}>
+                      {STATUS_LABELS[s]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>,
+            document.body,
+          )}
+      </>
     );
   }
 

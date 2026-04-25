@@ -20,6 +20,41 @@ const GATES_REQUIRING_CLEAR: Record<string, (m: MilestoneInstance) => boolean> =
   delivery: (m) => Boolean(m.deliveredAt),
 };
 
+// Human-readable reasons surfaced when a gate blocks a "Complete" transition.
+const GATE_REASONS: Record<string, string> = {
+  payment: "Record payment first",
+  approval: "Record client approval first",
+  signature: "Record client signature first",
+  delivery: "Record delivery first",
+};
+
+// Custom labels for the Complete option when the admin clicks through a gate.
+// Surfaces the otherwise-hidden gate event as an explicit step in the popover.
+const GATE_AUTO_LABELS: Record<string, string> = {
+  payment: "Mark paid & complete",
+  approval: "Mark approved & complete",
+  signature: "Mark signed & complete",
+  delivery: "Mark delivered & complete",
+};
+
+const GATE_AUTO_HINTS: Record<string, string> = {
+  payment: "Records payment now",
+  approval: "Records approval now",
+  signature: "Records signature now",
+  delivery: "Records delivery now",
+};
+
+// Labels surfaced when reverting a complete milestone. The popover prefixes
+// each with "Revert to " so the click reads as a destructive op, not a routine
+// status pick.
+const REVERT_LABELS: Record<string, string> = {
+  not_started: "not started",
+  in_progress: "in progress",
+  awaiting_client: "awaiting client",
+  awaiting_payment: "awaiting payment",
+  skipped: "skipped",
+};
+
 function findMilestone(
   workflow: ProjectWorkflow,
   phaseId: string,
@@ -86,23 +121,67 @@ export function isPhaseStartable(workflow: ProjectWorkflow, phaseId: string): bo
 /**
  * Is a milestone currently blocked by unmet hard prereqs or a non-startable phase?
  */
+function findMilestoneById(
+  workflow: ProjectWorkflow,
+  milestoneId: string,
+): { name: string } | null {
+  for (const p of workflow.phases) {
+    const m = p.milestones.find((x) => x.id === milestoneId);
+    if (m) return { name: m.name };
+  }
+  return null;
+}
+
 export function isBlocked(
   workflow: ProjectWorkflow,
   phaseId: string,
   milestoneId: string,
-): { blocked: boolean; reason?: string } {
+): { blocked: boolean; reason?: string; prereqName?: string } {
   const found = findMilestone(workflow, phaseId, milestoneId);
   if (!found) return { blocked: true, reason: "Milestone not found" };
   const { milestone } = found;
+  // Already-finished milestones can't be "blocked" — they're done. This avoids
+  // the StatusCircle rendering complete rows as gray when an earlier phase
+  // still has unfinished work that would otherwise mark this phase non-startable.
+  if (milestone.status === "complete" || milestone.status === "skipped") {
+    return { blocked: false };
+  }
   for (const prereqId of milestone.hardPrereqs) {
     if (!isPrereqSatisfied(workflow, prereqId)) {
-      return { blocked: true, reason: `Blocked by prereq: ${prereqId}` };
+      const prereq = findMilestoneById(workflow, prereqId);
+      return {
+        blocked: true,
+        reason: prereq
+          ? `Needs ${prereq.name} to be completed`
+          : `Needs prereq ${prereqId} to be completed`,
+        prereqName: prereq?.name,
+      };
     }
   }
   if (!isPhaseStartable(workflow, phaseId)) {
-    return { blocked: true, reason: "Phase is not yet startable" };
+    return { blocked: true, reason: "Earlier phase not finished" };
   }
   return { blocked: false };
+}
+
+/**
+ * Find the first not_started, not-blocked milestone the user can act on.
+ * Returns identifying keys + display name, or null if nothing is actionable
+ * (everything is blocked, complete, or in-flight).
+ *
+ * Used by the Schedule view to surface a "Next up" cue.
+ */
+export function getNextActionableMilestone(
+  workflow: ProjectWorkflow,
+): { phaseId: string; milestoneId: string; name: string } | null {
+  for (const p of workflow.phases) {
+    for (const m of p.milestones) {
+      if (m.status !== "not_started") continue;
+      if (isBlocked(workflow, p.id, m.id).blocked) continue;
+      return { phaseId: p.id, milestoneId: m.id, name: m.name };
+    }
+  }
+  return null;
 }
 
 /**
@@ -153,7 +232,7 @@ export function canTransition(
     if (milestone.gate) {
       const gateFn = GATES_REQUIRING_CLEAR[milestone.gate];
       if (gateFn && !gateFn(milestone)) {
-        return { allowed: false, reason: `Requires ${milestone.gate} gate to be cleared` };
+        return { allowed: false, reason: GATE_REASONS[milestone.gate] ?? `Needs ${milestone.gate} first` };
       }
     }
     if (
@@ -163,7 +242,7 @@ export function canTransition(
     ) {
       return { allowed: true };
     }
-    return { allowed: false, reason: `Cannot complete from ${current}` };
+    return { allowed: false, reason: "Start it first" };
   }
 
   // --- not_started (revert) ---
@@ -198,10 +277,10 @@ export function getAvailableTransitions(
   milestoneId: string,
   instanceId?: string,
   now: Date = new Date(),
-): Array<{ status: MilestoneStatus; allowed: boolean; reason?: string }> {
+): Array<AdminTransition> {
   const found = findMilestone(workflow, phaseId, milestoneId);
   if (!found) return [];
-  const results: Array<{ status: MilestoneStatus; allowed: boolean; reason?: string }> = [];
+  const results: Array<AdminTransition> = [];
   for (const s of ALL_STATUSES) {
     // Suppress "skipped" from the menu entirely when not optional — spec §3.6
     if (s === "skipped" && !found.milestone.optional) continue;
@@ -209,6 +288,95 @@ export function getAvailableTransitions(
     results.push({ status: s, allowed: r.allowed, reason: r.reason });
   }
   return results;
+}
+
+export interface AdminTransition {
+  status: MilestoneStatus;
+  allowed: boolean;
+  reason?: string;
+  // Custom popover label, e.g. "Mark signed & complete" for gated complete.
+  label?: string;
+  // The gate field this transition will auto-record when applied.
+  // The API endpoint reads this to set signedAt/approvalReceivedAt/etc.
+  autoClearGate?: "payment" | "approval" | "signature" | "delivery";
+}
+
+/**
+ * Admin-mode transitions: like getAvailableTransitions, but surfaces
+ * gate-blocked Complete as an explicit "Mark X & complete" action.
+ * The API endpoint records the gate timestamp when this transition is applied.
+ *
+ * Use this in admin contexts (Schedule view) where the admin is the source
+ * of truth for gate events. Use getAvailableTransitions for portal/client UIs
+ * where gates must be cleared by external action.
+ */
+export function getAdminTransitions(
+  workflow: ProjectWorkflow,
+  phaseId: string,
+  milestoneId: string,
+  instanceId?: string,
+  now: Date = new Date(),
+): Array<AdminTransition> {
+  const base = getAvailableTransitions(workflow, phaseId, milestoneId, instanceId, now);
+  const found = findMilestone(workflow, phaseId, milestoneId);
+  if (!found) return base;
+  const milestone = found.milestone;
+  const gate = milestone.gate;
+
+  // Allow one-click Complete from not_started or in_progress as long as the
+  // milestone isn't structurally blocked (prereqs / phase-startable). The
+  // server applies all required side effects atomically (startedAt + gate +
+  // completedAt). Sub-rows aren't handled here — they don't carry gates.
+  if (instanceId) return base;
+  const blocked = isBlocked(workflow, phaseId, milestoneId);
+  if (blocked.blocked) return base;
+
+  const upgraded = base.map((t) => {
+    // When the milestone is currently complete, frame transitions away from
+    // it as REVERTS — they remove the completion record and may cascade.
+    // Adding the explicit "Revert to …" label + warning subtitle gives the
+    // admin pause before clicking what looks like a normal status pick.
+    if (
+      milestone.status === "complete" &&
+      t.allowed &&
+      t.status !== "complete"
+    ) {
+      return {
+        ...t,
+        label: `Revert to ${REVERT_LABELS[t.status] ?? t.status}`,
+        reason: "Removes completion record",
+      };
+    }
+    if (t.status !== "complete") return t;
+    // Don't decorate the row when the milestone is already complete — the
+    // action label / hint only applies when transitioning TO complete.
+    if (milestone.status === "complete") return t;
+    if (t.allowed && !gate) return t; // already allowed, no gate, no override needed
+
+    // Build the labeled one-click variant
+    const label = gate ? GATE_AUTO_LABELS[gate] : "Mark complete";
+    const reason = gate ? GATE_AUTO_HINTS[gate] : undefined;
+    return {
+      status: "complete",
+      allowed: true,
+      reason,
+      label,
+      autoClearGate: gate ?? undefined,
+    };
+  });
+
+  // Drop only structurally-impossible options where the engine emitted an
+  // internal "Cannot move from X to Y" enum-dump. Keep all other disabled
+  // rows — reasons like "A downstream milestone depends on this" are valid
+  // user-facing explanations that help the admin understand why a revert
+  // is blocked.
+  return upgraded.filter((t) => {
+    if (t.allowed) return true;
+    if (t.status === milestone.status) return true; // keep current state visible
+    if (!t.reason) return true;
+    if (t.reason.toLowerCase().startsWith("cannot move from")) return false;
+    return true;
+  });
 }
 
 /**
@@ -283,8 +451,15 @@ export function computeMetrics(workflow: ProjectWorkflow): WorkflowMetrics {
         inProgress += 1;
       } else if (m.status === "awaiting_client" || m.status === "awaiting_payment") {
         awaitingClient += 1;
-      } else if (m.status === "not_started" && isBlocked(workflow, p.id, m.id).blocked) {
-        blocked += 1;
+      } else if (m.status === "not_started") {
+        if (isBlocked(workflow, p.id, m.id).blocked) {
+          blocked += 1;
+        } else {
+          // Actionable but not yet started — counts toward Active so the
+          // metric reflects "things you can move forward right now", not
+          // strictly "currently in_progress status".
+          inProgress += 1;
+        }
       }
     }
   }

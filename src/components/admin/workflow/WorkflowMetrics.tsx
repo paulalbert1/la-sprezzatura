@@ -19,7 +19,7 @@ const METRIC_CARDS: Array<{
   color: string;
 }> = [
   { label: "Complete", key: "complete", color: "#27500A" },
-  { label: "In progress", key: "inProgress", color: "#9A7B4B" },
+  { label: "Active", key: "inProgress", color: "#9A7B4B" },
   { label: "Awaiting client", key: "awaitingClient", color: "#854F0B" },
   { label: "Blocked", key: "blocked", color: "#6B5E52" },
 ];

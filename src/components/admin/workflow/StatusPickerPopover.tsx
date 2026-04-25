@@ -18,6 +18,8 @@ interface Transition {
   status: MilestoneStatus;
   allowed: boolean;
   reason?: string;
+  /** Override the default STATUS_LABELS entry (e.g. "Mark signed & complete"). */
+  label?: string;
 }
 
 interface StatusPickerPopoverProps {
@@ -118,13 +120,15 @@ export default function StatusPickerPopover({
 
   const position = getPosition();
 
-  // Build ordered option list, filtering out skipped when optionalSkip is false
-  const visibleStatuses = STATUS_ORDER.filter(
-    (s) => s !== "skipped" || optionalSkip,
-  );
-
   // Map transitions into lookup by status
   const transitionMap = new Map(transitions.map((t) => [t.status, t]));
+
+  // Render only the statuses the engine actually returned (filtered for valid
+  // transitions + the current state). Preserve the canonical STATUS_ORDER so
+  // the visual progression stays consistent. Honor optionalSkip for "skipped".
+  const visibleStatuses = STATUS_ORDER.filter(
+    (s) => transitionMap.has(s) && (s !== "skipped" || optionalSkip),
+  );
 
   // Arrow key navigation
   const handlePopoverKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -170,31 +174,23 @@ export default function StatusPickerPopover({
         padding: "4px",
       }}
     >
-      {/* Heading row */}
-      <div
-        style={{
-          padding: "8px 12px 4px 12px",
-          fontSize: "11px",
-          fontWeight: 600,
-          color: "#6B5E52",
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          fontFamily: "var(--font-sans)",
-        }}
-      >
-        Change status
-      </div>
-
-      {/* Option rows */}
+      {/* Option rows — eyebrow heading dropped; the menu is self-explanatory */}
       {visibleStatuses.map((s) => {
         const transition = transitionMap.get(s);
         const allowed = transition ? transition.allowed : false;
-        const reason = transition?.reason;
         const isCurrent = s === currentStatus;
+        // Suppress action-style decoration when the row IS the current state.
+        // The custom label / green tint / hint only describe transitioning TO
+        // complete — they're noise once the milestone is already there.
+        const reason = isCurrent ? undefined : transition?.reason;
+        const label = isCurrent
+          ? STATUS_LABELS[s]
+          : (transition?.label ?? STATUS_LABELS[s]);
+        const isCompleteAction = s === "complete" && allowed && !isCurrent;
 
-        // First allowed gets the auto-focus ref
+        // First allowed (other than current) gets the auto-focus ref
         let refProp: React.RefObject<HTMLButtonElement | null> | null = null;
-        if (allowed && !firstAllowedSet) {
+        if (allowed && !isCurrent && !firstAllowedSet) {
           refProp = firstAllowedRef;
           firstAllowedSet = true;
         }
@@ -205,52 +201,76 @@ export default function StatusPickerPopover({
             type="button"
             role="menuitem"
             ref={refProp as React.RefCallback<HTMLButtonElement> | null}
-            disabled={!allowed}
-            aria-disabled={!allowed ? "true" : undefined}
+            disabled={!allowed || isCurrent}
+            aria-disabled={!allowed || isCurrent ? "true" : undefined}
             aria-current={isCurrent ? "true" : undefined}
             onClick={() => {
-              if (allowed) {
+              if (allowed && !isCurrent) {
                 onPick(s);
               }
             }}
             style={{
-              display: "block",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "8px",
               width: "100%",
               textAlign: "left",
-              padding: "8px 12px",
+              padding: "6px 10px",
               fontSize: "13px",
               fontFamily: "var(--font-sans)",
-              color: allowed ? "#2C2520" : "#9E8E80",
-              backgroundColor: "transparent",
+              fontWeight: isCompleteAction ? 600 : 400,
+              color: !allowed
+                ? "#9E8E80"
+                : isCompleteAction
+                  ? "#27500A"
+                  : "#2C2520",
+              backgroundColor: isCompleteAction ? "#EEF3E3" : "transparent",
               border: "none",
               borderRadius: "6px",
-              cursor: allowed ? "pointer" : "not-allowed",
-              opacity: allowed ? 1 : 0.6,
+              cursor: allowed && !isCurrent ? "pointer" : "default",
+              opacity: !allowed ? 0.55 : 1,
               transition: "background-color 150ms",
             }}
             onMouseEnter={(e) => {
-              if (allowed) {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#F3EDE3";
+              if (allowed && !isCurrent) {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                  isCompleteAction ? "#E2EBD3" : "#F3EDE3";
               }
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor =
+                isCompleteAction ? "#EEF3E3" : "transparent";
             }}
           >
-            <span style={{ display: "block" }}>{STATUS_LABELS[s]}</span>
-            {!allowed && reason && (
-              <span
-                style={{
-                  display: "block",
-                  fontSize: "11px",
-                  color: "#9E8E80",
-                  marginTop: "2px",
-                  fontFamily: "var(--font-sans)",
-                }}
-              >
-                {reason}
+            <span style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
+              <span>
+                {label}
+                {isCurrent && (
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "11px",
+                      color: "#9E8E80",
+                      fontWeight: 400,
+                    }}
+                  >
+                    · current
+                  </span>
+                )}
               </span>
-            )}
+              {reason && (
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: allowed ? "#854F0B" : "#9E8E80",
+                    fontWeight: 400,
+                  }}
+                >
+                  {reason}
+                </span>
+              )}
+            </span>
           </button>
         );
       })}

@@ -20,7 +20,7 @@ describe("WorkflowMetrics", () => {
     );
     expect(screen.getByText("Complete")).toBeDefined();
     expect(screen.getByText("14")).toBeDefined();
-    expect(screen.getByText("In progress")).toBeDefined();
+    expect(screen.getByText("Active")).toBeDefined();
     expect(screen.getByText(/Awaiting client/i)).toBeDefined();
     expect(screen.getByText("Blocked")).toBeDefined();
   });

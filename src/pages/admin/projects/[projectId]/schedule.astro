@@ -7,10 +7,12 @@ import BlankWorkflowState from "../../../../components/admin/workflow/BlankWorkf
 import { getTenantClient } from "../../../../lib/tenantClient";
 import {
   detectDormancy, computeWarnings, computeMetrics,
-  getAvailableTransitions, isBlocked, isApprovalOverdue,
+  getAdminTransitions, isBlocked, isApprovalOverdue,
+  getNextActionableMilestone,
+  type AdminTransition,
 } from "../../../../lib/workflow/engine";
 import { PROJECT_WORKFLOW_QUERY } from "../../../../sanity/queries";
-import type { ProjectWorkflow, MilestoneStatus } from "../../../../lib/workflow/types";
+import type { ProjectWorkflow } from "../../../../lib/workflow/types";
 
 const projectId = Astro.params.projectId;
 if (!projectId) return Astro.redirect("/admin/projects");
@@ -59,9 +61,10 @@ const warnings = workflow ? computeWarnings(workflow) : [];
 const metrics = workflow
   ? computeMetrics(workflow)
   : { complete: 0, inProgress: 0, awaitingClient: 0, blocked: 0, progressPct: 0 };
+const nextActionable = workflow ? getNextActionableMilestone(workflow) : null;
 
 // Precompute engine outputs keyed by phaseId:milestoneId(:instanceKey)
-const transitionsById: Record<string, Array<{ status: MilestoneStatus; allowed: boolean; reason?: string }>> = {};
+const transitionsById: Record<string, Array<AdminTransition>> = {};
 const blockedById: Record<string, { blocked: boolean; reason?: string }> = {};
 const gateSubMessageById: Record<string, string> = {};
 const overdueReasonById: Record<string, string> = {};
@@ -72,11 +75,15 @@ if (workflow) {
     for (const m of phase.milestones) {
       const key = `${phase.id}:${m.id}`;
       blockedById[key] = isBlocked(workflow, phase.id, m.id);
-      transitionsById[key] = getAvailableTransitions(workflow, phase.id, m.id, undefined, now);
+      transitionsById[key] = getAdminTransitions(workflow, phase.id, m.id, undefined, now);
       // Gate sub-message: only when awaiting_* OR blocked with gate
       if ((m.status === "awaiting_client" || m.status === "awaiting_payment") && m.gate) {
         const overdue = isApprovalOverdue(workflow, phase.id, m.id, now);
-        gateSubMessageById[key] = `Requires ${m.gate}${overdue.businessDaysWaiting > 0 ? ` · ${overdue.businessDaysWaiting} biz days waiting` : ""}`;
+        const waitingSuffix =
+          overdue.businessDaysWaiting > 0
+            ? ` · ${overdue.businessDaysWaiting} biz days waiting`
+            : "";
+        gateSubMessageById[key] = `Awaiting ${m.gate}${waitingSuffix}`;
         if (overdue.overdue) {
           overdueReasonById[key] = `Awaiting client — overdue by ${overdue.businessDaysWaiting} biz days`;
         }
@@ -85,7 +92,7 @@ if (workflow) {
       if (m.instances) {
         for (const inst of m.instances) {
           const subKey = `${phase.id}:${m.id}:${inst._key}`;
-          transitionsById[subKey] = getAvailableTransitions(workflow, phase.id, m.id, inst._key, now);
+          transitionsById[subKey] = getAdminTransitions(workflow, phase.id, m.id, inst._key, now);
         }
       }
     }
@@ -122,6 +129,7 @@ const breadcrumbs = [
       blockedById={blockedById}
       gateSubMessageById={gateSubMessageById}
       overdueReasonById={overdueReasonById}
+      nextActionable={nextActionable}
     />
   ) : (
     <BlankWorkflowState client:load projectId={projectId} templates={templates} />

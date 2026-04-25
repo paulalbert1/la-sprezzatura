@@ -68,7 +68,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
             : i,
         ),
       );
-      flashError("Could not update action item.");
+      flashError("Could not update task.");
     }
   }
 
@@ -107,7 +107,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
       setNewDescription("");
       setNewDueDate("");
     } catch {
-      flashError("Could not create action item.");
+      flashError("Could not create task.");
     } finally {
       setCreating(false);
     }
@@ -144,7 +144,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
   return (
     <div id="client-action-items" style={cardStyle}>
       <div className="flex items-center justify-between mb-[14px]">
-        <h2 style={titleStyle}>Client Action Items</h2>
+        <h2 style={titleStyle}>Tasks — Client</h2>
         <button
           type="button"
           onClick={handleAddTaskClick}
@@ -164,7 +164,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
             color: "#9E8E80",
           }}
         >
-          No action items yet.
+          No tasks yet.
         </p>
       ) : (
         <div>
@@ -241,7 +241,7 @@ export default function ClientActionItemsList({ items, projectId }: Props) {
         <input
           ref={addInputRef}
           type="text"
-          placeholder="Add an action item"
+          placeholder="Add a task"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
           disabled={creating}

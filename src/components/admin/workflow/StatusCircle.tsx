@@ -7,6 +7,7 @@
 // Clicking opens the status picker popover via the `onClick` callback.
 // Blocked milestones are non-clickable (aria-disabled + cursor not-allowed).
 
+import { Check } from "lucide-react";
 import type { MilestoneStatus } from "../../../lib/workflow/types";
 
 interface StatusCircleProps {
@@ -58,7 +59,7 @@ function circleStyles(
       return {
         ...baseCircle,
         borderColor: "#9A7B4B",
-        backgroundColor: "transparent",
+        backgroundColor: "#9A7B4B",
         cursor: "pointer",
       };
     case "awaiting_client":
@@ -115,15 +116,26 @@ export default function StatusCircle({
     onClick?.(e.currentTarget);
   }
 
-  // in_progress needs inner dot rendering
-  const innerDot =
+  // complete: white check icon on green fill
+  const checkIcon =
+    status === "complete" ? (
+      <Check
+        size={size === 12 ? 8 : 11}
+        color="#FFFFFF"
+        strokeWidth={3}
+        aria-hidden="true"
+      />
+    ) : null;
+
+  // in_progress: white horizontal bar on amber fill (clearly not a radio dot)
+  const inProgressBar =
     status === "in_progress" ? (
       <span
         style={{
-          width: size === 12 ? "5px" : "7px",
-          height: size === 12 ? "5px" : "7px",
-          borderRadius: "50%",
-          backgroundColor: "#9A7B4B",
+          width: size === 12 ? "6px" : "8px",
+          height: "1.5px",
+          backgroundColor: "#FFFFFF",
+          borderRadius: "1px",
           display: "block",
         }}
       />
@@ -155,7 +167,8 @@ export default function StatusCircle({
       onClick={handleClick}
       style={styles}
     >
-      {innerDot}
+      {checkIcon}
+      {inProgressBar}
       {skippedSigil}
     </button>
   );

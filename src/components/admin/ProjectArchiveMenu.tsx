@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { MoreHorizontal } from "lucide-react";
 import { actions } from "astro:actions";
 import ToastContainer, { useToast } from "./ui/ToastContainer";
@@ -33,6 +34,7 @@ function ProjectArchiveMenuInner({
 }: ProjectArchiveMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const { show } = useToast();
@@ -113,11 +115,21 @@ function ProjectArchiveMenuInner({
   const menuLabel = archivedAt ? "Unarchive project" : "Archive project";
 
   return (
-    <div className="relative inline-block">
+    <>
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={(e) => {
+          if (isOpen) {
+            setIsOpen(false);
+            setAnchorRect(null);
+          } else {
+            setAnchorRect(
+              (e.currentTarget as HTMLButtonElement).getBoundingClientRect(),
+            );
+            setIsOpen(true);
+          }
+        }}
         aria-label="Project actions"
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -134,25 +146,36 @@ function ProjectArchiveMenuInner({
         <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
       </button>
 
-      {isOpen && (
-        <div
-          ref={panelRef}
-          role="menu"
-          className="absolute right-0 top-full mt-1 w-44 bg-white border border-stone-light/40 rounded-md shadow-md py-1 z-50"
-        >
-          <button
-            role="menuitem"
-            type="button"
-            onClick={onActionClick}
-            disabled={isPending}
-            className="w-full text-left px-3 py-2 text-[13px] font-body text-charcoal hover:bg-terracotta/5 focus:bg-terracotta/5 focus:outline-none disabled:opacity-60 disabled:pointer-events-none"
-            style={{ background: "transparent", border: "none", cursor: "pointer" }}
+      {isOpen &&
+        anchorRect &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={panelRef}
+            role="menu"
+            className="w-44 bg-white border border-stone-light/40 rounded-md shadow-md py-1"
+            style={{
+              position: "absolute",
+              top: anchorRect.bottom + window.scrollY + 4,
+              // Right-align: anchor right edge minus menu width (176px = w-44)
+              left: anchorRect.right + window.scrollX - 176,
+              zIndex: 50,
+            }}
           >
-            {menuLabel}
-          </button>
-        </div>
-      )}
-    </div>
+            <button
+              role="menuitem"
+              type="button"
+              onClick={onActionClick}
+              disabled={isPending}
+              className="w-full text-left px-3 py-2 text-[13px] font-body text-charcoal hover:bg-terracotta/5 focus:bg-terracotta/5 focus:outline-none disabled:opacity-60 disabled:pointer-events-none"
+              style={{ background: "transparent", border: "none", cursor: "pointer" }}
+            >
+              {menuLabel}
+            </button>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 }
 

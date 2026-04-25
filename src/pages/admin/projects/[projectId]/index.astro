@@ -6,6 +6,12 @@ import EditableTitle from "../../../../components/admin/EditableTitle.tsx";
 import ProjectTasks from "../../../../components/admin/ProjectTasks.tsx";
 import ClientActionItemsList from "../../../../components/admin/ClientActionItemsList.tsx";
 import MilestonesList from "../../../../components/admin/MilestonesList.tsx";
+import WorkflowMilestonesCard, {
+  type WorkflowMilestoneRow,
+} from "../../../../components/admin/WorkflowMilestonesCard.tsx";
+import { isBlocked, getNextActionableMilestone } from "../../../../lib/workflow/engine";
+import { PROJECT_WORKFLOW_QUERY } from "../../../../sanity/queries";
+import type { ProjectWorkflow } from "../../../../lib/workflow/types";
 import ProcurementEditor from "../../../../components/admin/ProcurementEditor.tsx";
 import DocumentsPanel from "../../../../components/admin/DocumentsPanel.tsx";
 import ContactCardWrapper from "../../../../components/admin/ContactCardWrapper.tsx";
@@ -37,6 +43,36 @@ const client = getTenantClient(tenantId);
 const project = await getAdminProjectDetail(client, projectId);
 if (!project) {
   return Astro.redirect("/admin/projects");
+}
+
+// Fetch the project workflow (Phase 44) so the Milestones card can mirror the
+// schedule view rather than the legacy project.milestones[] field.
+const projectWorkflow = (await client.fetch(PROJECT_WORKFLOW_QUERY, {
+  projectId,
+})) as ProjectWorkflow | null;
+
+let workflowRows: WorkflowMilestoneRow[] = [];
+if (projectWorkflow) {
+  const nextActionable = getNextActionableMilestone(projectWorkflow);
+  for (const phase of projectWorkflow.phases) {
+    for (const m of phase.milestones) {
+      const block = isBlocked(projectWorkflow, phase.id, m.id);
+      workflowRows.push({
+        _key: `${phase._key}:${m._key}`,
+        milestoneId: m.id,
+        phaseName: phase.name,
+        name: m.name,
+        status: m.status,
+        assignee: m.assignee,
+        blocked: block.blocked,
+        blockPrereqName: block.prereqName,
+        isNextUp:
+          nextActionable?.phaseId === phase.id &&
+          nextActionable?.milestoneId === m.id,
+        completedAt: m.completedAt,
+      });
+    }
+  }
 }
 
 const stageMeta = STAGE_META[project.pipelineStage as keyof typeof STAGE_META];
@@ -281,12 +317,20 @@ const breadcrumbs = [
       {/* Right column: Milestones (top) + Contractors (bottom) */}
       <div style="display: flex; flex-direction: column; gap: 14px;">
       <div id="milestones">
-        <MilestonesList
-          client:load
-          milestones={project.milestones || []}
-          projectId={projectId}
-          scheduleUrl={`/admin/projects/${projectId}/schedule`}
-        />
+        {projectWorkflow ? (
+          <WorkflowMilestonesCard
+            client:load
+            rows={workflowRows}
+            scheduleUrl={`/admin/projects/${projectId}/schedule`}
+          />
+        ) : (
+          <MilestonesList
+            client:load
+            milestones={project.milestones || []}
+            projectId={projectId}
+            scheduleUrl={`/admin/projects/${projectId}/schedule`}
+          />
+        )}
       </div>
 
       {/* Contractors */}
@@ -297,7 +341,7 @@ const breadcrumbs = [
           class="mb-[14px]"
           style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
         >
-          Contractor / Vendor
+          Trades
         </h2>
         <div class="flex flex-wrap gap-[7px] items-center">
           {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
@@ -358,7 +402,7 @@ const breadcrumbs = [
             class="inline-flex items-center gap-[6px] px-[11px] py-[5px] rounded-full transition-colors hover:text-[#9A7B4B] hover:border-[#9A7B4B]"
             style="border: 0.5px dashed #D4C8B8; font-size: 12px; color: #9E8E80; background-color: transparent; letter-spacing: 0.02em; font-family: var(--font-sans);"
           >
-            + Add contractor
+            + Add trade
           </button>
         </div>
 

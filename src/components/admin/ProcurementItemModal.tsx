@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { format, formatDistanceToNow, parseISO } from "date-fns";
 import {
   Check,
@@ -206,7 +207,10 @@ export function ProcurementItemModal({
 
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const editBtnRef = useRef<HTMLButtonElement | null>(null);
-  const statusDropdownRef = useRef<HTMLDivElement | null>(null);
+  const statusDropdownTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const statusDropdownMenuRef = useRef<HTMLDivElement | null>(null);
+  const [statusDropdownAnchorRect, setStatusDropdownAnchorRect] =
+    useState<DOMRect | null>(null);
 
   // Reset draft when the target item changes OR when the modal (re-)opens.
   // Depend on item?._key, not item itself — the parent rebuilds the item
@@ -247,12 +251,14 @@ export function ProcurementItemModal({
   useEffect(() => {
     if (!statusDropdownOpen) return;
     function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node;
       if (
-        statusDropdownRef.current &&
-        !statusDropdownRef.current.contains(e.target as Node)
+        statusDropdownMenuRef.current?.contains(target) ||
+        statusDropdownTriggerRef.current?.contains(target)
       ) {
-        setStatusDropdownOpen(false);
+        return;
       }
+      setStatusDropdownOpen(false);
     }
     function handleEsc(e: KeyboardEvent) {
       if (e.key === "Escape") setStatusDropdownOpen(false);
@@ -353,13 +359,22 @@ export function ProcurementItemModal({
     const current = draft.status || "pending";
     const pill = STATUS_PILL_STYLES[current] || STATUS_PILL_STYLES.pending;
     return (
-      <div className="relative" ref={statusDropdownRef}>
+      <>
         <button
           type="button"
+          ref={statusDropdownTriggerRef}
           data-testid="procurement-field-status"
           onClick={(e) => {
             e.stopPropagation();
-            setStatusDropdownOpen((v) => !v);
+            if (statusDropdownOpen) {
+              setStatusDropdownOpen(false);
+              setStatusDropdownAnchorRect(null);
+            } else {
+              setStatusDropdownAnchorRect(
+                (e.currentTarget as HTMLButtonElement).getBoundingClientRect(),
+              );
+              setStatusDropdownOpen(true);
+            }
           }}
           className="inline-flex items-center gap-1 cursor-pointer"
           style={{
@@ -377,46 +392,56 @@ export function ProcurementItemModal({
           {STATUS_LABELS[current] || current}
           <ChevronDown className="w-3 h-3" />
         </button>
-        {statusDropdownOpen ? (
-          <div
-            className="absolute left-0 top-full mt-1 rounded-lg shadow-lg py-1 z-10 min-w-[160px]"
-            style={{
-              backgroundColor: "#FFFEFB",
-              border: "0.5px solid #E8DDD0",
-            }}
-            role="listbox"
-          >
-            {STATUS_ORDER.map((s) => {
-              const sPill =
-                STATUS_PILL_STYLES[s] || STATUS_PILL_STYLES.pending;
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  role="option"
-                  aria-selected={current === s}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDraft((prev) => ({ ...prev, status: s }));
-                    setStatusDropdownOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
-                  style={{
-                    fontSize: "11.5px",
-                    color: sPill.text,
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  {current === s && <Check className="w-3.5 h-3.5" />}
-                  <span className={current !== s ? "ml-[22px]" : ""}>
-                    {STATUS_LABELS[s]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-      </div>
+        {statusDropdownOpen &&
+          statusDropdownAnchorRect &&
+          typeof document !== "undefined" &&
+          createPortal(
+            <div
+              ref={statusDropdownMenuRef}
+              className="rounded-lg shadow-lg py-1 min-w-[160px]"
+              style={{
+                position: "absolute",
+                top: statusDropdownAnchorRect.bottom + window.scrollY + 4,
+                left: statusDropdownAnchorRect.left + window.scrollX,
+                backgroundColor: "#FFFEFB",
+                border: "0.5px solid #E8DDD0",
+                zIndex: 110,
+              }}
+              role="listbox"
+            >
+              {STATUS_ORDER.map((s) => {
+                const sPill =
+                  STATUS_PILL_STYLES[s] || STATUS_PILL_STYLES.pending;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    role="option"
+                    aria-selected={current === s}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDraft((prev) => ({ ...prev, status: s }));
+                      setStatusDropdownOpen(false);
+                      setStatusDropdownAnchorRect(null);
+                    }}
+                    className="w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-[#FAF7F2]"
+                    style={{
+                      fontSize: "11.5px",
+                      color: sPill.text,
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    {current === s && <Check className="w-3.5 h-3.5" />}
+                    <span className={current !== s ? "ml-[22px]" : ""}>
+                      {STATUS_LABELS[s]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>,
+            document.body,
+          )}
+      </>
     );
   };
 

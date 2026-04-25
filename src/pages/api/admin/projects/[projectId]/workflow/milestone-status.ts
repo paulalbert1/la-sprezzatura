@@ -81,15 +81,7 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
     });
   }
 
-  const decision = canTransition(workflow, phaseId, milestoneId, target, instanceKey);
-  if (!decision.allowed) {
-    return new Response(
-      JSON.stringify({ error: decision.reason ?? "Transition not allowed" }),
-      { status: 409, headers: { "Content-Type": "application/json" } },
-    );
-  }
-
-  // Locate the phase and milestone by id (to get their _key values for patch paths)
+  // Locate the phase and milestone by id (need them before validation for gate auto-clear)
   const phase = workflow.phases.find((p) => p.id === phaseId);
   const milestone = phase?.milestones.find((m) => m.id === milestoneId);
   if (!phase || !milestone) {
@@ -100,6 +92,61 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
   }
 
   const now = new Date().toISOString();
+
+  // Admin one-click complete: when target=complete on a top-level milestone,
+  //   - Auto-record the gate timestamp/sentinel if applicable (surfaces the
+  //     otherwise-hidden gate event in a single click).
+  //   - Allow not_started → complete by virtually advancing through
+  //     in_progress for engine validation; actual patch sets all three fields
+  //     (startedAt + gate + completedAt) atomically.
+  const gateFields: Record<string, string> = {};
+  let virtualStatusForCheck = milestone.status;
+  if (target === "complete" && !instanceKey) {
+    if (milestone.gate === "signature" && !milestone.signedAt) {
+      gateFields.signedAt = now;
+    } else if (milestone.gate === "approval" && !milestone.approvalReceivedAt) {
+      gateFields.approvalReceivedAt = now;
+    } else if (milestone.gate === "delivery" && !milestone.deliveredAt) {
+      gateFields.deliveredAt = now;
+    } else if (milestone.gate === "payment" && !milestone.linkedPaymentId) {
+      gateFields.linkedPaymentId = `manual:admin:${now}`;
+    }
+    if (milestone.status === "not_started") {
+      virtualStatusForCheck = "in_progress";
+    }
+  }
+
+  // Validate against a workflow with virtual status + gate fields applied so
+  // canTransition treats the milestone as ready-to-complete. Actual mutation
+  // applies all fields atomically below.
+  const needsVirtualWorkflow =
+    Object.keys(gateFields).length > 0 || virtualStatusForCheck !== milestone.status;
+  const wfForCheck = needsVirtualWorkflow
+    ? {
+        ...workflow,
+        phases: workflow.phases.map((p) =>
+          p.id === phaseId
+            ? {
+                ...p,
+                milestones: p.milestones.map((m) =>
+                  m.id === milestoneId
+                    ? { ...m, status: virtualStatusForCheck, ...gateFields }
+                    : m,
+                ),
+              }
+            : p,
+        ),
+      }
+    : workflow;
+
+  const decision = canTransition(wfForCheck, phaseId, milestoneId, target, instanceKey);
+  if (!decision.allowed) {
+    return new Response(
+      JSON.stringify({ error: decision.reason ?? "Transition not allowed" }),
+      { status: 409, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
   const patch: Record<string, unknown> = { lastActivityAt: now };
 
   if (instanceKey) {
@@ -112,11 +159,14 @@ export const POST: APIRoute = async ({ request, params, cookies }) => {
     // Top-level milestone transition
     const basePath = `phases[_key=="${phase._key}"].milestones[_key=="${milestone._key}"]`;
     patch[`${basePath}.status`] = target;
-    if (target === "in_progress" && !milestone.startedAt) {
+    if ((target === "in_progress" || target === "complete") && !milestone.startedAt) {
       patch[`${basePath}.startedAt`] = now;
     }
     if (target === "complete" || target === "skipped") {
       patch[`${basePath}.completedAt`] = now;
+    }
+    for (const [field, value] of Object.entries(gateFields)) {
+      patch[`${basePath}.${field}`] = value;
     }
   }
 

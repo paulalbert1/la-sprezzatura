@@ -138,17 +138,20 @@ function DocumentsPanelInner({
 
   return (
     <>
-      <section className="bg-[#FFFEFB] border-[0.5px] border-[#E8DDD0] rounded-[10px] p-5 mt-8 mb-8">
-        <header className="flex justify-between items-center mb-4">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9E8E80]">
+      <section className="bg-[#FFFEFB] border-[0.5px] border-[#E8DDD0] rounded-[10px] p-5 mt-[14px] mb-[14px]">
+        <header className="flex justify-between items-center mb-[14px]">
+          <h2
+            className="text-[10.5px] font-medium uppercase tracking-[0.1em] text-[#9E8E80]"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
             Documents
           </h2>
           <button
             type="button"
             onClick={() => setUploadOpen(true)}
-            className="bg-[#9A7B4B] text-white px-3 py-1.5 text-[13px] rounded-[2px] uppercase tracking-[0.14em] font-semibold hover:bg-[#8A6D40] flex items-center gap-1"
+            className="inline-flex items-center gap-1 text-[11.5px] text-[#9A7B4B] hover:text-[#8A6D40] transition-colors focus:outline-none"
           >
-            <Plus size={14} />
+            <Plus size={11} />
             Upload
           </button>
         </header>
@@ -164,9 +167,9 @@ function DocumentsPanelInner({
                 data-active={isActive ? "true" : "false"}
                 onClick={() => setActiveCategory(tab.value)}
                 className={
-                  "px-2 py-1 rounded-[4px] transition-all duration-150 text-[11.5px] " +
+                  "px-2.5 py-1 rounded-[7px] transition-all duration-150 text-[11.5px] " +
                   (isActive
-                    ? "bg-[#F5EDD8] text-[#9A7B4B] border-[0.5px] border-[#E8D5A8] font-semibold"
+                    ? "bg-[#F5EDD8] text-[#9A7B4B] border-[0.5px] border-[#E8D5A8] font-medium"
                     : "text-[#6B5E52] hover:bg-[#F3EDE3] border-[0.5px] border-transparent font-normal")
                 }
               >
@@ -177,40 +180,27 @@ function DocumentsPanelInner({
         </div>
 
         {showEmptyAll && (
-          <div className="py-12 text-center">
-            <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9E8E80] mb-2">
-              No documents yet
-            </h3>
-            <p className="text-[14px] text-[#6B5E52] mb-4 max-w-[420px] mx-auto">
-              Upload contracts, drawings, selections, and presentations so your
-              whole team has the latest files.
+          <div className="py-10 text-center">
+            <p className="text-[12.5px] text-[#9E8E80] max-w-[420px] mx-auto">
+              No documents yet — use{" "}
+              <span className="text-[#9A7B4B]">+ Upload</span> above to add
+              contracts, drawings, selections, and presentations.
             </p>
-            <button
-              type="button"
-              onClick={() => setUploadOpen(true)}
-              className="bg-[#9A7B4B] text-white px-3 py-1.5 text-[13px] rounded-[2px] uppercase tracking-[0.14em] font-semibold hover:bg-[#8A6D40]"
-            >
-              Upload document
-            </button>
           </div>
         )}
 
         {showEmptyFiltered && activeCategory !== "all" && (
-          <div className="py-12 text-center">
-            <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#9E8E80] mb-2">
-              No {activeCategory.toLowerCase()} yet
-            </h3>
-            <p className="text-[14px] text-[#6B5E52] mb-4 max-w-[420px] mx-auto">
-              Upload your first {CATEGORY_SINGULAR[activeCategory]} or switch
-              to a different category.
+          <div className="py-10 text-center">
+            <p className="text-[12.5px] text-[#9E8E80] max-w-[420px] mx-auto">
+              No {activeCategory.toLowerCase()} yet.{" "}
+              <button
+                type="button"
+                onClick={() => setActiveCategory("all")}
+                className="text-[#9A7B4B] hover:text-[#8A6D40] focus:outline-none"
+              >
+                Show all
+              </button>
             </p>
-            <button
-              type="button"
-              onClick={() => setActiveCategory("all")}
-              className="px-3 py-1.5 text-[13px] text-[#6B5E52] hover:bg-[#F3EDE3] rounded-[2px] uppercase tracking-[0.14em] font-semibold"
-            >
-              All
-            </button>
           </div>
         )}
 

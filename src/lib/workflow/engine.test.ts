@@ -23,7 +23,7 @@ describe("canTransition — hard prereq enforcement", () => {
     });
     const r = canTransition(w, "p1", "b", "in_progress");
     expect(r.allowed).toBe(false);
-    expect(r.reason).toMatch(/prereq/i);
+    expect(r.reason).toMatch(/needs.*completed/i);
   });
 
   it("allows not_started → in_progress when hard prereqs are complete", () => {

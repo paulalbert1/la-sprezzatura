@@ -14,16 +14,20 @@
 
 import { useState } from "react";
 import { format, getYear } from "date-fns";
-import { Check, X } from "lucide-react";
+import { Check, X, Lock } from "lucide-react";
 import StatusCircle from "./StatusCircle";
 import type { MilestoneInstance, ContractorInstance } from "../../../lib/workflow/types";
 
-// UI-SPEC § Assignee Color-Coded Dot
-const ASSIGNEE_DOT_COLORS: Record<string, string> = {
-  designer: "#9A7B4B",
-  client: "#854F0B",
-  vendor: "#6B5E52",
-  trade: "#C4B5A2", // #9A7B4B at 0.5 opacity renders as ~#C4B5A2 on white
+// Assignee chip colors — shared with WorkflowMilestonesCard for consistency.
+// Bordered + saturated bg so chips read as a distinct element on cream surfaces.
+const ASSIGNEE_CHIP: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
+  designer: { bg: "#EFE3C0", text: "#7A5E32", border: "#D8C896" },
+  client:   { bg: "#F4D9B0", text: "#6B3D08", border: "#D9B27C" },
+  vendor:   { bg: "#DDEBC4", text: "#1F3F08", border: "#B8D095" },
+  trade:    { bg: "#E0D5C5", text: "#4F4439", border: "#BFB1A1" },
 };
 
 // UI-SPEC § Sub-row status pill colors
@@ -62,8 +66,11 @@ interface MilestoneRowProps {
   phaseId: string;
   isBlocked: boolean;
   blockReason?: string;
+  /** Display name of the unmet prereq, used to emphasize it in the block message. */
+  blockPrereqName?: string;
   overdueReason?: string;
   gateSubMessage?: string;
+  isNextUp?: boolean;
   onStatusClick: (
     phaseId: string,
     milestoneId: string,
@@ -202,8 +209,10 @@ export default function MilestoneRow({
   phaseId,
   isBlocked,
   blockReason,
+  blockPrereqName,
   overdueReason,
   gateSubMessage,
+  isNextUp = false,
   onStatusClick,
   onAddInstance,
   onRemoveInstance,
@@ -216,9 +225,17 @@ export default function MilestoneRow({
   const isMultiInstance = milestone.multiInstance;
 
   const completedDate = isComplete ? formatDate(milestone.completedAt) : null;
-  const dotColor = ASSIGNEE_DOT_COLORS[milestone.assignee] ?? "#D4C8B8";
+  const chip = ASSIGNEE_CHIP[milestone.assignee] ?? {
+    bg: "#F3EDE3",
+    text: "#6B5E52",
+    border: "#D4C8B8",
+  };
 
-  const nameColor = isSkipped ? "#9E8E80" : "#2C2520";
+  const nameColor = isSkipped
+    ? "#9E8E80"
+    : isComplete
+      ? "#6B5E52"
+      : "#2C2520";
 
   function handleAddInstance() {
     const name = newInstanceName.trim();
@@ -231,17 +248,25 @@ export default function MilestoneRow({
 
   return (
     <div
+      id={milestone.id}
+      data-next-up={isNextUp ? "true" : undefined}
       style={{
         borderBottom: "0.5px solid #E8DDD0",
         paddingTop: "8px",
         paddingBottom: "8px",
+        paddingLeft: isNextUp ? "10px" : "0",
+        marginLeft: isNextUp ? "-10px" : "0",
+        borderLeft: isNextUp ? "2px solid #9A7B4B" : "2px solid transparent",
+        backgroundColor: isNextUp ? "#FBF6EC" : "transparent",
+        borderRadius: isNextUp ? "0 4px 4px 0" : "0",
+        scrollMarginTop: "80px",
       }}
     >
       {/* Main row */}
       <div
         style={{
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           gap: "8px",
         }}
       >
@@ -260,21 +285,7 @@ export default function MilestoneRow({
           }
         />
 
-        {/* Assignee dot */}
-        <span
-          data-assignee={milestone.assignee}
-          title={milestone.assignee}
-          style={{
-            width: "8px",
-            height: "8px",
-            borderRadius: "50%",
-            backgroundColor: dotColor,
-            flexShrink: 0,
-            marginTop: "4px",
-          }}
-        />
-
-        {/* Name + optional pill */}
+        {/* Name */}
         <span
           style={{
             flex: 1,
@@ -287,6 +298,47 @@ export default function MilestoneRow({
         >
           {milestone.name}
         </span>
+
+        {/* Assignee chip (right-aligned, role-tinted) */}
+        <span
+          data-assignee={milestone.assignee}
+          style={{
+            fontSize: "11px",
+            fontWeight: 500,
+            padding: "1px 8px",
+            borderRadius: "8px",
+            backgroundColor: chip.bg,
+            color: chip.text,
+            border: `0.5px solid ${chip.border}`,
+            fontFamily: "var(--font-sans)",
+            flexShrink: 0,
+            lineHeight: 1.5,
+            textTransform: "capitalize",
+            letterSpacing: "0.02em",
+            opacity: isSkipped ? 0.6 : 1,
+          }}
+        >
+          {milestone.assignee}
+        </span>
+
+        {/* Next-up pill — only when this milestone is the next actionable */}
+        {isNextUp && (
+          <span
+            style={{
+              fontSize: "11px",
+              padding: "1px 6px",
+              borderRadius: "7px",
+              backgroundColor: "#9A7B4B",
+              color: "#FFFEFB",
+              flexShrink: 0,
+              lineHeight: 1.4,
+              fontWeight: 600,
+              letterSpacing: "0.02em",
+            }}
+          >
+            Next up
+          </span>
+        )}
 
         {/* Optional pill — only when optional and NOT skipped */}
         {milestone.optional && !isSkipped && (
@@ -329,9 +381,13 @@ export default function MilestoneRow({
             fontFamily: "var(--font-sans)",
             paddingLeft: "32px",
             marginTop: "2px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
           }}
         >
-          {gateSubMessage}
+          <Lock size={11} aria-hidden="true" style={{ flexShrink: 0 }} />
+          <span>{gateSubMessage}</span>
         </div>
       )}
       {isBlocked && blockReason && (
@@ -342,9 +398,31 @@ export default function MilestoneRow({
             fontFamily: "var(--font-sans)",
             paddingLeft: "32px",
             marginTop: "2px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
           }}
         >
-          {blockReason}
+          <Lock size={11} aria-hidden="true" style={{ flexShrink: 0 }} />
+          {blockPrereqName ? (
+            <span>
+              Needs{" "}
+              <span
+                style={{
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                  textDecorationStyle: "dotted",
+                  textDecorationThickness: "1px",
+                  textUnderlineOffset: "2px",
+                }}
+              >
+                {blockPrereqName}
+              </span>
+              {" "}to be completed
+            </span>
+          ) : (
+            <span>{blockReason}</span>
+          )}
         </div>
       )}
       {overdueReason && (

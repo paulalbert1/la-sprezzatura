@@ -18,25 +18,27 @@ import type { MilestoneRowProps } from "./MilestoneRow";
 
 // UI-SPEC § Phase status pill colors
 const PHASE_PILL: Record<
-  "complete" | "in_progress" | "upcoming",
+  "complete" | "in_progress" | "up_next" | "upcoming",
   { bg: string; text: string; label: string }
 > = {
-  complete: { bg: "#EEF3E3", text: "#27500A", label: "complete" },
-  in_progress: { bg: "#F5EDD8", text: "#9A7B4B", label: "in progress" },
-  upcoming: { bg: "#F3EDE3", text: "#9E8E80", label: "upcoming" },
+  complete: { bg: "#EEF3E3", text: "#27500A", label: "Complete" },
+  in_progress: { bg: "#F5EDD8", text: "#9A7B4B", label: "In progress" },
+  up_next: { bg: "#FAEEDA", text: "#854F0B", label: "Up next" },
+  upcoming: { bg: "#F3EDE3", text: "#9E8E80", label: "Waiting" },
 };
 
 interface PhaseAccordionProps {
   phase: PhaseInstance;
-  phaseStatus: "complete" | "in_progress" | "upcoming";
+  phaseStatus: "complete" | "in_progress" | "up_next" | "upcoming";
   isParallel: boolean;
   defaultOpen: boolean;
   isBlocked: (
     phaseId: string,
     milestoneId: string,
-  ) => { blocked: boolean; reason?: string };
+  ) => { blocked: boolean; reason?: string; prereqName?: string };
   gateSubMessageFor?: (phaseId: string, milestoneId: string) => string | undefined;
   overdueReasonFor?: (phaseId: string, milestoneId: string) => string | undefined;
+  isNextUp?: (milestoneId: string) => boolean;
   onStatusClick: MilestoneRowProps["onStatusClick"];
   onAddInstance: MilestoneRowProps["onAddInstance"];
   onRemoveInstance: MilestoneRowProps["onRemoveInstance"];
@@ -52,6 +54,7 @@ export default function PhaseAccordion({
   isBlocked,
   gateSubMessageFor,
   overdueReasonFor,
+  isNextUp,
   onStatusClick,
   onAddInstance,
   onRemoveInstance,
@@ -184,8 +187,10 @@ export default function PhaseAccordion({
                 phaseId={phase.id}
                 isBlocked={blockResult.blocked}
                 blockReason={blockResult.reason}
+                blockPrereqName={blockResult.prereqName}
                 gateSubMessage={gateSubMessage}
                 overdueReason={overdueReason}
+                isNextUp={isNextUp ? isNextUp(milestone.id) : false}
                 onStatusClick={onStatusClick}
                 onAddInstance={onAddInstance}
                 onRemoveInstance={onRemoveInstance}

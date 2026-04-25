@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { formatTrade } from "../../lib/trades";
 
 interface ExistingClient {
@@ -49,6 +50,7 @@ export default function QuickAssignTypeahead({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -237,6 +239,19 @@ export default function QuickAssignTypeahead({
     (state === "results" || state === "searching") &&
     !selectedContractor;
 
+  const showTradeDropdown = state === "selectingTrade" && Boolean(selectedContractor);
+
+  // Capture input rect whenever a dropdown surface needs to render. Portaled
+  // surfaces are positioned via this rect, so they escape any overflow:hidden
+  // ancestor (cards on the project detail page have rounded clipping wrappers).
+  useEffect(() => {
+    if (showDropdown || showTradeDropdown) {
+      setAnchorRect(inputRef.current?.getBoundingClientRect() ?? null);
+    } else {
+      setAnchorRect(null);
+    }
+  }, [showDropdown, showTradeDropdown]);
+
   return (
     <div className="relative">
       {/* Input */}
@@ -260,59 +275,84 @@ export default function QuickAssignTypeahead({
         }}
       />
 
-      {/* Dropdown results */}
-      {showDropdown && (
-        <div className="absolute z-40 bg-white border border-stone-light/30 rounded-lg shadow-md mt-1 w-72 max-h-48 overflow-y-auto">
-          {state === "searching" && results.length === 0 && (
-            <div className="px-3 py-2 text-sm text-stone font-body">
-              Searching...
-            </div>
-          )}
-          {state === "results" && results.length === 0 && (
-            <div className="px-3 py-2 text-sm text-stone italic font-body">
-              No matches found
-            </div>
-          )}
-          {results.map((entity) => (
-            <button
-              key={`${entity.entityType}-${entity._id}`}
-              type="button"
-              onClick={() => handleSelect(entity)}
-              className="w-full text-left px-3 py-2 text-sm font-body text-charcoal hover:bg-cream cursor-pointer flex items-center justify-between"
-            >
-              <span className="truncate">{entity.name}</span>
-              <span className="text-[11px] font-semibold uppercase text-stone-light ml-2 shrink-0">
-                {entity.entityType === "client" ? "CLIENT" : "CONTRACTOR"}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Dropdown results — portaled so it escapes overflow:hidden ancestors. */}
+      {showDropdown &&
+        anchorRect &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="bg-white border border-stone-light/30 rounded-lg shadow-md w-72 max-h-48 overflow-y-auto"
+            style={{
+              position: "absolute",
+              top: anchorRect.bottom + window.scrollY + 4,
+              left: anchorRect.left + window.scrollX,
+              zIndex: 50,
+            }}
+          >
+            {state === "searching" && results.length === 0 && (
+              <div className="px-3 py-2 text-sm text-stone font-body">
+                Searching...
+              </div>
+            )}
+            {state === "results" && results.length === 0 && (
+              <div className="px-3 py-2 text-sm text-stone italic font-body">
+                No matches found
+              </div>
+            )}
+            {results.map((entity) => (
+              <button
+                key={`${entity.entityType}-${entity._id}`}
+                type="button"
+                onClick={() => handleSelect(entity)}
+                className="w-full text-left px-3 py-2 text-sm font-body text-charcoal hover:bg-cream cursor-pointer flex items-center justify-between"
+              >
+                <span className="truncate">{entity.name}</span>
+                <span className="text-[11px] font-semibold uppercase text-stone-light ml-2 shrink-0">
+                  {entity.entityType === "client" ? "CLIENT" : "CONTRACTOR"}
+                </span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
 
-      {/* Trade selection dropdown for contractors */}
-      {state === "selectingTrade" && selectedContractor && (
-        <div className="absolute z-40 bg-white border border-stone-light/30 rounded-lg shadow-md mt-1 w-72 max-h-48 overflow-y-auto">
-          <div className="px-3 py-2 text-[11px] font-semibold text-stone uppercase tracking-wider border-b border-stone-light/10">
-            Assign for which trade?
-          </div>
-          {(selectedContractor.trades || []).map((trade) => (
-            <button
-              key={trade}
-              type="button"
-              onClick={() => handleTradeSelect(trade)}
-              className="w-full text-left px-3 py-2 text-sm font-body text-charcoal hover:bg-cream cursor-pointer"
-            >
-              {formatTrade(trade)}
-            </button>
-          ))}
-          {(!selectedContractor.trades ||
-            selectedContractor.trades.length === 0) && (
-            <div className="px-3 py-2 text-sm text-stone italic font-body">
-              No trades listed
+      {/* Trade selection dropdown — portaled */}
+      {showTradeDropdown &&
+        selectedContractor &&
+        anchorRect &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            className="bg-white border border-stone-light/30 rounded-lg shadow-md w-72 max-h-48 overflow-y-auto"
+            style={{
+              position: "absolute",
+              top: anchorRect.bottom + window.scrollY + 4,
+              left: anchorRect.left + window.scrollX,
+              zIndex: 50,
+            }}
+          >
+            <div className="px-3 py-2 text-[11px] font-semibold text-stone uppercase tracking-wider border-b border-stone-light/10">
+              Assign for which trade?
             </div>
-          )}
-        </div>
-      )}
+            {(selectedContractor.trades || []).map((trade) => (
+              <button
+                key={trade}
+                type="button"
+                onClick={() => handleTradeSelect(trade)}
+                className="w-full text-left px-3 py-2 text-sm font-body text-charcoal hover:bg-cream cursor-pointer"
+              >
+                {formatTrade(trade)}
+              </button>
+            ))}
+            {(!selectedContractor.trades ||
+              selectedContractor.trades.length === 0) && (
+              <div className="px-3 py-2 text-sm text-stone italic font-body">
+                No trades listed
+              </div>
+            )}
+          </div>,
+          document.body,
+        )}
 
       {/* Confirmation message */}
       {state === "assigned" && confirmMessage && (

@@ -129,6 +129,8 @@ Rendering usage quota badge — defined in `33-UI-SPEC.md` and codified here so 
 
 > **Rule:** Inside `/admin/*`, every text element uses DM Sans. Cormorant Garamond is reserved for the public-facing site and the sidebar brand mark (which already uses DM Sans, not serif — confirmed in `AdminNav.tsx` line 46). If you're tempted to use the serif heading font inside admin, stop.
 
+> **Footgun — h-tags inherit serif by default.** `global.css` line 73–82 sets `h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }` (Cormorant Garamond). Any `<h2>` you drop into admin will render serif unless you explicitly override. **Always set `style={{ fontFamily: "var(--font-sans)" }}` (or use Tailwind's `[font-family:var(--font-sans)]` arbitrary value) on every admin heading.** A `<div>` styled as a heading inherits sans correctly; only the semantic h-tags need the override. Bug class: a panel eyebrow looks subtly off-key and the cause isn't obvious from the heading's own classes — it's the cascade.
+
 #### Admin canonical type scale (4 sizes, 2 weights)
 
 | Role | Size | Default weight | Line height | Tailwind class | Used for |
@@ -266,6 +268,25 @@ px-4 py-2 rounded-lg
 hover:text-[#2C2520] transition-colors
 ```
 
+### Card-eyebrow CTA (in-card action)
+
+**Pattern:**
+```
+text-[11.5px] text-[#9A7B4B]
+hover:text-[#8A6D40] transition-colors
+inline-flex items-center gap-1
+```
+
+Right-aligned in the card header next to the eyebrow heading. Verb-led, lowercase ("Add task", "Upload"), no border, no uppercase, no solid background. Optional leading `+` glyph or trailing `→` for navigational variants ("View schedule →").
+
+**Use for:** the single primary action of a content panel — `+ Add task`, `+ Upload`, `View schedule →`, `+ Add trade`. One per card, paired with the panel eyebrow header. Avoid placing two card-eyebrow CTAs in the same card; if a panel needs two actions, the second must be a row-level affordance (icon button, inline edit) rather than a header CTA.
+
+**Why not solid primary here:** the project page hosts ~6 panels stacked vertically. If every panel's add-action were a solid `bg-[#9A7B4B]` button, the page would read as 6 competing primary CTAs. The card-eyebrow CTA reserves visual weight for the page-level primary action (e.g., `Send Update`) and lets per-panel actions whisper.
+
+**Empty state interaction:** when a panel uses the card-eyebrow CTA pattern, the eyebrow CTA satisfies the "always include an action" rule — the empty state should be descriptive text only, not duplicate a CTA button below the description. Two CTAs visible at once for the same action is a UX bug.
+
+**Reference implementations:** `ProjectTasks.tsx` (Tasks — Designer), `ClientActionItemsList.tsx` (Tasks — Client), `WorkflowMilestonesCard.tsx` (Schedule), `DocumentsPanel.tsx` (Documents).
+
 ### Luxury input (text, date, number, select)
 
 **Utility class:** `.luxury-input` — defined in `global.css` lines 100–116. Do not redefine.
@@ -306,9 +327,29 @@ Focus: border color → `#9A7B4B`. Placeholder: `#9E8E80`. ⚠ Note the font-siz
 
 **Always include an action.** An empty state without a next-step CTA is a dead end.
 
+**Exception — card-eyebrow CTA panels:** when a panel already exposes a card-eyebrow CTA in its header (e.g., `+ Add task`, `+ Upload`), the empty state should NOT render a second CTA button below the description. The eyebrow CTA satisfies the action requirement. Empty body becomes descriptive text only ("No documents yet — upload contracts, drawings, selections, and presentations to share with the team."). Two visible CTAs for the same action is a UX bug.
+
 ### Loading skeleton
 
 **Pattern:** Replace the target shape with a parchment-tinted block (`bg-[#F3EDE3]`), `animate-pulse`, same dimensions as the final content. Do not shimmer images.
+
+### Z-index scale (overlay surfaces)
+
+Use only these tier values; do not invent new z values. Keep new overlays inside the existing tiers so the layering order stays predictable.
+
+| Tier | Value | Used for |
+|------|-------|----------|
+| Base content | (none / 0) | Cards, rows, page chrome |
+| Sticky header | `z-30` / `zIndex: 30` | Page-level sticky bars (rare) |
+| Inline menu | `z-40` / `zIndex: 40` | Lifecycle/header menus that don't escape stacking context (e.g., `WorkflowHeader` lifecycle dropdown) |
+| Dropdown / popover | `z-50` / `zIndex: 50` | Inline status pickers, action menus, archive menu, **all `<button> + click → absolute menu` patterns**. Includes portal-rendered popovers like `StatusPickerPopover`. |
+| Toast | `z-60` / `zIndex: 60` | `ToastContainer` — must always cover dropdowns so confirmations remain visible |
+| Modal scrim | `z-100` / `zIndex: 100` | Full-screen modal backdrops (`AdminModal`) |
+| Modal-internal popover | `z-110` / `zIndex: 110` | Dropdowns/popovers rendered FROM inside an open modal (e.g. status picker inside `ProcurementItemModal`). Must sit above the scrim of its parent modal. |
+
+**Footgun — never use `z-10` for a dropdown.** A `z-10` menu is below sibling card rows that create their own stacking contexts (e.g., a row with `position: relative` + a focus-ring `outline-offset`). The menu will appear visually correct in isolation but get clipped/painted-over by the next row. If you find `z-10` on an `absolute top-full` menu, raise it to `z-50`. Audit pattern: `grep -rn "z-10" src/components/admin` should match nothing on a dropdown surface.
+
+**Stacking-context escape — when you must.** Inline `position: absolute` only escapes the nearest positioned ancestor. If an ancestor has `overflow: hidden`, `transform`, `filter`, or `will-change`, even `z-50` won't break out. In that case, render via `createPortal(node, document.body)` like `StatusPickerPopover` does — that's the gold-standard pattern for any new popover.
 
 ### Error banner
 

@@ -8,8 +8,9 @@
 // Optimistic-with-rollback pattern: snap → apply locally → POST → replace or rollback.
 // Wraps inner component in <ToastContainer> per per-island provider pattern.
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import ToastContainer, { useToast } from "../ui/ToastContainer";
+import AdminModal from "../ui/AdminModal";
 import WorkflowHeader from "./WorkflowHeader";
 import WorkflowWarnings from "./WorkflowWarnings";
 import WorkflowMetrics from "./WorkflowMetrics";
@@ -22,6 +23,13 @@ import type {
   WorkflowMetrics as WM,
   PhaseInstance,
 } from "../../../lib/workflow/types";
+import {
+  computeMetrics,
+  isBlocked,
+  getAdminTransitions,
+  getNextActionableMilestone,
+  type AdminTransition,
+} from "../../../lib/workflow/engine";
 
 export interface WorkflowTrackerProps {
   projectId: string;
@@ -33,15 +41,13 @@ export interface WorkflowTrackerProps {
   metrics: WM;
   templates: Array<{ _id: string; name: string }>;
   // Server-precomputed engine outputs
-  transitionsById: Record<
-    string,
-    Array<{ status: MilestoneStatus; allowed: boolean; reason?: string }>
-  >;
+  transitionsById: Record<string, Array<AdminTransition>>;
   // Key format: `${phaseId}:${milestoneId}` for milestone
   // `${phaseId}:${milestoneId}:${instanceKey}` for sub-row
   blockedById: Record<string, { blocked: boolean; reason?: string }>;
   gateSubMessageById?: Record<string, string>;
   overdueReasonById?: Record<string, string>;
+  nextActionable?: { phaseId: string; milestoneId: string; name: string } | null;
 }
 
 interface PickerContext {
@@ -51,10 +57,13 @@ interface PickerContext {
   instanceKey?: string;
 }
 
-// Derive a simple phase status from milestone statuses
+// Derive a phase status from milestone statuses + whether this phase contains
+// the next actionable milestone. The `up_next` value differentiates a phase
+// that is ready to start from one that is genuinely waiting on earlier work.
 function derivePhaseStatus(
   phase: PhaseInstance,
-): "complete" | "in_progress" | "upcoming" {
+  nextActionablePhaseId?: string,
+): "complete" | "in_progress" | "up_next" | "upcoming" {
   const ms = phase.milestones;
   if (ms.length === 0) return "upcoming";
   if (ms.every((m) => m.status === "complete" || m.status === "skipped")) {
@@ -70,13 +79,49 @@ function derivePhaseStatus(
   ) {
     return "in_progress";
   }
+  if (nextActionablePhaseId === phase.id) return "up_next";
   return "upcoming";
 }
 
 function Inner(props: WorkflowTrackerProps) {
   const [wf, setWf] = useState<ProjectWorkflow>(props.workflow);
   const [picker, setPicker] = useState<PickerContext | null>(null);
+  // When the user picks a revert (currently complete → not_started/in_progress/etc.),
+  // hold the pending pick here and show a confirmation modal before applying.
+  const [pendingRevert, setPendingRevert] = useState<{
+    phaseId: string;
+    milestoneId: string;
+    instanceKey?: string;
+    target: MilestoneStatus;
+    milestoneName: string;
+  } | null>(null);
   const { show } = useToast();
+
+  // Resolve URL hash to a phase id so we can auto-expand the phase containing
+  // the targeted milestone when arriving via deep link from the project card.
+  const hashPhaseId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return null;
+    const phase = wf.phases.find((p) =>
+      p.milestones.some((m) => m.id === hash),
+    );
+    return phase?.id ?? null;
+  }, [wf.phases]);
+
+  // After mount, scroll the targeted milestone into view (the phase will already
+  // be open from defaultOpen logic, so the anchor target is in the DOM).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace(/^#/, "");
+    if (!hash) return;
+    const el = document.getElementById(hash);
+    if (el) {
+      requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  }, []);
 
   const handleStatusClick = useCallback(
     (
@@ -90,10 +135,13 @@ function Inner(props: WorkflowTrackerProps) {
     [],
   );
 
-  async function handlePick(target: MilestoneStatus) {
-    if (!picker) return;
+  async function applyTransition(
+    phaseId: string,
+    milestoneId: string,
+    instanceKey: string | undefined,
+    target: MilestoneStatus,
+  ) {
     const snap = wf;
-    setPicker(null);
     try {
       const res = await fetch(
         `/api/admin/projects/${props.projectId}/workflow/milestone-status`,
@@ -101,10 +149,10 @@ function Inner(props: WorkflowTrackerProps) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            phaseId: picker.phaseId,
-            milestoneId: picker.milestoneId,
+            phaseId,
+            milestoneId,
             target,
-            instanceKey: picker.instanceKey,
+            instanceKey,
           }),
         },
       );
@@ -122,6 +170,42 @@ function Inner(props: WorkflowTrackerProps) {
       setWf(snap);
       show({ variant: "error", title: (err as Error).message });
     }
+  }
+
+  async function handlePick(target: MilestoneStatus) {
+    if (!picker) return;
+    const { phaseId, milestoneId, instanceKey } = picker;
+    setPicker(null);
+
+    // Intercept reverts: when the milestone is currently complete and the
+    // user picks any non-complete target, route through the confirmation
+    // modal first. Skipped is also a complete-equivalent end-state.
+    const milestone = wf.phases
+      .find((p) => p.id === phaseId)
+      ?.milestones.find((m) => m.id === milestoneId);
+    const isRevertingFromComplete =
+      !instanceKey &&
+      milestone?.status === "complete" &&
+      target !== "complete";
+    if (isRevertingFromComplete && milestone) {
+      setPendingRevert({
+        phaseId,
+        milestoneId,
+        instanceKey,
+        target,
+        milestoneName: milestone.name,
+      });
+      return;
+    }
+
+    await applyTransition(phaseId, milestoneId, instanceKey, target);
+  }
+
+  async function confirmRevert() {
+    if (!pendingRevert) return;
+    const { phaseId, milestoneId, instanceKey, target } = pendingRevert;
+    setPendingRevert(null);
+    await applyTransition(phaseId, milestoneId, instanceKey, target);
   }
 
   async function handleAddInstance(
@@ -186,12 +270,20 @@ function Inner(props: WorkflowTrackerProps) {
     }
   }
 
+  // Derive engine outputs from the live workflow state. SSR props are used as
+  // initial values via useState seed; these recompute on every status change so
+  // metrics, transitions, and the next-up cue stay in sync after optimistic
+  // updates and API responses.
+  const liveMetrics = useMemo(() => computeMetrics(wf), [wf]);
+  const liveNextActionable = useMemo(() => getNextActionableMilestone(wf), [wf]);
+  const liveBlocked = useCallback(
+    (pid: string, mid: string) => isBlocked(wf, pid, mid),
+    [wf],
+  );
+
   // Resolve picker transitions and current milestone
-  const transitionKey = picker
-    ? `${picker.phaseId}:${picker.milestoneId}${picker.instanceKey ? ":" + picker.instanceKey : ""}`
-    : "";
   const transitions = picker
-    ? (props.transitionsById[transitionKey] ?? [])
+    ? getAdminTransitions(wf, picker.phaseId, picker.milestoneId, picker.instanceKey)
     : [];
 
   const currentMs = picker
@@ -248,13 +340,18 @@ function Inner(props: WorkflowTrackerProps) {
 
       <WorkflowWarnings warnings={props.warnings} />
 
-      <WorkflowMetrics metrics={props.metrics} />
+      <WorkflowMetrics metrics={liveMetrics} />
 
       {wf.phases.map((phase, idx) => {
-        const phaseStatus = derivePhaseStatus(phase);
+        const phaseStatus = derivePhaseStatus(phase, liveNextActionable?.phaseId);
         const defaultOpen =
           phaseStatus === "in_progress" ||
+          phaseStatus === "up_next" ||
+          phase.id === hashPhaseId ||
           (idx === 0 && phaseStatus !== "complete");
+        const isNextUpMilestone = (mid: string) =>
+          liveNextActionable?.phaseId === phase.id &&
+          liveNextActionable?.milestoneId === mid;
         return (
           <PhaseAccordion
             key={phase._key}
@@ -262,15 +359,14 @@ function Inner(props: WorkflowTrackerProps) {
             phaseStatus={phaseStatus}
             isParallel={phase.canOverlapWith.length > 0}
             defaultOpen={defaultOpen}
-            isBlocked={(pid, mid) =>
-              props.blockedById[`${pid}:${mid}`] ?? { blocked: false }
-            }
+            isBlocked={liveBlocked}
             gateSubMessageFor={(pid, mid) =>
               props.gateSubMessageById?.[`${pid}:${mid}`]
             }
             overdueReasonFor={(pid, mid) =>
               props.overdueReasonById?.[`${pid}:${mid}`]
             }
+            isNextUp={isNextUpMilestone}
             onStatusClick={handleStatusClick}
             onAddInstance={handleAddInstance}
             onRemoveInstance={handleRemoveInstance}
@@ -286,6 +382,49 @@ function Inner(props: WorkflowTrackerProps) {
         onPick={handlePick}
         onClose={() => setPicker(null)}
       />
+
+      <AdminModal
+        open={pendingRevert !== null}
+        onClose={() => setPendingRevert(null)}
+        title="Revert completed milestone?"
+        size="sm"
+        footer={
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setPendingRevert(null)}
+              className="px-4 py-2 rounded-lg text-sm text-[#6B5E52] hover:bg-[#F3EDE3] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmRevert}
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#9B3A2A] text-white hover:bg-[#7E2F22] transition-colors"
+            >
+              Revert
+            </button>
+          </div>
+        }
+      >
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "13px",
+            color: "#2C2520",
+            lineHeight: 1.5,
+          }}
+        >
+          {pendingRevert ? (
+            <>
+              Revert <strong>{pendingRevert.milestoneName}</strong> to{" "}
+              {pendingRevert.target.replace(/_/g, " ")}? The completion record
+              will be removed and any downstream work that depends on this
+              milestone may need to be re-checked.
+            </>
+          ) : null}
+        </p>
+      </AdminModal>
     </>
   );
 }

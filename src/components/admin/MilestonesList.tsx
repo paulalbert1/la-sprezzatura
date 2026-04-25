@@ -48,7 +48,7 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
   return (
     <div style={cardStyle}>
       <div className="flex items-center justify-between mb-[14px]">
-        <h2 style={titleStyle}>Milestones</h2>
+        <h2 style={titleStyle}>Schedule</h2>
         <a
           href={scheduleUrl}
           className="transition-colors"

@@ -31,7 +31,7 @@ function WithAnchor(
 afterEach(cleanup);
 
 describe("StatusPickerPopover", () => {
-  it("renders CHANGE STATUS heading", () => {
+  it("renders an aria-labeled menu (no eyebrow heading)", () => {
     const onPick = vi.fn();
     const onClose = vi.fn();
     render(
@@ -43,7 +43,10 @@ describe("StatusPickerPopover", () => {
         onClose={onClose}
       />,
     );
-    expect(screen.getByText(/change status/i)).toBeDefined();
+    // The menu role + aria-label provides accessible context — no visible
+    // heading needed (the popover is self-explanatory).
+    const menu = screen.getByRole("menu", { name: /change status/i });
+    expect(menu).toBeDefined();
   });
   it("does not render 'Skipped' row when optionalSkip is false", () => {
     const onPick = vi.fn();
