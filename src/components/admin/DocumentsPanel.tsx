@@ -138,25 +138,21 @@ function DocumentsPanelInner({
 
   return (
     <>
-      <section className="bg-[#FFFEFB] border-[0.5px] border-[#E8DDD0] rounded-[10px] p-5 mt-[14px] mb-[14px]">
-        <header className="flex justify-between items-center mb-[14px]">
-          <h2
-            className="text-[10.5px] font-medium uppercase tracking-[0.1em] text-[#9E8E80]"
-            style={{ fontFamily: "var(--font-sans)" }}
-          >
-            Documents
-          </h2>
+      <section className="bg-[#FFFEFB] border-[0.5px] border-[#E8DDD0] rounded-[10px] overflow-hidden mt-[14px] mb-[14px]">
+        <header className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+          <h2 className="card-header-label">Documents</h2>
           <button
             type="button"
             onClick={() => setUploadOpen(true)}
-            className="inline-flex items-center gap-1 text-[11.5px] text-[#9A7B4B] hover:text-[#8A6D40] transition-colors focus:outline-none"
+            className="card-header-btn"
           >
-            <Plus size={11} />
+            <Plus size={12} />
             Upload
           </button>
         </header>
+        <div className="px-5 pt-4 pb-5">
 
-        <div className="flex gap-1 my-4">
+        <div className="flex gap-1 mb-4">
           {TABS.map((tab) => {
             const isActive = activeCategory === tab.value;
             return (
@@ -264,6 +260,7 @@ function DocumentsPanelInner({
             })}
           </div>
         )}
+        </div>
       </section>
 
       <UploadDocumentModal

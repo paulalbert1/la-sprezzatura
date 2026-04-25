@@ -150,3 +150,60 @@ html {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Dashboard card header — faint warm tint (~4% brand brown over canvas).
+ * The tint alone provides separation; no border-bottom. Header padding is
+ * tighter than card body row padding to signal hierarchy. */
+.card-header {
+  background-color: #F5EFE6;
+}
+.card-header-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5C4F3D;
+}
+.card-header-action {
+  font-size: 12px;
+  font-family: var(--font-body);
+  color: #8A7E6E;
+  transition: color 150ms ease;
+}
+.card-header-action:hover {
+  color: #5C4F3D;
+}
+/* Inline button on the tinted header — used by the Tasks cards' "+ Add task"
+ * affordance. Stays muted by default, picks up brand terracotta on hover. */
+.card-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: #8A7E6E;
+  border: 0.5px solid rgba(60, 40, 20, 0.12);
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 4px 10px;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.card-header-btn:hover {
+  color: #5C4F3D;
+  border-color: rgba(60, 40, 20, 0.2);
+  background: rgba(255, 255, 255, 0.8);
+}
+.card-header-select {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: #5C4F3D;
+  background: rgba(255, 255, 255, 0.5);
+  border: 0.5px solid rgba(60, 40, 20, 0.12);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.card-header-select:focus {
+  outline: none;
+  border-color: rgba(60, 40, 20, 0.25);
+}

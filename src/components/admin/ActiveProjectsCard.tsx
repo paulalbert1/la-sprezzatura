@@ -1,23 +1,10 @@
-import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import CardFilterInput from "./ui/CardFilterInput";
 import {
   STAGE_META,
   STAGE_COLORS,
   type StageKey,
 } from "../../lib/portalStages";
 import { getDaysInStage } from "../../lib/dashboardUtils";
-
-// Phase 35 Plan 03 — ActiveProjectsCard
-// Source of truth: .planning/phases/35-dashboard-polish-global-ux-cleanup/35-UI-SPEC.md
-// Requirements: DASH-16; CONTEXT D-03, D-04
-//
-// React island replacing the inline Astro Active Projects card on
-// /admin/dashboard. Owns:
-//   - Filter state (free-text, case-insensitive substring match over
-//     title / clientName / stage label). Live per-keystroke, no debounce.
-//   - Visual parity with the previous inline Astro card.
-// State resets on reload (useState only, no persistence) per D-04.
 
 export interface ProjectRow {
   _id: string;
@@ -32,65 +19,18 @@ interface Props {
   totalCount: number;
 }
 
-function rowMatchesFilter(row: ProjectRow, needle: string): boolean {
-  if (!needle) return true;
-  const q = needle.toLowerCase();
-  const stageTitle =
-    STAGE_META[row.pipelineStage as StageKey]?.title ?? "";
-  const fields = [row.title ?? "", row.clientName ?? "", stageTitle];
-  return fields.some((f) => f.toLowerCase().includes(q));
-}
-
 export default function ActiveProjectsCard({ projects, totalCount }: Props) {
-  const [filter, setFilter] = useState<string>("");
-
-  // Cap the base list to 8 (matches the pre-refactor slice(0, 8) in dashboard.astro).
-  const displayProjects = projects.slice(0, 8);
-  const visibleProjects = displayProjects.filter((p) =>
-    rowMatchesFilter(p, filter),
-  );
-
-  const hasFilter = filter.trim().length > 0;
-
-  let emptyCopy: string | null = null;
-  if (visibleProjects.length === 0) {
-    emptyCopy = hasFilter
-      ? "No projects match your filter."
-      : "No active projects";
-  }
+  // Cap the base list to 8 (matches the pre-refactor slice(0, 8)).
+  const visibleProjects = projects.slice(0, 8);
+  const emptyCopy = visibleProjects.length === 0 ? "No active projects" : null;
 
   return (
     <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-      {/* Header: title + filter input — matches UpcomingDeliveriesCard rhythm */}
-      <div className="px-5 pt-[18px] pb-0">
-        <h2
-          className="mb-[14px]"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "10.5px",
-            fontWeight: 500,
-            color: "#9E8E80",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Active Projects
-        </h2>
-        <hr
-          style={{
-            border: "none",
-            borderTop: "0.5px solid #E8DDD0",
-            margin: 0,
-          }}
-        />
-        <div className="py-3">
-          <CardFilterInput
-            value={filter}
-            onChange={setFilter}
-            placeholder="Filter projects…"
-            ariaLabel="Filter projects"
-          />
-        </div>
+      {/* Header — see global.css .card-header for tokens. Fixed h-[42px] so
+          every dashboard card header matches in height regardless of whether
+          it carries a trailing control. */}
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">Active Projects</h2>
       </div>
 
       {/* Row list or empty state */}

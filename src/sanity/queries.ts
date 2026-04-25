@@ -790,6 +790,23 @@ const ADMIN_DASHBOARD_TASKS_QUERY = `
   }[count(tasks) > 0]
 `;
 
+// All client action items from active projects (mirror of TASKS query for the
+// dashboard's "TASKS — CLIENT" card).
+const ADMIN_DASHBOARD_CLIENT_TASKS_QUERY = `
+  *[_type == "project" && projectStatus in ["active", "reopened"]] {
+    _id,
+    title,
+    "tasks": clientActionItems[] | order(completed asc, createdAt desc) {
+      _key,
+      description,
+      dueDate,
+      completed,
+      completedAt,
+      createdAt
+    }
+  }[count(tasks) > 0]
+`;
+
 // Recent activity across all active projects (15 most recent)
 const ADMIN_DASHBOARD_ACTIVITY_QUERY = `
   *[_type == "project" && projectStatus in ["active", "reopened"]
@@ -823,6 +840,7 @@ export async function getAdminDashboardData(client: SanityClient) {
     milestoneData,
     deliveryData,
     taskData,
+    clientTaskData,
     activityData,
     contractors,
   ] = await Promise.all([
@@ -830,6 +848,7 @@ export async function getAdminDashboardData(client: SanityClient) {
     client.fetch(ADMIN_DASHBOARD_MILESTONES_QUERY),
     client.fetch(ADMIN_DASHBOARD_DELIVERIES_QUERY),
     client.fetch(ADMIN_DASHBOARD_TASKS_QUERY),
+    client.fetch(ADMIN_DASHBOARD_CLIENT_TASKS_QUERY),
     client.fetch(ADMIN_DASHBOARD_ACTIVITY_QUERY),
     client.fetch(ADMIN_DASHBOARD_CONTRACTORS_QUERY),
   ]);
@@ -867,6 +886,14 @@ export async function getAdminDashboardData(client: SanityClient) {
     })),
   );
 
+  const clientTasks = (clientTaskData || []).flatMap((p: any) =>
+    (p.tasks || []).map((t: any) => ({
+      ...t,
+      projectId: p._id,
+      projectTitle: p.title,
+    })),
+  );
+
   // Flatten and sort activity, take top 15
   const activities = (activityData || [])
     .flatMap((p: any) =>
@@ -886,6 +913,7 @@ export async function getAdminDashboardData(client: SanityClient) {
     milestones,
     deliveries,
     tasks,
+    clientTasks,
     recentActivity: activities,
     // Phase 35 Plan 04 (DASH-17): top-6 recently-created contractors powers
     // the dashboard Contractor card. Shape: { _id, name, company, trades }[].

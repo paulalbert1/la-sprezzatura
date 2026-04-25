@@ -33,35 +33,18 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
     backgroundColor: "#FFFEFB",
     border: "0.5px solid #E8DDD0",
     borderRadius: "10px",
-    padding: "18px 20px",
+    overflow: "hidden",
   } as const;
-
-  const titleStyle = {
-    fontFamily: "var(--font-sans)",
-    fontSize: "10.5px",
-    fontWeight: 500,
-    color: "#9E8E80",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-  };
 
   return (
     <div style={cardStyle}>
-      <div className="flex items-center justify-between mb-[14px]">
-        <h2 style={titleStyle}>Schedule</h2>
-        <a
-          href={scheduleUrl}
-          className="transition-colors"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "11.5px",
-            color: "#9A7B4B",
-            letterSpacing: "0.02em",
-          }}
-        >
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">Schedule</h2>
+        <a href={scheduleUrl} className="card-header-action">
           View schedule →
         </a>
       </div>
+      <div style={{ padding: "16px 20px 18px" }}>
 
       {milestones.length > 0 ? (
         <>
@@ -166,6 +149,7 @@ export default function MilestonesList({ milestones, projectId, scheduleUrl }: P
           </a>
         </div>
       )}
+      </div>
     </div>
   );
 }

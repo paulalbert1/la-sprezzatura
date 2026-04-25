@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import CardFilterInput from "./ui/CardFilterInput";
 
 // Phase 35 Plan 02 — UpcomingDeliveriesCard
 // Source of truth: .planning/phases/35-dashboard-polish-global-ux-cleanup/35-UI-SPEC.md
@@ -79,55 +78,42 @@ function formatETADate(iso: string | null | undefined): string | null {
   }
 }
 
-function rowMatchesFilter(row: DeliveryRow, needle: string): boolean {
-  if (!needle) return true;
-  const q = needle.toLowerCase();
-  const fields = [
-    row.name ?? "",
-    row.clientName ?? "",
-    row.projectTitle ?? "",
-    row.trackingNumber ?? "",
-    row.carrier ?? "",
-  ];
-  return fields.some((f) => f.toLowerCase().includes(q));
+function isOverdue(iso: string | null | undefined): boolean {
+  if (!iso) return false;
+  try {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    return parseISO(iso).getTime() < start.getTime();
+  } catch {
+    return false;
+  }
 }
 
 export default function UpcomingDeliveriesCard({ deliveries }: Props) {
-  const [filter, setFilter] = useState<string>("");
   const [showDelivered, setShowDelivered] = useState<boolean>(false);
 
   const deliveredCount = deliveries.filter((d) => d.delivered).length;
   const undeliveredRows = deliveries.filter((d) => !d.delivered);
   const deliveredRows = deliveries.filter((d) => d.delivered);
 
-  const visibleUndelivered = undeliveredRows.filter((r) =>
-    rowMatchesFilter(r, filter),
-  );
-  const visibleDelivered = showDelivered
-    ? deliveredRows.filter((r) => rowMatchesFilter(r, filter))
-    : [];
+  const visibleRows = showDelivered
+    ? [...undeliveredRows, ...deliveredRows]
+    : undeliveredRows;
 
-  const visibleRows = [...visibleUndelivered, ...visibleDelivered];
-
-  // Empty states per copywriting contract
-  let emptyCopy: string | null = null;
-  if (visibleRows.length === 0) {
-    if (filter.trim().length > 0) {
-      emptyCopy = "No deliveries match your filter.";
-    } else if (undeliveredRows.length === 0 && !showDelivered) {
-      emptyCopy = "All caught up — no undelivered items.";
-    } else if (undeliveredRows.length === 0 && showDelivered) {
-      // All outstanding gone and delivered filtered away
-      emptyCopy = "All caught up — no undelivered items.";
-    }
-  }
+  const emptyCopy =
+    undeliveredRows.length === 0
+      ? "All caught up — no undelivered items."
+      : null;
 
   const renderRow = (d: DeliveryRow) => {
     const statusInfo = DELIVERY_STATUS[d.status];
     const carrierKey = (d.carrier ?? "").toLowerCase();
     const carrierLabel = TRACKED_CARRIERS[carrierKey];
     const etaDate = formatETADate(d.expectedDeliveryDate);
-    const showETA = Boolean(carrierLabel && etaDate);
+    const overdue = !d.delivered && isOverdue(d.expectedDeliveryDate);
+    const supportingParts = [d.clientName, d.projectTitle].filter(
+      (s): s is string => Boolean(s),
+    );
 
     return (
       <a
@@ -137,27 +123,32 @@ export default function UpcomingDeliveriesCard({ deliveries }: Props) {
       >
         <div className="flex-1 min-w-0">
           <span className="text-sm font-medium text-charcoal block truncate">
-            {d.clientName ?? ""}
-          </span>
-          <span className="text-[11px] text-stone-light block truncate">
             {d.name}
           </span>
-          <span className="text-[11px] text-stone-light block truncate">
-            {d.projectTitle}
-          </span>
+          {supportingParts.length > 0 && (
+            <span className="text-[11.5px] text-stone block truncate mt-0.5">
+              {supportingParts.join(" · ")}
+            </span>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
+          {etaDate ? (
+            <span
+              className={`text-[11.5px] font-body ${
+                overdue ? "text-red-600 font-semibold" : "text-stone"
+              }`}
+            >
+              {overdue ? "Overdue · " : ""}
+              {etaDate}
+              {carrierLabel ? ` · ${carrierLabel}` : ""}
+            </span>
+          ) : null}
           {statusInfo ? (
             <span
               className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${statusInfo.bg} ${statusInfo.text}`}
             >
               <span className={`w-[5px] h-[5px] rounded-full ${statusInfo.dot}`}></span>
               {statusInfo.label}
-            </span>
-          ) : null}
-          {showETA ? (
-            <span className="text-[11px] font-body text-stone-light">
-              ETA {etaDate} · {carrierLabel}
             </span>
           ) : null}
         </div>
@@ -167,36 +158,9 @@ export default function UpcomingDeliveriesCard({ deliveries }: Props) {
 
   return (
     <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-      {/* Header: title + filter input. Matches the Active Projects card header rhythm per UI-SPEC "Inherited Exceptions". */}
-      <div className="px-5 pt-[18px] pb-0">
-        <h2
-          className="mb-[14px]"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "10.5px",
-            fontWeight: 500,
-            color: "#9E8E80",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Upcoming Deliveries
-        </h2>
-        <hr
-          style={{
-            border: "none",
-            borderTop: "0.5px solid #E8DDD0",
-            margin: 0,
-          }}
-        />
-        <div className="py-3">
-          <CardFilterInput
-            value={filter}
-            onChange={setFilter}
-            placeholder="Filter deliveries…"
-            ariaLabel="Filter deliveries"
-          />
-        </div>
+      {/* Header — see global.css .card-header for tokens. */}
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">Upcoming Deliveries</h2>
       </div>
 
       {/* Row list or empty state */}

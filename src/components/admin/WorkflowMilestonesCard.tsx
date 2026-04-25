@@ -66,37 +66,18 @@ export default function WorkflowMilestonesCard({ rows, scheduleUrl }: Props) {
     backgroundColor: "#FFFEFB",
     border: "0.5px solid #E8DDD0",
     borderRadius: "10px",
-    padding: "18px 20px",
+    overflow: "hidden",
   } as const;
 
   return (
     <div style={cardStyle}>
-      <div className="flex items-center justify-between mb-[14px]">
-        <h2
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "10.5px",
-            fontWeight: 500,
-            color: "#9E8E80",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Schedule
-        </h2>
-        <a
-          href={scheduleUrl}
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontSize: "11.5px",
-            color: "#9A7B4B",
-            letterSpacing: "0.02em",
-            textDecoration: "none",
-          }}
-        >
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">Schedule</h2>
+        <a href={scheduleUrl} className="card-header-action">
           View schedule →
         </a>
       </div>
+      <div style={{ padding: "16px 20px 18px" }}>
 
       {rows.length === 0 ? (
         <div className="py-6 text-center">
@@ -305,6 +286,7 @@ export default function WorkflowMilestonesCard({ rows, scheduleUrl }: Props) {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }

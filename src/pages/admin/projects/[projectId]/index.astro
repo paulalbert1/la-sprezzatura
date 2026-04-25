@@ -335,14 +335,12 @@ const breadcrumbs = [
 
       {/* Contractors */}
       <div
-        style="background-color: #FFFEFB; border: 0.5px solid #E8DDD0; border-radius: 10px; padding: 18px 20px;"
+        style="background-color: #FFFEFB; border: 0.5px solid #E8DDD0; border-radius: 10px; overflow: hidden;"
       >
-        <h2
-          class="mb-[14px]"
-          style="font-family: var(--font-sans); font-size: 10.5px; font-weight: 500; color: #9E8E80; letter-spacing: 0.1em; text-transform: uppercase;"
-        >
-          Trades
-        </h2>
+        <div class="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+          <h2 class="card-header-label">Trades</h2>
+        </div>
+        <div style="padding: 16px 20px 18px;">
         <div class="flex flex-wrap gap-[7px] items-center">
           {project.projectContractors && project.projectContractors.map((pc: any) => pc.contractor && (
             <span
@@ -417,6 +415,7 @@ const breadcrumbs = [
               trade: pc.trade,
             }))}
           />
+        </div>
         </div>
       </div>
       </div>

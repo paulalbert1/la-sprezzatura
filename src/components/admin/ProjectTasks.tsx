@@ -140,31 +140,23 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
     backgroundColor: "#FFFEFB",
     border: "0.5px solid #E8DDD0",
     borderRadius: "10px",
-    padding: "18px 20px",
+    overflow: "hidden",
   } as const;
-
-  const titleStyle = {
-    fontFamily: "var(--font-sans)",
-    fontSize: "10.5px",
-    fontWeight: 500,
-    color: "#9E8E80",
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-  };
 
   return (
     <div id="tasks" style={cardStyle}>
-      <div className="flex items-center justify-between mb-[14px]">
-        <h2 style={titleStyle}>Tasks — Designer</h2>
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">Tasks — Designer</h2>
         <button
           type="button"
           onClick={handleAddTaskClick}
-          className="inline-flex items-center gap-1 text-[11.5px] font-body text-terracotta hover:text-[#9A7B4B] transition-colors focus:outline-none"
+          className="card-header-btn"
         >
-          <Plus size={11} />
+          <Plus size={12} />
           Add task
         </button>
       </div>
+      <div style={{ padding: "16px 20px 18px" }}>
 
       {visibleTasks.length === 0 ? (
         <p
@@ -302,6 +294,7 @@ export default function ProjectTasks({ tasks, projectId }: Props) {
           {error}
         </div>
       )}
+      </div>
     </div>
   );
 }

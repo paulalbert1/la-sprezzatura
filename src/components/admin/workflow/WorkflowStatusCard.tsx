@@ -63,9 +63,9 @@ export default function WorkflowStatusCard({
         <h2
           style={{
             fontFamily: "var(--font-sans)",
-            fontSize: "10.5px",
-            fontWeight: 500,
-            color: "#9E8E80",
+            fontSize: "11.5px",
+            fontWeight: 600,
+            color: "#6B5E52",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             marginBottom: "14px",

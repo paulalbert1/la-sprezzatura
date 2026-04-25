@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { format, parseISO } from "date-fns";
 import { Plus } from "lucide-react";
-import { isTaskOverdue } from "../../lib/dashboardUtils";
+import { isTaskOverdue, getDaysOverdue } from "../../lib/dashboardUtils";
 
 interface TaskItem {
   _key: string;
@@ -22,9 +22,26 @@ interface ProjectOption {
 interface Props {
   tasks: TaskItem[];
   projects: ProjectOption[];
+  // "studio" → /api/admin/tasks (default), "client" → /api/admin/client-action-items.
+  // Drives the card title and the API endpoint used for create/toggle.
+  kind?: "studio" | "client";
 }
 
-export default function DashboardTasksCard({ tasks, projects }: Props) {
+export default function DashboardTasksCard({ tasks, projects, kind = "studio" }: Props) {
+  const apiPath =
+    kind === "client" ? "/api/admin/client-action-items" : "/api/admin/tasks";
+  // The two endpoints use different request field names ("taskKey" vs
+  // "itemKey") for the array element identifier. Pick the matching one for
+  // both create-response parsing and toggle requests.
+  const keyField = kind === "client" ? "itemKey" : "taskKey";
+  const cardTitle = kind === "client" ? "Tasks — Client" : "Tasks — Designer";
+  const addLabel = kind === "client" ? "Add action item" : "Add task";
+  const placeholder =
+    kind === "client" ? "Add an action item..." : "Add a task...";
+  const emptyCopy =
+    kind === "client"
+      ? "No client action items yet. Use the field below to create one."
+      : "No tasks yet. Use the field below to create one.";
   const [localTasks, setLocalTasks] = useState<TaskItem[]>(tasks);
   const [filterProject, setFilterProject] = useState<string>("");
   const [newDescription, setNewDescription] = useState<string>("");
@@ -101,13 +118,13 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
     );
 
     try {
-      const res = await fetch("/api/admin/tasks", {
+      const res = await fetch(apiPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "toggle",
           projectId: task.projectId,
-          taskKey: task._key,
+          [keyField]: task._key,
           completed: newCompleted,
         }),
       });
@@ -143,7 +160,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
 
     setCreating(true);
     try {
-      const res = await fetch("/api/admin/tasks", {
+      const res = await fetch(apiPath, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -160,7 +177,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
       const projectTitle =
         projects.find((p) => p._id === pid)?.title || "";
       const newTask: TaskItem = {
-        _key: result.taskKey,
+        _key: result[keyField],
         description: desc,
         dueDate: newDueDate || null,
         completed: false,
@@ -170,7 +187,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
         projectTitle,
       };
       setLocalTasks((prev) => [newTask, ...prev]);
-      setJustCreated(result.taskKey);
+      setJustCreated(result[keyField]);
 
       // Clear form
       setNewDescription("");
@@ -194,61 +211,74 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
 
   return (
     <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
-      {/* Header with title, project filter, and Add-task CTA (DASH-20) */}
-      {/* legacy — do not modify pt-[18px] / mb-[14px] per UI-SPEC "Inherited Exceptions" */}
-      <div className="px-5 pt-[18px] pb-0">
-        <div className="flex items-center justify-between mb-[14px] gap-3">
-          <h2
-            style={{ fontFamily: "var(--font-sans)", fontSize: "10.5px", fontWeight: 500, color: "#9E8E80", letterSpacing: "0.1em", textTransform: "uppercase" as const }}
-          >Tasks</h2>
-          <div className="flex items-center gap-2">
-            <select
-              value={filterProject}
-              onChange={(e) => {
-                setFilterProject(e.target.value);
-                setNewProject(e.target.value);
-              }}
-              className="text-xs font-body text-stone bg-transparent border border-stone-light/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-terracotta"
-            >
-              <option value="">All Projects</option>
-              {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={handleAddTaskClick}
-              className="inline-flex items-center gap-1.5 text-[13px] font-body text-terracotta border border-terracotta/40 rounded-md px-3 py-1 hover:bg-terracotta/5 transition-colors focus:outline-none focus:ring-1 focus:ring-terracotta"
-            >
-              <Plus size={14} />
-              Add task
-            </button>
-          </div>
+      {/* Header — see global.css .card-header for tokens. */}
+      <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+        <h2 className="card-header-label">{cardTitle}</h2>
+        <div className="flex items-center gap-2">
+          <select
+            value={filterProject}
+            onChange={(e) => {
+              setFilterProject(e.target.value);
+              setNewProject(e.target.value);
+            }}
+            className="card-header-select"
+          >
+            <option value="">All Projects</option>
+            {projects.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={handleAddTaskClick}
+            className="card-header-btn"
+          >
+            <Plus size={14} />
+            {addLabel}
+          </button>
         </div>
-        <hr style={{ border: "none", borderTop: "0.5px solid #E8DDD0", margin: 0 }} />
       </div>
 
       {/* Task rows */}
       {visibleTasks.length === 0 ? (
-        <p className="text-sm text-stone text-center py-6">
-          No tasks yet. Use the field below to create one.
-        </p>
+        <p className="text-sm text-stone text-center py-6">{emptyCopy}</p>
       ) : (
         <div>
           {visibleTasks.map((task) => {
             const overdue = isTaskOverdue(task);
+            const daysLate =
+              overdue && task.dueDate ? getDaysOverdue(task.dueDate) : 0;
+            // Tier severity: critical (>7d) = red, warning (1–7d) = amber, neutral otherwise.
+            // This prevents the "everything is on fire" look when several rows are
+            // all just a day or two late.
+            const severity =
+              !overdue || task.completed
+                ? "none"
+                : daysLate > 7
+                  ? "critical"
+                  : "warning";
             const isNew = justCreated === task._key;
+            const titleColor =
+              task.completed
+                ? "text-stone-light line-through"
+                : severity === "critical"
+                  ? "text-red-600"
+                  : severity === "warning"
+                    ? "text-amber-700"
+                    : "text-charcoal";
+            const metaColor =
+              severity === "critical"
+                ? "text-red-500"
+                : severity === "warning"
+                  ? "text-amber-600"
+                  : "text-stone-light";
             return (
               <div
                 key={task._key}
                 className={`flex items-center gap-3 px-5 py-3 border-b border-stone-light/10 last:border-b-0 transition-colors duration-500 ${
-                  isNew
-                    ? "bg-terracotta/5"
-                    : overdue && !task.completed
-                      ? "bg-red-50"
-                      : ""
+                  isNew ? "bg-terracotta/5" : ""
                 } ${task.completed ? "opacity-40" : ""}`}
               >
                 <input
@@ -260,20 +290,16 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
                 />
                 <a
                   href={`/admin/projects/${task.projectId}#tasks`}
-                  className={`text-sm font-body flex-1 truncate ${
-                    task.completed
-                      ? "text-stone-light line-through"
-                      : overdue
-                        ? "text-red-600"
-                        : "text-charcoal"
-                  }`}
+                  className={`text-sm font-body flex-1 truncate ${titleColor}`}
                 >
                   {task.description}
                 </a>
-                <span className={`text-[11px] font-body shrink-0 ${overdue && !task.completed ? "text-red-500" : "text-stone-light"}`}>
+                <span className={`text-[11px] font-body shrink-0 ${metaColor}`}>
                   {task.projectTitle}
                   {task.dueDate && <> &middot; {formatTaskDate(task.dueDate)}</>}
-                  {overdue && !task.completed && <> &middot; overdue</>}
+                  {overdue && !task.completed && (
+                    <> &middot; {daysLate}d overdue</>
+                  )}
                 </span>
               </div>
             );
@@ -302,7 +328,7 @@ export default function DashboardTasksCard({ tasks, projects }: Props) {
         <input
           ref={addInputRef}
           type="text"
-          placeholder="Add a task..."
+          placeholder={placeholder}
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
           disabled={creating}
