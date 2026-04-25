@@ -456,7 +456,7 @@ export default function WizardContainer({
   };
 
   return (
-    <div className="max-w-[720px] mx-auto pt-4 pb-8">
+    <div className="max-w-[720px] pt-4 pb-8">
       {/* Step indicator bar */}
       {renderStepper()}
 
