@@ -147,15 +147,12 @@ export default function TradeChecklist({
 
   return (
     <div>
-      <h3 className="text-sm font-semibold font-body text-charcoal">Documents</h3>
-      <p
-        className="text-xs font-body text-stone-light"
-        style={{ fontSize: "11.5px" }}
-      >
-        Required documents for this {label}. Upload from each row to link a
-        file to a checklist item.
-      </p>
-
+      <div className="flex items-baseline justify-between mb-1">
+        <h3 className="text-base font-semibold font-body text-charcoal">Documents</h3>
+        <span className="text-[11px] font-body text-stone-light uppercase tracking-wider">
+          {checklistItems.length} required
+        </span>
+      </div>
       {checklistItems.length === 0 ? (
         <p
           className="text-xs font-body text-stone-light mt-2"
@@ -165,7 +162,15 @@ export default function TradeChecklist({
           Checklist to require documents for this {label}.
         </p>
       ) : (
-        <div className="flex flex-col mt-3" style={{ gap: "6px" }}>
+        <>
+          <p
+            className="text-xs font-body text-stone-light"
+            style={{ fontSize: "11.5px" }}
+          >
+            Required documents for this {label}. Upload from each row to link a
+            file to a checklist item.
+          </p>
+          <div className="flex flex-col mt-3" style={{ gap: "6px" }}>
           {checklistItems.map((item) => {
             const doc = matched.get(item);
             const isUploading = uploadingForLabel === item;
@@ -266,7 +271,8 @@ export default function TradeChecklist({
               </div>
             );
           })}
-        </div>
+          </div>
+        </>
       )}
 
       {others.length > 0 && (

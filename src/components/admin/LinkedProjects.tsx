@@ -34,17 +34,22 @@ const ENGAGEMENT_LABELS: Record<string, string> = {
 
 export default function LinkedProjects({ projects }: LinkedProjectsProps) {
   return (
-    <div>
-      <h3 className="text-sm font-semibold font-body text-charcoal mt-8 mb-4">
-        Linked Projects
-      </h3>
+    <div className="bg-white rounded-xl border border-stone-light/40 p-6 mt-4">
+      <div className="flex items-baseline justify-between mb-3">
+        <h3 className="text-base font-semibold font-body text-charcoal">
+          Linked Projects
+        </h3>
+        <span className="text-[11px] font-body text-stone-light uppercase tracking-wider">
+          {projects.length} {projects.length === 1 ? "project" : "projects"}
+        </span>
+      </div>
 
       {projects.length === 0 ? (
-        <p className="text-sm text-stone text-center py-6">
-          No linked projects
+        <p className="text-xs font-body text-stone-light" style={{ fontSize: "11.5px" }}>
+          Not currently linked to any projects.
         </p>
       ) : (
-        <div className="bg-white rounded-xl border border-stone-light/40 overflow-hidden">
+        <div className="flex flex-col" style={{ gap: "6px" }}>
           {projects.map((project) => {
             const stageColor =
               STAGE_COLORS[project.pipelineStage] || STAGE_COLORS.discovery;
@@ -58,21 +63,23 @@ export default function LinkedProjects({ projects }: LinkedProjectsProps) {
               <a
                 key={project._id}
                 href={`/admin/projects/${project._id}`}
-                className="flex items-center gap-3 px-5 py-3 hover:bg-cream/50 transition-colors border-b border-stone-light/10 last:border-b-0"
+                className="flex items-center gap-3 px-3 py-2 bg-cream/50 hover:bg-cream rounded-lg transition-colors"
               >
-                <span className="text-[13px] font-medium font-body text-charcoal flex-1 truncate">
+                <span className="text-sm font-medium font-body text-charcoal flex-1 truncate">
                   {project.title}
                 </span>
+                {engagementLabel && (
+                  <span
+                    className="text-[11px] font-body text-stone border border-stone-light/40 rounded-full px-2 py-0.5 shrink-0"
+                  >
+                    {engagementLabel}
+                  </span>
+                )}
                 <span
                   className={`inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${stageColor.bg} ${stageColor.text}`}
                 >
                   {stageLabel}
                 </span>
-                {engagementLabel && (
-                  <span className="text-[11px] text-stone-light font-body shrink-0">
-                    {engagementLabel}
-                  </span>
-                )}
               </a>
             );
           })}

@@ -200,20 +200,6 @@ export default function EntityDetailForm({
       )}
 
       <div className="bg-white rounded-xl border border-stone-light/40 p-6">
-        {/* Header with delete button */}
-        {!isCreateMode && (
-          <div className="flex items-center justify-end mb-4">
-            <button
-              type="button"
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-sm text-stone hover:text-red-600 transition-colors inline-flex items-center gap-1.5 font-body"
-            >
-              <Trash2 className="w-4 h-4" />
-              Delete {entityType === "client" ? "Client" : relationshipLabel(relationship)}
-            </button>
-          </div>
-        )}
-
         {/* Form fields */}
         <div className="space-y-4">
           {/* Name */}
@@ -278,29 +264,29 @@ export default function EntityDetailForm({
                 onChange={(e) => setStreet(e.target.value)}
                 className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-12 gap-3">
                 <input
                   type="text"
                   placeholder="City"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                  className="col-span-5 text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
                 />
                 <input
                   type="text"
                   placeholder="State"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                  className="col-span-3 text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="ZIP"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="col-span-4 text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-full focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
                 />
               </div>
-              <input
-                type="text"
-                placeholder="ZIP"
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                className="text-sm font-body text-charcoal bg-white border border-stone-light/40 rounded-lg px-3 py-2 w-1/2 focus:ring-1 focus:ring-terracotta focus:border-terracotta outline-none"
-              />
             </div>
           </div>
 
@@ -460,17 +446,6 @@ export default function EntityDetailForm({
                 )}
               </div>
 
-              {/* Documents section — Phase 43 TRAD-06 */}
-              {!isCreateMode && entityType === "contractor" && (
-                <div className="mt-6">
-                  <TradeChecklist
-                    contractorId={entity!._id}
-                    checklistItems={checklistItems ?? []}
-                    initialDocuments={(entity?.documents ?? []) as Parameters<typeof TradeChecklist>[0]["initialDocuments"]}
-                    relationship={(entity as any)?.relationship ?? null}
-                  />
-                </div>
-              )}
             </>
           )}
         </div>
@@ -497,6 +472,34 @@ export default function EntityDetailForm({
           )}
         </div>
       </div>
+
+      {/* Documents — separate card so uploads are visually distinct from the
+          form's Save action. Hidden entirely when no checklist is configured. */}
+      {!isCreateMode && entityType === "contractor" && (checklistItems?.length ?? 0) > 0 && (
+        <div className="bg-white rounded-xl border border-stone-light/40 p-6 mt-4">
+          <TradeChecklist
+            contractorId={entity!._id}
+            checklistItems={checklistItems ?? []}
+            initialDocuments={(entity?.documents ?? []) as Parameters<typeof TradeChecklist>[0]["initialDocuments"]}
+            relationship={(entity as any)?.relationship ?? null}
+          />
+        </div>
+      )}
+
+      {/* Danger zone — destructive action moved out of the top-right of the
+          form card to reduce mis-click risk. */}
+      {!isCreateMode && (
+        <div className="mt-6 pt-6 border-t border-stone-light/40 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-sm text-stone hover:text-red-600 transition-colors inline-flex items-center gap-1.5 font-body"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete {entityType === "client" ? "Client" : relationshipLabel(relationship)}
+          </button>
+        </div>
+      )}
 
       {/* Delete confirm dialog rendered via sibling component */}
       {showDeleteDialog && (

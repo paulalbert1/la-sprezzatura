@@ -78,6 +78,12 @@ const breadcrumbs = [
 
 <AdminLayout title={browserTitle} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
   <div class="max-w-4xl">
+    <h1
+      class="text-[22px] font-semibold text-charcoal"
+      style="font-family: var(--font-body); letter-spacing: 0;"
+    >
+      {pageTitle}
+    </h1>
     {!isNew && metaLine && (
       <p
         class="font-body font-normal mt-1 mb-5"
