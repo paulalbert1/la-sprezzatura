@@ -2,16 +2,17 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: verifying
-stopped_at: Phase 45 Plan 04 complete (react-email scaffold + brand-tokens pipeline proven via vitest snapshot)
-last_updated: "2026-04-26T21:33:32.643Z"
+status: partial
+stopped_at: Phase 45 partial — 4/5 plans complete (45-03 deferred pending app rename to Sprezza Hub)
+last_updated: "2026-04-26T21:35:00Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 9
-  completed_phases: 2
+  completed_phases: 1
   total_plans: 15
   completed_plans: 15
   percent: 100
+  notes: Plan counters exclude 45-03 (deferred via filename suffix); EMAIL-10/EMAIL-11 reqs remain open until that plan resumes after domain registration.
 ---
 
 # Project State
@@ -25,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — EXECUTING
-Plan: 5 of 5 (45-01 + 45-02 + 45-04 complete; 45-03 deferred; 45-05 snapshot harness next in Wave 2)
-Status: Phase complete — ready for verification
+Phase: 45 (email-foundations) — PARTIAL
+Plan: 4 of 5 visible plans complete (45-01, 45-02, 45-04, 45-05). 45-03 (asset host + DNS) deferred pending app rename to "Sprezza Hub" — domain not yet registered. EMAIL-08 and EMAIL-09 satisfied; EMAIL-10 and EMAIL-11 remain open until 45-03 resumes.
+Status: Phase 45 partial; 45-03 blocked on domain registration. Phase 46 unblocked because it only depends on EMAIL-08/09 + the snapshot baselines.
 Last activity: 2026-04-26
 
 ## v5.3 Phase Map
 
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
-| 45 | Email Foundations | 4 (EMAIL-08..11) | TBD | Not started |
+| 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Partial** — 4/5 plans done; 45-03 (EMAIL-10/11) deferred pending rename |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Not started |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
