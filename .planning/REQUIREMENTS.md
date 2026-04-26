@@ -70,11 +70,36 @@ Explicitly excluded with reasoning:
 
 ## Traceability
 
-To be filled by `/gsd-roadmap-create`. Each requirement maps to exactly one phase.
+Each requirement maps to exactly one phase. Phase numbering continues from Phase 44 (last shipped phase preceding v5.3).
 
 | Requirement | Phase | Notes |
 |---|---|---|
-| EMAIL-01..11 | TBD | |
-| IMPER-01..08 | TBD | |
-| PORTAL-01..06 | TBD | |
-| AUTH-01..02 | TBD | |
+| EMAIL-01 | Phase 46 | Outlook/Gmail/Apple Mail rendering — verified on Send Update + Work Order migration; pattern inherited by Phase 48 templates via shared shell |
+| EMAIL-02 | Phase 46 | Plain-text alternative — `render(component, { plainText: true })` becomes the default at the migration; Phase 48 inherits |
+| EMAIL-03 | Phase 46 | Preheader text — pattern established on Send Update + Work Order; inherited by Phase 48 |
+| EMAIL-04 | Phase 48 | "Or paste this link" fallback — fully exercised across the three smaller invitation emails; Work Order in Phase 46 conforms to the same pattern |
+| EMAIL-05 | Phase 48 | Link-expiry copy — same scope as EMAIL-04 |
+| EMAIL-06 | Phase 46 | List-Unsubscribe header — Send Update only |
+| EMAIL-07 | Phase 46 | Outlook-safe `<table>` markup — Send Update is the priority migration target; Work Order already conforms |
+| EMAIL-08 | Phase 45 | Shared `brand-tokens.ts` module — foundation prerequisite |
+| EMAIL-09 | Phase 45 | Golden HTML snapshots + Litmus harness — foundation prerequisite |
+| EMAIL-10 | Phase 45 | Email asset CDN host — foundation prerequisite |
+| EMAIL-11 | Phase 45 | DKIM / SPF / DMARC alignment — foundation prerequisite |
+| IMPER-01 | Phase 50 | Recipient picker UI — depends on Phase 49 architecture |
+| IMPER-02 | Phase 49 | Read-only enforcement — middleware gate, CI-tested |
+| IMPER-03 | Phase 49 | Resend 403 from impersonated context — CI-tested |
+| IMPER-04 | Phase 49 | Time-bound + (recipient, project) scoped — wrapped session schema |
+| IMPER-05 | Phase 50 | Persistent banner — depends on Phase 47 layout slot + Phase 49 server state |
+| IMPER-06 | Phase 49 | Audit log on `impersonationAudit` doc — D-2 |
+| IMPER-07 | Phase 49 | Cross-tenant rejection — CI-tested on every PR |
+| IMPER-08 | Phase 49 | Fresh admin auth required — mint endpoint check |
+| PORTAL-01 | Phase 51 | "What's next?" card — depends on Phase 47 layout |
+| PORTAL-02 | Phase 51 | Last-activity timestamps per section |
+| PORTAL-03 | Phase 51 | Mobile 375×667 rendering |
+| PORTAL-04 | Phase 52 | WCAG 2.1 AA via @axe-core/playwright — UAT phase |
+| PORTAL-05 | Phase 47 | Portal Layout Hoist — PortalLayout + PortalHeader + PortalFooter |
+| PORTAL-06 | Phase 51 | Card-header band parity with admin — depends on Phase 45 brand tokens |
+| AUTH-01 | Phase 51 | Reason-coded login copy |
+| AUTH-02 | Phase 51 | Login/verify/role-select in polished portal shell — depends on Phase 47 `bare` prop |
+
+**Coverage:** 27/27 requirements mapped to exactly one phase. No orphans, no duplicates.

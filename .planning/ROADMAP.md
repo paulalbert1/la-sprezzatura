@@ -10,8 +10,9 @@
 - 🚫 **v4.0 Project Schedule** - Phase 15 complete; Phases 16-17 **superseded (Schedule Rebuild displaced to a future milestone)**
 - ✅ **v5.0 Admin Platform Completion** - Phases 29-34 (shipped 2026-04-12)
 - ✅ **v5.1 Admin UX Polish & Workflow Additions** - Phases 35-41 (completed 2026-04-22, Phase 41 carried to v5.2)
-- 🚧 **v5.2 Trades Directory** - Phases 41-43 (in progress)
-- 🚧 **v5.3 Workflow Engine** - Phase 44 (in progress)
+- ✅ **v5.2 Trades Directory** - Phases 41-43 (completed 2026-04-23)
+- 🚧 **Workflow Engine (Phase 44)** - interim phase between v5.2 and v5.3 (in progress)
+- 🚧 **v5.3 Third-Party Views & Outbound Email Polish** - Phases 45-52 (in progress)
 - 📋 **v6.0 Linha Platform** - TBD (planned)
 
 ## Phases
@@ -278,9 +279,9 @@ Plans:
 - [x] 43-03-PLAN.md — Wave 1: ChecklistConfigSection + SettingsPage wiring (Contractor/Vendor Checklist sections) (TRAD-08)
 - [x] 43-04-PLAN.md — Wave 1: EntityListPage amber completeness dot + Trades list Astro page wiring (TRAD-04)
 
-### v5.3 Workflow Engine (Phase 44)
+### Workflow Engine (Phase 44) — interim phase between v5.2 and v5.3
 
-**Milestone Goal:** Replace the Frappe Gantt chart with a configurable designer workflow engine. Liz defines reusable workflow templates (phases, milestones, gates, multi-instance contractors) in Settings and instantiates them per project. The engine enforces prerequisite logic, client approval gates, dormancy detection, and payment gates derived from her design services agreement.
+**Goal:** Replace the Frappe Gantt chart with a configurable designer workflow engine. Liz defines reusable workflow templates (phases, milestones, gates, multi-instance contractors) in Settings and instantiates them per project. The engine enforces prerequisite logic, client approval gates, dormancy detection, and payment gates derived from her design services agreement.
 
 - 🚧 **Phase 44: Workflow Engine** — template management, project tracker UI, engine rules, and instantiation flow
 
@@ -305,6 +306,125 @@ Plans:
 - [ ] 44-10-PLAN.md — Wave 4: Settings integration + /admin/settings/workflow-templates/[id] editor page (WF-01, WF-02)
 - [ ] 44-11-PLAN.md — Wave 4: Dashboard WorkflowStatusCard + SSR stats + end-to-end smoke checkpoint (WF-08)
 
+### v5.3 Third-Party Views & Outbound Email Polish (Phases 45-52)
+
+**Milestone Goal:** Bring everything a non-admin recipient sees (clients, contractors, building managers) into visual + voice consistency with the admin polish work shipped in v5.1/v5.2, and tighten outbound email so messages from the studio render reliably across Outlook desktop, Gmail, and Apple Mail and read as professional and on-brand. Add a designer-impersonation preview so the studio can reliably preview what each recipient sees and audit before sending.
+
+**Track structure (two parallel tracks converging on portal polish + UAT):**
+
+- **Email track** — Phase 45 (Foundations) → Phase 46 (Send Update + Work Order migration) → Phase 48 (Smaller transactional emails)
+- **Portal/Impersonation track** — Phase 47 (Portal Layout Hoist) parallel with Email track → Phase 49 (Impersonation Architecture, parallel with Email) → Phase 50 (Impersonation UI, depends on 47 and 49)
+- **Convergence** — Phase 51 (Portal Visual + Voice Pass, consumes 47 / 50 / 45) → Phase 52 (Cross-cutting QA / UAT)
+
+**Resolved decisions (do not re-litigate):**
+
+- **D-1**: Adopt `react-email` this milestone (Position B). Future-proof for v6.0 per-tenant theming; Outlook safety via Litmus harness; single shared `brand-tokens.ts` source of truth across portal CSS and email theme.
+- **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type (per-tenant). Keeps audit churn out of `siteSettings`.
+- **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
+
+- [ ] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08, EMAIL-09, EMAIL-10, EMAIL-11)
+- [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
+- [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
+- [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
+- [ ] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08)
+- [ ] **Phase 50: Impersonation UI** — 2 reqs (IMPER-01, IMPER-05)
+- [ ] **Phase 51: Portal Visual + Voice Pass** — 6 reqs (PORTAL-01, PORTAL-02, PORTAL-03, PORTAL-06, AUTH-01, AUTH-02)
+- [ ] **Phase 52: Cross-Cutting QA / UAT** — 1 req (PORTAL-04)
+
+### Phase 45: Email Foundations
+**Goal**: A reusable email rendering foundation is in place — shared brand tokens between portal and email, react-email scaffolding, an Outlook-safe testing harness with golden HTML snapshots of the existing two templates as a regression baseline, a stable cookie-less image asset host, and verified DKIM/SPF/DMARC alignment for the production sender domain — so subsequent template phases can ship visual + voice changes with regressions caught automatically.
+**Depends on**: Phase 34 (Settings/Send Update baseline); Phase 39 (Work Order email baseline)
+**Requirements**: EMAIL-08, EMAIL-09, EMAIL-10, EMAIL-11
+**Success Criteria** (what must be TRUE):
+  1. A single `src/lib/brand-tokens.ts` module is consumed by both Tailwind config and the email theme — changing a color in one place updates both portal CSS and email rendering (EMAIL-08)
+  2. Golden HTML snapshots exist for `buildSendUpdateEmail` and `buildWorkOrderEmail` covering every section toggle and optional-field permutation, and a Litmus / Email on Acid harness produces Outlook 2016 / 2019 / 365 visual diffs as the merge gate for any subsequent template change (EMAIL-09)
+  3. Email assets (logo, brand mark) load from a stable, cookie-less CDN endpoint (e.g. `email-assets.lasprezz.com`) with proper caching headers (EMAIL-10)
+  4. The Resend dashboard shows green DKIM, SPF, and DMARC alignment for the production sender domain, verified before the next phase ships any template change (EMAIL-11)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 46: Send Update + Work Order Migration
+**Goal**: The two existing email templates (Send Update weekly digest and Work Order) are ported to the react-email foundation, render correctly across Outlook desktop / Gmail / Apple Mail, ship plain-text fallbacks, carry preheader copy, use Outlook-safe `<table>` markup, and the Send Update digest carries a List-Unsubscribe header for Gmail bulk-sender compliance.
+**Depends on**: Phase 45 (foundation, snapshots, asset host, DKIM)
+**Requirements**: EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07
+**Success Criteria** (what must be TRUE):
+  1. The Send Update digest and Work Order email both render without layout collapse in Outlook 2016 / 2019 / 365, Gmail web, Gmail iOS, Apple Mail macOS, and Apple Mail iOS, verified via attached Litmus / EOA screenshots in the phase summary (EMAIL-01)
+  2. Both templates send with a plain-text MIME alternative produced by `render(component, { plainText: true })` — every `resend.emails.send` call passes both `html` and `text` (EMAIL-02)
+  3. Both templates include preheader text that renders as the inbox preview line in Gmail and Apple Mail (EMAIL-03)
+  4. The Send Update digest carries a List-Unsubscribe header (RFC 8058 one-click format) on every send (EMAIL-06)
+  5. The Send Update layout uses `<table role="presentation">` outer markup with pixel units, no `flex` / `grid` / `rem` / shorthand `border-radius` for layout, matching the Outlook-safe pattern already proven in the existing Work Order template (EMAIL-07)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 47: Portal Layout Hoist
+**Goal**: Portal chrome (header, footer, banner slot) is hoisted into a single `PortalLayout.astro` shell with extracted `PortalHeader` and `PortalFooter` components, so every recipient-facing page in `/portal/*` shares one source of truth for brand mark, role-aware sub-label, sign-out, and the layout slot that the impersonation banner will occupy in Phase 50.
+**Depends on**: v5.0 (Phase 34 portal baseline); none from email track (parallelizable)
+**Requirements**: PORTAL-05
+**Success Criteria** (what must be TRUE):
+  1. A single `PortalLayout.astro` shell renders the same header and footer chrome on every `/portal/*` page (dashboard, project, PURL landing, login, verify, role-select via a `bare` prop), and changing brand-mark wording in one component updates every page (PORTAL-05)
+  2. `PortalHeader.astro` and `PortalFooter.astro` are extracted as standalone components, no recipient page inlines its own brand mark or footer
+  3. `PortalLayout.astro` exposes a layout slot for the impersonation banner that renders nothing today (component is built in Phase 50) and renders a sticky banner once Phase 50 lands — verified by mounting a stub banner during this phase
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 48: Smaller Transactional Emails
+**Goal**: The three remaining transactional invitation templates (artifact-ready, contractor work-order access, building-manager access) are built on the react-email foundation, share the same shell as Send Update / Work Order, ship plain-text fallbacks and preheaders by default, and carry the link-fallback copy and link-expiry messaging that mark them as deliberate transactional artifacts rather than disposable system mail.
+**Depends on**: Phase 45 (foundation); Phase 46 (migration pattern proven)
+**Requirements**: EMAIL-04, EMAIL-05
+**Success Criteria** (what must be TRUE):
+  1. Every transactional invitation email (Work Order, artifact-ready, contractor access, building access) shows a visible "or paste this link" line under the primary CTA with the literal URL selectable for copy-paste — verified by sending a test of each template type to a corporate inbox that strips the CTA button (EMAIL-04)
+  2. Every transactional invitation email includes copy stating how long the link remains valid, sourced from the same TTL constant the redemption endpoint enforces (EMAIL-05)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 49: Impersonation Architecture
+**Goal**: The server-side foundation for designer impersonation is in place — wrapped admin session schema (`impersonatedBy` field), one-shot mint/redeem token flow with Redis GETDEL, dedicated `impersonationAudit` Sanity document, middleware-enforced read-only gate on every mutation endpoint, hard 30-minute TTL, and a CI test that proves cross-tenant impersonation is structurally impossible — so the UI in Phase 50 can surface the feature against a load-bearing security boundary that's already proven correct.
+**Depends on**: v5.0 (Phase 29 tenant model + session middleware); none from email/layout tracks (parallelizable)
+**Requirements**: IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08
+**Success Criteria** (what must be TRUE):
+  1. Any non-safe HTTP method (POST / PATCH / PUT / DELETE) attempted from an impersonated session returns 401 — verified by a CI test that mints an impersonation cookie and POSTs to a representative admin and portal mutation endpoint (IMPER-02)
+  2. Calls to `resend.emails.send` from any endpoint reached during an impersonated session return 403 before mail is dispatched, verified by a CI test against `/api/send-update` and the work-order send endpoint (IMPER-03)
+  3. Every impersonation session is scoped to one (recipient, project) pair encoded in the wrapped payload and auto-expires after a 30-minute TTL — verified by inspecting the redeemed session shape and a server-side TTL enforcement test (IMPER-04)
+  4. Every impersonation start, exit, and timeout creates an append-only entry on the `impersonationAudit` Sanity document with admin email, target role + entityId, tenantId, projectId, mintedAt, exitedAt, and exit reason — verified by reading the audit doc after a manual end-to-end run (IMPER-06)
+  5. A CI test on every PR sends a cross-tenant `recipientId` to `/api/admin/impersonate` and asserts the response is 403 with no Redis token written (IMPER-07)
+  6. Impersonation start requires fresh admin authentication: if the admin session was minted more than the configured threshold ago, the mint endpoint returns 401 with a re-prompt code instead of issuing a token (IMPER-08)
+**Plans**: TBD
+
+### Phase 50: Impersonation UI
+**Goal**: Designer-facing surfaces — the recipient picker on admin entity detail pages, the one-shot impersonation start flow that opens in a new tab, and the persistent banner with admin identity, target identity, and one-click exit rendered on every recipient route — make Phase 49's architecture usable. The banner self-gates so it renders correctly on `/portal/*`, `/workorder/*`, and `/building/*` even though only `/portal/*` uses the new `PortalLayout` shell.
+**Depends on**: Phase 47 (banner slot in PortalLayout); Phase 49 (mint/redeem, audit log, read-only gate)
+**Requirements**: IMPER-01, IMPER-05
+**Success Criteria** (what must be TRUE):
+  1. From `/admin/clients/[id]`, `/admin/trades/[id]`, and any other admin entity detail page where a recipient is identifiable, Liz can click "Preview as <recipient>" — the resulting flow opens the appropriate portal in a new tab as that recipient (client, contractor, or building manager), driven by a tenant-scoped GROQ recipient picker and never by free-text input (IMPER-01)
+  2. A persistent banner renders on every recipient-facing page during impersonation displaying admin email, target role + display name, and a one-click "Exit preview" form-button — visible at top of viewport on `/portal/*`, `/workorder/*`, and `/building/*` at both desktop and 375×667 mobile widths (IMPER-05)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 51: Portal Visual + Voice Pass
+**Goal**: Recipient-facing portal pages match the admin's card-header band system and brand voice from v5.1/v5.2; clients arriving on a project portal see a "What's next?" card calling out their immediate action; section-level last-activity timestamps reassure them the data is current; mobile rendering works on iPhone-sized viewports; and recipients arriving with expired or regenerated tokens see distinct, recoverable copy instead of a generic login screen. Liz uses the impersonation flow from Phase 50 to QA every change without sending mail to real recipients.
+**Depends on**: Phase 47 (portal layout shell); Phase 50 (impersonation preview for QA); Phase 45 (brand tokens for visual consistency with email)
+**Requirements**: PORTAL-01, PORTAL-02, PORTAL-03, PORTAL-06, AUTH-01, AUTH-02
+**Success Criteria** (what must be TRUE):
+  1. A client landing on `/portal/project/[id]` sees a "What's next?" card at the top of the page identifying their immediate action or the next expected event, derived from open action items and pending artifact reviews (PORTAL-01)
+  2. Each major section of the project portal (milestones, procurement, artifacts, contractors, design options) shows a last-activity timestamp in human-readable form (e.g. "updated 2 days ago") (PORTAL-02)
+  3. Every portal page (`/portal/*`, `/workorder/*`, `/building/*`) renders correctly at 375×667 mobile viewport with no horizontal scroll, body text readable without zoom, and tap targets at least 44pt (PORTAL-03)
+  4. Portal voice and visual rhythm match the admin's card-header band system (`.card-header`, brand tokens, sentence-case-via-CSS-uppercase) — a side-by-side comparison of admin and portal cards shows consistent header treatment (PORTAL-06)
+  5. A recipient arriving with an expired or regenerated token lands on a login screen with distinct, reason-coded copy explaining what happened and how to recover, not a generic "please sign in" — at least four reason codes (`token_regenerated`, `link_expired`, `link_invalid`, `session_timeout`) each render distinct copy (AUTH-01)
+  6. Login, verify, and role-select pages render in the polished portal shell from Phase 47 (via `bare={true}` to suppress the chrome that's wrong for unauthenticated pages) with consistent typography and spacing matching the rest of the portal (AUTH-02)
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 52: Cross-Cutting QA / UAT
+**Goal**: A single coherent end-to-end pass exercises every recipient surface — Liz performs a real impersonation as each recipient role, sends a real Send Update digest, opens the project portal at desktop and mobile widths, walks through the auth recovery copy for every reason code, and a representative subset of routes passes WCAG 2.1 AA assertions via @axe-core/playwright — catching any inter-phase regression before milestone close.
+**Depends on**: Phases 45-51
+**Requirements**: PORTAL-04
+**Success Criteria** (what must be TRUE):
+  1. A representative subset of portal routes (project, dashboard, login, verify) pass WCAG 2.1 AA assertions via @axe-core/playwright with zero violations — results attached to phase summary (PORTAL-04)
+  2. End-to-end UAT pass: Liz impersonates one client, one contractor, and one building manager (each on a different project), confirms the banner is visible, exits cleanly, sends a real Send Update digest, opens it in Outlook desktop / Gmail / Apple Mail iOS, opens the resulting portal link, and confirms the polished portal renders correctly at desktop and 375×667 mobile widths
+  3. Outlook 2016 / 2019 / 365 screenshots and iPhone 12-mini screenshots of every refreshed email and portal page are attached to the phase summary
+  4. The `impersonationAudit` document is reviewed and shows clean enter/exit pairs with no orphaned entries, confirming the audit trail captured every preview Liz performed during UAT
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans | Status | Completed |
@@ -327,6 +447,15 @@ Plans:
 | 41 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 42 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 43 | v5.2 | 4/4 | Complete    | 2026-04-23 |
+| 44 | (interim) | 0/11 | In progress | - |
+| 45 | v5.3 | 0/TBD | Not started | - |
+| 46 | v5.3 | 0/TBD | Not started | - |
+| 47 | v5.3 | 0/TBD | Not started | - |
+| 48 | v5.3 | 0/TBD | Not started | - |
+| 49 | v5.3 | 0/TBD | Not started | - |
+| 50 | v5.3 | 0/TBD | Not started | - |
+| 51 | v5.3 | 0/TBD | Not started | - |
+| 52 | v5.3 | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-03-14*
@@ -335,3 +464,4 @@ Plans:
 *v5.1 planned: 2026-04-14 — 7 phases, 43 requirements, 22 plans estimated*
 *v5.2 planned: 2026-04-22 — 3 phases, 12 requirements, ~9 plans estimated*
 *Phase 41 planned: 2026-04-22 — 2 plans (backend foundation + UI sweep)*
+*v5.3 planned: 2026-04-26 — 8 phases (45-52), 27 requirements, plans TBD per phase*

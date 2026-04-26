@@ -6,7 +6,7 @@ status: planning
 last_updated: "2026-04-26T02:26:06.566Z"
 last_activity: 2026-04-26
 progress:
-  total_phases: 0
+  total_phases: 8
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,33 +17,51 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-22)
+See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase --phase — 44
+**Current focus:** v5.3 Phase 45 — Email Foundations
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started — Roadmap complete, ready for `/gsd-plan-phase 45`
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-26 — Milestone v5.3 started
+Status: Roadmap defined; planning the first phase next
+Last activity: 2026-04-26 — Roadmap drafted for v5.3 (Phases 45-52, 27 requirements mapped)
 
-## v5.2 Phase Map
+## v5.3 Phase Map
 
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
-| 41 | Client Data Model Refinements (carryover from v5.1) | 4 | 2-3 | Not started |
-| 42 | Trades Entity — Routes, Schema, and Display | 5 | 2 | Ready to execute |
-| 43 | Document Checklists, Settings Config, and Completeness | 3 | 4 | Ready to execute |
+| 45 | Email Foundations | 4 (EMAIL-08..11) | TBD | Not started |
+| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Not started |
+| 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
+| 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
+| 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
+| 50 | Impersonation UI | 2 (IMPER-01, 05) | TBD | Not started |
+| 51 | Portal Visual + Voice Pass | 6 (PORTAL-01, 02, 03, 06, AUTH-01, 02) | TBD | Not started |
+| 52 | Cross-Cutting QA / UAT | 1 (PORTAL-04) | TBD | Not started |
 
-**Total:** 12 requirements, ~9 plans estimated
+**Total:** 27 requirements across 8 phases.
+
+**Track structure:**
+- Email track: 45 → 46 → 48
+- Portal/Impersonation track: 47 (parallel) and 49 (parallel) → 50 (depends on 47 + 49)
+- Convergence: 51 (depends on 47, 50, 45) → 52 (UAT)
+
+Email track and Portal/Impersonation track share zero files (other than possibly `brand-tokens.ts`) and CAN run in parallel.
+
+## Resolved Decisions (v5.3)
+
+- **D-1**: Adopt `react-email` this milestone (Position B). Future-proof for v6.0 per-tenant theming; Outlook safety via Litmus harness; single shared `brand-tokens.ts` source of truth.
+- **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type per tenant.
+- **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 via the self-gating component dropped into existing page bodies. Full layout migration of those routes deferred to v5.4.
 
 ## Accumulated Context
 
 ### Decisions
 
-Carried from v5.1 boundary. Full history:
+Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 
 - `.planning/MILESTONES.md` (v5.0 section)
 - `.planning/PROJECT.md` (Key Decisions table)
@@ -60,85 +78,55 @@ Carried from v5.1 boundary. Full history:
 - Phase 40: Address block shared between clients and contractors via EntityDetailForm
 - Phase 40: Trade pill labels use formatTrade() from lib/trades.ts
 
-**v5.2 starting decisions:**
+**v5.2 decisions (still relevant for v5.3):**
 
-- v5.2 replaces the previously planned "Schedule Rebuild" (Frappe Gantt retirement); that scope is displaced to a future milestone
-- Phase 41 (CLNT-10..13 — client data model) carries forward from v5.1 as the first phase of v5.2
-- Phase 42 scope: TRAD-01 (route rename) is a prerequisite for TRAD-03/04/05 and must land before any UI consuming the new entity label or meta line
-- Phase 42 scope: TRAD-02 (relationship field) and TRAD-07 (1099 unification) grouped together — both touch contractor schema and should be a single migration
-- Phase 43 scope: TRAD-08 (Settings config) and TRAD-06 (checklist UI) land together — checklist UI is only renderable once types are configurable; TRAD-04 (completeness indicator) lands in the same phase since it reads required-document state
-- Checklist item types for TRAD-08 extend siteSettings with contractorChecklistItems[] and vendorChecklistItems[]
-- Work Order routing by relationship type deferred to v5.3 (out of scope per REQUIREMENTS.md)
-- formatPhone extracts all digits via /\D/g; returns (NNN) NNN-NNNN for exactly 10 digits; raw input unchanged otherwise (safe fallback for non-US numbers)
-- Phone stored raw in Sanity — no normalization on save; display format is render-time only via formatPhone() from src/lib/format.ts
-- No Sanity data migration for orphaned preferredContact values — removed from schema/queries/API; existing documents retain inert orphaned data per D-18
-- Address cell renders [city, state].filter(Boolean).join(', ') with em-dash fallback — handles city-only, state-only, and both-present cases
-- Sort for nested address.city uses conditional accessor in comparator (sortColumn === 'address'); generic path handles all flat fields
-- tel: href in ContactCardPopover uses raw data.phone; only visible link text uses formatPhone() — raw digits required by native dialer
-- Phase 42 Plan 01: Sanity _type stays 'contractor'; relationship field (required, radio) carries the UI-facing meaning per D-01
-- Phase 42 Plan 01: PATCH update uses hasOwnProperty on body to distinguish omitted key (leave alone) vs. explicit null (clear to null) vs. string (trim+set)
-- Phase 42 Plan 01: relationshipLabel() helper is case-sensitive by design — only canonical 'vendor' slug returns 'Vendor'; null/undefined/other → 'Contractor' per D-04
-- Phase 42 Plan 01: siteSettings.contractorChecklistItems[] and vendorChecklistItems[] are schema-only in Phase 42 per D-09 — rendered by Phase 43 checklist UI
-- Phase 42 Plan 02: /admin/contractors hard-renamed to /admin/trades (no redirect per D-02); old path now 404s natively.
-- Phase 42 Plan 02: Relationship field renders as a 2-card radio group, not a dropdown. Rationale: 2 mutually-exclusive options semantically heavy enough (drives checklist + label) to warrant both being visible.
-- Phase 42 Plan 02: EntityListPage primary CTA keeps 'New Contractor / Vendor' collective label per UI-SPEC — the ambiguous label is intentional at the CTA; the form forces the choice via the required radio group.
-- Phase 42 Plan 02: projectContractors GROQ projection extended with relationship so chip popovers on the project detail page show the correct Contractor|Vendor label (Rule 2 correctness addition beyond plan scope).
-- Phase 43 Plan 01: GET handler in site-settings.ts uses getSession(cookies) matching existing POST handler convention, not locals
-- Phase 43 Plan 01: Settings checklist API returns {types: string[]} envelope from GET inUseDocTypes; non-string and empty values filtered server-side
-- Phase 43 Plan 01: 50-item DoS cap on updateContractorChecklistItems / updateVendorChecklistItems enforced BEFORE per-entry validation (T-43-03)
-- Phase 43 Plan 02: Shared hidden file input + activeLabelRef (not per-row inputs) drives row-scoped upload in TradeChecklist — simpler DOM and matches RESEARCH Pattern 1
-- Phase 43 Plan 02: EntityDetailForm Documents block is gated by !isCreateMode && entityType === 'contractor' — TradeChecklist is contractor-only and only rendered in edit mode (Pitfall 6)
-- Phase 43 Plan 02: TRAD-06 delivered; pre-existing dead code (unused TRADE_LABELS constant in EntityDetailForm) left intact per scope boundary
-- Phase 43 Plan 03: ChecklistConfigSection.variant is optional with a 'contractor' default — keeps the Wave 0 RED test's 3-prop signature valid while the acceptance grep still matches the variant union type
-- Phase 43 Plan 03: Delete confirmation uses a modal (with a visible 'Delete checklist item' button) — inline Check/X pattern has no text and would fail the Wave 0 RED test's /delete|confirm|remove/i button lookup
-- Phase 43 Plan 03: settings.astro extended to populate contractorChecklistItems and vendorChecklistItems in the initialSettings normalization step — required since SiteSettingsPayload promotes those fields to non-optional
-- Phase 43 Plan 04: EntityListPage amber dot uses dual-text pattern — aria-label 'Incomplete — missing required documents' (full UI-SPEC label) and title 'Missing required documents' (short tooltip) on the same span; RED test matches either, acceptance grep validates both
-- Phase 43 Plan 04: isIncomplete() exported from EntityListPage.tsx so future verifiers/tests can import the D-12 branching logic directly instead of reimplementing it
-- templateId on projectWorkflow is a plain string (not Sanity reference) per Pitfall 3 — templates can be deleted while project workflows survive
-- UTC-noon normalization in businessDaysBetween: date-fns differenceInBusinessDays uses local time; midnight UTC timestamps become the previous evening in Eastern timezone, shifting biz-day counts by one; fix normalizes both dates to UTC noon before calling date-fns
-- skipped satisfies hard prereqs (A1): isPrereqSatisfied returns true for complete and skipped statuses; enables optional milestones to be skipped without blocking downstream work
-- schedule.astro patched with inline GROQ fetch for project title (no non-existent getProjectById import) — minimal stub until Plan 09 WorkflowTracker replaces it
-- schedule.astro SSR engine precomputation: engine.ts runs server-side only, serialized maps (transitionsById/blockedById/gateSubMessageById/overdueReasonById) pass to WorkflowTracker as props — client never imports engine.ts
-- Template name fetched on-demand for schedule.astro header (not snapshotted on projectWorkflow) — '(deleted template)' fallback when template no longer exists
-- WorkflowTemplateItem inline type exported from SettingsPage.tsx so settings.astro can cast GROQ fetch result without unknown[] mismatch
-- WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
-- WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
-- Server-side version auto-increment on PATCH: server fetches current version, computes current.version + 1, client-supplied version is never trusted (T-44-04-02)
-- DELETE refuses 409 when projectWorkflow references templateId — prevents orphaned workflows (T-44-04-03)
-- regenKeys() recursively regenerates all Sanity _key values via crypto.randomUUID() on duplicate — prevents duplicate-key errors (T-44-04-05)
-- Seed idempotency: per-seed count check + createIfNotExists with deterministic _id as defense in depth (T-44-04-06)
-- Task 1 (queries.ts) was pre-completed in Plan 01; recognized as done, no duplicate commit
-- milestone-status uses ALLOWED_STATUSES allowlist before canTransition() engine call (T-44-05-07 defense in depth)
-- Both instance endpoints re-fetch workflow via PROJECT_WORKFLOW_QUERY after mutation to return authoritative state
-- StatusPickerPopover uses createPortal to document.body so it escapes overflow-hidden containers in the accordion body
-- Date formatting in MilestoneRow uses date-part slicing (isoStr.slice(0,10)) not parseISO to avoid UTC-midnight timezone shift in Eastern time
-- afterEach(cleanup) required in portal component tests — jsdom shares document.body across tests causing accumulated portal nodes
-- afterEach(cleanup) required in all React island tests — jsdom accumulates portal/DOM nodes across tests without it (Plan 07)
-- derivePhaseStatus is a local pure function in WorkflowTracker (not imported from engine.ts) — engine is server-only, cannot run on client (Plan 07)
-- WorkflowTemplatesSection uses local PhaseMinimal interface (not imported PhaseTemplate) to avoid structural incompatibility with SSR-fetched data
-- WorkflowTemplateEditor cycle detection implemented as local pure DFS function (not imported from engine.ts) per Plan 08 spec — engine.ts is server-only
-- WorkflowStatusCard placed in right column above Tasks card — dashboard uses 2-col grid (not 12-col), so top of right column is the correct placement
-- Blocked milestone count in WorkflowStatusCard uses status-based approximation (not full engine.computeMetrics) — dashboard is a signal, tracker page is source of truth
+- Phase 41-43 trades model and document-checklist patterns are the baseline for the Trades-side recipient picker in Phase 50
+- Phase 42 Plan 02: Sanity _type stays 'contractor'; relationship field carries UI meaning — recipient picker for contractors uses the same field
+- Phase 43 Plan 02: TradeChecklist DOM patterns (shared hidden file input + activeLabelRef) inform any portal-side document upload UX in Phase 51
+
+**Phase 44 (Workflow Engine, in progress):**
+
+- Workflow Engine ships before v5.3 portal polish — portal "What's next?" card in Phase 51 may consume workflow-derived signal once Phase 44 lands
+- engine.ts is server-only; client-side derivePhaseStatus is pure function — same boundary applies if v5.3 portal polish reads workflow state
+
+**v5.3 starting decisions (architectural, derived from research):**
+
+- Wrapped admin session for impersonation: `session.role` stays `admin` and `session.tenantId` intact; sibling field `session.impersonatedBy` carries admin identity. Never role-swap. (Pitfall 1 mitigation)
+- Reuse existing PURL `source` discriminator on session for the read-only middleware gate; impersonation gets `source: "impersonation"` (Pitfall 1)
+- One-shot mint→redeem token via Redis GETDEL (TTL=120s) for the cross-tab hop; matches existing `magic:` work-order token pattern
+- Impersonation cookie scope `Path=/` (not `/portal`) so designer can navigate back to admin without clearing cookies (Pitfall 2)
+- Recipient picker is a tenant-scoped GROQ query, never free-text input (Pitfall 3)
+- Impersonation `start` endpoint must verify `recipient.tenantId === session.tenantId` before minting (Pitfall 3); middleware re-checks defense-in-depth
+- Impersonation hard TTL = 30 minutes; UI banner persists across navigation; explicit "Exit preview" form button (Pitfall 4)
+- Defense-in-depth on Resend send endpoints: every endpoint that calls `resend.emails.send` adds an explicit `if (session.source === "impersonation") return 403` (IMPER-03 belt-and-braces)
+- `src/lib/brand-tokens.ts` is the single source of truth for color, typography, spacing — consumed by both Tailwind config (portal) and email theme (`@react-email/tailwind`). Email theme MIRRORS values, not imports — email clients can't load CSS variables (Pitfall: brand-token drift)
+- Email images host on cookie-less subdomain (`email-assets.lasprezz.com` recommended); never on the same host as session cookies (Pitfall 8)
+- Golden HTML snapshots of `buildSendUpdateEmail` + `buildWorkOrderEmail` captured in Phase 45 BEFORE any react-email migration in Phase 46 (Pitfall 5)
+- Litmus / Email on Acid screenshot in Outlook 2016 + 2019 + 365 attached to every template phase summary (Pitfall 4)
+- `<ImpersonationBanner/>` is self-gating: returns null when `Astro.locals.impersonatedBy` is unset; safe to drop into any layout body, including `/workorder/*` and `/building/*` which retain their existing layouts in v5.3 (D-3)
+- DKIM/SPF/DMARC verification for `lasprezz.com` is a hard prerequisite before any external send in Phase 46 — flagged Active in PROJECT.md v3.0 and resolved in Phase 45
+- Tenant-scoped `getTenantClient(tenantId)` used by impersonated reads — same Sanity client whether requester is the live recipient or impersonating admin, by design (pixel-identical rendering)
+- New dependencies: `react-email@^6.0.0`, `@react-email/render`, `@react-email/tailwind`, `@axe-core/playwright@^4.11.2`, `@playwright/test@latest` (a11y harness manual-only, no CI gate)
 
 ### Pending Todos
 
-Carried from v5.1:
+Carried forward:
 
 - DNS record audit needed for all 4 domains before cutover (v3.0 Phase 12)
 - Pre-existing test failures (14 tests) need cleanup
 - Phase 34 APIs (site-settings, upload-sanity-image, send-update) should migrate to getTenantClient (v6.0)
 - Phase 39 work-orders/[id]/send.ts also uses sanityWriteClient — same v6.0 migration target
 - tenantAudit allowlist extension needed for Phase-38 + Phase-39 plan-mandated lasprezz.com defaults (separate maintenance PR)
+- Phase 44 Workflow Engine still in progress — should land before Phase 51 portal polish if "What's next?" card consumes workflow state
 
 ### Blockers/Concerns
 
-- Resend sandbox only delivers to account owner until domain verified — affects Work Order email send (WORK-05)
+- Resend sandbox only delivers to account owner until domain verified — DKIM/SPF/DMARC alignment is a hard prerequisite for Phase 46 external sends and is the gate-bearing deliverable in Phase 45 (EMAIL-11)
+- Phase 49 architecture must land cross-tenant CI test before Phase 50 UI exposes the feature — tenant-leak is the highest-severity v5.3 pitfall
 
 ## Session Continuity
 
-Last session: 2026-04-25T14:52:24.672Z
-Stopped at: context exhaustion at 93% (2026-04-25)
+Last session: 2026-04-26
+Stopped at: Roadmap drafted for v5.3 (Phases 45-52)
 Resume file: None
-Next action: `/gsd-execute-phase 43`
-
-**Planned Phase:** 44 (Workflow Engine) — 11 plans — 2026-04-23T21:20:18.157Z
+Next action: `/gsd-preflight 45 --for plan-phase` then `/gsd-plan-phase 45`
