@@ -15,7 +15,7 @@
 - [ ] **EMAIL-06**: The Send Update weekly digest includes a List-Unsubscribe header (Gmail/Yahoo bulk-sender requirement)
 - [ ] **EMAIL-07**: The Send Update digest layout uses Outlook-safe `<table>` markup (no flex / grid / rem / `border-radius` shorthand)
 - [x] **EMAIL-08**: Brand colors, typography, and spacing in emails are sourced from a single shared brand-tokens module also consumed by Tailwind
-- [ ] **EMAIL-09**: All five email templates (Send Update, Work Order, artifact-ready, contractor access, building access) carry golden HTML snapshots that gate future regressions
+- [x] **EMAIL-09**: All five email templates (Send Update, Work Order, artifact-ready, contractor access, building access) carry golden HTML snapshots that gate future regressions
 - [ ] **EMAIL-10**: Email assets (logo, etc.) are hosted on a stable, image-CDN endpoint with proper caching headers
 - [ ] **EMAIL-11**: DKIM, SPF, and DMARC are aligned and verified for the production sender domain
 

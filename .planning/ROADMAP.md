@@ -322,7 +322,7 @@ Plans:
 - **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type (per-tenant). Keeps audit churn out of `siteSettings`.
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
 
-- [ ] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08, EMAIL-09, EMAIL-10, EMAIL-11)
+- [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08, EMAIL-09, EMAIL-10, EMAIL-11) (completed 2026-04-26)
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
@@ -347,7 +347,7 @@ Plans:
 - [x] 45-02-PLAN.md (tokens) — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08) (complete 2026-04-26 — see 45-02-SUMMARY.md)
 - [ ] 45-03-PLAN.deferred.md (asset host + DNS) — DEFERRED pending app-rename / domain registration
 - [x] 45-04-PLAN.md (react-email scaffold) — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
-- [ ] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
+- [x] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
 
 **UI hint**: yes
 
@@ -456,7 +456,7 @@ Plans:
 | 42 | v5.2 | 3/3 | Complete    | 2026-04-23 |
 | 43 | v5.2 | 4/4 | Complete    | 2026-04-23 |
 | 44 | (interim) | 0/11 | In progress | - |
-| 45 | v5.3 | 3/4 | In Progress|  |
+| 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
 | 46 | v5.3 | 0/TBD | Not started | - |
 | 47 | v5.3 | 0/TBD | Not started | - |
 | 48 | v5.3 | 0/TBD | Not started | - |
