@@ -1,86 +1,80 @@
-# Requirements: La Sprezzatura — v5.2 Trades Directory
+# Requirements: La Sprezzatura — v5.3 Third-Party Views & Outbound Email Polish
 
-**Defined:** 2026-04-22
-**Core Value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work — extended in v5.2 to make the Trades entity a first-class, relationship-aware record with configurable document checklists.
+**Defined:** 2026-04-26
+**Core Value:** Make every recipient-facing surface (clients, contractors, building managers) read with the same care as Liz's design work. Outbound email is the studio's most visible artifact — it must render reliably across Outlook desktop, Gmail, and Apple Mail, carry the studio's voice, and stay maintainable as new templates and per-tenant theming arrive in v6.0.
 
-## v5.2 Requirements
+## v5.3 Requirements
 
-### Client Refinements (CLNT — carryover from v5.1 Phase 41)
+### Email Template Foundations & Refresh (EMAIL)
 
-- [x] **CLNT-10
-**: Phone numbers render in a single consistent format across the client list, contractor list, popovers, and detail views
-- [x] **CLNT-11
-**: Client record includes physical address fields (street, city, state, zip)
-- [x] **CLNT-12
-**: Clients list columns are: name, address, email, phone (replaces current columns)
-- [x] **CLNT-13
-**: "Preferred contact" field is removed from both the client schema and the UI
+- [ ] **EMAIL-01**: Every outbound email renders correctly in Outlook desktop (2016 / 2019 / 365), Gmail web, Gmail iOS, Apple Mail macOS, and Apple Mail iOS
+- [ ] **EMAIL-02**: Every outbound email ships a plain-text alternative for screen readers and image-blocked clients
+- [ ] **EMAIL-03**: Every outbound email includes preheader text that explains the message in the recipient's inbox preview
+- [ ] **EMAIL-04**: Every transactional invitation email includes a visible "or paste this link" fallback for the primary CTA
+- [ ] **EMAIL-05**: Every transactional invitation email includes copy stating how long the link remains valid
+- [ ] **EMAIL-06**: The Send Update weekly digest includes a List-Unsubscribe header (Gmail/Yahoo bulk-sender requirement)
+- [ ] **EMAIL-07**: The Send Update digest layout uses Outlook-safe `<table>` markup (no flex / grid / rem / `border-radius` shorthand)
+- [ ] **EMAIL-08**: Brand colors, typography, and spacing in emails are sourced from a single shared brand-tokens module also consumed by Tailwind
+- [ ] **EMAIL-09**: All five email templates (Send Update, Work Order, artifact-ready, contractor access, building access) carry golden HTML snapshots that gate future regressions
+- [ ] **EMAIL-10**: Email assets (logo, etc.) are hosted on a stable, image-CDN endpoint with proper caching headers
+- [ ] **EMAIL-11**: DKIM, SPF, and DMARC are aligned and verified for the production sender domain
 
-### Trades Entity & Routing (TRAD)
+### Designer Impersonation (IMPER)
 
-- [x] **TRAD-01
-**: `/admin/trades` route replaces `/admin/contractors`; all URLs, nav links, and breadcrumbs are updated throughout the admin app and portal
-- [x] **TRAD-02
-**: Each Trades record has a `relationship` field with two values: `contractor` or `vendor`
-- [x] **TRAD-03
-**: The entity display name renders as "Contractor" or "Vendor" (not "Contractor / Vendor") based on the record's relationship field — applied consistently in list view, detail view, popovers, nav, and work order context
-- [x] **TRAD-04
-**: Trades list view shows a completeness indicator (e.g., amber dot) on any record where required fields or required documents are missing
-- [x] **TRAD-05
-**: Trades detail page shows a meta line directly below the name: primary trade · relationship type · city, state
+- [ ] **IMPER-01**: Designer can preview the portal "as" any client, contractor, or building manager from the admin app via a recipient picker
+- [ ] **IMPER-02**: During impersonation, the designer cannot perform any write actions (server-side read-only enforcement on every mutation endpoint)
+- [ ] **IMPER-03**: During impersonation, the system does not send any real outbound email (Resend calls return 403)
+- [ ] **IMPER-04**: Impersonation sessions are time-bound (auto-expire after a fixed window) and scoped to one (recipient, project) pair
+- [ ] **IMPER-05**: A persistent banner shows during impersonation displaying the admin's identity, the target recipient, and a one-click exit
+- [ ] **IMPER-06**: Every impersonation start, end, and timeout is recorded in an append-only audit log with admin identity, target identity, tenant, project, and timestamps
+- [ ] **IMPER-07**: Designer cannot impersonate across tenant boundaries (rejection verified by CI test on every PR)
+- [ ] **IMPER-08**: Impersonation start requires fresh admin authentication (re-prompt if session is older than a configured threshold)
 
-### Document Checklists (TRAD)
+### Recipient Portal Polish (PORTAL)
 
-- [x] **TRAD-06
-**: Trades detail page shows a document checklist scoped to the record's relationship type — contractor checklist: W-9, certificate of insurance, trade license, 1099; vendor checklist: vendor agreement, tax form
-- [x] **TRAD-07
-**: The existing 1099 document slot from Phase 40 is unified into the contractor document checklist as a checklist item; no standalone 1099 section remains on the detail page
-- [x] **TRAD-08
-**: Checklist item types are configurable from Settings per relationship type (add, rename); a checklist item type cannot be removed while any Trades records have a document uploaded for that type
+- [ ] **PORTAL-01**: Client landing on `/portal/project/[id]` sees a "What's next?" card at the top of the page identifying their immediate action or expected next event
+- [ ] **PORTAL-02**: Each major section of the project portal shows when it was last updated (last-activity timestamp)
+- [ ] **PORTAL-03**: All portal pages render correctly at 375×667 mobile viewport — no horizontal scroll, readable body text, tap targets ≥44pt
+- [ ] **PORTAL-04**: Representative portal routes (project, dashboard, login, verify) pass WCAG 2.1 AA assertions via @axe-core/playwright
+- [ ] **PORTAL-05**: Portal header and footer chrome is consistent across every portal page, sourced from a single layout shell (PortalLayout + extracted components)
+- [ ] **PORTAL-06**: Portal voice and visual rhythm match the admin's card-header band system (`.card-header`, brand tokens, sentence-case-via-CSS-uppercase)
 
-## Future Requirements (Deferred)
+### Portal Auth Flows (AUTH)
 
-### Schedule Rebuild (SCHED-NG — previously v5.2, now displaced)
+- [ ] **AUTH-01**: A recipient arriving with an expired or regenerated token sees distinct copy explaining what happened and how to recover, not a generic login screen
+- [ ] **AUTH-02**: Login, verify, and role-select pages render in the polished portal shell with consistent typography and spacing
 
-- **SCHED-NG-01**: Retire Frappe Gantt from the admin Schedule view
-- **SCHED-NG-02**: Replace with a configurable designer workflow template reflecting Liz's structured phase sequence
-- **SCHED-NG-03**: Template is editable / overridable per project
+## Future Requirements (deferred)
 
-*These require a dedicated brainstorming session before scoping to phases.*
+These were considered for v5.3 but moved to a future milestone:
+
+- Notification preferences UI — recipient opt-out of weekly digest, frequency control (deferred — substantial schema + UI work)
+- Reply-to-designer form on the project portal (deferred — content/voice exercise, lower priority)
+- Invoice / payment summary on the portal (deferred — needs procurement pricing visibility decision, currently excluded per Phase 37 D-13/D-14)
+- Quick-switch impersonation (impersonate next recipient without exit) — deferred as anti-feature for MVP; revisit if usage data justifies it
+- Accept / decline directly from work order email (deferred — needs API surface)
+- Migration of `/workorder/*` and `/building/*` routes to PortalLayout (deferred to v5.4 — banner-only in v5.3)
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| Work Order routing by relationship type | Work orders currently serve all trade contacts; scoping to contractor-only is a separate UX change with portal implications — defer to v5.3 or as needed |
-| Checklist items imported from existing 1099 docs retroactively | Migration complexity without clear user value; Liz can re-upload if needed |
-| Multi-tenant checklist templates | Single-tenant deployment; extraction deferred to v6.0 Linha |
-| Phase 16-17 Gantt enhancements | Superseded; Schedule Rebuild deferred past v5.2 |
+Explicitly excluded with reasoning:
+
+- **Public website (lasprezz.com Astro front end)** — separate scope and surface
+- **Multi-tenant capability gating for front-end-bound settings** — already parked under v6.0 Linha Platform (PROJECT.md "Planned" section)
+- **Embedded procurement pricing in client portal** — reaffirms Phase 37 D-13/D-14 (designer privacy)
+- **Chat / messaging UI on portal** — already excluded in PROJECT.md "Out of Scope"
+- **Public sharing of portal pages** — already excluded
+- **Gamification / progress badges on portal** — already excluded
+- **Migrating to a different email service provider** — Resend is staying; framework adoption is purely client-side
+- **Email link tracking / engagement analytics** — not a v5.3 deliverable
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| CLNT-10 | Phase 41 | Complete |
-| CLNT-11 | Phase 41 | Complete |
-| CLNT-12 | Phase 41 | Complete |
-| CLNT-13 | Phase 41 | Complete |
-| TRAD-01 | Phase 42 | Complete |
-| TRAD-02 | Phase 42 | Complete |
-| TRAD-03 | Phase 42 | Complete |
-| TRAD-05 | Phase 42 | Complete |
-| TRAD-07 | Phase 42 | Complete |
-| TRAD-04 | Phase 43 | Complete |
-| TRAD-06 | Phase 43 | Complete |
-| TRAD-08 | Phase 43 | Complete |
+To be filled by `/gsd-roadmap-create`. Each requirement maps to exactly one phase.
 
-**Coverage:**
-- v5.2 requirements: 12 total
-- Phase 41: 4 (CLNT-10..13)
-- Phase 42: 5 (TRAD-01, TRAD-02, TRAD-03, TRAD-05, TRAD-07)
-- Phase 43: 3 (TRAD-04, TRAD-06, TRAD-08)
-- Unmapped: 0
-
----
-*Requirements defined: 2026-04-22*
-*Last updated: 2026-04-22 — Traceability filled; all 12 requirements mapped to phases 41-43*
+| Requirement | Phase | Notes |
+|---|---|---|
+| EMAIL-01..11 | TBD | |
+| IMPER-01..08 | TBD | |
+| PORTAL-01..06 | TBD | |
+| AUTH-01..02 | TBD | |
