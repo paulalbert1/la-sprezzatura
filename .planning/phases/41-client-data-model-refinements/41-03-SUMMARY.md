@@ -8,8 +8,7 @@ gap_closure: true
 
 key-files:
   modified:
-    - path: src/sanity/queries.ts
-      change: "Added address { street, city, state, zip } to getAdminClients GROQ projection"
+    - src/sanity/queries.ts
 
 self-check: PASSED
 ---

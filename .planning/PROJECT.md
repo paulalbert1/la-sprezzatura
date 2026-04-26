@@ -20,10 +20,10 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v4.0 Project Schedule | Interactive Gantt chart for project sequencing | 15-17 | Phase 15 complete |
 | v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 29-34 | Shipped 2026-04-12 |
 | v5.1 Admin UX Polish | Hands-on UX refinements, Work Order + Documents panels, vendor/client schema updates | 35-40 | Complete 2026-04-22 (Phase 41 carried to v5.2) |
-| v5.2 Trades Directory | Unified Trades entity, /admin/trades routes, relationship field, doc checklists, completeness indicator | 41-TBD | In progress |
+| v5.2 Trades Directory | Unified Trades entity, /admin/trades routes, relationship field, doc checklists, completeness indicator | 41-43 | Complete 2026-04-23 |
 | v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD | Planned |
 
-## Current Milestone: v5.2 Trades Directory
+## Current Milestone: v5.2 Trades Directory — Complete 2026-04-23
 
 **Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) also carries forward from v5.1.
 
@@ -36,7 +36,7 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - Completeness indicator — list view shows a visual signal when required fields or documents are missing
 - Detail page meta line — compact at-a-glance summary (trade, relationship type, location) below the name
 
-## Current State (after v5.0)
+## Current State (after v5.2)
 
 **Shipped:** Custom `/admin/*` app with tenant-aware architecture. Sanity Studio fully retired (51 files deleted, studioBasePath dropped). The admin app is the sole management interface for projects, clients, contractors, procurement, rendering, portfolio, settings, and Send Update.
 
@@ -81,14 +81,16 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] DNS consolidation — all 4 domains to Cloudflare
 - [ ] Email consolidation to @lasprezz.com on Microsoft 365 with SPF/DKIM/DMARC
 
-### Active (v5.2 — in progress)
+### Validated (v5.2 — complete 2026-04-23)
 
-- [ ] Client data model — phone formatting, address field, updated columns, drop preferred-contact (Phase 41 carryover from v5.1)
-- [ ] Unified Trades entity — `/admin/trades` routes replacing `/admin/contractors`
-- [ ] Relationship field — `contractor | vendor` per Trades record, drives document checklists
-- [ ] Display name logic — entity renders as "Contractor" or "Vendor" based on relationship type
-- [ ] Completeness indicator — list view signals missing required fields or documents
-- [ ] Detail page meta line — trade, relationship type, location shown below the name
+- ✓ Client data model — phone formatting, address field, updated columns, drop preferred-contact — Phase 41
+- ✓ Unified Trades entity — `/admin/trades` routes replacing `/admin/contractors` — Phase 42
+- ✓ Relationship field — `contractor | vendor` per Trades record, drives document checklists — Phase 42
+- ✓ Display name logic — entity renders as "Contractor" or "Vendor" based on relationship type — Phase 42
+- ✓ Document checklists — relationship-scoped required doc list with upload/view/delete per row — Phase 43
+- ✓ Completeness indicator — amber dot in list view when required documents are missing — Phase 43
+- ✓ Settings config — admin can add/rename/delete checklist item types with in-use delete guard — Phase 43
+- ✓ Detail page meta line — trade, relationship type, location shown below the name — Phase 42
 
 ### Deferred (v4.0 — Gantt)
 
