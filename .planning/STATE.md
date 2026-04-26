@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: planning
-last_updated: "2026-04-26T02:26:06.566Z"
-last_activity: 2026-04-26
+status: executing
+stopped_at: Phase 45 Plan 01 complete (deps + scripts + Chromium); Wave 1 (45-02 brand-tokens) next
+last_updated: "2026-04-26T20:27:04Z"
+last_activity: 2026-04-26 -- Phase 45 Plan 01 (Wave 0 dep baseline) complete
 progress:
-  total_phases: 8
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 9
+  completed_phases: 1
+  total_plans: 15
+  completed_plans: 12
+  percent: 80
 ---
 
 # Project State
@@ -20,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** v5.3 Phase 45 — Email Foundations
+**Current focus:** Phase 45 — email-foundations
 
 ## Current Position
 
-Phase: Not started — Roadmap complete, ready for `/gsd-plan-phase 45`
-Plan: —
-Status: Roadmap defined; planning the first phase next
-Last activity: 2026-04-26 — Roadmap drafted for v5.3 (Phases 45-52, 27 requirements mapped)
+Phase: 45 (email-foundations) — EXECUTING
+Plan: 2 of 5 (45-01 complete; 45-03 deferred; next executable is 45-02)
+Status: Executing Phase 45
+Last activity: 2026-04-26 -- Phase 45 Plan 01 (Wave 0 dep baseline) complete
 
 ## v5.3 Phase Map
 
@@ -45,6 +46,7 @@ Last activity: 2026-04-26 — Roadmap drafted for v5.3 (Phases 45-52, 27 require
 **Total:** 27 requirements across 8 phases.
 
 **Track structure:**
+
 - Email track: 45 → 46 → 48
 - Portal/Impersonation track: 47 (parallel) and 49 (parallel) → 50 (depends on 47 + 49)
 - Convergence: 51 (depends on 47, 50, 45) → 52 (UAT)
@@ -56,6 +58,7 @@ Email track and Portal/Impersonation track share zero files (other than possibly
 - **D-1**: Adopt `react-email` this milestone (Position B). Future-proof for v6.0 per-tenant theming; Outlook safety via Litmus harness; single shared `brand-tokens.ts` source of truth.
 - **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type per tenant.
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 via the self-gating component dropped into existing page bodies. Full layout migration of those routes deferred to v5.4.
+- **D-4** (Phase 45-01): `@vitejs/plugin-react` pinned at `^5.2.0` (not RESEARCH.md's `^6.0.1`). `^6` requires `vite@^8` peer; the entire tree (Astro 6.0.4, Vitest 3.2.4, Sanity 5.16, `@tailwindcss/vite` 4.2.2) resolves `vite@7.3.1`. `^5.2.0` matches the version already deduped in the tree as a transitive of `@astrojs/react@5.0.0` and satisfies Pitfall 1 fix (transitive → direct) without forcing a vite-8 cascade. Reconsider when Astro 7 / Vitest 4 land.
 
 ## Accumulated Context
 
@@ -126,7 +129,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-26
-Stopped at: Roadmap drafted for v5.3 (Phases 45-52)
-Resume file: None
-Next action: `/gsd-preflight 45 --for plan-phase` then `/gsd-plan-phase 45`
+Last session: 2026-04-26T20:27:04Z
+Stopped at: Phase 45 Plan 01 complete (Wave 0 dep baseline)
+Resume file: .planning/phases/45-email-foundations/45-01-SUMMARY.md
+Next action: `/gsd-execute-phase 45` to run Wave 1 (45-02 brand-tokens; 45-04 react-email scaffold) — 45-03 is deferred, do not include

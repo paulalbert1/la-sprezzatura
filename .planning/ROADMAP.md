@@ -343,11 +343,11 @@ Plans:
 **Plans**: 5 plans (3 waves)
 
 Plans:
-- [ ] 45-PLAN-foundation.md — Wave 0: package.json deps + npm scripts + Playwright Chromium install
-- [ ] 45-PLAN-tokens.md — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08)
-- [ ] 45-PLAN-asset-host-and-dns.md — Wave 1: standalone Vercel asset host + Cloudflare SPF amend + Resend dashboard verification + docs/email-merge-gate.md (EMAIL-10, EMAIL-11)
-- [ ] 45-PLAN-react-email-scaffold.md — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
-- [ ] 45-PLAN-snapshot-harness.md — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
+- [x] 45-01-PLAN.md (foundation) — Wave 0: package.json deps + npm scripts + Playwright Chromium install (complete 2026-04-26 — see 45-01-SUMMARY.md)
+- [ ] 45-02-PLAN.md (tokens) — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08)
+- [ ] 45-03-PLAN.deferred.md (asset host + DNS) — DEFERRED pending app-rename / domain registration
+- [ ] 45-04-PLAN.md (react-email scaffold) — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
+- [ ] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
 
 **UI hint**: yes
 
