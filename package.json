@@ -9,7 +9,13 @@
     "preview": "astro preview",
     "check": "biome check .",
     "format": "biome format . --write",
-    "test": "vitest run"
+    "test": "vitest run",
+    "theme:gen": "tsx scripts/generate-theme-css.ts",
+    "prebuild": "npm run theme:gen",
+    "predev": "npm run theme:gen",
+    "test:email": "vitest run src/lib/sendUpdate src/lib/workOrder src/emails",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "engines": {
     "node": ">=22.12.0"
