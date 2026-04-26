@@ -104,6 +104,7 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 - [ ] Admin dashboard at admin.linha.com — designer management, usage, billing, health
 - [ ] Onboarding wizard — guided provisioning (Sanity dataset, Vercel project, domain, billing)
 - [ ] Per-designer Vercel deployments with Sanity multi-dataset isolation
+- [ ] Tenant capability flag for front-end-bound settings — gate Social links, Hero slideshow, and the front-end fields inside General (site title, tagline) so tenants without a public website don't see settings that don't apply. Onboarding asks "Does your studio have a public website powered by this platform?" and stores `hasPortfolioSite` (or equivalent capability) on the tenant record. Stretch: split General into "Studio" + "Public website" sub-sections.
 
 ### Out of Scope
 
