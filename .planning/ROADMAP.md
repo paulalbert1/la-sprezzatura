@@ -344,7 +344,7 @@ Plans:
 
 Plans:
 - [x] 45-01-PLAN.md (foundation) — Wave 0: package.json deps + npm scripts + Playwright Chromium install (complete 2026-04-26 — see 45-01-SUMMARY.md)
-- [ ] 45-02-PLAN.md (tokens) — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08)
+- [x] 45-02-PLAN.md (tokens) — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08) (complete 2026-04-26 — see 45-02-SUMMARY.md)
 - [ ] 45-03-PLAN.deferred.md (asset host + DNS) — DEFERRED pending app-rename / domain registration
 - [ ] 45-04-PLAN.md (react-email scaffold) — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
 - [ ] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)

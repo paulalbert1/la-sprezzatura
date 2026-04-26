@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 45 Plan 01 complete (deps + scripts + Chromium); Wave 1 (45-02 brand-tokens) next
-last_updated: "2026-04-26T20:27:04Z"
-last_activity: 2026-04-26 -- Phase 45 Plan 01 (Wave 0 dep baseline) complete
+stopped_at: Phase 45 Plan 02 complete (brand-tokens TS source of truth + generator + global.css @import swap); Wave 2 (45-04 react-email scaffold, 45-05 snapshot harness) next
+last_updated: "2026-04-26T20:59:39Z"
+last_activity: 2026-04-26 -- Phase 45 Plan 02 (brand-tokens single-source-of-truth pipeline) complete
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 15
-  completed_plans: 12
-  percent: 80
+  completed_plans: 13
+  percent: 87
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 45 (email-foundations) — EXECUTING
-Plan: 2 of 5 (45-01 complete; 45-03 deferred; next executable is 45-02)
+Plan: 4 of 5 (45-01 + 45-02 complete; 45-03 deferred; next executable is 45-04 react-email scaffold + 45-05 snapshot harness in Wave 2)
 Status: Executing Phase 45
-Last activity: 2026-04-26 -- Phase 45 Plan 01 (Wave 0 dep baseline) complete
+Last activity: 2026-04-26 -- Phase 45 Plan 02 (brand-tokens single-source-of-truth pipeline) complete
 
 ## v5.3 Phase Map
 
@@ -59,6 +59,8 @@ Email track and Portal/Impersonation track share zero files (other than possibly
 - **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type per tenant.
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 via the self-gating component dropped into existing page bodies. Full layout migration of those routes deferred to v5.4.
 - **D-4** (Phase 45-01): `@vitejs/plugin-react` pinned at `^5.2.0` (not RESEARCH.md's `^6.0.1`). `^6` requires `vite@^8` peer; the entire tree (Astro 6.0.4, Vitest 3.2.4, Sanity 5.16, `@tailwindcss/vite` 4.2.2) resolves `vite@7.3.1`. `^5.2.0` matches the version already deduped in the tree as a transitive of `@astrojs/react@5.0.0` and satisfies Pitfall 1 fix (transitive → direct) without forcing a vite-8 cascade. Reconsider when Astro 7 / Vitest 4 land.
+- **D-5** (Phase 45-02): `src/lib/brand-tokens.ts` is the typed source of truth (23 colors, 4 fonts, 2 spacing tokens). `scripts/generate-theme-css.ts` exports a pure `buildThemeCss(tokens)` plus a CLI entry that writes `src/styles/_generated-theme.css` byte-idempotently. `global.css` `@import`s the generated file; out-of-scope tokens (`--container-text`, `--animate-fade-in-up`, `@keyframes`, `@theme inline` font bridge) stay CSS-only per D-07. CI freshness gate: `npm run theme:gen && git diff --exit-code src/styles/_generated-theme.css`. EMAIL-08 satisfied.
+- **D-6** (Phase 45-02): Test co-location confirmed for `src/lib/brand-tokens.test.ts` (NOT `src/lib/__tests__/brand-tokens.test.ts`) — every other `*.test.ts` in `src/lib/` is co-located. Same convention applies to forthcoming `src/emails/scaffold.test.ts` in 45-04.
 
 ## Accumulated Context
 
@@ -129,7 +131,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-26T20:27:04Z
-Stopped at: Phase 45 Plan 01 complete (Wave 0 dep baseline)
-Resume file: .planning/phases/45-email-foundations/45-01-SUMMARY.md
-Next action: `/gsd-execute-phase 45` to run Wave 1 (45-02 brand-tokens; 45-04 react-email scaffold) — 45-03 is deferred, do not include
+Last session: 2026-04-26T20:59:39Z
+Stopped at: Phase 45 Plan 02 complete (brand-tokens single-source-of-truth pipeline + generator + global.css @import swap)
+Resume file: .planning/phases/45-email-foundations/45-02-SUMMARY.md
+Next action: `/gsd-execute-phase 45` to run Wave 2 (45-04 react-email scaffold + 45-05 snapshot harness) — 45-03 remains deferred
