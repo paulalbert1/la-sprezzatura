@@ -122,21 +122,28 @@ function WorkflowTemplatesSectionInner({ templates }: Props) {
           </button>
         </div>
       ) : (
-        <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "12px",
-            }}
-            className="workflow-template-grid"
-          >
-            {templates.map((t) => (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            gap: "12px",
+          }}
+          className="workflow-template-grid"
+        >
+          {templates.map((t) => {
+            const usage = t.inUseCount;
+            const usageLabel =
+              usage === 0
+                ? "No active projects"
+                : `${usage} active project${usage === 1 ? "" : "s"}`;
+            return (
               <a
                 key={t._id}
                 href={`/admin/settings/workflow-templates/${t._id}`}
                 style={{
-                  display: "block",
+                  display: "flex",
+                  flexDirection: "column",
+                  minHeight: "130px",
                   padding: "16px",
                   backgroundColor: "#FFFEFB",
                   border: "0.5px solid #E8DDD0",
@@ -153,60 +160,88 @@ function WorkflowTemplatesSectionInner({ templates }: Props) {
                   (e.currentTarget as HTMLAnchorElement).style.borderColor = "#E8DDD0";
                 }}
               >
-                {/* Card name */}
-                <p
+                {/* Title row: name on the left, version label on the right */}
+                <div
                   style={{
-                    fontSize: "13px",
-                    fontWeight: 600,
-                    color: "#2C2520",
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: "8px",
                     marginBottom: "4px",
-                    lineHeight: 1.4,
                   }}
                 >
-                  {t.name}
-                </p>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: "#2C2520",
+                      lineHeight: 1.4,
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    {t.name}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "#B5A892",
+                      letterSpacing: "0.04em",
+                      flexShrink: 0,
+                    }}
+                  >
+                    v{t.version}
+                  </span>
+                </div>
 
-                {/* Meta line */}
+                {/* Phases / milestones */}
                 <p
                   style={{
                     fontSize: "11px",
                     color: "#9E8E80",
-                    marginBottom: t.inUseCount > 0 ? "4px" : "28px",
                     lineHeight: 1.4,
                   }}
                 >
                   {t.phases.length} phase{t.phases.length !== 1 ? "s" : ""}{" "}
-                  · {totalMilestones(t.phases)} milestone{totalMilestones(t.phases) !== 1 ? "s" : ""}{" "}
-                  · v{t.version}
+                  · {totalMilestones(t.phases)} milestone{totalMilestones(t.phases) !== 1 ? "s" : ""}
                 </p>
 
-                {/* In-use count */}
-                {t.inUseCount > 0 && (
-                  <p
-                    style={{
-                      fontSize: "11px",
-                      color: "#6B5E52",
-                      marginBottom: "28px",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {t.inUseCount} active project{t.inUseCount !== 1 ? "s" : ""}
-                  </p>
-                )}
-
-                {/* Duplicate button — bottom-right */}
+                {/* Footer: usage pill (muted when zero) on left, Duplicate on right */}
                 <div
                   style={{
-                    position: "absolute",
-                    bottom: "12px",
-                    right: "12px",
+                    marginTop: "auto",
+                    paddingTop: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
                   }}
                 >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      padding: "3px 9px",
+                      borderRadius: "4px",
+                      letterSpacing: "0.02em",
+                      fontWeight: 500,
+                      ...(usage === 0
+                        ? {
+                            background: "transparent",
+                            color: "#B5A892",
+                            border: "0.5px dashed rgba(60,40,20,0.18)",
+                          }
+                        : {
+                            background: "#F5EFE6",
+                            color: "#5C4F3D",
+                          }),
+                    }}
+                  >
+                    {usageLabel}
+                  </span>
                   <button
                     type="button"
                     onClick={(e) => handleDuplicate(e, t._id)}
                     disabled={busy === t._id}
                     style={{
+                      marginLeft: "auto",
                       fontSize: "11px",
                       color: busy === t._id ? "#9E8E80" : "#6B5E52",
                       backgroundColor: "transparent",
@@ -221,30 +256,51 @@ function WorkflowTemplatesSectionInner({ templates }: Props) {
                   </button>
                 </div>
               </a>
-            ))}
-          </div>
+            );
+          })}
 
-          <div style={{ marginTop: "16px" }}>
-            <button
-              type="button"
-              onClick={handleNew}
-              disabled={busy === "new"}
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: "#FFFEFB",
-                backgroundColor: busy === "new" ? "#C4A97A" : "#9A7B4B",
-                border: "none",
-                padding: "8px 16px",
-                borderRadius: "6px",
-                cursor: busy === "new" ? "not-allowed" : "pointer",
-                fontFamily: "var(--font-sans)",
-              }}
-            >
-              + New template
-            </button>
-          </div>
-        </>
+          {/* Dashed empty-state card — replaces the standalone "+ New template"
+              button below the grid. Sits as the next slot in the grid so the
+              create action lives where the eye is already scanning. */}
+          <button
+            type="button"
+            onClick={handleNew}
+            disabled={busy === "new"}
+            aria-label="New template"
+            style={{
+              minHeight: "130px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              padding: "16px",
+              background: "transparent",
+              border: "0.5px dashed rgba(60,40,20,0.22)",
+              borderRadius: "10px",
+              color: "#8A7E6E",
+              fontSize: "13px",
+              fontFamily: "var(--font-sans)",
+              cursor: busy === "new" ? "not-allowed" : "pointer",
+              transition:
+                "border-color 150ms ease, color 150ms ease, background-color 150ms ease",
+            }}
+            onMouseEnter={(e) => {
+              if (busy !== "new") {
+                e.currentTarget.style.borderColor = "rgba(60,40,20,0.4)";
+                e.currentTarget.style.color = "#5C4F3D";
+                e.currentTarget.style.background = "rgba(245,239,230,0.5)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "rgba(60,40,20,0.22)";
+              e.currentTarget.style.color = "#8A7E6E";
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <span style={{ fontSize: "16px", lineHeight: 1 }}>+</span>
+            <span>{busy === "new" ? "Creating…" : "New template"}</span>
+          </button>
+        </div>
       )}
 
       {/* Responsive: collapse to 1 column below 720px */}
