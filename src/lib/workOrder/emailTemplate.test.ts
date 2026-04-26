@@ -59,6 +59,29 @@ describe("buildWorkOrderEmail", () => {
     // No table rows with item-level markers (the template only uses outer wrapper tables)
     expect(html).not.toMatch(/Item\s*<\/td>/i);
   });
+
+  // ---------------------------------------------------------------------------
+  // Phase 45 Plan 05 — EMAIL-09 regression baseline snapshots.
+  //
+  // Captured BEFORE Phase 46 migrates buildWorkOrderEmail to react-email so the
+  // Phase-39 string-builder output is frozen as the regression baseline. The
+  // canonical baseInput() snap is the primary baseline; the HTML-escaped title
+  // permutation exercises the escapeHtml() code path with a different fixture
+  // so a regression in escape handling fails this snap (not just the toContain
+  // checks above).
+  // ---------------------------------------------------------------------------
+
+  it("snapshot: legacy buildWorkOrderEmail output for the canonical baseInput", () => {
+    const html = buildWorkOrderEmail(baseInput());
+    expect(html).toMatchSnapshot();
+  });
+
+  it("snapshot: legacy buildWorkOrderEmail output with HTML-escaped project title", () => {
+    const html = buildWorkOrderEmail(
+      baseInput({ project: { _id: "P1", title: "<script>alert(1)</script>" } }),
+    );
+    expect(html).toMatchSnapshot();
+  });
 });
 
 describe("buildWorkOrderPlainText", () => {

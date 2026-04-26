@@ -66,7 +66,10 @@ describe("buildSendUpdateEmail (Phase 34 Plan 04)", () => {
       fixtureInput({ personalNote: "Hi Sarah, big week ahead!" }),
     );
     expect(html).toContain("<!DOCTYPE html>");
-    expect(html).toContain("Project Update: Kimball Residence");
+    // Phase 38 redesign: project title now appears in a sub-header line below
+    // the "Project Update" h1, paired with the formatted date — assert presence
+    // (location, not the legacy "Project Update: {title}" copy).
+    expect(html).toContain("Kimball Residence");
     expect(html).toContain("Hi Sarah, big week ahead!");
     // Personal note renders as a <p> element ABOVE the section blocks.
     const noteIdx = html.indexOf("Hi Sarah, big week ahead!");
@@ -134,7 +137,10 @@ describe("buildSendUpdateEmail (Phase 34 Plan 04)", () => {
         ],
       }),
     );
-    expect(html).toContain("Items Awaiting Your Review");
+    // Phase 38 redesign: section header copy is "Awaiting Your Review"
+    // (the legacy "Items Awaiting Your Review" string was dropped when the
+    // template moved to the v5.1 reference layout).
+    expect(html).toContain("Awaiting Your Review");
     expect(html).toContain("Proposal");
     expect(html).toContain("Floor Plan");
   });
@@ -151,9 +157,11 @@ describe("buildSendUpdateEmail (Phase 34 Plan 04)", () => {
     expect(html).not.toContain('href="https://lasprezz.com/portal/dashboard"');
   });
 
-  it("default ctaLabel is 'View in Your Portal' when not provided", () => {
+  it("default ctaLabel is 'Open Your Project Portal →' when not provided", () => {
+    // Phase 38 redesign updated DEFAULT_CTA_LABEL in emailTemplate.ts to
+    // "Open Your Project Portal →" (was "View in Your Portal" in Phase 34).
     const html = buildSendUpdateEmail(fixtureInput());
-    expect(html).toContain("View in Your Portal");
+    expect(html).toContain("Open Your Project Portal");
   });
 
   it("matches existing send-update.ts snapshot when called with the fixture input", () => {
@@ -161,6 +169,42 @@ describe("buildSendUpdateEmail (Phase 34 Plan 04)", () => {
     // "legacy send-update.ts output" — any future refactor that accidentally
     // changes HTML structure will fail this test loud-fast.
     const html = buildSendUpdateEmail(fixtureInput());
+    expect(html).toMatchSnapshot();
+  });
+
+  // ---------------------------------------------------------------------------
+  // Phase 45 Plan 05 — section-toggle permutation snapshots.
+  //
+  // These four cases plus the canonical baseline above are the EMAIL-09
+  // regression baseline frozen BEFORE Phase 46 migrates buildSendUpdateEmail
+  // to react-email. Each permutation exercises one render branch (a section
+  // toggle or the personal-note path) so a Phase 46 regression in any single
+  // branch fails its dedicated snap loud-fast.
+  // ---------------------------------------------------------------------------
+
+  it("snapshot: renders without procurement section (showProcurement: false)", () => {
+    const html = buildSendUpdateEmail(fixtureInput({ showProcurement: false }));
+    expect(html).toMatchSnapshot();
+  });
+
+  it("snapshot: renders without artifacts section (showArtifacts: false, pendingArtifacts: [])", () => {
+    const html = buildSendUpdateEmail(
+      fixtureInput({ showArtifacts: false, pendingArtifacts: [] }),
+    );
+    expect(html).toMatchSnapshot();
+  });
+
+  it("snapshot: renders without milestones section (showMilestones: false)", () => {
+    const html = buildSendUpdateEmail(fixtureInput({ showMilestones: false }));
+    expect(html).toMatchSnapshot();
+  });
+
+  it("snapshot: renders with non-empty personalNote", () => {
+    // The default fixture has personalNote: "". This permutation captures the
+    // alternate code path where the personal note section IS rendered.
+    const html = buildSendUpdateEmail(
+      fixtureInput({ personalNote: "Loving the new fabric samples." }),
+    );
     expect(html).toMatchSnapshot();
   });
 });
