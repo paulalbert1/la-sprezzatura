@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 45 Plan 02 complete (brand-tokens TS source of truth + generator + global.css @import swap); Wave 2 (45-04 react-email scaffold, 45-05 snapshot harness) next
-last_updated: "2026-04-26T20:59:39Z"
-last_activity: 2026-04-26 -- Phase 45 Plan 02 (brand-tokens single-source-of-truth pipeline) complete
+stopped_at: Phase 45 Plan 04 complete (react-email scaffold + brand-tokens pipeline proven via vitest snapshot)
+last_updated: "2026-04-26T21:11:59.446Z"
+last_activity: 2026-04-26 -- Phase 45 Plan 04 (react-email scaffold + brand-tokens pipeline proven via vitest snapshot) complete
 progress:
   total_phases: 9
   completed_phases: 1
   total_plans: 15
-  completed_plans: 13
-  percent: 87
+  completed_plans: 14
+  percent: 93
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 45 (email-foundations) — EXECUTING
-Plan: 4 of 5 (45-01 + 45-02 complete; 45-03 deferred; next executable is 45-04 react-email scaffold + 45-05 snapshot harness in Wave 2)
+Plan: 5 of 5 (45-01 + 45-02 + 45-04 complete; 45-03 deferred; 45-05 snapshot harness next in Wave 2)
 Status: Executing Phase 45
-Last activity: 2026-04-26 -- Phase 45 Plan 02 (brand-tokens single-source-of-truth pipeline) complete
+Last activity: 2026-04-26 -- Phase 45 Plan 04 (react-email scaffold + brand-tokens pipeline proven via vitest snapshot) complete
 
 ## v5.3 Phase Map
 
@@ -112,6 +112,7 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - DKIM/SPF/DMARC verification for `lasprezz.com` is a hard prerequisite before any external send in Phase 46 — flagged Active in PROJECT.md v3.0 and resolved in Phase 45
 - Tenant-scoped `getTenantClient(tenantId)` used by impersonated reads — same Sanity client whether requester is the live recipient or impersonating admin, by design (pixel-identical rendering)
 - New dependencies: `react-email@^6.0.0`, `@react-email/render`, `@react-email/tailwind`, `@axe-core/playwright@^4.11.2`, `@playwright/test@latest` (a11y harness manual-only, no CI gate)
+- **D-7** (Phase 45-04): `@react-email/tailwind@^2.0.7` normalizes hex colors to `rgb(r,g,b)` during inlining; brand-token round-trip assertions in email tests must accept either hex OR rgb form. `containsTokenColor()` helper in `src/emails/scaffold.test.ts` is the canonical pattern for Phase 46+ template tests. Update 45-RESEARCH.md Pitfall 7 to reflect this when convenient.
 
 ### Pending Todos
 
@@ -131,7 +132,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-26T20:59:39Z
-Stopped at: Phase 45 Plan 02 complete (brand-tokens single-source-of-truth pipeline + generator + global.css @import swap)
-Resume file: .planning/phases/45-email-foundations/45-02-SUMMARY.md
-Next action: `/gsd-execute-phase 45` to run Wave 2 (45-04 react-email scaffold + 45-05 snapshot harness) — 45-03 remains deferred
+Last session: 2026-04-26T21:11:59.438Z
+Stopped at: Phase 45 Plan 04 complete (react-email scaffold + brand-tokens pipeline proven via vitest snapshot)
+Resume file: .planning/phases/45-email-foundations/45-04-SUMMARY.md
+Next action: `/gsd-execute-phase 45` to run Wave 2's remaining plan (45-05 snapshot harness) — 45-03 remains deferred
