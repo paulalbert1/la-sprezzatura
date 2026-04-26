@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
-import CollapsibleSection from "../ui/CollapsibleSection";
 import ToastContainer, { useToast } from "../ui/ToastContainer";
 import GeneralSection, {
   type GeneralValues,
@@ -15,7 +14,6 @@ import HeroSlideshowEditor, {
 import RenderingConfigSection, {
   type RenderingConfigValues,
 } from "./RenderingConfigSection";
-import StudioRetirementNotice from "./StudioRetirementNotice";
 import TradesCatalogSection from "../TradesCatalogSection";
 import ChecklistConfigSection from "../ChecklistConfigSection";
 import WorkflowTemplatesSection from "../workflow/WorkflowTemplatesSection";
@@ -300,8 +298,50 @@ function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [] }: S
     [initialSettings.heroSlideshow],
   );
 
+  // Sub-nav: each section has a stable id used in the URL hash for deep
+  // linking (e.g. /admin/settings#workflow-templates). All sections stay
+  // mounted so per-section editor state survives nav switches; we just
+  // hide the inactive ones with display:none.
+  const sections = [
+    { id: "general", label: "General" },
+    { id: "social-links", label: "Social links" },
+    { id: "hero-slideshow", label: "Hero slideshow" },
+    { id: "rendering", label: "Rendering" },
+    { id: "trades", label: "Trades" },
+    { id: "contractor-checklist", label: "Contractor checklist" },
+    { id: "vendor-checklist", label: "Vendor checklist" },
+    { id: "workflow-templates", label: "Workflow templates" },
+  ] as const;
+  type SectionId = (typeof sections)[number]["id"];
+
+  const initialActive: SectionId = (() => {
+    if (typeof window === "undefined") return "general";
+    const hash = window.location.hash.replace("#", "");
+    return (sections.find((s) => s.id === hash)?.id ?? "general") as SectionId;
+  })();
+  const [active, setActive] = useState<SectionId>(initialActive);
+
+  useEffect(() => {
+    function onHashChange() {
+      const hash = window.location.hash.replace("#", "");
+      const match = sections.find((s) => s.id === hash);
+      if (match) setActive(match.id as SectionId);
+    }
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  function selectSection(id: SectionId) {
+    setActive(id);
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `#${id}`);
+    }
+  }
+
+  const activeLabel = sections.find((s) => s.id === active)?.label ?? "";
+
   return (
-    <div className="max-w-3xl" data-settings-page>
+    <div data-settings-page>
       <p
         className="mb-6"
         style={{ fontSize: "13px", color: "#6B5E52" }}
@@ -310,65 +350,124 @@ function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [] }: S
         Site-wide settings and rendering configuration.
       </p>
 
-      <div className="flex flex-col" style={{ gap: "14px" }}>
-        <CollapsibleSection title="General" defaultOpen>
-          <GeneralSection values={general} onChange={handleGeneralChange} />
-        </CollapsibleSection>
+      <div className="flex gap-8">
+        {/* Sub-nav rail */}
+        <nav
+          className="shrink-0"
+          aria-label="Settings sections"
+          style={{ width: "180px" }}
+        >
+          <ul className="flex flex-col" style={{ gap: "1px" }}>
+            {sections.map((s) => {
+              const isActive = s.id === active;
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectSection(s.id as SectionId)}
+                    aria-current={isActive ? "page" : undefined}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      fontFamily: "var(--font-body)",
+                      fontSize: "13px",
+                      color: isActive ? "#5C4F3D" : "#8A7E6E",
+                      fontWeight: isActive ? 600 : 400,
+                      background: isActive ? "#F5EFE6" : "transparent",
+                      borderLeft: isActive
+                        ? "2px solid #9A7B4B"
+                        : "2px solid transparent",
+                      borderRadius: "0 6px 6px 0",
+                      padding: "7px 12px",
+                      cursor: "pointer",
+                      transition:
+                        "color 150ms ease, background-color 150ms ease, border-color 150ms ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = "#5C4F3D";
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = "#8A7E6E";
+                      }
+                    }}
+                  >
+                    {s.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-        <CollapsibleSection title="Social Links">
-          <SocialLinksSection
-            values={socialLinks}
-            onChange={handleSocialChange}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Hero Slideshow">
-          <HeroSlideshowEditor
-            ref={heroRef}
-            initialSlides={initialHeroSlides}
-            onDirtyChange={handleHeroDirty}
-            onValidChange={setHeroValid}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Rendering Configuration">
-          <RenderingConfigSection
-            values={rendering}
-            onChange={handleRenderingChange}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Trades">
-          <TradesCatalogSection trades={trades} onChange={handleTradesChange} />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Contractor Checklist" defaultOpen>
-          <ChecklistConfigSection
-            items={contractorChecklistItems}
-            inUseTypes={inUseDocTypes}
-            variant="contractor"
-            onChange={handleContractorChecklistChange}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Vendor Checklist">
-          <ChecklistConfigSection
-            items={vendorChecklistItems}
-            inUseTypes={inUseDocTypes}
-            variant="vendor"
-            onChange={handleVendorChecklistChange}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Workflow Templates" defaultOpen={false}>
-          <p className="text-sm font-body text-stone" style={{ marginBottom: "16px", fontSize: "13px", color: "#6B5E52" }}>
-            Reusable process definitions you can apply to projects. Each template defines phases, milestones, gates, and default contractors. Edit or duplicate an existing template, or create a new one from scratch.
-          </p>
-          <WorkflowTemplatesSection templates={initialWorkflowTemplates} />
-        </CollapsibleSection>
+        {/* Content panel */}
+        <div className="flex-1 min-w-0 max-w-3xl">
+          <div
+            style={{
+              backgroundColor: "#FFFEFB",
+              border: "0.5px solid #E8DDD0",
+              borderRadius: "10px",
+              overflow: "hidden",
+            }}
+          >
+            <div className="card-header flex items-center justify-between gap-3 px-5 h-[42px]">
+              <h2 className="card-header-label">{activeLabel}</h2>
+            </div>
+            <div style={{ padding: "20px 24px 24px" }}>
+              <div style={{ display: active === "general" ? "block" : "none" }}>
+                <GeneralSection values={general} onChange={handleGeneralChange} />
+              </div>
+              <div style={{ display: active === "social-links" ? "block" : "none" }}>
+                <SocialLinksSection
+                  values={socialLinks}
+                  onChange={handleSocialChange}
+                />
+              </div>
+              <div style={{ display: active === "hero-slideshow" ? "block" : "none" }}>
+                <HeroSlideshowEditor
+                  ref={heroRef}
+                  initialSlides={initialHeroSlides}
+                  onDirtyChange={handleHeroDirty}
+                  onValidChange={setHeroValid}
+                />
+              </div>
+              <div style={{ display: active === "rendering" ? "block" : "none" }}>
+                <RenderingConfigSection
+                  values={rendering}
+                  onChange={handleRenderingChange}
+                />
+              </div>
+              <div style={{ display: active === "trades" ? "block" : "none" }}>
+                <TradesCatalogSection trades={trades} onChange={handleTradesChange} />
+              </div>
+              <div style={{ display: active === "contractor-checklist" ? "block" : "none" }}>
+                <ChecklistConfigSection
+                  items={contractorChecklistItems}
+                  inUseTypes={inUseDocTypes}
+                  variant="contractor"
+                  onChange={handleContractorChecklistChange}
+                />
+              </div>
+              <div style={{ display: active === "vendor-checklist" ? "block" : "none" }}>
+                <ChecklistConfigSection
+                  items={vendorChecklistItems}
+                  inUseTypes={inUseDocTypes}
+                  variant="vendor"
+                  onChange={handleVendorChecklistChange}
+                />
+              </div>
+              <div style={{ display: active === "workflow-templates" ? "block" : "none" }}>
+                <p className="text-sm font-body text-stone" style={{ marginBottom: "16px", fontSize: "13px", color: "#6B5E52" }}>
+                  Reusable process definitions you can apply to projects. Each template defines phases, milestones, gates, and default contractors. Edit or duplicate an existing template, or create a new one from scratch.
+                </p>
+                <WorkflowTemplatesSection templates={initialWorkflowTemplates} />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <StudioRetirementNotice />
 
       {/* Sticky footer */}
       <div

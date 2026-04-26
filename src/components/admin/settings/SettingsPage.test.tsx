@@ -58,38 +58,43 @@ beforeEach(() => {
 });
 
 describe("SettingsPage (Phase 34 Plan 03)", () => {
-  it("renders four CollapsibleSection children (General, Social Links, Hero Slideshow, Rendering Configuration)", () => {
+  it("renders a sub-nav button for every settings section", () => {
     render(<SettingsPage initialSettings={defaultSettings()} />);
-    // The CollapsibleSection primitive exposes each header as role="button"
-    // with the title as the accessible name.
-    expect(
-      screen.getByRole("button", { name: /General/ }),
-    ).not.toBeNull();
-    expect(
-      screen.getByRole("button", { name: /Social Links/ }),
-    ).not.toBeNull();
-    expect(
-      screen.getByRole("button", { name: /Hero Slideshow/ }),
-    ).not.toBeNull();
-    expect(
-      screen.getByRole("button", { name: /Rendering Configuration/ }),
-    ).not.toBeNull();
+    // Each entry in the sidebar sub-nav exposes a role=button with the
+    // section label as the accessible name.
+    const labels = [
+      /General/,
+      /Social links/,
+      /Hero slideshow/,
+      /Rendering/,
+      /Trades/,
+      /Contractor checklist/,
+      /Vendor checklist/,
+      /Workflow templates/,
+    ];
+    for (const name of labels) {
+      expect(screen.getByRole("button", { name })).not.toBeNull();
+    }
   });
 
-  it("General section is expanded by default; others collapsed", () => {
+  it("General is the active section by default (aria-current='page')", () => {
     render(<SettingsPage initialSettings={defaultSettings()} />);
-    // General's body renders the site-title input with its tenant-neutral placeholder
+    const generalNav = screen.getByRole("button", { name: /General/ });
+    expect(generalNav.getAttribute("aria-current")).toBe("page");
+    // Other nav buttons should not be marked active.
+    const renderingNav = screen.getByRole("button", { name: /^Rendering$/ });
+    expect(renderingNav.getAttribute("aria-current")).toBeNull();
+  });
+
+  it("clicking a section nav button activates it", () => {
+    render(<SettingsPage initialSettings={defaultSettings()} />);
+    const renderingNav = screen.getByRole("button", { name: /^Rendering$/ });
+    expect(renderingNav.getAttribute("aria-current")).toBeNull();
+    fireEvent.click(renderingNav);
+    expect(renderingNav.getAttribute("aria-current")).toBe("page");
+    // General should no longer be active.
     expect(
-      screen.queryByPlaceholderText("Your studio name"),
-    ).not.toBeNull();
-    // Rendering Configuration section is collapsed — the helper text
-    // that lives inside its body must NOT be in the DOM.
-    expect(
-      screen.queryByText(/Maximum AI renderings per designer/i),
-    ).toBeNull();
-    // Hero slideshow body (empty state) must not be rendered either.
-    expect(
-      document.querySelector("[data-hero-empty-state]"),
+      screen.getByRole("button", { name: /General/ }).getAttribute("aria-current"),
     ).toBeNull();
   });
 
@@ -204,39 +209,26 @@ describe("SettingsPage (Phase 34 Plan 03)", () => {
 });
 
 describe("SettingsPage — Phase 43 checklist sections (TRAD-08)", () => {
-  it("renders Contractor Checklist section open by default", () => {
+  it("renders sub-nav entries for both Contractor and Vendor checklists", () => {
     mockInUseDocTypesFetch();
     render(
       <SettingsPage
         initialSettings={defaultSettings({
           contractorChecklistItems: ["W-9"],
-          vendorChecklistItems: [],
-        })}
-      />,
-    );
-    // CollapsibleSection header exposes a role=button with the title as name.
-    expect(
-      screen.getByRole("button", { name: /Contractor Checklist/ }),
-    ).not.toBeNull();
-    // Open-by-default means the item label inside the section is rendered.
-    expect(screen.getByText("W-9")).not.toBeNull();
-  });
-
-  it("renders Vendor Checklist section closed by default", () => {
-    mockInUseDocTypesFetch();
-    render(
-      <SettingsPage
-        initialSettings={defaultSettings({
-          contractorChecklistItems: [],
           vendorChecklistItems: ["Vendor agreement"],
         })}
       />,
     );
     expect(
-      screen.getByRole("button", { name: /Vendor Checklist/ }),
+      screen.getByRole("button", { name: /Contractor checklist/ }),
     ).not.toBeNull();
-    // Body is unmounted while collapsed, so the item label must NOT appear.
-    expect(screen.queryByText("Vendor agreement")).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /Vendor checklist/ }),
+    ).not.toBeNull();
+    // All section bodies stay mounted (display:none for inactive ones)
+    // so item labels exist in the DOM regardless of which nav is active.
+    expect(screen.getByText("W-9")).not.toBeNull();
+    expect(screen.getByText("Vendor agreement")).not.toBeNull();
   });
 
   it("fetches inUseDocTypes on mount", async () => {

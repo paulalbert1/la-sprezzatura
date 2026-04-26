@@ -2,8 +2,9 @@ import { useState, useCallback } from "react";
 import ToastContainer, { useToast } from "../ui/ToastContainer";
 
 // Phase 44 Plan 08 / Plan 10 — WorkflowTemplatesSection
-// Rendered inside a CollapsibleSection in SettingsPage.
-// Provides: card grid + empty state + New template + per-card Duplicate.
+// Rendered inside the SettingsPage sidebar-nav content panel as one of the
+// settings sections. Provides: card grid + empty state + New template +
+// per-card Duplicate.
 
 interface PhaseMinimal {
   milestones?: unknown[];
