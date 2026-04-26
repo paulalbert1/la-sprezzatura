@@ -18,8 +18,8 @@ updated: 2026-04-26
 
 | Property | Value |
 |----------|-------|
-| **Framework** | Vitest 3.2.4 (existing) + Playwright 1.59.x (NEW — 45-PLAN-foundation Task 3 install) |
-| **Config file** | `vitest.config.ts` (existing); `playwright.config.ts` (45-PLAN-snapshot-harness Task 2) |
+| **Framework** | Vitest 3.2.4 (existing) + Playwright 1.59.x (NEW — 45-01-PLAN Task 3 install) |
+| **Config file** | `vitest.config.ts` (existing); `playwright.config.ts` (45-05-PLAN Task 2) |
 | **Quick run command** | `vitest run src/lib/sendUpdate src/lib/workOrder` |
 | **Full suite command** | `npm run test && npm run test:visual` |
 | **Estimated runtime** | ~15s Vitest scoped, ~45s with Playwright snapshots |
@@ -30,11 +30,11 @@ updated: 2026-04-26
 
 | Plan File | Task IDs |
 |-----------|----------|
-| 45-PLAN-foundation.md | 45-foundation-T1 (deps), 45-foundation-T2 (npm scripts), 45-foundation-T3 (chromium install) |
-| 45-PLAN-tokens.md | 45-tokens-T1 (brand-tokens.ts + shape test), 45-tokens-T2 (generator + global.css swap + round-trip test) |
-| 45-PLAN-react-email-scaffold.md | 45-scaffold-T1 (_theme.ts), 45-scaffold-T2 (__scaffold.tsx + scaffold.test.ts) |
-| 45-PLAN-snapshot-harness.md | 45-snaps-T1 (Send Update permutations + Work Order baseline Vitest snaps), 45-snaps-T2 (playwright.config.ts + scaffold.spec.ts + PNG baselines) |
-| 45-PLAN-asset-host-and-dns.md | 45-assets-T1 (Vercel asset host + curl smoke), 45-assets-T2 (Cloudflare SPF edit + Resend dashboard verify), 45-assets-T3 (docs/email-merge-gate.md), 45-assets-T4 (Outlook desktop scaffold screenshot) |
+| 45-01-PLAN.md (foundation) | 45-foundation-T1 (deps), 45-foundation-T2 (npm scripts), 45-foundation-T3 (chromium install) |
+| 45-02-PLAN.md (tokens) | 45-tokens-T1 (brand-tokens.ts + shape test), 45-tokens-T2 (generator + global.css swap + round-trip test) |
+| 45-04-PLAN.md (react-email-scaffold) | 45-scaffold-T1 (_theme.ts), 45-scaffold-T2 (__scaffold.tsx + scaffold.test.ts) |
+| 45-05-PLAN.md (snapshot-harness) | 45-snaps-T1 (Send Update permutations + Work Order baseline Vitest snaps), 45-snaps-T2 (playwright.config.ts + scaffold.spec.ts + PNG baselines) |
+| 45-03-PLAN.md (asset-host-and-dns) | 45-assets-T1 (Vercel asset host + curl smoke), 45-assets-T2 (Cloudflare SPF edit + Resend dashboard verify), 45-assets-T3 (docs/email-merge-gate.md), 45-assets-T4 (Outlook desktop scaffold screenshot) |
 
 ---
 
