@@ -1,0 +1,239 @@
+---
+phase: 45-email-foundations
+plan: foundation
+type: execute
+wave: 0
+depends_on: []
+files_modified:
+  - package.json
+  - package-lock.json
+autonomous: true
+requirements: [EMAIL-08, EMAIL-09]
+
+must_haves:
+  truths:
+    - "All Phase 45 dependencies are recorded as direct dependencies (no transitive-only)."
+    - "`npm test` succeeds on a fresh `npm ci` from this commit (no missing packages)."
+    - "Playwright Chromium binary is installed locally so subsequent waves can run snapshot tests."
+    - "`@vitejs/plugin-react` is no longer transitive-only — it is a direct devDependency."
+  artifacts:
+    - path: package.json
+      provides: "Direct devDependencies for @vitejs/plugin-react, @playwright/test, tsx, plus dependencies for react-email + @react-email/* packages, plus npm scripts (theme:gen, prebuild, predev, test:email, test:visual, test:visual:update)."
+      contains: '"@vitejs/plugin-react"'
+    - path: package-lock.json
+      provides: "Lockfile reflecting the installs above so CI installs are deterministic."
+  key_links:
+    - from: package.json
+      to: vitest.config.ts
+      via: "@vitejs/plugin-react direct devDep — vitest.config.ts line 4 imports it; must not rely on transitive resolution."
+      pattern: '"@vitejs/plugin-react"'
+    - from: package.json
+      to: scripts/generate-theme-css.ts
+      via: "tsx runs the TS generator script via the theme:gen npm script."
+      pattern: '"theme:gen": "tsx scripts/generate-theme-css.ts"'
+---
+
+<objective>
+Establish the Wave 0 dependency baseline for Phase 45. Add every npm package the rest of the phase needs, fix the pre-existing `@vitejs/plugin-react` transitive-only flaw, install the Playwright Chromium binary, and wire up the npm scripts the other plans will reference (`theme:gen`, `prebuild`, `predev`, `test:email`, `test:visual`, `test:visual:update`).
+
+Purpose: every other Phase 45 plan depends on these packages and scripts existing. Foundation is autonomous, has no source-code surface beyond `package.json`, and lands first so Waves 1 and 2 can run in parallel.
+
+Output: an updated `package.json` + `package-lock.json` plus a one-time local `npx playwright install chromium` confirmation.
+</objective>
+
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/execute-plan.md
+@$HOME/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/STATE.md
+@.planning/phases/45-email-foundations/45-CONTEXT.md
+@.planning/phases/45-email-foundations/45-RESEARCH.md
+@.planning/phases/45-email-foundations/45-PATTERNS.md
+@.planning/phases/45-email-foundations/45-VALIDATION.md
+@./CLAUDE.md
+@package.json
+@vitest.config.ts
+
+<interfaces>
+<!-- Versions to pin per RESEARCH.md "Standard Stack". Use these EXACTLY. -->
+
+dependencies (runtime, server-rendered via Astro endpoints):
+  "react-email": "^6.0.0"
+  "@react-email/components": "^1.0.12"
+  "@react-email/render": "^2.0.7"
+  "@react-email/tailwind": "^2.0.7"
+
+devDependencies (build/test only):
+  "@playwright/test": "^1.59.1"
+  "@vitejs/plugin-react": "^6.0.1"   # ← currently transitive-only; promote to direct
+  "tsx": "^4.20.6"                    # ← TS script runner for scripts/generate-theme-css.ts
+
+scripts to add (preserve existing dev/build/preview/check/format/test):
+  "theme:gen": "tsx scripts/generate-theme-css.ts"
+  "prebuild": "npm run theme:gen"
+  "predev": "npm run theme:gen"
+  "test:email": "vitest run src/lib/sendUpdate src/lib/workOrder src/emails"
+  "test:visual": "playwright test"
+  "test:visual:update": "playwright test --update-snapshots"
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Install Phase 45 dependencies and devDependencies</name>
+  <files>package.json, package-lock.json</files>
+  <read_first>
+    - package.json (full file — current dependencies, devDependencies, scripts)
+    - vitest.config.ts (line 4 imports @vitejs/plugin-react — confirm direct devDep is required)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Standard Stack" section (verified versions)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "package.json (MODIFY, config)" section
+  </read_first>
+  <action>
+    Run two npm install commands in sequence from the repo root. Do NOT hand-edit package.json — let npm record exact pinned versions.
+
+    1) Install runtime dependencies (per D-13/D-14 these are imported by Astro server endpoints in Phases 46+; they ship in production):
+       ```
+       npm install react-email@^6.0.0 @react-email/components@^1.0.12 @react-email/render@^2.0.7 @react-email/tailwind@^2.0.7
+       ```
+
+    2) Install devDependencies (build- and test-time only):
+       ```
+       npm install --save-dev @playwright/test@^1.59.1 @vitejs/plugin-react@^6.0.1 tsx@^4.20.6
+       ```
+
+    Rationale per RESEARCH.md Pitfall 1: `@vitejs/plugin-react` is currently transitive-only via the package-lock; `vitest.config.ts` line 4 imports it directly. A clean `npm ci` on a fresh checkout can fail with "Cannot find package '@vitejs/plugin-react'". The `--save-dev` install fixes that by promoting it to a direct devDep.
+
+    Do NOT bump existing dependencies. Do NOT run `npm audit fix` or `npm update` — those would silently change other versions. Only the eight packages above should be touched.
+
+    Verify nothing else regressed by running `npm test` after install — the existing Vitest suite must still pass.
+  </action>
+  <verify>
+    <automated>node -e "const p=require('./package.json'); const need=['react-email','@react-email/components','@react-email/render','@react-email/tailwind']; const dev=['@playwright/test','@vitejs/plugin-react','tsx']; const missing=[...need.filter(k=>!p.dependencies?.[k]), ...dev.filter(k=>!p.devDependencies?.[k])]; if(missing.length){console.error('MISSING',missing);process.exit(1)} console.log('OK')" && npm test</automated>
+  </verify>
+  <acceptance_criteria>
+    - `node -e "console.log(require('./package.json').dependencies['react-email'])"` prints a non-empty version string starting with `^6`.
+    - `node -e "console.log(require('./package.json').dependencies['@react-email/components'])"` prints a version starting with `^1`.
+    - `node -e "console.log(require('./package.json').dependencies['@react-email/render'])"` prints a version starting with `^2`.
+    - `node -e "console.log(require('./package.json').dependencies['@react-email/tailwind'])"` prints a version starting with `^2`.
+    - `node -e "console.log(require('./package.json').devDependencies['@playwright/test'])"` prints a version starting with `^1.59`.
+    - `node -e "console.log(require('./package.json').devDependencies['@vitejs/plugin-react'])"` prints a version starting with `^6`.
+    - `node -e "console.log(require('./package.json').devDependencies['tsx'])"` prints a non-empty version string.
+    - `git diff --stat package.json` shows package.json changed; `git diff --stat package-lock.json` shows package-lock.json changed.
+    - `npm test` exits 0 (existing Vitest suite still green — no regression).
+    - `grep -c '"@vitejs/plugin-react"' package.json` returns at least 1 (i.e. direct devDep, not transitive-only).
+  </acceptance_criteria>
+  <done>All eight packages are present in package.json at pinned versions matching the interfaces block above. The existing Vitest suite still passes.</done>
+</task>
+
+<task type="auto">
+  <name>Task 2: Add Phase 45 npm scripts (theme:gen, prebuild, predev, test:email, test:visual, test:visual:update)</name>
+  <files>package.json</files>
+  <read_first>
+    - package.json (post-Task-1 state — confirm scripts block shape)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Pattern 1: Brand-tokens TS → CSS generation" (npm scripts block)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "package.json (MODIFY, config)" — Edit list
+  </read_first>
+  <action>
+    Edit `package.json` `"scripts"` block to add the six new scripts below. Do not remove or rename any existing script (`dev`, `build`, `preview`, `check`, `format`, `test` must stay exactly as they are).
+
+    Add these keys verbatim:
+    - `"theme:gen": "tsx scripts/generate-theme-css.ts"`
+    - `"prebuild": "npm run theme:gen"`
+    - `"predev": "npm run theme:gen"`
+    - `"test:email": "vitest run src/lib/sendUpdate src/lib/workOrder src/emails"`
+    - `"test:visual": "playwright test"`
+    - `"test:visual:update": "playwright test --update-snapshots"`
+
+    Per CONTEXT D-08: `prebuild` and `predev` are npm lifecycle hooks. Astro's `build` runs `astro build`; npm runs `prebuild` automatically first. Same for `dev`/`predev`. This guarantees `_generated-theme.css` is regenerated before every build and dev start.
+
+    Per RESEARCH "Anti-Patterns to Avoid": keep Playwright separate from `npm test`. The default `npm test` runs Vitest only; Playwright lives behind `test:visual` so the email-snapshot harness doesn't slow down the unit-test loop.
+
+    Note: `theme:gen` will fail until 45-PLAN-tokens lands `scripts/generate-theme-css.ts`. That is expected — the script is added now so other plans can call `npm run theme:gen` once their files exist. Verification of this task does NOT run `theme:gen`.
+  </action>
+  <verify>
+    <automated>node -e "const s=require('./package.json').scripts; const need=['theme:gen','prebuild','predev','test:email','test:visual','test:visual:update']; const m=need.filter(k=>!s[k]); if(m.length){console.error('MISSING',m);process.exit(1)} if(s['theme:gen']!=='tsx scripts/generate-theme-css.ts'){console.error('theme:gen wrong');process.exit(1)} if(s['prebuild']!=='npm run theme:gen'){console.error('prebuild wrong');process.exit(1)} if(s['test:visual']!=='playwright test'){console.error('test:visual wrong');process.exit(1)} console.log('OK')"</automated>
+  </verify>
+  <acceptance_criteria>
+    - `node -e "console.log(require('./package.json').scripts['theme:gen'])"` prints `tsx scripts/generate-theme-css.ts` exactly.
+    - `node -e "console.log(require('./package.json').scripts['prebuild'])"` prints `npm run theme:gen` exactly.
+    - `node -e "console.log(require('./package.json').scripts['predev'])"` prints `npm run theme:gen` exactly.
+    - `node -e "console.log(require('./package.json').scripts['test:email'])"` prints `vitest run src/lib/sendUpdate src/lib/workOrder src/emails` exactly.
+    - `node -e "console.log(require('./package.json').scripts['test:visual'])"` prints `playwright test` exactly.
+    - `node -e "console.log(require('./package.json').scripts['test:visual:update'])"` prints `playwright test --update-snapshots` exactly.
+    - All pre-existing scripts (`dev`, `build`, `preview`, `check`, `format`, `test`) still resolve to their original commands (compare with `git show HEAD:package.json`).
+  </acceptance_criteria>
+  <done>All six new npm scripts are present at the exact strings above; no existing script is altered.</done>
+</task>
+
+<task type="auto">
+  <name>Task 3: Install the Playwright Chromium browser binary</name>
+  <files></files>
+  <read_first>
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Environment Availability" section — Playwright Chromium is the only missing dep with a fallback install step
+    - package.json (post-Task-2 state — confirm @playwright/test is installed before running this)
+  </read_first>
+  <action>
+    Run the one-time Chromium download from the repo root:
+
+    ```
+    npx playwright install chromium
+    ```
+
+    This downloads ~150 MB of headless Chromium into Playwright's cache directory (typically `~/Library/Caches/ms-playwright/` on macOS). It is a per-machine setup step, not a per-repo install — Playwright keeps browsers outside `node_modules`.
+
+    Do NOT run `npx playwright install` (no `chromium` arg) — that pulls Firefox + WebKit too and bloats the cache for browsers we never use. Per RESEARCH "Playwright config", we only ship a chromium project.
+
+    If the download fails (network blocked, cache permission issue), retry once. If it still fails, do not proceed — flag the failure and stop, since 45-PLAN-snapshot-harness depends on this binary.
+  </action>
+  <verify>
+    <automated>npx playwright --version | grep -E '^Version [0-9]'</automated>
+  </verify>
+  <acceptance_criteria>
+    - `npx playwright --version` prints a string starting with `Version 1.59` (or higher minor).
+    - `ls ~/Library/Caches/ms-playwright/ | grep -ci chromium` returns at least 1 (a `chromium-*` or `chromium_headless_shell-*` directory exists in the Playwright cache on macOS).
+    - `npx playwright install --dry-run chromium 2>&1 | grep -ic 'is already installed\|browser is up to date\|chromium.*already'` returns at least 1, OR re-running `npx playwright install chromium` reports the browser is already present (Playwright prints "is already installed" / "browser is up to date").
+  </acceptance_criteria>
+  <done>Headless Chromium is downloaded and Playwright's `--version` resolves; the cache directory contains a chromium subfolder. The binary is reusable across local runs and the existing CI runner (CI's first run will re-download into its own cache; that's expected).</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| npm registry → local | We trust pinned versions resolved from package-lock.json. No new credentials introduced. |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-V14-FOUND-01 | Tampering | package-lock.json | accept | Pin versions via npm install; commit lockfile diff for review. No new auth scope. |
+| T-V14-FOUND-02 | Information Disclosure | npm install logs | accept | No secrets used by these install commands; logs cannot leak credentials. |
+
+(Phase-wide threats T-V14-01..04 and T-V5-01 from `<security_threat_model>` apply to the plans that touch DNS, the asset host, and rendering — not this Wave 0 dependency setup.)
+</threat_model>
+
+<verification>
+- `npm test` exits 0 (no regression in the existing 70+ Vitest tests).
+- `npx playwright --version` prints a valid version string.
+- `git diff --stat` shows only `package.json` and `package-lock.json` modified.
+</verification>
+
+<success_criteria>
+1. All four runtime dependencies (`react-email`, `@react-email/components`, `@react-email/render`, `@react-email/tailwind`) appear in `package.json` `dependencies`.
+2. All three devDependencies (`@playwright/test`, `@vitejs/plugin-react`, `tsx`) appear in `package.json` `devDependencies`.
+3. All six new npm scripts (`theme:gen`, `prebuild`, `predev`, `test:email`, `test:visual`, `test:visual:update`) are wired exactly as specified.
+4. Playwright's headless Chromium binary is installed (verifiable via `npx playwright --version` plus the cache-directory check).
+5. `npm test` passes, proving no regression to the existing Vitest suite.
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/45-email-foundations/45-foundation-SUMMARY.md` per `$HOME/.claude/get-shit-done/templates/summary.md`. The summary should record: which packages landed at which versions, the npm script block diff, and the Playwright Chromium install confirmation.
+</output>

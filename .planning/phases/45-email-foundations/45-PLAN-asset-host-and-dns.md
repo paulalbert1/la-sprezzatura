@@ -1,0 +1,588 @@
+---
+phase: 45-email-foundations
+plan: asset-host-and-dns
+type: execute
+wave: 1
+depends_on: [foundation]
+files_modified:
+  - docs/email-merge-gate.md
+autonomous: false
+requirements: [EMAIL-10, EMAIL-11]
+user_setup:
+  - service: "GitHub (separate repo)"
+    why: "Standalone Vercel project per CONTEXT D-01 — `la-sprezzatura-email-assets` lives outside this codebase."
+    actions:
+      - task: "Create new repo `la-sprezzatura-email-assets` under ~/Dropbox/GitHub/"
+        location: "Local FS + GitHub via `gh repo create`"
+      - task: "Populate /public/wordmark.png and /public/brand-mark.png from the studio brand asset library"
+        location: "Manual file copy into the new repo"
+  - service: vercel
+    why: "Asset CDN host (cookie-less) per D-01."
+    actions:
+      - task: "Create new Vercel project pointed at `la-sprezzatura-email-assets`"
+        location: "vercel.com → New Project → Import GitHub repo"
+      - task: "Add custom domain `email-assets.lasprezz.com` in project Settings → Domains"
+        location: "Vercel Dashboard"
+      - task: "Capture screenshot of the Vercel domain showing SSL provisioned + green status"
+        location: "Phase summary"
+  - service: cloudflare
+    why: "DNS for lasprezz.com lives at Cloudflare per memory `project_email_migration_status`. Two edits this phase: (a) add CNAME for email-assets.lasprezz.com, DNS-only / grey cloud; (b) amend SPF TXT to include amazonses.com."
+    actions:
+      - task: "Add CNAME `email-assets` → Vercel-provided target (e.g. cname.vercel-dns.com), Proxy: DNS-only (grey cloud), TTL: Auto"
+        location: "Cloudflare Dashboard → lasprezz.com → DNS → Records"
+      - task: "Edit SPF TXT record at `lasprezz.com` from `v=spf1 include:spf.protection.outlook.com -all` to `v=spf1 include:spf.protection.outlook.com include:amazonses.com -all`"
+        location: "Cloudflare Dashboard → lasprezz.com → DNS → Records"
+      - task: "Capture before/after dig output for SPF + DKIM + DMARC"
+        location: "Phase summary"
+  - service: resend
+    why: "Domain verification screenshot per D-15 (EMAIL-11 deliverable)."
+    actions:
+      - task: "Trigger re-verification on the lasprezz.com domain row after DNS propagation"
+        location: "Resend Dashboard → Domains → lasprezz.com"
+      - task: "Capture screenshot showing DKIM + SPF + DMARC all green/verified"
+        location: "Phase summary"
+
+must_haves:
+  truths:
+    - "`la-sprezzatura-email-assets` repo exists at `~/Dropbox/GitHub/la-sprezzatura-email-assets/` with `vercel.json`, `public/wordmark.png`, `public/brand-mark.png`, `README.md`."
+    - "Standalone Vercel project for `la-sprezzatura-email-assets` is deployed and `email-assets.lasprezz.com` resolves to it (DNS-only / grey cloud)."
+    - "`curl -sI https://email-assets.lasprezz.com/wordmark.png` returns HTTP 200, `Cache-Control: public, max-age=31536000, immutable`, and NO `Set-Cookie` header (T-V14-03 mitigation)."
+    - "SPF TXT record at lasprezz.com includes `include:amazonses.com` (verified live via dig)."
+    - "DKIM `resend._domainkey.lasprezz.com` resolves to a Resend-issued public key (verified live)."
+    - "DMARC `_dmarc.lasprezz.com` exists with at least `p=none` and an `rua=mailto:` reporting address (verified live)."
+    - "Resend dashboard shows DKIM, SPF, DMARC all green/verified for lasprezz.com (screenshot in phase summary)."
+    - "`docs/email-merge-gate.md` documents the manual Outlook desktop send-to-liz screenshot procedure for Phase 46+ to inherit."
+    - "Phase summary captures: SPF dig before/after, DKIM dig, DMARC dig, asset-host curl headers, Resend dashboard screenshot, scaffold-rendered Outlook desktop screenshot."
+  artifacts:
+    - path: "~/Dropbox/GitHub/la-sprezzatura-email-assets/"
+      provides: "Standalone Vercel asset repo (separate from this codebase)."
+      contains: "vercel.json, public/wordmark.png, public/brand-mark.png, README.md"
+    - path: docs/email-merge-gate.md
+      provides: "Phase 46+ Outlook desktop manual merge-gate procedure (D-10)."
+      contains: "# Email Merge Gate"
+  key_links:
+    - from: "email-assets.lasprezz.com (Cloudflare CNAME)"
+      to: "Vercel deployment of la-sprezzatura-email-assets"
+      via: "DNS-only (grey cloud) per Pitfall 4"
+      pattern: "email-assets\\..*CNAME.*vercel"
+    - from: "noreply@lasprezz.com (Resend SES sender)"
+      to: "Receiving MTA SPF/DKIM/DMARC checks"
+      via: "include:amazonses.com in SPF + resend._domainkey DKIM + p=none DMARC"
+      pattern: "v=spf1.*amazonses"
+---
+
+<objective>
+Land the two operator-in-the-loop deliverables for Phase 45:
+
+1. **EMAIL-10 (asset host):** Stand up the standalone `la-sprezzatura-email-assets` Vercel project with cookie-less serving of `wordmark.png` + `brand-mark.png` behind `email-assets.lasprezz.com` (Cloudflare DNS-only).
+2. **EMAIL-11 (DNS alignment):** Edit the SPF TXT record at lasprezz.com to include `amazonses.com`, then capture the Resend dashboard screenshot proving DKIM + SPF + DMARC are all green for lasprezz.com.
+
+Plus the procedural deliverable that Phase 46+ inherits:
+
+3. **D-10 merge gate:** Write `docs/email-merge-gate.md` documenting the manual Outlook desktop screenshot procedure (send to `liz@lasprezz.com`, screenshot in Outlook, attach to phase summary).
+
+Purpose: this plan is the only `autonomous: false` plan in the phase. Every step crosses a boundary the executor cannot fully automate from this codebase — separate repo, Vercel project provisioning, Cloudflare DNS edits, Resend dashboard verification, manual Outlook screenshot. The plan is structured so Claude does as much CLI/API work as possible (`gh repo create`, `vercel` CLI, `dig`, `curl`) and pauses at the irreducibly-manual steps.
+</objective>
+
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/execute-plan.md
+@$HOME/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/STATE.md
+@.planning/phases/45-email-foundations/45-CONTEXT.md
+@.planning/phases/45-email-foundations/45-RESEARCH.md
+@.planning/phases/45-email-foundations/45-PATTERNS.md
+@.planning/phases/45-email-foundations/45-VALIDATION.md
+@./CLAUDE.md
+
+<interfaces>
+<!-- la-sprezzatura-email-assets/vercel.json - exact shape -->
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {
+      "source": "/(.*)\\.(png|jpg|jpeg|gif|svg|webp|ico)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}
+```
+
+<!-- Cloudflare DNS records to add/edit (lasprezz.com zone) -->
+
+ADD:
+  Type:  CNAME
+  Name:  email-assets
+  Target: <value Vercel shows after adding the custom domain — typically cname.vercel-dns.com>
+  Proxy: DNS-only (grey cloud) — CRITICAL per RESEARCH Pitfall 4
+  TTL:   Auto
+
+EDIT (existing SPF TXT at apex):
+  Type:  TXT
+  Name:  @ (or lasprezz.com)
+  Old:   v=spf1 include:spf.protection.outlook.com -all
+  New:   v=spf1 include:spf.protection.outlook.com include:amazonses.com -all
+  TTL:   Auto
+
+DO NOT TOUCH:
+  - resend._domainkey CNAME/TXT (DKIM — already aligned per RESEARCH live dig)
+  - _dmarc TXT (DMARC — already aligned with p=none per RESEARCH live dig)
+  - All M365 records (MX, autodiscover, etc.)
+
+<!-- Resend dashboard verification target -->
+URL: https://resend.com/domains
+Domain row: lasprezz.com
+Expected: DKIM "Verified" (green), SPF "Verified" (green), DMARC "Verified" (green)
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="checkpoint:human-action" gate="blocking">
+  <name>Task 1: Create the la-sprezzatura-email-assets repo, deploy it to Vercel, point email-assets.lasprezz.com at it</name>
+  <files></files>
+  <read_first>
+    - .planning/phases/45-email-foundations/45-CONTEXT.md (D-01..D-04 — asset CDN decisions)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Pattern 5: Cookie-less Vercel asset host" (lines 513-549) and "Pitfall 4: Cloudflare proxy breaking Vercel Cache-Control" (lines 608-621)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "la-sprezzatura-email-assets/" section
+    - ~/.claude/CLAUDE.md (directory structure rule — `~/Dropbox/GitHub/` for git repos)
+  </read_first>
+  <action>
+    Stage all the artifacts needed for the operator-in-the-loop steps that follow. Concretely:
+
+    1. Create the standalone repo locally at `~/Dropbox/GitHub/la-sprezzatura-email-assets/` with `public/`, `vercel.json` (per the interfaces block), and a `README.md`. Source the brand wordmark + brand mark PNGs from the studio brand asset library (manual file copy step — confirm with operator if path is unclear before proceeding).
+    2. Initialize git, commit the initial assets + vercel.json + README, and run `gh repo create la-sprezzatura-email-assets --public --source=. --push` (ask operator to choose `--public` vs `--private` before running; default to `--private` if uncertain since the Vercel deploy URL stays public regardless).
+    3. Pause and pass control to the operator for the Vercel "Import Project" + "Add Custom Domain" steps and the matching Cloudflare CNAME edit (DNS-only / grey cloud per Pitfall 4) — Claude cannot complete those without browser-based dashboards.
+    4. Once the operator confirms `email-assets.lasprezz.com` resolves, Claude runs `curl -sI https://email-assets.lasprezz.com/wordmark.png` to capture the headers and pastes the verbatim output into the phase summary. Claude also runs the same curl against `/brand-mark.png` to confirm the second asset.
+
+    See `<how-to-verify>` for the exact operator-side step list.
+  </action>
+  <what-built>
+    Claude has prepared instructions (the steps below) but has NOT yet executed them. This step is `human-action` because it spans:
+    (a) creating a new repo OUTSIDE this codebase,
+    (b) provisioning a separate Vercel project + adding a custom domain,
+    (c) editing Cloudflare DNS,
+    (d) capturing the screenshot of the deployed Vercel domain showing SSL active.
+
+    None of these can be safely automated end-to-end without operator-in-the-loop validation (Vercel "DNS pending" states, Cloudflare 2FA, etc.).
+  </what-built>
+  <how-to-verify>
+    Execute these steps in order. Claude can run any individual command via Bash if useful, but the operator confirms each milestone:
+
+    1. **Create the repo locally + on GitHub:**
+       ```
+       cd ~/Dropbox/GitHub/
+       mkdir la-sprezzatura-email-assets
+       cd la-sprezzatura-email-assets
+       git init
+       mkdir public
+       # Copy the studio's wordmark + brand mark PNGs into ./public/
+       # (file source: studio brand asset library — manual copy)
+       cat > vercel.json <<'EOF'
+       {
+         "$schema": "https://openapi.vercel.sh/vercel.json",
+         "headers": [
+           {
+             "source": "/(.*)\\.(png|jpg|jpeg|gif|svg|webp|ico)",
+             "headers": [
+               { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+             ]
+           }
+         ]
+       }
+       EOF
+       cat > README.md <<'EOF'
+       # la-sprezzatura-email-assets
+
+       Standalone, cookie-less asset host for La Sprezzatura outbound email.
+       Deployed at `email-assets.lasprezz.com`.
+
+       ## Adding an asset
+
+       Drop the file in `public/`. Use a versioned filename for any visual change
+       (`logo-v2.png`, not overwriting `logo.png`) so cached references in
+       previously-sent emails stay stable. Per CONTEXT D-04.
+
+       ## Cache headers
+
+       `vercel.json` sets `Cache-Control: public, max-age=31536000, immutable`
+       on every image route. Do NOT enable Cloudflare orange-cloud proxy in front
+       of this — DNS-only (grey cloud) per Vercel guidance.
+       EOF
+       git add .
+       git commit -m "Initial commit: vercel.json, brand assets, README"
+       gh repo create la-sprezzatura-email-assets --public --source=. --push
+       ```
+       (Use `--private` instead of `--public` if the brand assets are not meant for public-internet hosting — discuss with user before committing. The Vercel deploy URL is public regardless of the GitHub repo visibility.)
+
+       **Confirm:** `gh repo view la-sprezzatura-email-assets` succeeds.
+
+    2. **Connect Vercel to the repo:**
+       Browse to https://vercel.com/new, select `la-sprezzatura-email-assets`, accept defaults (no framework, root `/`), Deploy.
+
+       **Confirm:** Default Vercel deployment URL (`la-sprezzatura-email-assets.vercel.app` or similar) returns HTTP 200 for `/wordmark.png`.
+
+    3. **Add the custom domain:**
+       In the Vercel project: Settings → Domains → Add → `email-assets.lasprezz.com`. Vercel will display the exact CNAME target it expects.
+
+       **Confirm:** Vercel shows the CNAME instructions panel with a target hostname (typically `cname.vercel-dns.com`).
+
+    4. **Add the Cloudflare CNAME (DNS-only):**
+       Cloudflare → lasprezz.com → DNS → Records → Add:
+       - Type: `CNAME`
+       - Name: `email-assets`
+       - Target: <value from Vercel step 3>
+       - Proxy status: **DNS only (grey cloud)** — CRITICAL per Pitfall 4. NEVER orange.
+       - TTL: Auto
+
+       **Confirm:** `dig +short CNAME email-assets.lasprezz.com` returns the Vercel target after ~1-2 min propagation.
+
+    5. **Wait for Vercel SSL provisioning** (~30 sec to 5 min after DNS resolves):
+       Vercel dashboard → Domains → `email-assets.lasprezz.com` should turn green / "Valid Configuration".
+
+       **Confirm:** `curl -sI https://email-assets.lasprezz.com/wordmark.png` returns HTTP 200.
+
+    6. **Smoke-test cache headers + cookie-less:**
+       ```
+       curl -sI https://email-assets.lasprezz.com/wordmark.png
+       ```
+       Output must include:
+       - `HTTP/2 200`
+       - `cache-control: public, max-age=31536000, immutable`
+       - **NO** `set-cookie` header
+
+       Capture the full headers output verbatim — paste into the phase summary.
+
+    7. **Capture screenshots for phase summary:**
+       - Vercel project domain page showing `email-assets.lasprezz.com` valid + SSL active.
+       - The full `curl -sI` output above.
+
+    Do NOT proceed to Task 2 until all six confirmations are green.
+  </how-to-verify>
+  <resume-signal>Type "asset-host-ready" with the curl headers output pasted, OR describe blocker.</resume-signal>
+  <verify>
+    <automated>curl -sI https://email-assets.lasprezz.com/wordmark.png | tee /tmp/45-asset-headers.txt; grep -c '^HTTP/.* 200' /tmp/45-asset-headers.txt; grep -ci 'cache-control: public, max-age=31536000, immutable' /tmp/45-asset-headers.txt; if grep -i '^set-cookie:' /tmp/45-asset-headers.txt; then echo COOKIE_LEAK_FAIL; exit 1; else echo NO_COOKIE_OK; fi</automated>
+  </verify>
+  <acceptance_criteria>
+    - `test -d ~/Dropbox/GitHub/la-sprezzatura-email-assets/` exits 0.
+    - `test -f ~/Dropbox/GitHub/la-sprezzatura-email-assets/vercel.json` exits 0.
+    - `test -f ~/Dropbox/GitHub/la-sprezzatura-email-assets/public/wordmark.png` exits 0.
+    - `test -f ~/Dropbox/GitHub/la-sprezzatura-email-assets/public/brand-mark.png` exits 0.
+    - `gh repo view la-sprezzatura-email-assets --json name -q .name 2>/dev/null` returns `la-sprezzatura-email-assets`.
+    - `dig +short CNAME email-assets.lasprezz.com | grep -ic vercel` returns at least 1 (CNAME points at Vercel).
+    - `curl -sI https://email-assets.lasprezz.com/wordmark.png | grep -c '^HTTP/.* 200'` returns 1.
+    - `curl -sI https://email-assets.lasprezz.com/wordmark.png | grep -ic 'cache-control: public, max-age=31536000, immutable'` returns 1.
+    - `curl -sI https://email-assets.lasprezz.com/wordmark.png | grep -ic '^set-cookie:'` returns 0 (T-V14-03 mitigation — NO cookies on the asset host).
+    - `curl -sI https://email-assets.lasprezz.com/brand-mark.png | grep -c '^HTTP/.* 200'` returns 1 (second asset reachable too).
+    - Screenshot of Vercel domain panel (showing SSL valid) is attached to the phase summary.
+  </acceptance_criteria>
+  <done>The standalone repo exists, Vercel deploys it on auto-push, `email-assets.lasprezz.com` is a working cookie-less host with year-immutable cache headers, and Cloudflare DNS is DNS-only / grey cloud. Brand wordmark + brand mark are reachable.</done>
+</task>
+
+<task type="checkpoint:human-action" gate="blocking">
+  <name>Task 2: Edit SPF TXT in Cloudflare DNS to include amazonses.com; verify all three (DKIM, SPF, DMARC) green in Resend dashboard</name>
+  <files></files>
+  <read_first>
+    - .planning/phases/45-email-foundations/45-CONTEXT.md (D-15, D-16 — Resend dashboard verification + Cloudflare DNS edits)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Pitfall 6: SPF record missing Resend's mechanism" (lines 632-644 — exact before/after SPF strings)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Runtime State Inventory" — confirms SPF is the only DNS record needing edit; DKIM and DMARC already aligned per live dig 2026-04-26
+  </read_first>
+  <action>
+    Claude does the dig-side work; the operator does the Cloudflare edit:
+
+    1. Capture the BEFORE state via `dig +short TXT lasprezz.com`, `dig +short TXT resend._domainkey.lasprezz.com`, `dig +short TXT _dmarc.lasprezz.com`. Save outputs to /tmp and surface them to the operator + the phase summary.
+    2. Pause for the operator to make the SPF edit in Cloudflare (interfaces block has the exact before/after strings). Claude polls `dig` with the public 1.1.1.1 resolver until the new value appears.
+    3. After propagation, capture the AFTER state via the same three dig commands. Diff before/after for SPF — confirm `include:amazonses.com` is now present and the apex still has exactly ONE SPF record (T-V14-DUPSPF-01).
+    4. Pause again for the operator to log into Resend, click "Verify DNS Records" on the lasprezz.com row, and screenshot the all-green state.
+
+    See `<how-to-verify>` for the operator-side step list and the SPF edit specifics.
+  </action>
+  <what-built>
+    Claude has captured the BEFORE state via dig in this task's verify step. The DNS edit itself happens in the Cloudflare dashboard (browser-side; no Cloudflare CLI is configured for this codebase). The AFTER state is then re-captured via dig and the Resend dashboard re-verifies.
+  </what-built>
+  <how-to-verify>
+    1. **Capture BEFORE state** (Claude can run these via Bash; record output in phase summary):
+       ```
+       dig +short TXT lasprezz.com
+       dig +short TXT resend._domainkey.lasprezz.com
+       dig +short TXT _dmarc.lasprezz.com
+       ```
+       Expected per RESEARCH live audit:
+       - lasprezz.com: `v=spf1 include:spf.protection.outlook.com -all` (the record needing edit)
+       - resend._domainkey: a `p=...` public key string (already aligned)
+       - _dmarc: `v=DMARC1; p=none; rua=mailto:paul@lasprezz.com` (already aligned)
+
+    2. **Edit SPF in Cloudflare:**
+       Cloudflare → lasprezz.com → DNS → Records → find the apex TXT record matching `v=spf1 include:spf.protection.outlook.com -all` → Edit:
+       - New value: `v=spf1 include:spf.protection.outlook.com include:amazonses.com -all`
+       - Save.
+
+       Important: do NOT add a SECOND SPF record. There must be exactly ONE SPF record at the apex (multiple SPF records cause SPF PermError).
+
+    3. **Wait ~1-5 minutes for propagation**, then capture AFTER state:
+       ```
+       dig +short TXT lasprezz.com
+       ```
+       Expected: includes the substring `include:amazonses.com`.
+
+    4. **Re-verify in Resend:**
+       Resend Dashboard → Domains → lasprezz.com → click "Verify DNS Records" (or equivalent button). All three rows (DKIM, SPF, DMARC) should turn green / "Verified".
+
+    5. **Capture screenshot** of the Resend domain row showing all three verified — paste into phase summary.
+
+    6. If Resend still shows SPF "Failed" after 10 min, double-check:
+       - Only ONE SPF record exists at apex (`dig +short TXT lasprezz.com | grep -c '^"v=spf1'` should be 1, not 2).
+       - The new include is `include:amazonses.com` exactly (lowercase; no leading/trailing whitespace).
+       - DNS has propagated globally — try a public resolver: `dig @1.1.1.1 +short TXT lasprezz.com`.
+  </how-to-verify>
+  <resume-signal>Type "dns-verified" with the dig outputs + Resend screenshot path pasted, OR describe blocker.</resume-signal>
+  <verify>
+    <automated>dig +short TXT lasprezz.com | tee /tmp/45-spf.txt; grep -c amazonses /tmp/45-spf.txt | awk '$1>=1{exit 0}{exit 1}' && dig +short TXT resend._domainkey.lasprezz.com | tee /tmp/45-dkim.txt; grep -c 'p=' /tmp/45-dkim.txt | awk '$1>=1{exit 0}{exit 1}' && dig +short TXT _dmarc.lasprezz.com | tee /tmp/45-dmarc.txt; grep -ci 'v=DMARC1' /tmp/45-dmarc.txt | awk '$1>=1{exit 0}{exit 1}' && grep -c 'rua=mailto:' /tmp/45-dmarc.txt | awk '$1>=1{exit 0}{exit 1}'</automated>
+  </verify>
+  <acceptance_criteria>
+    - `dig +short TXT lasprezz.com | grep -c amazonses` returns at least 1 (T-V14-01 mitigation: SPF authorizes Resend's SES relay).
+    - `dig +short TXT lasprezz.com | grep -c 'spf.protection.outlook.com'` returns at least 1 (M365 SPF still authorized — pre-existing flow not regressed).
+    - `dig +short TXT lasprezz.com | grep -c '^"v=spf1'` returns exactly 1 (no duplicate SPF records at apex — multiple = PermError).
+    - `dig +short TXT resend._domainkey.lasprezz.com | grep -c 'p='` returns at least 1 (T-V14-02 mitigation: DKIM key still aligned).
+    - `dig +short TXT _dmarc.lasprezz.com | grep -ci 'v=DMARC1'` returns 1 (T-V14-04: DMARC record exists).
+    - `dig +short TXT _dmarc.lasprezz.com | grep -c 'rua=mailto:'` returns at least 1 (DMARC has reporting address).
+    - Screenshot of Resend dashboard showing DKIM + SPF + DMARC all green/verified for `lasprezz.com` is attached to the phase summary.
+    - BEFORE-state dig outputs (showing SPF missing amazonses) and AFTER-state dig outputs are both captured in the phase summary for audit.
+  </acceptance_criteria>
+  <done>SPF authorizes Resend, DKIM alignment is intact, DMARC exists with reporting, and Resend's UI gates ALL THREE green for lasprezz.com. Phase 46 can ship outbound mail without SPF failures.</done>
+</task>
+
+<task type="auto">
+  <name>Task 3: Write docs/email-merge-gate.md (Outlook desktop manual procedure for Phase 46+)</name>
+  <files>docs/email-merge-gate.md</files>
+  <read_first>
+    - .planning/phases/45-email-foundations/45-CONTEXT.md (D-09, D-10 — DIY Playwright + Outlook desktop procedural gate)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "docs/email-merge-gate.md" section (heading + intro pattern from COMPETITIVE-ANALYSIS.md)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "State of the Art" — Litmus/EOA was the alternative; CONTEXT chose DIY. The doc explains why this manual gate exists.
+    - ~/.claude/CLAUDE.md ("Email drafting" + "no emojis" + dash convention)
+  </read_first>
+  <action>
+    Create `docs/email-merge-gate.md` mirroring the heading conventions of the existing `COMPETITIVE-ANALYSIS.md` (PATTERNS.md "docs/email-merge-gate.md" analog). Use double-hyphens (`--`), no em-dashes, no emojis (CLAUDE.md global rule).
+
+    Required sections and content:
+
+    ```markdown
+    # Email Merge Gate -- Outlook Desktop Spot-Check
+
+    *Last updated: 2026-04-26*
+
+    ## Overview
+
+    La Sprezzatura uses a self-hosted Playwright snapshot harness for email visual
+    regression. Playwright covers Chromium-equivalent clients (Gmail web, Apple
+    Mail macOS / iOS, web Outlook). It does NOT cover Outlook desktop -- Outlook
+    2016 / 2019 / 365 use Microsoft Word's render engine, which is too far from
+    Chromium for headless emulation. Per Phase 45 CONTEXT D-09 / D-10, the
+    Outlook desktop gate is procedural rather than automated.
+
+    Liz reads outbound mail in Outlook desktop. Any template change that ships
+    without a real-Outlook-desktop spot-check has shipped blind for the highest-
+    stakes recipient.
+
+    ## When this gate applies
+
+    Every Phase 46+ pull request that:
+    - modifies a file under `src/emails/`
+    - modifies `src/lib/sendUpdate/emailTemplate.ts` or `src/lib/workOrder/emailTemplate.ts`
+    - modifies `src/emails/_theme.ts`
+    - modifies `src/lib/brand-tokens.ts` (changes a color / font / spacing token)
+    - introduces a new transactional email template
+
+    The gate does NOT apply to PRs that only change the Playwright harness, snapshots,
+    fixtures, or non-email code paths.
+
+    ## Procedure
+
+    1. **Trigger a real send to `liz@lasprezz.com`.** Use the staging or production
+       send endpoint with the modified template. Do NOT mock the send -- this is
+       the only way to exercise Resend's actual rendering pipeline.
+
+    2. **Open the message in Outlook desktop.** Liz checks her Outlook 365
+       desktop client; the implementer can request a screenshot via Slack / email.
+
+    3. **Capture screenshots:**
+       - Full message view, default zoom.
+       - Above-the-fold view (the inbox preview area).
+       - At least one section with mixed content (CTA button + heading + body
+         text -- whatever the template's most fragile combination is).
+
+    4. **Attach screenshots to the phase summary.** Path:
+       `.planning/phases/<NN>-<slug>/<NN>-SUMMARY.md`. Include in the summary's
+       "Outlook desktop verification" section.
+
+    5. **If the screenshot reveals a regression** (collapsed layout, missing
+       images, oversize fonts, broken CTA), file a fix in the same phase before
+       merging. Common Outlook regressions:
+       - Body text rendered too large -> `pixelBasedPreset` missing in
+         `src/emails/_theme.ts` (RESEARCH Pitfall 7).
+       - Layout collapse -> CSS the template depends on uses `flex` / `grid`
+         instead of `<table role="presentation">` (Phase 46 EMAIL-07).
+       - Missing image -> asset URL not on `email-assets.lasprezz.com` or
+         the asset host returned a non-cached 404.
+
+    ## Why this is procedural, not automated
+
+    Per Phase 45 CONTEXT D-09: paid services like Litmus or Email on Acid
+    (~$74/mo) WOULD give us automated Outlook desktop coverage, but the user
+    explicitly chose DIY-only. If Outlook regressions become a recurring problem
+    in Phase 46+, revisit this decision with a one-month EOA buy-in for the
+    high-risk migration phases. Until then, this manual gate is the contract.
+
+    ## Inheritance
+
+    Every Phase 46+ phase summary that touches email rendering MUST include an
+    "Outlook desktop verification" section with the screenshots above. The
+    `/gsd-verify-work` checker will flag a phase as incomplete if the section is
+    absent.
+    ```
+
+    Notes per CLAUDE.md repo conventions:
+    - Top-level repo `.md` (sibling of `COMPETITIVE-ANALYSIS.md`).
+    - Double-hyphens (`--`), never em-dashes.
+    - No emojis.
+    - No AI attribution.
+  </action>
+  <verify>
+    <automated>test -f docs/email-merge-gate.md && grep -c '^# Email Merge Gate' docs/email-merge-gate.md && grep -c '## Procedure' docs/email-merge-gate.md && grep -c '## Inheritance' docs/email-merge-gate.md && grep -c 'Outlook desktop' docs/email-merge-gate.md && grep -cE '[—–]' docs/email-merge-gate.md | awk '$1==0{exit 0}{print "FAIL: em-dash or en-dash found"; exit 1}'</automated>
+  </verify>
+  <acceptance_criteria>
+    - `test -f docs/email-merge-gate.md` exits 0.
+    - `grep -c '^# Email Merge Gate' docs/email-merge-gate.md` returns 1.
+    - `grep -c '^## Overview' docs/email-merge-gate.md` returns 1.
+    - `grep -c '^## When this gate applies' docs/email-merge-gate.md` returns 1.
+    - `grep -c '^## Procedure' docs/email-merge-gate.md` returns 1.
+    - `grep -c '^## Why this is procedural' docs/email-merge-gate.md` returns 1.
+    - `grep -c '^## Inheritance' docs/email-merge-gate.md` returns 1.
+    - `grep -c 'liz@lasprezz.com' docs/email-merge-gate.md` returns at least 1.
+    - `grep -c 'pixelBasedPreset' docs/email-merge-gate.md` returns at least 1 (regression debugging crib).
+    - `grep -cE '[—–]' docs/email-merge-gate.md` returns 0 (no em-dash or en-dash; double-hyphens only per repo convention).
+    - The doc does NOT contain any emoji characters: `python3 -c "import sys; t=open('docs/email-merge-gate.md').read(); import re; print(len(re.findall(r'[\U0001F300-\U0001FAFF\U00002600-\U000027BF]', t)))"` returns `0`. (If Python is unavailable, eyeball — no faces, no checkmark glyphs, no rocket icons.)
+  </acceptance_criteria>
+  <done>The doc exists with all required sections, references the procedural-not-automated decision (D-09/D-10), names `liz@lasprezz.com` as the canonical target, and lists the specific Outlook regression patterns implementers should debug against. Phase 46+ phase summaries can cite this doc verbatim for their Outlook spot-check section.</done>
+</task>
+
+<task type="checkpoint:human-verify" gate="blocking">
+  <name>Task 4: Capture the Outlook desktop scaffold render screenshot for the Phase 45 summary</name>
+  <files></files>
+  <read_first>
+    - docs/email-merge-gate.md (Task 3 output — follow the documented procedure for the first time)
+    - src/emails/__scaffold.tsx (45-PLAN-react-email-scaffold output — the component being rendered for this gate)
+    - .planning/phases/45-email-foundations/45-CONTEXT.md (D-10 — Outlook desktop screenshot is part of the phase summary)
+  </read_first>
+  <action>
+    Claude renders the Scaffold to HTML and prepares it for the operator to send + capture:
+
+    1. Run `npx tsx -e "import('@react-email/render').then(async ({ render }) => { const m = await import('./src/emails/__scaffold'); const C = m.Scaffold ?? m.default; console.log(await render(C({}))); })" > /tmp/scaffold.html` from the repo root. Confirm the file is non-empty and starts with `<!doctype html>` or `<!DOCTYPE html>`.
+    2. Hand `/tmp/scaffold.html` to the operator with the suggested send paths (Resend one-shot script, or Gmail compose paste) — the operator chooses based on what's fastest. Either way the message lands in `liz@lasprezz.com`'s Outlook desktop inbox.
+    3. Pause for the operator to capture the Outlook desktop screenshot(s) per the merge-gate checklist (5 items: body text size, bg-cream, bg-terracotta, heading font, no layout collapse).
+    4. Once screenshots arrive, Claude saves them to `.planning/phases/45-email-foundations/screenshots/45-scaffold-outlook-desktop.png` (creating `screenshots/` if needed), records the path in the plan's SUMMARY.md, and copies the 5-item checklist into the summary with `[x]` / `[ ]` annotations the operator filled in.
+
+    See `<how-to-verify>` for the operator-side step list.
+  </action>
+  <what-built>
+    The scaffold component (Phase 45 plan: react-email-scaffold) renders deterministic HTML containing brand-token hex values. To prove the *Outlook desktop* leg of the EMAIL-09 gate works (and to populate the merge-gate doc with its first real artifact), Claude has prepared the rendered HTML output and instructions for the operator to send it to liz@lasprezz.com and capture a screenshot.
+  </what-built>
+  <how-to-verify>
+    1. **Render the scaffold to HTML:**
+       From the la-sprezzatura repo root:
+       ```
+       npx tsx -e "import('@react-email/render').then(async ({ render }) => { const { Scaffold } = await import('./src/emails/__scaffold'); console.log(await render(Scaffold({}))); })" > /tmp/scaffold.html
+       ```
+       (Adjust if `Scaffold` is a default export vs named — the scaffold file in the react-email-scaffold plan exports both.)
+
+       Confirm: `wc -c /tmp/scaffold.html` returns a non-zero size; the file starts with `<!DOCTYPE html>` or `<!doctype html>`.
+
+    2. **Send the rendered HTML to `liz@lasprezz.com`** via the most ergonomic available path:
+       - Best: a one-shot Resend send via `npx tsx scripts/send-test-scaffold.ts` (operator may write a tiny helper — NOT a permanent script, just a one-off).
+       - Alternative: paste into a Gmail compose window (which preserves the HTML), send to `liz@lasprezz.com`.
+       - Either way, the message arrives in Liz's Outlook desktop inbox.
+
+    3. **Open the message in Outlook desktop** (Liz's machine) and screenshot:
+       - Full message default zoom.
+       - The CTA button area (bg-terracotta button + Hello-heading + body text).
+
+    4. **Save the screenshot(s)** to a path Claude can reference in the phase summary. Suggested location: `.planning/phases/45-email-foundations/screenshots/45-scaffold-outlook-desktop.png`. Create the `screenshots/` subdir if it doesn't exist; commit the PNG along with the SUMMARY.md.
+
+    5. **Verification checklist for the screenshot** (per docs/email-merge-gate.md "common Outlook regressions"):
+       - [ ] Body text renders at ~16px (NOT ballooned -- if ballooned, `pixelBasedPreset` is missing or misconfigured in `src/emails/_theme.ts`).
+       - [ ] `bg-cream` background is visible (`#FAF8F5`).
+       - [ ] `bg-terracotta` button is visible (`#C4836A`).
+       - [ ] Heading uses Cormorant Garamond OR a fallback serif (Outlook may substitute `"Georgia"` -- that is acceptable).
+       - [ ] No layout collapse / overlapping text.
+
+    Resume signal back to Claude includes the local path of the screenshot OR a description of any regression caught.
+  </how-to-verify>
+  <resume-signal>Type "outlook-screenshot-captured" with the local PNG path, OR describe blocker / regression.</resume-signal>
+  <verify>
+    <automated>echo "Manual gate -- screenshot path is recorded in the phase summary; no automated assertion."; exit 0</automated>
+  </verify>
+  <acceptance_criteria>
+    - A PNG screenshot of the rendered `<Scaffold />` viewed in Outlook desktop is captured by the operator.
+    - The screenshot path is recorded in the phase summary at `.planning/phases/45-email-foundations/45-asset-host-and-dns-SUMMARY.md` under an "Outlook desktop verification" section.
+    - The verification checklist (5 items above) is included in the summary, each item annotated `[x]` (passed) or `[ ]` (regression — fix before phase close).
+    - If any checklist item failed, a follow-up issue or commit lands BEFORE the phase summary is signed off.
+  </acceptance_criteria>
+  <done>The scaffold renders correctly in real Outlook desktop, the screenshot lives in the phase artifacts, and the merge-gate doc is now battle-tested. Phase 46 inherits this exact procedure.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| Resend (Amazon SES) → receiving MTA SPF check | Untrusted: receivers do not trust unaligned SPF. Mitigation: SPF includes amazonses.com. |
+| Resend → receiving MTA DKIM check | Untrusted: signed bodies must verify against the published DKIM TXT. Mitigation: `resend._domainkey.lasprezz.com` is set to Resend's published key (already aligned per RESEARCH dig). |
+| Receiving MTA → DMARC reporter | Outbound: aggregate reports flow to `paul@lasprezz.com`. Mitigation: `_dmarc` exists with `rua=mailto:` (already aligned). |
+| Browser → email-assets.lasprezz.com | Untrusted: anyone on the internet can fetch images. Mitigation: cookie-less origin (no auth state to leak); cached at edge. |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-V14-01 | Spoofing | SPF policy at lasprezz.com | mitigate | Edit SPF to include `amazonses.com` (Task 2). Without this, receivers reject Resend mail under `-all`. Verified by `dig +short TXT lasprezz.com \| grep amazonses`. |
+| T-V14-02 | Spoofing | DKIM at resend._domainkey | mitigate (already in place) | DKIM TXT contains a Resend-issued public key. Verified live via dig (RESEARCH 2026-04-26). Re-verified in Task 2. |
+| T-V14-03 | Information Disclosure | Asset host shares cookies with apex | mitigate | `email-assets.lasprezz.com` is a SEPARATE origin (subdomain), no `Domain=.lasprezz.com` cookies are set on apex by current code, AND no auth middleware runs on the asset Vercel project. Verified by `curl -sI ... \| grep -ic '^set-cookie'` returning 0 (Task 1). |
+| T-V14-04 | Spoofing | DMARC policy too weak | accept | `p=none` is correct for Phase 45 (Resend's alignment check passes; doesn't reject in-flight legit mail). Tightening to `p=quarantine` after `rua` reports stabilize is deferred (RESEARCH Anti-Patterns: do NOT raise to `p=quarantine` this phase). Documented as a future-phase task in the deferred-ideas list. |
+| T-V14-PROXY-01 | Tampering | Cloudflare proxy in front of Vercel | mitigate | Cloudflare CNAME for email-assets is **DNS-only / grey cloud**, NOT proxied. Pitfall 4 from RESEARCH. Vercel SSL provisions cleanly; no double-CDN cache layer. |
+| T-V14-DUPSPF-01 | Spoofing | Duplicate SPF records causing PermError | mitigate | Verify `dig +short TXT lasprezz.com \| grep -c '^"v=spf1'` returns exactly 1 after the edit. Multiple SPF records at apex cause SPF PermError (worse than no record). |
+</threat_model>
+
+<verification>
+- `curl -sI https://email-assets.lasprezz.com/wordmark.png` returns 200 + correct `Cache-Control` + no `Set-Cookie`.
+- `dig +short TXT lasprezz.com` includes `include:amazonses.com`.
+- Resend dashboard screenshot shows all three (DKIM, SPF, DMARC) green.
+- `docs/email-merge-gate.md` exists with all required sections and no em-dashes / emojis.
+- An Outlook desktop screenshot of the scaffold render is attached to the phase summary.
+</verification>
+
+<success_criteria>
+1. `la-sprezzatura-email-assets` repo exists, deploys to Vercel, and serves `email-assets.lasprezz.com/wordmark.png` + `/brand-mark.png` with correct cache headers, no cookies, HTTP 200.
+2. Cloudflare DNS shows: `email-assets` CNAME (DNS-only / grey cloud) → Vercel target; SPF amended to include `amazonses.com`; DKIM + DMARC unchanged.
+3. Resend dashboard shows DKIM + SPF + DMARC all green for lasprezz.com (screenshot captured).
+4. `docs/email-merge-gate.md` documents the Outlook desktop manual procedure for Phase 46+.
+5. The Outlook desktop scaffold render is captured + verified per the merge-gate checklist.
+6. Phase summary aggregates: SPF before/after dig, DKIM dig, DMARC dig, asset-host curl headers, Resend dashboard screenshot, Outlook desktop screenshot, Vercel domain panel screenshot.
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/45-email-foundations/45-asset-host-and-dns-SUMMARY.md` per `$HOME/.claude/get-shit-done/templates/summary.md`. The summary MUST include:
+
+- **Asset host:** repo URL, Vercel project URL, full curl headers output, screenshot of Vercel domain panel.
+- **DNS:** before/after `dig +short TXT lasprezz.com` (shows SPF amendment), `dig +short TXT resend._domainkey.lasprezz.com`, `dig +short TXT _dmarc.lasprezz.com`.
+- **Resend:** screenshot of the lasprezz.com domain row showing all three green.
+- **Outlook desktop:** screenshot path + 5-item verification checklist (each `[x]` or `[ ]`).
+- **Merge-gate doc:** confirmation `docs/email-merge-gate.md` is committed.
+</output>

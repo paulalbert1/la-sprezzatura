@@ -1,0 +1,459 @@
+---
+phase: 45-email-foundations
+plan: tokens
+type: execute
+wave: 1
+depends_on: [foundation]
+files_modified:
+  - src/lib/brand-tokens.ts
+  - src/lib/brand-tokens.test.ts
+  - scripts/generate-theme-css.ts
+  - src/styles/_generated-theme.css
+  - src/styles/global.css
+autonomous: true
+requirements: [EMAIL-08]
+
+must_haves:
+  truths:
+    - "`src/lib/brand-tokens.ts` is the single typed source of truth for the email-relevant subset of brand tokens (colors, font families, spacing). Per D-05, D-07."
+    - "Running `npm run theme:gen` deterministically writes `src/styles/_generated-theme.css` from `brand-tokens.ts`. Per D-05, D-08."
+    - "Re-running `npm run theme:gen` produces a byte-identical file (idempotency)."
+    - "`src/styles/global.css` imports the generated CSS and no longer inlines the `--color-*`, `--font-*`, `--spacing-*` declarations that came from brand tokens."
+    - "`npm run build` succeeds — the portal compiles against the generated theme, proving Tailwind v4 picks up the generated `@theme` block."
+    - "A round-trip test asserts every token category is reachable in the generated CSS at the correct value."
+  artifacts:
+    - path: src/lib/brand-tokens.ts
+      provides: "Typed `brandTokens` const with `colors`, `fonts`, `spacing` keys plus exported types."
+      contains: "export const brandTokens ="
+    - path: scripts/generate-theme-css.ts
+      provides: "Generator that reads `brandTokens` and writes `src/styles/_generated-theme.css`. Exports a pure function plus a CLI entry."
+      contains: "writeFileSync"
+    - path: src/styles/_generated-theme.css
+      provides: "Auto-generated Tailwind v4 `@theme` block consumed by global.css."
+      contains: "AUTO-GENERATED"
+    - path: src/lib/brand-tokens.test.ts
+      provides: "Round-trip test: shape assertions + generator output equals committed file."
+      contains: "describe(\"brandTokens\""
+    - path: src/styles/global.css
+      provides: "Edited to `@import \"./_generated-theme.css\"` instead of inlining the migrated tokens. Animations / `@theme inline` font bridge / base styles untouched."
+      contains: '@import "./_generated-theme.css"'
+  key_links:
+    - from: src/lib/brand-tokens.ts
+      to: src/styles/_generated-theme.css
+      via: "scripts/generate-theme-css.ts (run via `npm run theme:gen` from prebuild/predev)"
+      pattern: 'export const brandTokens'
+    - from: src/styles/global.css
+      to: src/styles/_generated-theme.css
+      via: "@import directive"
+      pattern: '@import "./_generated-theme.css"'
+---
+
+<objective>
+Establish the brand-tokens single-source-of-truth pipeline. Port the email-relevant subset of the current `global.css` `@theme` block into `src/lib/brand-tokens.ts` (D-05, D-07), build a deterministic CSS generator (D-08) that writes `src/styles/_generated-theme.css`, swap `global.css` to `@import` the generated file, and prove the round-trip with a Vitest test.
+
+Purpose: this is the EMAIL-08 backbone. The same TS literal is consumed by Tailwind v4 (via the generated CSS) AND by `@react-email/tailwind` directly (via `src/emails/_theme.ts`, built in 45-PLAN-react-email-scaffold). Drift is impossible — touching the TS file regenerates the CSS on the next build.
+
+Output: TS source of truth + generator + generated CSS + global.css import swap + round-trip test, all committed to git.
+</objective>
+
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/execute-plan.md
+@$HOME/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/PROJECT.md
+@.planning/ROADMAP.md
+@.planning/STATE.md
+@.planning/phases/45-email-foundations/45-CONTEXT.md
+@.planning/phases/45-email-foundations/45-RESEARCH.md
+@.planning/phases/45-email-foundations/45-PATTERNS.md
+@.planning/phases/45-email-foundations/45-VALIDATION.md
+@./CLAUDE.md
+@src/styles/global.css
+@src/lib/portalStages.ts
+@src/lib/format.test.ts
+@scripts/migrations/37-migrate-item-image-to-images.mjs
+
+<interfaces>
+<!-- Token shape — REQUIRED EXPORTS from src/lib/brand-tokens.ts. -->
+
+```typescript
+// camelCase TS keys → kebab-case CSS var names per Claude's Discretion in CONTEXT.md
+export const brandTokens = {
+  colors: {
+    // Warm neutrals (mirror global.css lines 4-14)
+    cream: "#FAF8F5",
+    creamDark: "#F5F0EB",
+    stone: "#8A8478",
+    stoneLight: "#B8B0A4",
+    stoneDark: "#6B6358",
+    charcoal: "#2C2926",
+    charcoalLight: "#4A4540",
+    terracotta: "#C4836A",
+    terracottaLight: "#D4A08A",
+    white: "#FFFFFF",
+    // Luxury admin palette (mirror global.css lines 17-29)
+    ivory: "#FAF7F2",
+    surface: "#FFFEFB",
+    parchment: "#F3EDE3",
+    borderWarm: "#E8DDD0",
+    borderMid: "#D4C8B8",
+    gold: "#9A7B4B",
+    goldLight: "#F5EDD8",
+    goldMid: "#E8D5A8",
+    textDark: "#2C2520",
+    textMid: "#6B5E52",
+    textMuted: "#9E8E80",
+    destructive: "#9B3A2A",
+    destructiveSurface: "#FBEEE8",
+  },
+  fonts: {
+    // Mirror global.css lines 32-35; emails use heading + body only,
+    // but include serif/sans aliases for parity with portal.
+    heading: '"Cormorant Garamond", "Georgia", serif',
+    body: '"DM Sans", "system-ui", sans-serif',
+    serif: '"Cormorant Garamond", "Georgia", serif',
+    sans: '"DM Sans", "system-ui", sans-serif',
+  },
+  spacing: {
+    // Mirror global.css lines 38-39; D-07 limits scope to spacing emails actually use.
+    // ONLY these two tokens — do NOT include --container-text or --animate-* (D-07 stays CSS-only).
+    section: "8rem",
+    sectionSm: "5rem",
+  },
+} as const;
+
+export type BrandTokens = typeof brandTokens;
+```
+
+<!-- camelCase → kebab-case mapping — used by generator + test. -->
+"creamDark" → "cream-dark"
+"borderWarm" → "border-warm"
+"sectionSm" → "section-sm"
+(implementation: `s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()`)
+
+<!-- Generator output shape — what _generated-theme.css MUST look like after running theme:gen. -->
+
+```css
+/* AUTO-GENERATED by scripts/generate-theme-css.ts. Do not edit by hand.
+   Source of truth: src/lib/brand-tokens.ts. Run `npm run theme:gen` to regenerate. */
+
+@theme {
+  /* Color palette */
+  --color-cream: #FAF8F5;
+  --color-cream-dark: #F5F0EB;
+  /* ...etc... */
+  /* Typography */
+  --font-heading: "Cormorant Garamond", "Georgia", serif;
+  /* ...etc... */
+  /* Spacing scale */
+  --spacing-section: 8rem;
+  --spacing-section-sm: 5rem;
+}
+```
+
+<!-- global.css edit shape — replace inline tokens with @import. -->
+- Remove inline `--color-*` / `--font-heading` / `--font-body` / `--font-serif` / `--font-sans` / `--spacing-section` / `--spacing-section-sm` declarations from the existing `@theme { ... }` block.
+- KEEP: `@import "tailwindcss";` (line 1), `--container-text`, `--animate-fade-in-up`, `@keyframes fade-in-up`, the `@theme inline { --font-heading: var(--font-heading); --font-body: var(--font-body); }` bridge, all base styles below line 65.
+- Place `@import "./_generated-theme.css";` immediately after `@import "tailwindcss";` and before the existing `@theme { ... }` block.
+- The remaining inline `@theme` block keeps `--container-text` and `--animate-fade-in-up` plus `@keyframes` (D-07 CSS-only).
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto" tdd="true">
+  <name>Task 1: Create src/lib/brand-tokens.ts and round-trip test</name>
+  <files>src/lib/brand-tokens.ts, src/lib/brand-tokens.test.ts</files>
+  <read_first>
+    - src/styles/global.css (full file — current `@theme` block is the source values to port)
+    - src/lib/portalStages.ts (analog from PATTERNS.md — typed const + named exports + types co-located)
+    - src/lib/format.test.ts (analog from PATTERNS.md — pure-logic Vitest pattern)
+    - .planning/phases/45-email-foundations/45-CONTEXT.md (D-05, D-06, D-07 — token scope)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "src/lib/brand-tokens.ts" + "src/lib/__tests__/brand-tokens.test.ts" sections — note the PATTERNS recommendation to co-locate (file path is `src/lib/brand-tokens.test.ts`, NOT `src/lib/__tests__/brand-tokens.test.ts`)
+  </read_first>
+  <behavior>
+    - brandTokens.colors.cream === "#FAF8F5" (anchored value)
+    - brandTokens.colors.charcoal === "#2C2926"
+    - brandTokens.colors.gold === "#9A7B4B"
+    - brandTokens.fonts.heading.startsWith('"Cormorant Garamond"')
+    - brandTokens.fonts.body.startsWith('"DM Sans"')
+    - brandTokens.spacing.section === "8rem"
+    - brandTokens.spacing.sectionSm === "5rem"
+    - Object.keys(brandTokens.colors).length === 23 (10 warm-neutral + 13 luxury-admin per global.css lines 4-29)
+    - kebab(name) helper produces `cream-dark` from `creamDark`, `border-warm` from `borderWarm`, `section-sm` from `sectionSm`
+    - The generator's `buildThemeCss(brandTokens)` pure function returns a string starting with `/* AUTO-GENERATED` and containing every `--color-cream: #FAF8F5;`, `--font-heading: ...`, `--spacing-section: 8rem;` line
+  </behavior>
+  <action>
+    Step 1 — Create `src/lib/brand-tokens.ts` per D-05, D-07. Use the EXACT values shown in the `<interfaces>` block above (do not invent new tokens, do not pull in `--container-text` or animation tokens — D-07 keeps those CSS-only).
+
+    File header (mirror PATTERNS.md "Header Comment Convention"):
+    ```typescript
+    // src/lib/brand-tokens.ts
+    // Phase 45 -- single typed source of truth for brand tokens consumed by both
+    // Tailwind (via scripts/generate-theme-css.ts -> src/styles/_generated-theme.css)
+    // and react-email (via src/emails/_theme.ts mirror).
+    //
+    // Decisions: D-05 (TS source of truth), D-06 (email mirror, not CSS vars),
+    // D-07 (email-relevant subset only -- colors, font families, small spacing scale).
+    //
+    // Edit this file -> run `npm run theme:gen` -> commit the regenerated
+    // src/styles/_generated-theme.css. CI verifies the diff is empty.
+    ```
+
+    Then export the `brandTokens as const` literal exactly as in `<interfaces>` (23 colors, 4 fonts, 2 spacing entries) plus `export type BrandTokens = typeof brandTokens;`. Use double-hyphens (`--`) in any prose comments per repo convention noted in PATTERNS.md "CLAUDE.md Constraints".
+
+    Step 2 — Create `src/lib/brand-tokens.test.ts` (co-located per PATTERNS.md placement note — NOT `__tests__/`). The test imports `brandTokens` and (when Task 2 lands) the pure `buildThemeCss` helper. For Task 1, write the shape assertions only:
+
+    ```typescript
+    // src/lib/brand-tokens.test.ts
+    // Phase 45 -- round-trip + shape tests for brand-tokens.
+
+    import { describe, it, expect } from "vitest";
+    import { brandTokens } from "./brand-tokens";
+
+    describe("brandTokens shape", () => {
+      it("color count matches the migrated subset (23 colors: 10 warm-neutral + 13 luxury-admin)", () => {
+        expect(Object.keys(brandTokens.colors).length).toBe(23);
+      });
+
+      it("anchors a sentinel color value", () => {
+        expect(brandTokens.colors.cream).toBe("#FAF8F5");
+        expect(brandTokens.colors.charcoal).toBe("#2C2926");
+        expect(brandTokens.colors.gold).toBe("#9A7B4B");
+      });
+
+      it("font families round-trip with quoted fallbacks", () => {
+        expect(brandTokens.fonts.heading.startsWith('"Cormorant Garamond"')).toBe(true);
+        expect(brandTokens.fonts.body.startsWith('"DM Sans"')).toBe(true);
+      });
+
+      it("spacing scale is the email-relevant subset only", () => {
+        expect(brandTokens.spacing.section).toBe("8rem");
+        expect(brandTokens.spacing.sectionSm).toBe("5rem");
+        expect(Object.keys(brandTokens.spacing).length).toBe(2);
+      });
+    });
+    ```
+
+    Generator-output round-trip tests come in Task 2 once `buildThemeCss` exists.
+  </action>
+  <verify>
+    <automated>npx vitest run src/lib/brand-tokens.test.ts --reporter=basic</automated>
+  </verify>
+  <acceptance_criteria>
+    - `test -f src/lib/brand-tokens.ts` exits 0.
+    - `test -f src/lib/brand-tokens.test.ts` exits 0 (co-located, NOT in `__tests__/`).
+    - `grep -c "^export const brandTokens" src/lib/brand-tokens.ts` returns 1.
+    - `grep -c "^export type BrandTokens" src/lib/brand-tokens.ts` returns 1.
+    - `node -e "import('./src/lib/brand-tokens.ts').catch(()=>{}); const {brandTokens} = await import('tsx/esm/api').then(m=>m.tsImport('./src/lib/brand-tokens.ts', import.meta.url)); console.log(Object.keys(brandTokens.colors).length)"` — alternative simpler check: `npx tsx -e "import('./src/lib/brand-tokens.ts').then(m=>{if(Object.keys(m.brandTokens.colors).length!==23){process.exit(1)}})"` exits 0.
+    - `npx tsx -e "import('./src/lib/brand-tokens.ts').then(m=>{if(m.brandTokens.colors.cream!=='#FAF8F5'){process.exit(1)} if(m.brandTokens.spacing.section!=='8rem'){process.exit(1)}})"` exits 0.
+    - `npx vitest run src/lib/brand-tokens.test.ts --reporter=basic` exits 0 with at least 4 passing assertions.
+    - `grep -E "(animate|container-text|luxury-input|GSAP)" src/lib/brand-tokens.ts | grep -v '^//'` returns empty (D-07 keeps these CSS-only).
+  </acceptance_criteria>
+  <done>brand-tokens.ts contains the typed `brandTokens` const matching the interfaces block, the co-located test file passes shape assertions, and no out-of-scope tokens (animations, container widths, GSAP) leaked in.</done>
+</task>
+
+<task type="auto" tdd="true">
+  <name>Task 2: Build scripts/generate-theme-css.ts, generate _generated-theme.css, swap global.css to @import it</name>
+  <files>scripts/generate-theme-css.ts, src/styles/_generated-theme.css, src/styles/global.css, src/lib/brand-tokens.test.ts</files>
+  <read_first>
+    - src/styles/global.css (full file — exact ordering and comment headers to mirror)
+    - .planning/phases/45-email-foundations/45-RESEARCH.md "Pattern 1: Brand-tokens TS → CSS generation" (reference body — lines 261-318)
+    - .planning/phases/45-email-foundations/45-PATTERNS.md "scripts/generate-theme-css.ts" + "src/styles/_generated-theme.css" + "src/styles/global.css (MODIFY, config)" sections
+    - scripts/migrations/37-migrate-item-image-to-images.mjs (analog — header comment + exported function for tests + CLI entry pattern)
+    - src/lib/brand-tokens.ts (Task 1 output)
+  </read_first>
+  <behavior>
+    - `buildThemeCss(brandTokens)` returns a string with the exact header `/* AUTO-GENERATED by scripts/generate-theme-css.ts. Do not edit by hand.`
+    - The output contains a single `@theme {` block (no `@import "tailwindcss"` inside — global.css owns that import).
+    - Color section: 23 lines like `  --color-cream: #FAF8F5;` (camelCase keys → kebab-case CSS vars).
+    - Font section: 4 lines for heading/body/serif/sans.
+    - Spacing section: 2 lines for `--spacing-section: 8rem;` and `--spacing-section-sm: 5rem;`.
+    - Running `buildThemeCss` twice on the same input returns byte-identical strings (deterministic ordering — no `Object.entries` non-determinism since Node preserves insertion order).
+    - After running `npm run theme:gen`, the file at `src/styles/_generated-theme.css` exists and matches what `buildThemeCss` returned.
+    - `git diff --exit-code src/styles/_generated-theme.css` after a fresh `npm run theme:gen` exits 0 (idempotency).
+  </behavior>
+  <action>
+    Step 1 — Create `scripts/generate-theme-css.ts` mirroring the migration-script header convention (PATTERNS.md). Export a pure function `buildThemeCss(tokens: BrandTokens): string` separately from the file-write side-effect so the test can call it without writing files.
+
+    Reference the canonical body from RESEARCH.md lines 267-301. Adjust to the project's actual `brandTokens` shape (the research example uses `tokens.colors`, etc.; we use `brandTokens.colors`).
+
+    Implementation skeleton (use this structure verbatim, tweak details to match the BrandTokens type):
+    ```typescript
+    // scripts/generate-theme-css.ts
+    // Phase 45 -- generates src/styles/_generated-theme.css from src/lib/brand-tokens.ts.
+    //
+    // Usage:
+    //   npm run theme:gen      (CLI; called by prebuild + predev)
+    //   import { buildThemeCss } from "./generate-theme-css"   (testable pure fn)
+    //
+    // D-05: TS file is the source of truth.
+    // D-08: Generated file is committed; CI verifies `git diff --exit-code` is empty.
+
+    import { writeFileSync } from "node:fs";
+    import { fileURLToPath } from "node:url";
+    import path from "node:path";
+    import { brandTokens, type BrandTokens } from "../src/lib/brand-tokens.ts";
+
+    const HEADER = `/* AUTO-GENERATED by scripts/generate-theme-css.ts. Do not edit by hand.
+       Source of truth: src/lib/brand-tokens.ts. Run \`npm run theme:gen\` to regenerate. */`;
+
+    function kebab(name: string): string {
+      return name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+    }
+
+    export function buildThemeCss(tokens: BrandTokens): string {
+      const lines: string[] = [HEADER, "", "@theme {", "  /* Color palette */"];
+      for (const [name, value] of Object.entries(tokens.colors)) {
+        lines.push(`  --color-${kebab(name)}: ${value};`);
+      }
+      lines.push("", "  /* Typography */");
+      for (const [name, value] of Object.entries(tokens.fonts)) {
+        lines.push(`  --font-${kebab(name)}: ${value};`);
+      }
+      lines.push("", "  /* Spacing scale */");
+      for (const [name, value] of Object.entries(tokens.spacing)) {
+        lines.push(`  --spacing-${kebab(name)}: ${value};`);
+      }
+      lines.push("}", "");
+      return lines.join("\n");
+    }
+
+    // CLI entry — only runs when invoked directly (npm run theme:gen).
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      const __dirname = path.dirname(fileURLToPath(import.meta.url));
+      const outPath = path.resolve(__dirname, "../src/styles/_generated-theme.css");
+      writeFileSync(outPath, buildThemeCss(brandTokens), "utf8");
+      const counts = `${Object.keys(brandTokens.colors).length} colors, ${Object.keys(brandTokens.fonts).length} fonts, ${Object.keys(brandTokens.spacing).length} spacing tokens`;
+      console.log(`Wrote ${outPath} (${counts})`);
+    }
+    ```
+
+    Step 2 — Run `npm run theme:gen`. Confirm `src/styles/_generated-theme.css` is created. Open it, eyeball it against the existing `global.css` `@theme` block lines 3-39 — the migrated tokens (colors, fonts, spacing-section, spacing-section-sm) must round-trip exactly. The non-migrated declarations (`--container-text`, `--animate-fade-in-up`, `@keyframes`) must NOT be in the generated file (they stay in global.css per D-07).
+
+    Step 3 — Edit `src/styles/global.css`. Remove from the existing `@theme { ... }` block:
+    - All 23 `--color-*` declarations (lines 4-29).
+    - The 4 `--font-*` declarations except do NOT remove the `@theme inline { --font-heading: var(--font-heading); --font-body: var(--font-body); }` bridge at lines 60-63 (PATTERNS.md "src/styles/global.css MODIFY" — keep that).
+    - The 2 `--spacing-*` declarations (lines 38-39).
+
+    KEEP in `global.css`:
+    - `@import "tailwindcss";` (line 1) at the top.
+    - `--container-text: 1200px;` and `--animate-fade-in-up: ...` and the `@keyframes fade-in-up { ... }` block, all inside the existing `@theme { ... }` (D-07).
+    - The `@theme inline { ... }` font bridge (lines 60-63).
+    - All base styles from line 65 onward.
+
+    Add: `@import "./_generated-theme.css";` immediately after `@import "tailwindcss";` and before the slimmed-down `@theme { ... }` block. Do NOT add it inside `@theme`.
+
+    Step 4 — Append round-trip tests to `src/lib/brand-tokens.test.ts` so future drift is caught:
+
+    ```typescript
+    // ...existing tests above...
+
+    import { readFileSync } from "node:fs";
+    import path from "node:path";
+    import { buildThemeCss } from "../../scripts/generate-theme-css";
+
+    describe("brandTokens -> _generated-theme.css round-trip", () => {
+      it("buildThemeCss is deterministic (idempotent)", () => {
+        const a = buildThemeCss(brandTokens);
+        const b = buildThemeCss(brandTokens);
+        expect(a).toBe(b);
+      });
+
+      it("generated CSS contains every color as `--color-<kebab>: <hex>;`", () => {
+        const css = buildThemeCss(brandTokens);
+        for (const [name, value] of Object.entries(brandTokens.colors)) {
+          const kebab = name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+          expect(css).toContain(`--color-${kebab}: ${value};`);
+        }
+      });
+
+      it("generated CSS contains spacing tokens", () => {
+        const css = buildThemeCss(brandTokens);
+        expect(css).toContain("--spacing-section: 8rem;");
+        expect(css).toContain("--spacing-section-sm: 5rem;");
+      });
+
+      it("committed _generated-theme.css matches buildThemeCss output (CI freshness)", () => {
+        const expected = buildThemeCss(brandTokens);
+        const committed = readFileSync(
+          path.resolve(__dirname, "../styles/_generated-theme.css"),
+          "utf8"
+        );
+        expect(committed).toBe(expected);
+      });
+    });
+    ```
+
+    Step 5 — Run `npm run build`. Astro must succeed. Tailwind v4 picks up the generated `@theme` block via the `@import` chain. If build fails with a Tailwind error like "duplicate `--color-cream` declaration", check that no migrated token is left inline in `global.css`.
+
+    Step 6 — Run `npm run theme:gen` once more, then `git diff --exit-code src/styles/_generated-theme.css`. Must exit 0 (idempotency). This is the same CI invariant Pitfall 8 in RESEARCH.md describes.
+  </action>
+  <verify>
+    <automated>npm run theme:gen && git diff --exit-code src/styles/_generated-theme.css && npx vitest run src/lib/brand-tokens.test.ts --reporter=basic && npm run build</automated>
+  </verify>
+  <acceptance_criteria>
+    - `test -f scripts/generate-theme-css.ts` exits 0.
+    - `test -f src/styles/_generated-theme.css` exits 0.
+    - `grep -c "^export function buildThemeCss" scripts/generate-theme-css.ts` returns 1.
+    - `head -1 src/styles/_generated-theme.css | grep -c "AUTO-GENERATED"` returns 1.
+    - `grep -c "^@theme {" src/styles/_generated-theme.css` returns 1 (single `@theme` block).
+    - `grep -c "^  --color-cream: #FAF8F5;" src/styles/_generated-theme.css` returns 1.
+    - `grep -c "^  --color-gold: #9A7B4B;" src/styles/_generated-theme.css` returns 1.
+    - `grep -c "^  --font-heading:" src/styles/_generated-theme.css` returns 1.
+    - `grep -c "^  --spacing-section: 8rem;" src/styles/_generated-theme.css` returns 1.
+    - `grep -c "^  --spacing-section-sm: 5rem;" src/styles/_generated-theme.css` returns 1.
+    - `grep -c "container-text\|animate-fade-in-up\|keyframes" src/styles/_generated-theme.css` returns 0 (D-07 keeps these CSS-only).
+    - `grep -c '@import "./_generated-theme.css"' src/styles/global.css` returns 1.
+    - `grep -E '^\s+--color-(cream|stone|charcoal|terracotta|ivory|surface|parchment|gold|destructive)' src/styles/global.css` returns empty (migrated tokens no longer inline).
+    - `grep -c "@theme inline" src/styles/global.css` returns 1 (font bridge preserved).
+    - `grep -c "container-text\|animate-fade-in-up" src/styles/global.css` returns at least 2 (D-07 stays inline).
+    - `npm run theme:gen && git diff --exit-code src/styles/_generated-theme.css` exits 0 (idempotency / freshness gate).
+    - `npx vitest run src/lib/brand-tokens.test.ts --reporter=basic` exits 0 with at least 8 passing assertions (4 from Task 1 + 4 round-trip).
+    - `npm run build` exits 0 (portal compiles against the generated theme).
+  </acceptance_criteria>
+  <done>The pipeline is wired end-to-end: editing `brandTokens` and running `npm run theme:gen` produces a deterministic `_generated-theme.css`; global.css imports it; the portal still builds; the round-trip test validates every token category. CI freshness check (`git diff --exit-code`) passes.</done>
+</task>
+
+</tasks>
+
+<threat_model>
+## Trust Boundaries
+
+| Boundary | Description |
+|----------|-------------|
+| `brand-tokens.ts` (TS) → `_generated-theme.css` (committed CSS) | A build-time transform; the generator is trusted. No runtime input crosses this boundary. |
+| `_generated-theme.css` → `global.css` → portal CSS bundle | Build-time CSS composition by `@tailwindcss/vite`; no untrusted data. |
+
+## STRIDE Threat Register
+
+| Threat ID | Category | Component | Disposition | Mitigation Plan |
+|-----------|----------|-----------|-------------|-----------------|
+| T-V14-TOK-01 | Tampering | `_generated-theme.css` (committed but auto-regenerated) | mitigate | CI freshness gate: `npm run theme:gen && git diff --exit-code src/styles/_generated-theme.css`. Pitfall 8 from RESEARCH. |
+| T-V14-TOK-02 | Tampering | `brand-tokens.ts` literal values | accept | Source-of-truth file; PR review process is the gate. Diff appears in every PR that touches it. |
+
+(Phase-wide T-V5-01, T-V14-01..04 do not apply to brand-token authoring — they apply to DNS, asset host, and JSX rendering. See those plans.)
+</threat_model>
+
+<verification>
+- `npx vitest run src/lib/brand-tokens.test.ts` passes all assertions.
+- `npm run theme:gen` is idempotent (`git diff --exit-code` after regen).
+- `npm run build` compiles the portal.
+- `grep` checks confirm no migrated tokens were left inline in `global.css` and no out-of-scope tokens leaked into `brand-tokens.ts`.
+</verification>
+
+<success_criteria>
+1. `src/lib/brand-tokens.ts` exists with the exact 23 colors / 4 fonts / 2 spacing tokens defined in the interfaces block.
+2. `scripts/generate-theme-css.ts` exports a pure `buildThemeCss` function and runs as a CLI via `npm run theme:gen`.
+3. `src/styles/_generated-theme.css` is committed and round-trips deterministically from `brandTokens`.
+4. `src/styles/global.css` imports the generated file via `@import "./_generated-theme.css";` and no longer inlines migrated tokens.
+5. The animations, container width, font bridge, and base styles in `global.css` are untouched.
+6. `npm run build` and `npm test` both pass.
+7. The round-trip test in `brand-tokens.test.ts` asserts the committed CSS matches `buildThemeCss(brandTokens)` byte-for-byte (CI freshness gate baked in).
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/45-email-foundations/45-tokens-SUMMARY.md` per `$HOME/.claude/get-shit-done/templates/summary.md`. Capture: token counts (colors/fonts/spacing), the global.css before/after diff summary, the regenerate-and-diff CI freshness command, and confirmation that `npm run build` succeeds.
+</output>

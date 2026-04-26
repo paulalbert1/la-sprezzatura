@@ -340,7 +340,15 @@ Plans:
   2. Golden HTML snapshots exist for `buildSendUpdateEmail` and `buildWorkOrderEmail` covering every section toggle and optional-field permutation, and a Litmus / Email on Acid harness produces Outlook 2016 / 2019 / 365 visual diffs as the merge gate for any subsequent template change (EMAIL-09)
   3. Email assets (logo, brand mark) load from a stable, cookie-less CDN endpoint (e.g. `email-assets.lasprezz.com`) with proper caching headers (EMAIL-10)
   4. The Resend dashboard shows green DKIM, SPF, and DMARC alignment for the production sender domain, verified before the next phase ships any template change (EMAIL-11)
-**Plans**: TBD
+**Plans**: 5 plans (3 waves)
+
+Plans:
+- [ ] 45-PLAN-foundation.md — Wave 0: package.json deps + npm scripts + Playwright Chromium install
+- [ ] 45-PLAN-tokens.md — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08)
+- [ ] 45-PLAN-asset-host-and-dns.md — Wave 1: standalone Vercel asset host + Cloudflare SPF amend + Resend dashboard verification + docs/email-merge-gate.md (EMAIL-10, EMAIL-11)
+- [ ] 45-PLAN-react-email-scaffold.md — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
+- [ ] 45-PLAN-snapshot-harness.md — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
+
 **UI hint**: yes
 
 ### Phase 46: Send Update + Work Order Migration
