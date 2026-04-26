@@ -21,20 +21,20 @@ A visually stunning portfolio site that makes La Sprezzatura look as polished an
 | v5.0 Admin Platform | Custom /admin/* app replacing Sanity Studio | 29-34 | Shipped 2026-04-12 |
 | v5.1 Admin UX Polish | Hands-on UX refinements, Work Order + Documents panels, vendor/client schema updates | 35-40 | Complete 2026-04-22 (Phase 41 carried to v5.2) |
 | v5.2 Trades Directory | Unified Trades entity, /admin/trades routes, relationship field, doc checklists, completeness indicator | 41-43 | Complete 2026-04-23 |
+| v5.3 Third-Party Views & Email Polish | Recipient-facing UI + outbound email templates, designer impersonation | 45-TBD | In progress |
 | v6.0 Linha Platform | Multi-tenant extraction, Turborepo monorepo, onboarding wizard | TBD | Planned |
 
-## Current Milestone: v5.2 Trades Directory — Complete 2026-04-23
+## Current Milestone: v5.3 Third-Party Views & Outbound Email Polish
 
-**Goal:** Elevate the Contractor/Vendor concept into a first-class "Trades" entity with its own `/admin/trades` routes, a relationship field (contractor|vendor) that drives document checklists, display name logic, a completeness indicator in list view, and a polished detail page with a meta line. Phase 41 (client data model refinements) also carries forward from v5.1.
+**Goal:** Bring everything a non-admin recipient sees (clients, contractors, building managers) into visual + voice consistency with the admin polish work shipped in v5.1/v5.2, and tighten outbound email templates so messages from the studio read as professional and on-brand. Add a designer-impersonation view so the studio can reliably preview what each recipient sees.
 
 **Target features:**
-- Clients (Phase 41 carryover) — consistent phone formatting, address field, updated columns, drop "preferred contact"
-- Unified Trades entity — `/admin/trades` routes replace `/admin/contractors`; nav and breadcrumbs updated
-- Relationship field — each Trades record has a `contractor | vendor` relationship type
-- Document checklists — relationship field drives which required documents are shown per record
-- Display name logic — entity label renders as "Contractor" or "Vendor" based on relationship
-- Completeness indicator — list view shows a visual signal when required fields or documents are missing
-- Detail page meta line — compact at-a-glance summary (trade, relationship type, location) below the name
+- Send Update weekly digest email — refreshed template, brand-voice consistency
+- Work order email template — refreshed, on-brand
+- Smaller transactional emails — artifact-ready notification, building access, work order access
+- Client project portal (`/portal/project/[projectId]`) — visual + voice consistency pass
+- Portal auth flows — login, verify, role-select polish
+- Designer-impersonation view — designer can preview the portal "as" any recipient (client, contractor, building manager) for QA, pre-send verification, and live walkthroughs; temporary, scoped, no real auth emails sent
 
 ## Current State (after v5.2)
 
