@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: partial
-stopped_at: Phase 45 partial — 4/5 plans complete (45-03 deferred pending app rename to Sprezza Hub)
-last_updated: "2026-04-26T21:35:00Z"
+status: executing
+stopped_at: Phase 45 — 45-03 resumed (sprezzahub.com registered); operator-in-the-loop plan now executing
+last_updated: "2026-04-26T22:00:00Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 9
@@ -12,7 +12,7 @@ progress:
   total_plans: 15
   completed_plans: 15
   percent: 100
-  notes: Plan counters exclude 45-03 (deferred via filename suffix); EMAIL-10/EMAIL-11 reqs remain open until that plan resumes after domain registration.
+  notes: 45-03 (asset host + DNS) restored after sprezzahub.com registered same day; EMAIL-10/EMAIL-11 will close on completion. Visible plan counters still show 4/4 because the SDK regenerates from filename presence; the 5th visible plan (45-03) is in flight.
 ---
 
 # Project State
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — PARTIAL
-Plan: 4 of 5 visible plans complete (45-01, 45-02, 45-04, 45-05). 45-03 (asset host + DNS) deferred pending app rename to "Sprezza Hub" — domain not yet registered. EMAIL-08 and EMAIL-09 satisfied; EMAIL-10 and EMAIL-11 remain open until 45-03 resumes.
-Status: Phase 45 partial; 45-03 blocked on domain registration. Phase 46 unblocked because it only depends on EMAIL-08/09 + the snapshot baselines.
+Phase: 45 (email-foundations) — EXECUTING 45-03
+Plan: 45-03 in flight (asset host + DNS, autonomous: false). 45-01/02/04/05 complete. App-rename substitutions applied to plan body: asset host → email-assets.sprezzahub.com, repo → sprezza-hub-email-assets. Sender side (lasprezz.com / liz@lasprezz.com / DKIM/SPF/DMARC) unchanged.
+Status: Operator checkpoints expected at Task 1 (sprezzahub.com Cloudflare zone status, GitHub repo visibility, Vercel + Cloudflare UI), Task 2 (Cloudflare SPF edit on lasprezz.com + Resend dashboard verify), Task 4 (Outlook desktop test send to liz@lasprezz.com).
 Last activity: 2026-04-26
 
 ## v5.3 Phase Map
 
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
-| 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Partial** — 4/5 plans done; 45-03 (EMAIL-10/11) deferred pending rename |
+| 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Executing** — 4/5 done; 45-03 (EMAIL-10/11) in flight after sprezzahub.com registered |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Not started |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |

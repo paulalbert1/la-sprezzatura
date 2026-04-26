@@ -322,7 +322,7 @@ Plans:
 - **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type (per-tenant). Keeps audit churn out of `siteSettings`.
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
 
-- [~] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 deferred, EMAIL-11 deferred). 4/5 plans done 2026-04-26; 45-03 (asset host + DNS) deferred pending app rename to "Sprezza Hub" / new domain registration.
+- [~] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 in flight, EMAIL-11 in flight). 4/5 plans done 2026-04-26; 45-03 (asset host + DNS) executing after sprezzahub.com registered same day. Asset host moves to email-assets.sprezzahub.com; sender domain (lasprezz.com) unchanged.
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
