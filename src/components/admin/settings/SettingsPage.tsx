@@ -60,6 +60,10 @@ export interface WorkflowTemplateItem {
 export interface SettingsPageProps {
   initialSettings: SiteSettingsPayload;
   initialWorkflowTemplates?: WorkflowTemplateItem[];
+  // Distinct trade names found on existing contractor records — surfaced in
+  // the Trades settings section so legacy / ad-hoc trades are discoverable
+  // even if they aren't in the curated catalog yet.
+  inUseTrades?: string[];
 }
 
 function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
@@ -75,7 +79,7 @@ function cloneInitial(s: SiteSettingsPayload): SiteSettingsPayload {
   };
 }
 
-function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [] }: SettingsPageProps) {
+function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [], inUseTrades = [] }: SettingsPageProps) {
   const [general, setGeneral] = useState<GeneralValues>({
     siteTitle: initialSettings.siteTitle ?? "",
     tagline: initialSettings.tagline ?? "",
@@ -440,7 +444,11 @@ function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [] }: S
                 />
               </div>
               <div style={{ display: active === "trades" ? "block" : "none" }}>
-                <TradesCatalogSection trades={trades} onChange={handleTradesChange} />
+                <TradesCatalogSection
+                  trades={trades}
+                  onChange={handleTradesChange}
+                  inUseTrades={inUseTrades}
+                />
               </div>
               <div style={{ display: active === "contractor-checklist" ? "block" : "none" }}>
                 <ChecklistConfigSection
@@ -568,4 +576,5 @@ export default function SettingsPage(props: SettingsPageProps) {
     </ToastContainer>
   );
 }
+
 

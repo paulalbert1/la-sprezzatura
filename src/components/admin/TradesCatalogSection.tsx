@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Pencil, Trash2, Check, X } from "lucide-react";
+import { Pencil, Trash2, Check, X, Plus } from "lucide-react";
+import { formatTrade } from "../../lib/trades";
 
 // Phase 40 — VEND-03 — Trades catalog CRUD component
 // Source of truth: .planning/phases/40-contractor-vendor-rename-trades-crud-1099-support/40-UI-SPEC.md
@@ -7,6 +8,11 @@ import { Pencil, Trash2, Check, X } from "lucide-react";
 export interface TradesCatalogSectionProps {
   trades: string[];
   onChange: (next: string[]) => void;
+  // Distinct trade names already on contractor records. Surfaces below the
+  // catalog list as "In use on contractor records — not yet in catalog" so
+  // the user can promote ad-hoc / legacy values into the curated catalog
+  // with one click.
+  inUseTrades?: string[];
 }
 
 function FieldLabel({ children }: { children: string }) {
@@ -25,7 +31,14 @@ function FieldLabel({ children }: { children: string }) {
   );
 }
 
-export default function TradesCatalogSection({ trades, onChange }: TradesCatalogSectionProps) {
+export default function TradesCatalogSection({ trades, onChange, inUseTrades = [] }: TradesCatalogSectionProps) {
+  // Trades present on contractor records that are not yet in the curated
+  // catalog. Compared case-insensitively against catalog entries so
+  // "Plumbing" doesn't double-list when the catalog already has "plumbing".
+  const catalogLower = new Set(trades.map((t) => t.toLowerCase()));
+  const orphanedInUse = inUseTrades.filter(
+    (t) => !catalogLower.has(t.toLowerCase()),
+  );
   const [newTrade, setNewTrade] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
   const [renamingIdx, setRenamingIdx] = useState<number | null>(null);
@@ -65,6 +78,19 @@ export default function TradesCatalogSection({ trades, onChange }: TradesCatalog
     const next = trades.filter((_, i) => i !== idx);
     onChange(next);
     setConfirmDeleteIdx(null);
+  }
+
+  function handlePromote(name: string) {
+    if (trades.some((t) => t.toLowerCase() === name.toLowerCase())) return;
+    onChange([...trades, name]);
+  }
+
+  function handlePromoteAll() {
+    const additions = orphanedInUse.filter(
+      (n) => !trades.some((t) => t.toLowerCase() === n.toLowerCase()),
+    );
+    if (additions.length === 0) return;
+    onChange([...trades, ...additions]);
   }
 
   return (
@@ -172,6 +198,40 @@ export default function TradesCatalogSection({ trades, onChange }: TradesCatalog
             Add trade
           </button>
         </div>
+
+        {/* Trades discovered on existing contractor records but not yet in the
+            curated catalog. One-click promote per trade, or add all at once. */}
+        {orphanedInUse.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-stone-light/30">
+            <div className="flex items-baseline justify-between mb-1">
+              <FieldLabel>In use — not yet in catalog</FieldLabel>
+              <button
+                type="button"
+                onClick={handlePromoteAll}
+                className="text-[12px] font-body text-terracotta hover:text-terracotta/80 transition-colors"
+              >
+                Add all to catalog
+              </button>
+            </div>
+            <p style={{ fontSize: "11.5px", color: "#9E8E80", marginBottom: "12px" }}>
+              These trades are already on at least one contractor record. Promote them into the catalog so they appear in the trade picker and stay editable.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {orphanedInUse.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => handlePromote(name)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12.5px] font-body text-charcoal border border-stone-light/40 bg-cream/40 hover:bg-cream hover:border-terracotta/60 transition-colors"
+                  aria-label={`Add ${formatTrade(name)} to catalog`}
+                >
+                  <span>{formatTrade(name)}</span>
+                  <Plus className="w-3 h-3 text-stone-light" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delete confirmation modal */}

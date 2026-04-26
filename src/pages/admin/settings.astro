@@ -30,6 +30,17 @@ const workflowTemplates = (await client.fetch(
   }`,
 )) as WorkflowTemplateItem[];
 
+// Distinct trades currently used on any contractor record. Surfaces in the
+// Trades settings section so the user can see what's "in the wild" — even
+// when the curated catalog is empty (legacy data may have been entered
+// before the catalog feature shipped).
+const inUseTradesRaw = (await client.fetch(
+  `array::unique(*[_type == "contractor" && defined(trades)].trades[])`,
+)) as string[] | null;
+const inUseTrades = (inUseTradesRaw ?? [])
+  .filter((t): t is string => typeof t === "string" && t.length > 0)
+  .sort((a, b) => a.localeCompare(b));
+
 // Normalize the GROQ result into a fully-populated payload so the React
 // island never has to branch on undefined fields.
 type SiteSettingsRow = {
@@ -103,5 +114,10 @@ const initialSettings = {
     { label: "Settings" },
   ]}
 >
-  <SettingsPage client:load initialSettings={initialSettings} initialWorkflowTemplates={workflowTemplates} />
+  <SettingsPage
+    client:load
+    initialSettings={initialSettings}
+    initialWorkflowTemplates={workflowTemplates}
+    inUseTrades={inUseTrades}
+  />
 </AdminLayout>
