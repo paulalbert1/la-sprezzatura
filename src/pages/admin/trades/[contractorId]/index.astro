@@ -48,8 +48,8 @@ const pageTitle = isNew ? "New Trade" : (contractorData?.name || "Trade");
 
 const relLabel = !isNew && contractorData ? relationshipLabel((contractorData as any).relationship) : null;
 const browserTitle = isNew
-  ? "New Trade — La Sprezzatura Admin"
-  : `${pageTitle} — ${relLabel ?? "Trade"} — La Sprezzatura Admin`;
+  ? "New Trade — Sprezza Hub"
+  : `${pageTitle} — ${relLabel ?? "Trade"} — Sprezza Hub`;
 
 // Phase 42 TRAD-05 — meta line: {primary trade} · {Contractor|Vendor} · {City, ST}
 // Segments are filtered so missing values leave no empty slots and no
