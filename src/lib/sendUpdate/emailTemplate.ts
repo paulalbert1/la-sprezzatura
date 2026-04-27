@@ -328,7 +328,6 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
 
       <div style="padding: 2.5rem 2.5rem 0; text-align: center; border-bottom: 0.5px solid #E8E2D9; padding-bottom: 1.5rem;">
         <p style="font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 0.18em; color: #9A8F82; margin: 0 0 0.35rem; text-transform: uppercase;">La Sprezzatura</p>
-        <p style="font-family: Arial, sans-serif; font-size: 9px; letter-spacing: 0.12em; color: #B8AFA4; margin: 0; text-transform: uppercase;">Linha Studio</p>
       </div>
 
       <div style="padding: 2rem 2.5rem 0;">
@@ -346,7 +345,7 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
 
       <div style="padding: 0 2.5rem 2.5rem;">
         <p style="font-size: 15px; color: #2C2A26; margin: 0 0 0.2rem;">Elizabeth</p>
-        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #9A8F82; margin: 0 0 1.75rem;">La Sprezzatura · Linha Studio</p>
+        <p style="font-family: Arial, sans-serif; font-size: 12px; color: #9A8F82; margin: 0 0 1.75rem;">La Sprezzatura</p>
 
         <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 0.5px solid #EDE8E2;">
           <a href="${esc(ctaHref)}" style="display: inline-block; background: #8B6E5A; color: #FAF7F3; font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; text-decoration: none; padding: 0.85rem 2rem; border-radius: 2px;">${esc(resolvedCtaLabel)}</a>
@@ -359,6 +358,7 @@ export function buildSendUpdateEmail(input: SendUpdateEmailInput): string {
 
       <div style="padding: 1rem 2.5rem; border-top: 0.5px solid #EDE8E2; text-align: center;">
         <p style="font-family: Arial, sans-serif; font-size: 10px; color: #C5BDB4; margin: 0; letter-spacing: 0.06em;">La Sprezzatura · Darien, CT</p>
+        <p style="font-family: Arial, sans-serif; font-size: 10px; color: #C5BDB4; margin: 0.5rem 0 0; letter-spacing: 0.06em;">Sent via Sprezza Hub</p>
       </div>
 
     </div>
