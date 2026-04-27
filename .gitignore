@@ -42,3 +42,8 @@ CLAUDE.local.md
 #   tests/email-snapshots/scaffold.spec.ts-snapshots/ ARE tracked).
 test-results/
 tests/email-snapshots/.playwright-fixtures/
+
+# Phase 46 D-16 migration diff (one-shot script + temp HTML output;
+# reviewed by hand pre-cutover and discarded)
+scripts/_phase46-diff-old-vs-new.ts
+tests/email-snapshots/.phase46-diff/
