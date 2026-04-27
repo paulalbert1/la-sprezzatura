@@ -36,7 +36,6 @@ export function buildWorkOrderEmail(input: WorkOrderEmailInput): string {
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;background-color:#FFFEFB;border:0.5px solid #E8DDD0;">
         <tr><td style="padding:32px 40px 24px;">
           <div style="font-size:11.5px;font-weight:600;letter-spacing:0.14em;color:#9E8E80;text-transform:uppercase;">LA SPREZZATURA</div>
-          <div style="font-size:11.5px;color:#9E8E80;margin-top:4px;">Linha Studio</div>
         </td></tr>
         <tr><td style="padding:8px 40px 24px;">
           <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:600;color:#2C2520;margin:0 0 12px;line-height:1.3;">Work order ready for review</h1>
@@ -51,8 +50,9 @@ export function buildWorkOrderEmail(input: WorkOrderEmailInput): string {
         </td></tr>
         <tr><td style="padding:0 40px 32px;border-top:0.5px solid #E8DDD0;">
           <div style="font-size:12px;color:#9E8E80;margin-top:24px;">${escapeHtml(fromDisplayName)}</div>
-          <div style="font-size:12px;color:#9E8E80;margin-top:4px;">La Sprezzatura &middot; Linha Studio</div>
+          <div style="font-size:12px;color:#9E8E80;margin-top:4px;">La Sprezzatura</div>
           <div style="font-size:12px;color:#9E8E80;margin-top:4px;">Darien, CT</div>
+          <div style="font-size:10px;color:#C5BDB4;margin-top:12px;letter-spacing:0.06em;text-align:center;">Sent via Sprezza Hub</div>
         </td></tr>
       </table>
     </td></tr>
@@ -71,8 +71,9 @@ Your work order for ${project.title} is ready.
 View the latest version: ${link}
 
 La Sprezzatura
-Linha Studio
-Darien, CT`;
+Darien, CT
+
+Sent via Sprezza Hub`;
 }
 
 function escapeHtml(s: string): string {
