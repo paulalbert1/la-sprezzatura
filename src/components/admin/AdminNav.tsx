@@ -52,7 +52,7 @@ export default function AdminNav({ currentPath, businessName }: { currentPath: s
           className="text-[10px] tracking-[0.16em] uppercase"
           style={{ color: "#9E8E80", fontFamily: "var(--font-sans)" }}
         >
-          Linha Studio
+          Sprezza Hub
         </p>
       </div>
 
