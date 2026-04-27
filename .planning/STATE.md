@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied) — verifying
-Plan: 45-03 closed 2026-04-26 (asset host + DNS + merge gate). 45-01/02/04/05 also complete. App-rename substitutions for sprezzahub.com landed cleanly: asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache). Sender side (lasprezz.com / liz@lasprezz.com / DKIM/SPF/DMARC) verified all-green in Resend; apex SPF amended with include:amazonses.com belt-and-suspenders to the modern send.lasprezz.com MAIL FROM pattern.
-Status: Phase 45 ready for `/gsd-verify-work 45`. Next email-track phase is 46 (Send Update + Work Order migration).
+Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied). Phase 45.5 (Linha → Sprezza Hub Platform Rename) scaffolded; ready to plan.
+Plan: 45-03 closed 2026-04-26. Follow-up commit `ae54a30` added Outlook dark-mode color-scheme meta tags to scaffold; snapshots regenerated. Phase 45.5 added to ROADMAP between 45 and 46 — captures the platform identifier rebrand with explicit tenant-vs-platform scope boundaries. CONTEXT.md pre-seeded at `.planning/phases/45.5-platform-rename/45.5-CONTEXT.md` with all architectural decisions (D-1 scope, D-2 footer attribution wording, D-3 wordmark casing, D-4 tenant-vs-platform sender display, D-5 admin UI surfaces, D-6 snapshot regeneration as audit trail, D-7 Linha refs, D-8 anti-scope-creep guards) so `/gsd-plan-phase 45.5` skips the discuss step.
+Status: Next: `/gsd-plan-phase 45.5` to generate PLAN.md, then `/gsd-execute-phase 45.5` next session. Phase 46 deferred until 45.5 closes (avoids Phase 46 templates accumulating Linha references that 45.5 would just need to rip out).
 Last activity: 2026-04-26
 
 ## v5.3 Phase Map
@@ -36,7 +36,8 @@ Last activity: 2026-04-26
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
-| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Not started |
+| 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 (est.) | **Scaffolded** — CONTEXT.md ready; awaiting `/gsd-plan-phase 45.5` |
+| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Blocked by 45.5 |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |

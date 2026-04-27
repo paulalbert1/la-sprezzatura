@@ -323,6 +323,7 @@ Plans:
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
 
 - [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
+- [ ] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand; no REQUIREMENTS.md row maps directly). Decimal phase inserted between 45 and 46 to land the platform-identifier rename before any Phase 46 template rewrite accumulates more "Linha" / "La Sprezzatura · Linha Studio" references. Tenant-facing surfaces (Liz's email body wordmarks, public marketing site) are explicitly out of scope.
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
@@ -350,6 +351,33 @@ Plans:
 - [x] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
 
 **UI hint**: yes
+
+### Phase 45.5: Linha → Sprezza Hub Platform Rename
+**Goal**: The platform identifier `Linha` is renamed to `Sprezza Hub` everywhere it appears as the SaaS product brand — codebase identifiers (`src/lib/tenants.ts` and friends), admin/back-office UI chrome (login, settings, system pages, error copy), and the email-template footer co-brand line — without touching tenant-facing surfaces (Liz's email body wordmarks, public marketing site, tenant IDs, repo name). The rebrand respects the multi-tenant SaaS pattern: tenant brand dominates customer-facing communications; the platform brand appears only in (a) a small "Sent via Sprezza Hub" email footer attribution, (b) account/system emails (password reset, signup, billing), and (c) admin/back-office UI chrome.
+**Depends on**: Phase 45 (snapshots will need regen; admin UI chrome already exists from v5.0; brand-tokens stable)
+**Requirements**: 0 numbered REQUIREMENTS.md rows map directly. This phase is platform tech-debt cleanup ahead of v6.0 multi-tenant. Architectural decision: rename now (before Phase 46 template migration accumulates more `Linha` references) rather than later.
+**Success Criteria** (what must be TRUE):
+  1. `grep -ri "Linha" src/ docs/ scripts/ --include="*.ts" --include="*.tsx" --include="*.astro" --include="*.json" --include="*.md"` returns zero hits except in (a) historical spec files under `docs/superpowers/specs/` (frozen artifacts), (b) memory file references that are kept for audit trail, (c) git history (immutable).
+  2. Admin login screen, settings page header, and system error copy display "Sprezza Hub" — never "Linha" or "La Sprezzatura" as a platform label.
+  3. Email template footer (Send Update + Work Order) shows tenant wordmark unchanged ("LA SPREZZATURA") plus a small `Sent via Sprezza Hub` attribution at the very bottom (small gray text, ~10px, centered).
+  4. System / account emails (password reset, signup confirmation, billing notices, if any exist) use sender display `Sprezza Hub <noreply@lasprezz.com>` — distinct from per-tenant emails which use the tenant's display name.
+  5. Tenant-facing surfaces are byte-identical to pre-rename: public marketing site (Hero, About, Footer, Process, Services, Portfolio, SEO meta), Liz's email body copy, `tenants.json` tenant ID `la-sprezzatura`, `package.json` name. (Verify via `git diff`-stat that those files have zero changes outside the system/admin layer.)
+  6. 45-05 snapshots regenerate cleanly via `npm run test:visual:update`; the diff is the audit trail for the rebrand.
+  7. `npm test`, `npm run test:email`, `npm run test:visual` all exit 0 after the rename.
+  8. No new `--no-verify` commits.
+**Plans**: 2 plans (estimated):
+  1. Codebase identifier rebrand (`src/lib/tenants.ts`, type names, comments, internal docs, error messages) — purely refactor, snapshot-safe.
+  2. Email footer + admin UI chrome + system email sender display — touches templates and triggers snapshot regen.
+
+**Out of scope** (kept stable):
+- Liz's tenant-side email body wordmarks ("LA SPREZZATURA" stays — it's her brand)
+- Public marketing site copy (Hero, About, Footer, Process, Services, Portfolio, SEO meta — Liz's design business stays "La Sprezzatura")
+- Tenant ID `la-sprezzatura` in `tenants.json` (URL/session backward compat)
+- `package.json` `name` field, repo directory name (deployable artifact)
+- Per-tenant theming evolution of `brand-tokens.ts` (deferred to v6.0)
+- Historical spec docs in `docs/superpowers/specs/` (frozen artifacts)
+
+**UI hint**: yes — admin chrome rename. UI-SPEC step skipped because this is string substitution against existing UI, not greenfield design; planner can spec inline.
 
 ### Phase 46: Send Update + Work Order Migration
 **Goal**: The two existing email templates (Send Update weekly digest and Work Order) are ported to the react-email foundation, render correctly across Outlook desktop / Gmail / Apple Mail, ship plain-text fallbacks, carry preheader copy, use Outlook-safe `<table>` markup, and the Send Update digest carries a List-Unsubscribe header for Gmail bulk-sender compliance.
