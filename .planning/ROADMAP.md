@@ -324,7 +324,7 @@ Plans:
 
 - [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
 - [x] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand). Complete 2026-04-27. Admin chrome (AdminNav, login, trades pages) reads "Sprezza Hub"; Send Update + Work Order email footers carry "Sent via Sprezza Hub" attribution; `src/lib/email/system.ts` forward-looking sender constants stub added. Zero `Linha` references remain in src/, docs/ (excluding frozen specs), or scripts/. Tenant brand surfaces (LA SPREZZATURA wordmark, public marketing site, sender domain lasprezz.com, tenants.json slug, package.json name) byte-identical. 7 email-snapshot tests flipped FAIL → PASS post-snapshot-regen; full-suite test count improved 68 → 60 failures with zero new failures.
-- [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
+- [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — 3 plans (3 waves) planned
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
 - [ ] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08)
@@ -389,7 +389,12 @@ Plans:
   3. Both templates include preheader text that renders as the inbox preview line in Gmail and Apple Mail (EMAIL-03)
   4. The Send Update digest carries a List-Unsubscribe header (RFC 8058 one-click format) on every send (EMAIL-06)
   5. The Send Update layout uses `<table role="presentation">` outer markup with pixel units, no `flex` / `grid` / `rem` / shorthand `border-radius` for layout, matching the Outlook-safe pattern already proven in the existing Work Order template (EMAIL-07)
-**Plans**: TBD
+**Plans**: 3 plans (3 waves)
+
+Plans:
+- [ ] 46-01-PLAN.md (shell + WorkOrder port) — Wave 1: src/emails/shell/{EmailShell,EmailButton,Preheader}.tsx + src/lib/email/tenantBrand.ts + src/emails/workOrder/{WorkOrder.tsx,fixtures.ts,WorkOrder.test.ts} + src/emails/fixtures.shared.ts (D-4, D-5, D-6, D-7; satisfies EMAIL-01..03 for Work Order)
+- [ ] 46-02-PLAN.md (SendUpdate structural rewrite) — Wave 2: src/emails/sendUpdate/{SendUpdate.tsx,Greeting.tsx,Milestones.tsx,ActionItems.tsx,Procurement.tsx,PendingArtifacts.tsx,fixtures.ts,SendUpdate.test.ts} (D-1, D-2, D-13, D-20; satisfies EMAIL-07 + EMAIL-01..03 for Send Update)
+- [ ] 46-03-PLAN.md (cutover + List-Unsubscribe + merge gate) — Wave 3: D-16 diff script + 3 call-site rewires + List-Unsubscribe header + 6 legacy-file deletions + buildWorkOrderPlainText deletion + render-email-fixtures-impl extension + Outlook desktop merge-gate screenshot (D-8, D-10, D-12, D-14, D-16, D-17; closes EMAIL-06 + finalizes EMAIL-01..03)
 **UI hint**: yes
 
 ### Phase 47: Portal Layout Hoist
