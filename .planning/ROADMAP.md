@@ -490,7 +490,7 @@ Plans:
 | 43 | v5.2 | 4/4 | Complete    | 2026-04-23 |
 | 44 | (interim) | 0/11 | In progress | - |
 | 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
-| 46 | v5.3 | 1/3 | In Progress|  |
+| 46 | v5.3 | 2/3 | In Progress|  |
 | 47 | v5.3 | 0/TBD | Not started | - |
 | 48 | v5.3 | 0/TBD | Not started | - |
 | 49 | v5.3 | 0/TBD | Not started | - |
