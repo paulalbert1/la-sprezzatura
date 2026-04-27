@@ -31,7 +31,10 @@ export interface ScaffoldProps {
 export function Scaffold({ recipientName = "Sample Recipient" }: ScaffoldProps) {
   return (
     <Html lang="en">
-      <Head />
+      <Head>
+        <meta name="color-scheme" content="only light" />
+        <meta name="supported-color-schemes" content="light" />
+      </Head>
       <Tailwind config={emailTailwindConfig}>
         <Body className="bg-cream font-body">
           <Container className="mx-auto max-w-xl py-10 px-5">

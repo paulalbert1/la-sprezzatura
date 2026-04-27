@@ -55,6 +55,43 @@ fixtures, or non-email code paths.
      instead of `<table role="presentation">` (Phase 46 EMAIL-07).
    - Missing image -> asset URL not on `email-assets.sprezzahub.com` or
      the asset host returned a non-cached 404.
+   - **Background or button colors look darker than the source hex** -> Outlook
+     in dark mode auto-inverts light palettes. NOT a regression of the brand
+     tokens; the underlying HTML is correct. See "Outlook dark-mode handling"
+     below for the mitigation.
+
+## Outlook dark-mode handling
+
+Outlook desktop applies its own automatic dark-mode color inversion when
+the user has Office in dark mode. A cream `#FAF8F5` background renders as
+gray; a terracotta `#C4836A` button hue-shifts darker. The HTML markup is
+unchanged -- Outlook overrides for accessibility.
+
+**Phase 45 mitigation (in place via Phase 45-03 follow-up commit):**
+`src/emails/__scaffold.tsx` now declares the email as light-only via two
+meta tags in `<Head>`:
+
+```tsx
+<Head>
+  <meta name="color-scheme" content="only light" />
+  <meta name="supported-color-schemes" content="light" />
+</Head>
+```
+
+These tell Outlook 365 desktop (and most other clients) to skip the
+auto-inversion and render the email in its source palette. Phase 46+
+templates MUST inherit this pattern -- copy the two `<meta>` tags into
+the `<Head>` of every new email component.
+
+**If the gate still shows hue shifts after the meta tags ship:** the
+client probably forces dark mode regardless (older Outlook versions, some
+mobile clients). Two fallbacks:
+1. **Design for both** via `@media (prefers-color-scheme: dark)` blocks
+   inside `<style>` tags in `<Head>` -- override specific colors when
+   dark mode is forced.
+2. **Accept the inversion** and verify contrast remains readable
+   (current scaffold's terracotta-on-cream remains readable when
+   inverted).
 
 ## Why this is procedural, not automated
 
