@@ -392,7 +392,7 @@ Plans:
 **Plans**: 3 plans (3 waves)
 
 Plans:
-- [ ] 46-01-PLAN.md (shell + WorkOrder port) — Wave 1: src/emails/shell/{EmailShell,EmailButton,Preheader}.tsx + src/lib/email/tenantBrand.ts + src/emails/workOrder/{WorkOrder.tsx,fixtures.ts,WorkOrder.test.ts} + src/emails/fixtures.shared.ts (D-4, D-5, D-6, D-7; satisfies EMAIL-01..03 for Work Order)
+- [x] 46-01-PLAN.md (shell + WorkOrder port) — Wave 1: src/emails/shell/{EmailShell,EmailButton,Preheader}.tsx + src/lib/email/tenantBrand.ts + src/emails/workOrder/{WorkOrder.tsx,fixtures.ts,WorkOrder.test.ts} + src/emails/fixtures.shared.ts (D-4, D-5, D-6, D-7; satisfies EMAIL-01..03 for Work Order)
 - [ ] 46-02-PLAN.md (SendUpdate structural rewrite) — Wave 2: src/emails/sendUpdate/{SendUpdate.tsx,Greeting.tsx,Milestones.tsx,ActionItems.tsx,Procurement.tsx,PendingArtifacts.tsx,fixtures.ts,SendUpdate.test.ts} (D-1, D-2, D-13, D-20; satisfies EMAIL-07 + EMAIL-01..03 for Send Update)
 - [ ] 46-03-PLAN.md (cutover + List-Unsubscribe + merge gate) — Wave 3: D-16 diff script + 3 call-site rewires + List-Unsubscribe header + 6 legacy-file deletions + buildWorkOrderPlainText deletion + render-email-fixtures-impl extension + Outlook desktop merge-gate screenshot (D-8, D-10, D-12, D-14, D-16, D-17; closes EMAIL-06 + finalizes EMAIL-01..03)
 **UI hint**: yes
@@ -490,7 +490,7 @@ Plans:
 | 43 | v5.2 | 4/4 | Complete    | 2026-04-23 |
 | 44 | (interim) | 0/11 | In progress | - |
 | 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
-| 46 | v5.3 | 0/TBD | Not started | - |
+| 46 | v5.3 | 1/3 | In Progress|  |
 | 47 | v5.3 | 0/TBD | Not started | - |
 | 48 | v5.3 | 0/TBD | Not started | - |
 | 49 | v5.3 | 0/TBD | Not started | - |

@@ -7,9 +7,9 @@
 
 ### Email Template Foundations & Refresh (EMAIL)
 
-- [ ] **EMAIL-01**: Every outbound email renders correctly in Outlook desktop (2016 / 2019 / 365), Gmail web, Gmail iOS, Apple Mail macOS, and Apple Mail iOS
-- [ ] **EMAIL-02**: Every outbound email ships a plain-text alternative for screen readers and image-blocked clients
-- [ ] **EMAIL-03**: Every outbound email includes preheader text that explains the message in the recipient's inbox preview
+- [x] **EMAIL-01**: Every outbound email renders correctly in Outlook desktop (2016 / 2019 / 365), Gmail web, Gmail iOS, Apple Mail macOS, and Apple Mail iOS
+- [x] **EMAIL-02**: Every outbound email ships a plain-text alternative for screen readers and image-blocked clients
+- [x] **EMAIL-03**: Every outbound email includes preheader text that explains the message in the recipient's inbox preview
 - [ ] **EMAIL-04**: Every transactional invitation email includes a visible "or paste this link" fallback for the primary CTA
 - [ ] **EMAIL-05**: Every transactional invitation email includes copy stating how long the link remains valid
 - [ ] **EMAIL-06**: The Send Update weekly digest includes a List-Unsubscribe header (Gmail/Yahoo bulk-sender requirement)
