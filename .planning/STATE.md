@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: executing
-stopped_at: Phase 45 — 45-03 resumed (sprezzahub.com registered); operator-in-the-loop plan now executing
-last_updated: "2026-04-26T22:00:00Z"
+status: verifying
+stopped_at: Phase 45 complete — 5/5 plans done; verification pending
+last_updated: "2026-04-27T00:30:00Z"
 last_activity: 2026-04-26
 progress:
   total_phases: 9
@@ -12,7 +12,7 @@ progress:
   total_plans: 15
   completed_plans: 15
   percent: 100
-  notes: 45-03 (asset host + DNS) restored after sprezzahub.com registered same day; EMAIL-10/EMAIL-11 will close on completion. Visible plan counters still show 4/4 because the SDK regenerates from filename presence; the 5th visible plan (45-03) is in flight.
+  notes: Phase 45 closes with 5/5 plans complete. EMAIL-08/09/10/11 all satisfied. Phase 46 (Send Update + Work Order migration) is the next email-track phase.
 ---
 
 # Project State
@@ -26,16 +26,16 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — EXECUTING 45-03
-Plan: 45-03 in flight (asset host + DNS, autonomous: false). 45-01/02/04/05 complete. App-rename substitutions applied to plan body: asset host → email-assets.sprezzahub.com, repo → sprezza-hub-email-assets. Sender side (lasprezz.com / liz@lasprezz.com / DKIM/SPF/DMARC) unchanged.
-Status: Operator checkpoints expected at Task 1 (sprezzahub.com Cloudflare zone status, GitHub repo visibility, Vercel + Cloudflare UI), Task 2 (Cloudflare SPF edit on lasprezz.com + Resend dashboard verify), Task 4 (Outlook desktop test send to liz@lasprezz.com).
+Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied) — verifying
+Plan: 45-03 closed 2026-04-26 (asset host + DNS + merge gate). 45-01/02/04/05 also complete. App-rename substitutions for sprezzahub.com landed cleanly: asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache). Sender side (lasprezz.com / liz@lasprezz.com / DKIM/SPF/DMARC) verified all-green in Resend; apex SPF amended with include:amazonses.com belt-and-suspenders to the modern send.lasprezz.com MAIL FROM pattern.
+Status: Phase 45 ready for `/gsd-verify-work 45`. Next email-track phase is 46 (Send Update + Work Order migration).
 Last activity: 2026-04-26
 
 ## v5.3 Phase Map
 
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
-| 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Executing** — 4/5 done; 45-03 (EMAIL-10/11) in flight after sprezzahub.com registered |
+| 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Not started |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
@@ -134,7 +134,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-26T21:33:28.165Z
-Stopped at: Phase 45 Plan 04 complete (react-email scaffold + brand-tokens pipeline proven via vitest snapshot)
+Last session: 2026-04-27T00:30:00Z
+Stopped at: Phase 45 complete — 5/5 plans done; EMAIL-08..11 all satisfied; verification pending
 Resume file: None
-Next action: `/gsd-execute-phase 45` to run Wave 2's remaining plan (45-05 snapshot harness) — 45-03 remains deferred
+Next action: `/gsd-verify-work 45` to confirm phase closure, then `/gsd-discuss-phase 46` (Send Update + Work Order migration) to begin the next email-track phase

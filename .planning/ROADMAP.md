@@ -322,7 +322,7 @@ Plans:
 - **D-2**: Impersonation audit log lives in a dedicated Sanity `impersonationAudit` document type (per-tenant). Keeps audit churn out of `siteSettings`.
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
 
-- [~] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 in flight, EMAIL-11 in flight). 4/5 plans done 2026-04-26; 45-03 (asset host + DNS) executing after sprezzahub.com registered same day. Asset host moves to email-assets.sprezzahub.com; sender domain (lasprezz.com) unchanged.
+- [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
@@ -345,7 +345,7 @@ Plans:
 Plans:
 - [x] 45-01-PLAN.md (foundation) — Wave 0: package.json deps + npm scripts + Playwright Chromium install (complete 2026-04-26 — see 45-01-SUMMARY.md)
 - [x] 45-02-PLAN.md (tokens) — Wave 1: brand-tokens.ts + scripts/generate-theme-css.ts + global.css @import swap (EMAIL-08) (complete 2026-04-26 — see 45-02-SUMMARY.md)
-- [ ] 45-03-PLAN.deferred.md (asset host + DNS) — DEFERRED pending app-rename / domain registration
+- [x] 45-03-PLAN.md (asset host + DNS + merge gate) — Wave 2: sprezza-hub-email-assets repo + Vercel project + Cloudflare CNAME, lasprezz.com SPF amendment, Resend dashboard verify, docs/email-merge-gate.md, first real Outlook desktop scaffold render to liz@lasprezz.com (EMAIL-10, EMAIL-11) (complete 2026-04-26 — see 45-03-SUMMARY.md)
 - [x] 45-04-PLAN.md (react-email scaffold) — Wave 2: src/emails/_theme.ts + __scaffold.tsx + scaffold.test.ts (EMAIL-08 proof-of-pipeline)
 - [x] 45-05-PLAN.md (snapshot harness) — Wave 2: Send Update permutation + Work Order baseline Vitest snaps + playwright.config.ts + first Playwright spec at 3 viewports (EMAIL-09)
 
