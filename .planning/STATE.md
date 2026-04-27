@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied). Phase 45.5 (Linha → Sprezza Hub Platform Rename) scaffolded; ready to plan.
-Plan: 45-03 closed 2026-04-26. Follow-up commit `ae54a30` added Outlook dark-mode color-scheme meta tags to scaffold; snapshots regenerated. Phase 45.5 added to ROADMAP between 45 and 46 — captures the platform identifier rebrand with explicit tenant-vs-platform scope boundaries. CONTEXT.md pre-seeded at `.planning/phases/45.5-platform-rename/45.5-CONTEXT.md` with all architectural decisions (D-1 scope, D-2 footer attribution wording, D-3 wordmark casing, D-4 tenant-vs-platform sender display, D-5 admin UI surfaces, D-6 snapshot regeneration as audit trail, D-7 Linha refs, D-8 anti-scope-creep guards) so `/gsd-plan-phase 45.5` skips the discuss step.
-Status: Next: `/gsd-plan-phase 45.5` to generate PLAN.md, then `/gsd-execute-phase 45.5` next session. Phase 46 deferred until 45.5 closes (avoids Phase 46 templates accumulating Linha references that 45.5 would just need to rip out).
+Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied). Phase 45.5 (Linha → Sprezza Hub Platform Rename) — PLANNED (2 plans, ready for execution).
+Plan: 45-03 closed 2026-04-26. Follow-up commit `ae54a30` added Outlook dark-mode meta tags. Phase 45.5 planned 2026-04-26 with pattern-mapper + planner + plan-checker chain: pattern-mapper found scope is much smaller than initial 60-file grep (only 5 files actually need renames; 60+ matches are mostly tenant brand or sender domain — KEEP). Two plans produced: 45.5-01 (admin chrome sweep, 4 files, 4 tasks including pre-pass enumeration + baseline test capture) and 45.5-02 (email footers + system.ts forward-looking stub, 5 tasks, snapshot regen as audit trail). Plan-checker passed after one revision cycle (HIGH: test-baseline framing; MEDIUM: hoist admin pre-pass to pre-edit; LOW: grep wording clarity).
+Status: Next: `/gsd-execute-phase 45.5` next session — Wave 1 (45.5-01) is admin chrome rename, Wave 2 (45.5-02) is email footers + snap regen. Both autonomous (no operator checkpoints). Phase 46 stays blocked by 45.5.
 Last activity: 2026-04-26
 
 ## v5.3 Phase Map
@@ -36,7 +36,7 @@ Last activity: 2026-04-26
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
-| 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 (est.) | **Scaffolded** — CONTEXT.md ready; awaiting `/gsd-plan-phase 45.5` |
+| 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Planned** — 45.5-01 + 45.5-02 cleared by plan-checker; ready for `/gsd-execute-phase 45.5` |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Blocked by 45.5 |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
