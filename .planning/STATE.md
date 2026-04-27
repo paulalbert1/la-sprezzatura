@@ -2,17 +2,17 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: verifying
-stopped_at: Phase 45 complete — 5/5 plans done; verification pending
-last_updated: "2026-04-27T00:30:00Z"
-last_activity: 2026-04-26
+status: ready-for-next
+stopped_at: Phase 45.5 complete — 2/2 plans done; verifier PASS 8/8; Phase 46 unblocked
+last_updated: "2026-04-27T12:15:00Z"
+last_activity: 2026-04-27
 progress:
   total_phases: 9
-  completed_phases: 1
-  total_plans: 15
-  completed_plans: 15
+  completed_phases: 2
+  total_plans: 17
+  completed_plans: 17
   percent: 100
-  notes: Phase 45 closes with 5/5 plans complete. EMAIL-08/09/10/11 all satisfied. Phase 46 (Send Update + Work Order migration) is the next email-track phase.
+  notes: Phases 45 and 45.5 closed (7/7 plans across both). Linha → Sprezza Hub rebrand done; admin chrome + email footers carry the new platform identifier; tenant brand surfaces byte-identical. Phase 46 (Send Update + Work Order template migration) unblocked.
 ---
 
 # Project State
@@ -22,22 +22,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 45 — email-foundations
+**Current focus:** Phase 45.5 — platform-rename (closed); Phase 46 — Send Update + Work Order Migration (next)
 
 ## Current Position
 
-Phase: 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied). Phase 45.5 (Linha → Sprezza Hub Platform Rename) — PLANNED (2 plans, ready for execution).
-Plan: 45-03 closed 2026-04-26. Follow-up commit `ae54a30` added Outlook dark-mode meta tags. Phase 45.5 planned 2026-04-26 with pattern-mapper + planner + plan-checker chain: pattern-mapper found scope is much smaller than initial 60-file grep (only 5 files actually need renames; 60+ matches are mostly tenant brand or sender domain — KEEP). Two plans produced: 45.5-01 (admin chrome sweep, 4 files, 4 tasks including pre-pass enumeration + baseline test capture) and 45.5-02 (email footers + system.ts forward-looking stub, 5 tasks, snapshot regen as audit trail). Plan-checker passed after one revision cycle (HIGH: test-baseline framing; MEDIUM: hoist admin pre-pass to pre-edit; LOW: grep wording clarity).
-Status: Next: `/gsd-execute-phase 45.5` next session — Wave 1 (45.5-01) is admin chrome rename, Wave 2 (45.5-02) is email footers + snap regen. Both autonomous (no operator checkpoints). Phase 46 stays blocked by 45.5.
-Last activity: 2026-04-26
+Phase: 45.5 (platform-rename) — COMPLETE (2/2 plans, verifier PASS 8/8). Phase 45 (email-foundations) — COMPLETE (5/5 plans, EMAIL-08..11 satisfied). Phase 46 unblocked.
+Plan: 45.5-02 closed 2026-04-27. Wave 1 (45.5-01) renamed admin chrome (AdminNav, login, admin/trades pages) to "Sprezza Hub" across 4 files in 3 commits (`47bc111`, `5867d3f`, `0304588` + SUMMARY commit `70f3ea6`). Wave 2 (45.5-02) rebranded the Send Update + Work Order email footers with "Sent via Sprezza Hub" attribution, added the forward-looking `src/lib/email/system.ts` sender constants stub (D-4), and regenerated 7 Vitest email snapshots in 5 commits (`251672e`, `4f741b2`, `d4b4a2c`, `0c112e6` + SUMMARY commit `97fc748`). Tenant brand surfaces (LA SPREZZATURA wordmark, tenants.json slug, package.json name, public marketing pages, sender domain lasprezz.com) byte-identical. Test count strictly improved 68 → 60 failures (7 email snapshots flipped FAIL → PASS, 1 admin-chrome audit went green). Working tree clean.
+Status: Next: `/gsd-discuss-phase 46` to start Send Update + Work Order template migration to react-email (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07).
+Last activity: 2026-04-27
 
 ## v5.3 Phase Map
 
 | Phase | Name | Reqs | Plans (est.) | Status |
 |-------|------|------|--------------|--------|
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
-| 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Planned** — 45.5-01 + 45.5-02 cleared by plan-checker; ready for `/gsd-execute-phase 45.5` |
-| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Blocked by 45.5 |
+| 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
+| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Unblocked — ready for `/gsd-discuss-phase 46` |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |

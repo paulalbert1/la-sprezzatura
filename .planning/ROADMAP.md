@@ -323,7 +323,7 @@ Plans:
 - **D-3**: `/workorder/*` and `/building/*` get the impersonation banner only in v5.3 (self-gating component drops into existing page bodies). Full layout migration of those routes deferred to v5.4.
 
 - [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
-- [ ] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand; no REQUIREMENTS.md row maps directly). Decimal phase inserted between 45 and 46 to land the platform-identifier rename before any Phase 46 template rewrite accumulates more "Linha" / "La Sprezzatura · Linha Studio" references. Tenant-facing surfaces (Liz's email body wordmarks, public marketing site) are explicitly out of scope.
+- [x] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand). Complete 2026-04-27. Admin chrome (AdminNav, login, trades pages) reads "Sprezza Hub"; Send Update + Work Order email footers carry "Sent via Sprezza Hub" attribution; `src/lib/email/system.ts` forward-looking sender constants stub added. Zero `Linha` references remain in src/, docs/ (excluding frozen specs), or scripts/. Tenant brand surfaces (LA SPREZZATURA wordmark, public marketing site, sender domain lasprezz.com, tenants.json slug, package.json name) byte-identical. 7 email-snapshot tests flipped FAIL → PASS post-snapshot-regen; full-suite test count improved 68 → 60 failures with zero new failures.
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
@@ -365,9 +365,9 @@ Plans:
   6. 45-05 snapshots regenerate cleanly via `npm run test:visual:update`; the diff is the audit trail for the rebrand.
   7. `npm test`, `npm run test:email`, `npm run test:visual` all exit 0 after the rename.
   8. No new `--no-verify` commits.
-**Plans**: 2 plans (estimated):
-  1. Codebase identifier rebrand (`src/lib/tenants.ts`, type names, comments, internal docs, error messages) — purely refactor, snapshot-safe.
-  2. Email footer + admin UI chrome + system email sender display — touches templates and triggers snapshot regen.
+**Plans**: 2 plans complete:
+- [x] 45.5-01-PLAN.md (admin chrome sweep) — Wave 1: AdminNav.tsx + admin/login.astro + admin/trades/index.astro + admin/trades/[contractorId]/index.astro (complete 2026-04-27 — see 45.5-01-SUMMARY.md)
+- [x] 45.5-02-PLAN.md (email footer rebrand + system stub + snapshot regen) — Wave 2: sendUpdate/emailTemplate.ts + workOrder/emailTemplate.ts + new src/lib/email/system.ts + Vitest snapshots + Playwright PNG baselines (complete 2026-04-27 — see 45.5-02-SUMMARY.md)
 
 **Out of scope** (kept stable):
 - Liz's tenant-side email body wordmarks ("LA SPREZZATURA" stays — it's her brand)
