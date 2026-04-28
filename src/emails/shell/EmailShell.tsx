@@ -1,8 +1,10 @@
 // src/emails/shell/EmailShell.tsx
 // Phase 46 -- shared layout shell for v5.3 react-email templates.
+// Phase 46-04 -- adds closed-enum signoffStyle register (D-29).
 //
 // Source of truth:
 //   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-5, D-6, D-7)
+//   .planning/phases/46-send-update-work-order-migration/46-04-CONTEXT.md (D-29)
 //   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (EmailShell.tsx)
 //
 // Composition: <Html> + <Head> + <Tailwind config={emailTailwindConfig}> + <Body>
@@ -17,6 +19,9 @@
 // in a real per-tenant lookup with zero shell changes.
 // D-7: cta is optional so Phase 48's invite-style emails can render their own
 // button inside children if needed; v5.3 templates always pass it.
+// D-29 (46-04): signoffStyle resolves which TenantBrand register renders in
+// the footer. Closed enum -- adding a register requires a schema addition in
+// tenantBrand.ts; do not widen with a string cast.
 
 import type { ReactNode } from "react";
 import {
@@ -34,14 +39,33 @@ import type { TenantBrand } from "../../lib/email/tenantBrand";
 import { EmailButton } from "./EmailButton";
 import { Preheader } from "./Preheader";
 
+export type SignoffStyle = "formal" | "casual";
+
 export interface EmailShellProps {
   tenant: TenantBrand;
   preheader: string;
+  /**
+   * Signature register -- controls which TenantBrand field renders in the footer signature line.
+   * "formal" -> tenant.signoffNameFormal (e.g. "Elizabeth Lewis"; SendUpdate uses this).
+   * "casual" -> tenant.signoffNameCasual (e.g. "Elizabeth"; WorkOrder uses this).
+   * Defaults to "casual" so existing templates (WorkOrder) get byte-identical output without opting in.
+   * Closed enum per 46-04-CONTEXT D-29 -- adding a register requires schema additions; do not widen by string cast.
+   */
+  signoffStyle?: SignoffStyle;
   cta?: { href: string; label: string };
   children: ReactNode;
 }
 
-export function EmailShell({ tenant, preheader, cta, children }: EmailShellProps) {
+export function EmailShell({
+  tenant,
+  preheader,
+  signoffStyle = "casual",
+  cta,
+  children,
+}: EmailShellProps) {
+  const signoffName =
+    signoffStyle === "formal" ? tenant.signoffNameFormal : tenant.signoffNameCasual;
+
   return (
     <Html lang="en">
       <Head>
@@ -66,7 +90,7 @@ export function EmailShell({ tenant, preheader, cta, children }: EmailShellProps
             <Hr className="border-cream-dark m-0" />
             <Section className="px-[40px] py-[16px] text-center">
               <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0">
-                {tenant.signoffName} {"·"} {tenant.signoffLocation}
+                {signoffName} {"·"} {tenant.signoffLocation}
               </Text>
               <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0 mt-[8px]">
                 Sent via Sprezza Hub
