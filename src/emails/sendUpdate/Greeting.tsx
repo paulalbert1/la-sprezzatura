@@ -1,60 +1,62 @@
 // src/emails/sendUpdate/Greeting.tsx
-// Phase 46 -- header + h1 + project sub-line + greeting + personalNote.
+// Phase 46-04 -- Greeting section. H1 + project sub-line + greeting line only.
 //
-// Source of truth:
-//   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-1)
-//   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (Greeting.tsx)
-//   src/lib/sendUpdate/emailTemplate.ts lines 322-339 (legacy markup)
+// Personal-note rendering moved to Body.tsx (D-5). Greeting no longer accepts
+// the body prop -- the field is omitted from the GreetingProps interface
+// to make the deletion structural, not nominal.
 //
-// JSX auto-escapes children, so the legacy esc() helper is not used here.
-// The personalNote splitter mirrors lines 312-320 of the legacy template:
-// split on \n{2,} for paragraphs, single \n becomes <br>.
+// sentDate is pre-formatted upstream by SendUpdate.tsx via formatLongDate().
 
-import React from "react";
 import { Heading, Section, Text } from "@react-email/components";
-import {
-  formatLongDate,
-  type SendUpdateProject,
-} from "./SendUpdate";
+import type { SendUpdateProject } from "./SendUpdate";
 
 export interface GreetingProps {
-  clientFirstName?: string;
   project: SendUpdateProject;
-  personalNote: string;
+  firstName?: string;
+  sentDate: string;        // pre-formatted upstream
 }
 
-export function Greeting({ clientFirstName, project, personalNote }: GreetingProps) {
-  const dateStr = formatLongDate(new Date().toISOString());
-  const greetingName = clientFirstName ?? "there";
+const HEADING_STYLE = {
+  fontSize: 22,
+  fontFamily: '"Cormorant Garamond","Georgia",serif',
+  color: "#2C2926",
+  margin: 0,
+  marginBottom: 6,
+  fontWeight: 600,
+  letterSpacing: "-0.005em",
+} as const;
 
+const SUBLINE_STYLE = {
+  fontSize: 13,
+  lineHeight: "24px",
+  color: "#8A8478",
+  margin: 0,
+  marginBottom: 24,
+  letterSpacing: "0.04em",
+} as const;
+
+const GREETING_STYLE = {
+  fontSize: 15,
+  lineHeight: "28px",
+  color: "#4A4540",
+  margin: 0,
+  marginBottom: 14,
+} as const;
+
+const SECTION_STYLE = {
+  paddingLeft: 40,
+  paddingRight: 40,
+  paddingTop: 8,
+  paddingBottom: 12,
+} as const;
+
+export function Greeting({ project, firstName, sentDate }: GreetingProps) {
+  const greetingName = firstName ?? "there";
   return (
-    <Section className="px-[40px] pt-[8px] pb-[12px]">
-      <Heading
-        as="h1"
-        className="text-[22px] font-heading text-charcoal m-0 mb-[6px]"
-      >
-        Project Update
-      </Heading>
-      <Text className="text-[13px] text-stone m-0 mb-[28px] tracking-[0.04em]">
-        {project.title} {"·"} {dateStr}
-      </Text>
-      <Text className="text-[15px] leading-[28px] text-charcoal-light m-0 mb-[14px]">
-        {`Hi ${greetingName},`}
-      </Text>
-      {personalNote &&
-        personalNote.split(/\n{2,}/).map((para, idx) => (
-          <Text
-            key={idx}
-            className="text-[15px] leading-[28px] text-charcoal-light m-0 mb-[14px]"
-          >
-            {para.split("\n").map((line, i, arr) => (
-              <React.Fragment key={i}>
-                {line}
-                {i < arr.length - 1 && <br />}
-              </React.Fragment>
-            ))}
-          </Text>
-        ))}
+    <Section style={SECTION_STYLE}>
+      <Heading as="h1" style={HEADING_STYLE}>Project Update</Heading>
+      <Text style={SUBLINE_STYLE}>{project.title} {"·"} {sentDate}</Text>
+      <Text style={GREETING_STYLE}>{`Hi ${greetingName},`}</Text>
     </Section>
   );
 }

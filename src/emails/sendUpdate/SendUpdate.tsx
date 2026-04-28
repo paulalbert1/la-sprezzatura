@@ -1,82 +1,50 @@
 // src/emails/sendUpdate/SendUpdate.tsx
-// Phase 46 -- react-email port of src/lib/sendUpdate/emailTemplate.ts.
+// Phase 46-04 -- composition root with new section order (D-2).
 //
-// Source of truth:
-//   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-1, D-2, D-3, D-7, D-13)
-//   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (SendUpdate.tsx)
+// Order: Greeting -> Body -> ReviewItems -> Milestones -> Procurement -> CTA + reply -> Footer.
+// PendingArtifacts removed as a separate section -- data merged into ReviewItems (D-3).
+// Single terracotta CTA inside children, so the reply-affordance line sits naturally
+// between the CTA and the EmailShell footer (D-9, D-19, D-20).
+// Three-line footer rendered by EmailShell with signoffStyle="formal" (D-29) so the
+// signature line is "Elizabeth Lewis" (vs WorkOrder's "Elizabeth").
 //
-// D-1: pixel-faithful nested-table rewrite -- every flex row (milestones,
-//      action items, procurement label/date pairs) becomes <Row><Column>.
-// D-2: 7x7 status indicators are colored squares (no border-radius).
-// D-3: only the CTA <EmailButton> retains longhand border-radius: 2px.
-// D-7: <EmailShell> always passed cta={...}; preheader prop is required.
-// D-13: call site passes preheader explicitly; defaultPreheader() is the
-//       defensive fallback only.
+// Required props:
+//   personalNote (D-6)  -- pass "" to opt out of the body section
+//   pendingArtifacts (D-3) -- pass [] to opt out of artifact rows
+//   personalActionItems    -- pass [] to opt out of designer rows
+//   tenant (D-29)       -- threaded to EmailShell
+//   preheader (D-13)    -- call site computes
 //
-// Section toggling (showMilestones / showProcurement / showArtifacts /
-// showClientActionItems) is preserved verbatim from the legacy template.
-// JSX auto-escapes children; the legacy esc() helper is intentionally NOT
-// ported (T-46-02-01).
+// Helpers retained for downstream use:
+//   getArtifactLabel(type, customName?)  -- 2-arg signature; ReviewItems calls this
+//   formatDate, formatLongDate           -- date formatters used by the call site
 
+import { Section, Text } from "@react-email/components";
 import { EmailShell } from "../shell/EmailShell";
+import { EmailButton } from "../shell/EmailButton";
+import type { TenantBrand } from "../../lib/email/tenantBrand";
+import { Body } from "./Body";
+import { ReviewItems, type PersonalActionItem } from "./ReviewItems";
+import { Milestones, type MilestoneRow } from "./Milestones";
+import { Procurement, type ProcurementRow } from "./Procurement";
 import { Greeting } from "./Greeting";
-import { Milestones } from "./Milestones";
-import { ActionItems } from "./ActionItems";
-import { Procurement } from "./Procurement";
-import { PendingArtifacts } from "./PendingArtifacts";
-import { LA_SPREZZATURA_TENANT } from "../../lib/email/tenantBrand";
+import type { ProcurementStatus } from "../../lib/procurement/statusPills";
 
 // ---------------------------------------------------------------------------
-// Types (mirrored verbatim from legacy src/lib/sendUpdate/emailTemplate.ts
-// lines 19-89; preheader prop added per D-13).
+// Types
 // ---------------------------------------------------------------------------
-
-export interface SendUpdateClientRef {
-  _id: string;
-  name: string;
-  email?: string;
-  portalToken?: string;
-}
-
-export interface SendUpdateMilestone {
-  _key?: string;
-  name?: string;
-  date?: string;
-  completed?: boolean;
-}
-
-export interface SendUpdateProcurementItem {
-  _key?: string;
-  name?: string;
-  status?: string;
-  installDate?: string;
-  expectedDeliveryDate?: string;
-}
-
-export interface SendUpdateArtifact {
-  _key?: string;
-  artifactType?: string;
-  customTypeName?: string;
-  currentVersionKey?: string;
-  hasApproval?: boolean;
-}
-
-export interface SendUpdateClientActionItem {
-  _key?: string;
-  description?: string;
-  dueDate?: string;
-  completed?: boolean;
-}
 
 export interface SendUpdateProject {
   _id: string;
   title: string;
-  engagementType: string;
-  clients?: Array<{ client?: SendUpdateClientRef }>;
-  milestones?: SendUpdateMilestone[];
-  procurementItems?: SendUpdateProcurementItem[];
-  artifacts?: SendUpdateArtifact[];
-  clientActionItems?: SendUpdateClientActionItem[];
+  milestones?: Array<{ label: string; date: string; state: "completed" | "upcoming" }>;
+  procurementItems?: Array<{
+    name: string;
+    vendor?: string;
+    spec?: string;
+    status: ProcurementStatus;
+    eta: string;
+  }>;
 }
 
 export interface PendingArtifact {
@@ -87,140 +55,127 @@ export interface PendingArtifact {
 
 export interface SendUpdateEmailInput {
   project: SendUpdateProject;
-  personalNote: string;
+  personalNote: string;            // REQUIRED -- D-6 (pass "" to opt out)
+  personalActionItems: PersonalActionItem[];
+  pendingArtifacts: PendingArtifact[];
   showMilestones: boolean;
   showProcurement: boolean;
-  showArtifacts: boolean;
-  pendingArtifacts: PendingArtifact[];
+  showReviewItems: boolean;
   baseUrl: string;
   ctaHref: string;
   ctaLabel?: string;
-  /** Client's first name for the greeting. Falls back to "there" if omitted. */
   clientFirstName?: string;
-  /** Controls the "Client Action Items" section rendering. */
-  showClientActionItems?: boolean;
-  /** Email address for the "Reply with feedback" CTA (defaults to liz@). */
-  feedbackEmail?: string;
-  /** Inbox-preview text (D-13). Call site passes; defaultPreheader is fallback. */
-  preheader?: string;
+  tenant: TenantBrand;             // REQUIRED -- threaded to EmailShell (D-29)
+  preheader: string;               // REQUIRED -- D-13 (Phase 46)
+  sentDate?: string;               // optional override; defaults to today (long form)
 }
+
+// Re-export PersonalActionItem so external callers (compose helper, tests, fixtures)
+// pull the type from the composition root rather than reaching into ReviewItems.
+export type { PersonalActionItem };
 
 // ---------------------------------------------------------------------------
-// Helpers (re-exported verbatim from legacy lines 95-151; esc() NOT ported).
+// Helpers retained for downstream use
 // ---------------------------------------------------------------------------
 
-export const STATUS_LABEL: Record<string, string> = {
-  scheduled: "Scheduled",
-  warehouse: "Warehouse",
-  "in-transit": "In transit",
-  ordered: "Ordered",
-  pending: "Pending order",
-  delivered: "Delivered",
-  installed: "Installed",
+const KNOWN_ARTIFACT_LABELS: Record<string, string> = {
+  proposal: "Proposal",
+  contract: "Contract",
+  "design-board": "Design Board",
+  "floor-plan": "Floor Plan",
+  invoice: "Invoice",
+  "purchase-order": "Purchase Order",
+  warranty: "Warranty",
+  "close-document": "Close Document",
 };
 
-export const STATUS_COLOR: Record<string, string> = {
-  scheduled: "#8A8478",
-  warehouse: "#B07050",
-  "in-transit": "#D4A574",
-  ordered: "#D4A574",
-  pending: "#B8AFA4",
-  delivered: "#7D9E6E",
-  installed: "#7D9E6E",
-};
-
-export function formatStatusText(status: string): string {
-  return (
-    STATUS_LABEL[status] ||
-    status.charAt(0).toUpperCase() + status.slice(1).replace(/-/g, " ")
-  );
-}
-
-export function getStatusColor(status: string): string {
-  return STATUS_COLOR[status] || "#8A8478";
-}
-
-export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-export function formatLongDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
+/**
+ * Resolve the display label for an artifact type. ReviewItems calls this with
+ * two args `(type, customName)`; preserved here for compatibility with the
+ * Task 3 ReviewItems implementation.
+ */
 export function getArtifactLabel(type: string, customName?: string): string {
-  const labels: Record<string, string> = {
-    proposal: "Proposal",
-    "floor-plan": "Floor Plan",
-    "design-board": "Design Board",
-    contract: "Contract",
-    warranty: "Warranty",
-    "close-document": "Close Document",
-  };
-  if (labels[type]) return labels[type];
+  if (type === "custom" && customName) return customName;
+  if (KNOWN_ARTIFACT_LABELS[type]) return KNOWN_ARTIFACT_LABELS[type];
   if (customName) return customName;
   return type.charAt(0).toUpperCase() + type.slice(1).replace(/-/g, " ");
+}
+
+export function formatDate(d: string | Date): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export function formatLongDate(d: string | Date): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
 // ---------------------------------------------------------------------------
 // Composition root
 // ---------------------------------------------------------------------------
 
-const DEFAULT_CTA_LABEL = "VIEW PORTAL";
+const DEFAULT_CTA_LABEL = "Open Portal";
 
-function defaultPreheader(project: SendUpdateProject): string {
-  return `Project Update for ${project.title} -- ${formatLongDate(new Date().toISOString())}`;
-}
+const REPLY_LINE_STYLE = {
+  fontSize: 12,
+  lineHeight: "20px",
+  color: "#8A8478",
+  margin: 0,
+  marginTop: 14,
+} as const;
 
-export function SendUpdate(props: SendUpdateEmailInput) {
+const CTA_SECTION_STYLE = {
+  paddingLeft: 40,
+  paddingRight: 40,
+  paddingTop: 8,
+  paddingBottom: 32,
+} as const;
+
+export function SendUpdate(input: SendUpdateEmailInput) {
   const {
     project,
     personalNote,
+    personalActionItems,
+    pendingArtifacts,
+    showMilestones,
+    showProcurement,
+    showReviewItems,
     ctaHref,
-    ctaLabel,
-    preheader,
-    showMilestones = true,
-    showProcurement = true,
-    showArtifacts = true,
-    showClientActionItems = true,
-    pendingArtifacts = [],
+    ctaLabel = DEFAULT_CTA_LABEL,
     clientFirstName,
-  } = props;
+    tenant,
+    preheader,
+    sentDate,
+  } = input;
 
-  const openActionItems = (project.clientActionItems ?? []).filter(
-    (ai) => !ai.completed,
-  );
+  const sentDateFormatted = sentDate ?? formatLongDate(new Date());
+  const milestonesMapped: MilestoneRow[] = (project.milestones ?? []).map((m) => ({
+    label: m.label,
+    date: formatDate(m.date),
+    state: m.state,
+  }));
+  const procurementMapped: ProcurementRow[] = (project.procurementItems ?? []).map((p) => ({
+    name: p.name,
+    vendor: p.vendor,
+    spec: p.spec,
+    status: p.status,
+    eta: formatDate(p.eta),
+  }));
 
   return (
-    <EmailShell
-      tenant={LA_SPREZZATURA_TENANT}
-      preheader={preheader ?? defaultPreheader(project)}
-      cta={{ href: ctaHref, label: ctaLabel ?? DEFAULT_CTA_LABEL }}
-    >
-      <Greeting
-        clientFirstName={clientFirstName}
-        project={project}
-        personalNote={personalNote}
-      />
-      {showMilestones && (project.milestones?.length ?? 0) > 0 && (
-        <Milestones milestones={project.milestones ?? []} />
+    <EmailShell tenant={tenant} preheader={preheader} signoffStyle="formal">
+      <Greeting project={project} firstName={clientFirstName} sentDate={sentDateFormatted} />
+      <Body personalNote={personalNote} />
+      {showReviewItems && (
+        <ReviewItems personalActionItems={personalActionItems} pendingArtifacts={pendingArtifacts} />
       )}
-      {showClientActionItems && openActionItems.length > 0 && (
-        <ActionItems items={openActionItems} />
-      )}
-      {showProcurement && (project.procurementItems?.length ?? 0) > 0 && (
-        <Procurement items={project.procurementItems ?? []} />
-      )}
-      {showArtifacts && pendingArtifacts.length > 0 && (
-        <PendingArtifacts artifacts={pendingArtifacts} />
-      )}
+      {showMilestones && <Milestones milestones={milestonesMapped} />}
+      {showProcurement && <Procurement items={procurementMapped} />}
+      <Section style={CTA_SECTION_STYLE}>
+        <EmailButton href={ctaHref} variant="terracotta">{ctaLabel}</EmailButton>
+        <Text style={REPLY_LINE_STYLE}>You can reply to this email directly.</Text>
+      </Section>
     </EmailShell>
   );
 }
