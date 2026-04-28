@@ -1,11 +1,11 @@
 ---
 phase: 46-send-update-work-order-migration
 plan: 04
-scope: task-1-only
-status: task-1-complete
-subsystem: procurement-palette + sanity-schema + design-system-spec
-tags: [email, procurement, palette-extraction, sanity-schema, design-system-reconciliation]
-tasks_complete: 1
+scope: tasks-1-and-2
+status: tasks-1-and-2-complete
+subsystem: procurement-palette + sanity-schema + design-system-spec + personal-note-markdown
+tags: [email, procurement, palette-extraction, sanity-schema, design-system-reconciliation, markdown-serializer, security-allowlist]
+tasks_complete: 2
 tasks_total: 6
 requires:
   - 46-04 D-12 (canonical procurement palette)
@@ -13,23 +13,31 @@ requires:
   - 46-04 D-15 (vendor + spec schema fields)
   - 46-04 D-30 (DESIGN-SYSTEM.md reconciliation toward code)
   - 46-04 D-31 (statusPills.test.ts property assertions)
+  - 46-04 D-5 (constrained markdown subset, https-only URL allowlist)
+  - 46-04 D-6 (personalNote required prop)
+  - 46-04 D-7 (forward-migration: plain-text wraps as one paragraph)
+  - 46-04 D-8 (600-char hard cap at the serializer)
 provides:
   - src/lib/procurement/statusPills.ts -- canonical pill palette + labels module (leaf code)
   - ProcurementStatus type for downstream consumers (admin UI; future SendUpdate render)
   - vendor + spec fields on procurementItem inline schema, group: "email"
   - shared ProcurementItem TypeScript export in src/sanity/queries.ts
   - DESIGN-SYSTEM.md procurement palette mirrored from production code
+  - src/lib/email/personalNoteMarkdown.ts -- parsePersonalNote + PersonalNoteParseError (leaf code)
+  - PersonalNoteParseErrorCode union ('OVER_LIMIT' | 'INVALID_URL_SCHEME') for downstream compose-helper consumers
 affects:
   - src/components/admin/ProcurementEditor.tsx (refactored to import shared module)
   - .planning/DESIGN-SYSTEM.md (Pending updated, Scheduled added, precedence pointer)
 tech-stack:
   added: []
-  patterns: [single-source-of-truth-extraction, leaf-module, designer-spec-mirrors-code]
+  patterns: [single-source-of-truth-extraction, leaf-module, designer-spec-mirrors-code, constrained-markdown-subset, https-only-url-allowlist, tdd-red-green]
 key-files:
   created:
     - src/lib/procurement/statusPills.ts
     - src/lib/procurement/statusPills.test.ts
     - src/lib/procurement/__snapshots__/statusPills.test.ts.snap
+    - src/lib/email/personalNoteMarkdown.ts
+    - src/lib/email/personalNoteMarkdown.test.ts
   modified:
     - src/components/admin/ProcurementEditor.tsx
     - src/sanity/schemas/project.ts
@@ -41,13 +49,24 @@ decisions:
   - vendor-description-keeps-onboarding-example-AND-adds-email-signal
   - remove-internal-product-name-Send-Update-from-studio-description
   - 50-char-hint-belt-and-suspenders-with-Rule.max-validation
+  - https-only-url-allowlist-no-mailto-no-http (Task 2 D-5 tighter than initial 46-CONTEXT draft)
+  - explicit-multi-blank-line-collapse-tests-added-beyond-plan-listed-17 (Task 2 belt-and-suspenders)
+  - inline-styles-no-tailwind-dependency-in-leaf-serializer (Task 2 D-5)
 metrics:
-  duration: 9m 24s
-  start: 2026-04-28T11:44:01Z
-  end:   2026-04-28T11:53:25Z
-  commits: 8
-  tests-added: 11   # 7 new statusPills + 4 new schema
-  tests-passing: 65/65 (3 affected files)
+  duration: 9m 24s (Task 1) + 22m 41s (Task 2) = 32m 5s total
+  task1:
+    start: 2026-04-28T11:44:01Z
+    end:   2026-04-28T11:53:25Z
+    commits: 8
+    tests-added: 11   # 7 new statusPills + 4 new schema
+    tests-passing: 65/65 (3 affected files)
+  task2:
+    start: 2026-04-28T12:14:26Z
+    end:   2026-04-28T12:37:07Z
+    commits: 2  # RED + GREEN; Task 2 SUMMARY+STATE commit not counted
+    tests-added: 21
+    tests-passing: 21/21 (personalNoteMarkdown.test.ts)
+  commits-total: 10
   completed: 2026-04-28
 ---
 
@@ -241,6 +260,164 @@ Verified all 8 commits present in git log: `git log --oneline cec0ee2^..HEAD` li
 
 All 65/65 affected tests pass. tsc clean for touched files. All 23 acceptance criteria green.
 
-## Next
+## Next (after Task 1)
 
 User reviews this output. If approved, Task 2 of plan 46-04 is dispatched: "Constrained markdown serializer for personalNote" — `src/lib/email/personalNoteMarkdown.ts` and `.test.ts`, TDD-tagged.
+
+---
+
+# Task 2 — Constrained Markdown Serializer for personalNote
+
+Constrained-markdown-subset serializer for the SendUpdate Body (D-5..D-8). Allowed tokens: `**bold**`, `_italic_`, `[label](https://...)`, blank-line paragraph breaks. URL scheme allowlist: https only — `javascript:`, `data:`, `http:`, `mailto:`, `ftp:` all throw `PersonalNoteParseError('INVALID_URL_SCHEME')`. 600-char hard cap throws `PersonalNoteParseError('OVER_LIMIT')`. Forward-migration path proven: plain-text input without tokens or blank lines wraps as a single paragraph block.
+
+## Scope (Task 2)
+
+**This section covers Task 2 only.** Plan 46-04 has six tasks; Tasks 3–6 remain unstarted. The user reviews this output before authorizing dispatch of Task 3.
+
+**Explicitly out of Task 2 scope:** No call sites consume `parsePersonalNote()` yet — it sits as a leaf utility. The `Body.tsx` SendUpdate section component (Task 3) imports it. The compose helper (`composeSendUpdateEmail`, Task 5) catches `PersonalNoteParseError` and re-throws with diagnostic context. The compose-UI hard cap (matching the 600-char serializer cap) is a separate UI plan, not Plan 46-04.
+
+## What Shipped (Task 2)
+
+### 1. `src/lib/email/personalNoteMarkdown.ts` (new, leaf module)
+
+Single source of truth for the SendUpdate Body markdown subset. Exports:
+
+| Export | Type | Notes |
+|---|---|---|
+| `parsePersonalNote(text: string): ReactNode[]` | function | one react-email `<Text>` element per paragraph |
+| `PersonalNoteParseError` | class | extends `Error`; carries `.code` + `.details` |
+| `PersonalNoteParseErrorCode` | type union | `"OVER_LIMIT" \| "INVALID_URL_SCHEME"` |
+
+**Module shape constraints (D-5 / D-13 leaf-code parallel):**
+- Zero upward imports — depends only on `react` and `@react-email/components` (Link, Text). No imports from `src/components/`, `src/emails/`, anywhere else inside `src/`.
+- Inline `style` props only — does not depend on a `<Tailwind>` context. Matches Outlook-safe inline-style discipline that 46-02's snapshots already enforce.
+- `MAX_LEN = 600` and `ALLOWED_SCHEME = /^https:\/\//i` are module-level constants — discoverable by acceptance-criteria grep, not buried inside function bodies.
+
+**Token order (load-bearing):**
+1. Backslash escape (`\X` → literal `X`)
+2. Link `[label](url)` — URL scheme validated via `validateUrl()`; bracket label is NOT re-parsed for nested tokens (so `[**foo**](https://x)` renders as a link with literal `**foo**` text, not as a link wrapping bold)
+3. Bold `**...**`
+4. Italic `_..._`
+5. Default literal char
+
+The `parseInline` walk merges adjacent text nodes via `mergeAdjacentText()` for cleaner downstream rendering. Malformed input — unclosed `**`, `[label](` without closing paren — falls through to literal-char emission, never throws.
+
+**Failure modes:**
+- Length validation runs FIRST (cheapest check; fails fast even if input also contains a bad URL).
+- `validateUrl` throws on first non-https URL it encounters; subsequent tokens never parse.
+- `OVER_LIMIT` details: `{ length, max: 600 }`. `INVALID_URL_SCHEME` details: `{ url }`.
+
+### 2. `src/lib/email/personalNoteMarkdown.test.ts` (new)
+
+**21 vitest cases** covering all behavioral requirements from the plan plus two **mandated additional tests** for double-blank-line collapse (carried into the executor as load-bearing security reminders, not in the original `<acceptance_criteria>` list):
+
+| # | Test | Asserts |
+|---|---|---|
+| 1 | empty input → `[]` | no error, no nodes |
+| 2 | whitespace-only → `[]` | no error, no nodes |
+| 3 | plain-text without tokens → one `<p>` (D-7 forward-migration) | exactly 1 `<p>` in HTML |
+| 4 | `\n\n` splits paragraphs | 3 `<p>` for `"First.\n\nSecond.\n\nThird."` |
+| 5 | **multi-blank-line collapses** (no stacked empty `<p>`) | `\n\n\n\n` → 2 `<p>`, no empty `<p>` between |
+| 6 | **`\n\n\n` ≡ `\n\n`** | both produce 2 `<p>` |
+| 7 | `**bold**` → `<strong>` | regex match |
+| 8 | `_italic_` → `<em>` | regex match |
+| 9 | https link → `<a href>` | `href="https://lasprezz.com"` |
+| 10 | `[**Important**](url)` parses as link wrapping literal label | `**Important**` text inside `<a>`, no separate `<strong>` |
+| 11 | `\**bold\**` → literal `**bold**` | no `<strong>` |
+| 12 | unclosed `**world` → literal text | no throw, no `<strong>` |
+| 13 | incomplete `[label](` → literal text | no throw, no `<a >` |
+| 14 | `javascript:` rejected with `INVALID_URL_SCHEME` | `.code === "INVALID_URL_SCHEME"` |
+| 15 | `data:` rejected | throws `/INVALID_URL_SCHEME/` |
+| 16 | `http:` rejected (https-only allowlist) | throws |
+| 17 | `mailto:` rejected | throws |
+| 18 | `ftp:` rejected | throws |
+| 19 | `https:` accepted | does not throw |
+| 20 | 600 chars passes, 601 throws `OVER_LIMIT` | `details: { length: 601, max: 600 }` |
+| 21 | `<script>` in label HTML-escaped via JSX (no injection) | output contains `&lt;script&gt;`, not `<script>` |
+
+Tests 5, 6, and 18 are the user-mandated additions beyond the plan's listed ~17 cases (multi-blank collapse + `ftp:` rejection — `ftp:` was implied by "https only" in D-5 but not in the plan's listed-test enumeration, so I added it explicitly to round out the scheme rejection coverage).
+
+**Tests:** 21/21 pass. tsc clean for touched files.
+
+## Deviations from Plan (Task 2)
+
+### Process — Test count diverged from plan's "~17 tests"
+
+**Found during:** Test authoring per pre-execution context block.
+
+**Issue:** Plan section's `<behavior>` listed roughly 17 distinct test scenarios. The user's pre-execution security reminders (load-bearing) added two **mandatory** tests for multi-blank-line collapse. I additionally added an `ftp:` rejection test for completeness — D-5's "https only" allowlist implies all non-https schemes reject, and the plan tested four (`javascript:`, `data:`, `http:`, `mailto:`); rounding to all five common alternatives + the explicit `https:` accept case made the rejection coverage complete and uniform.
+
+**Fix:** Test file lands at 21 tests (vs. plan's ~17). All 21 pass.
+
+**No behavioral or interface change** — only test coverage breadth.
+
+## Acceptance Criteria — All Green (Task 2)
+
+All 12 acceptance criteria from the plan's Task 2 `<acceptance_criteria>` block pass:
+
+- File existence (1): both `.ts` and `.test.ts` exist
+- Exports (1): `parsePersonalNote` + `PersonalNoteParseError` both exported
+- URL allowlist https-only (1): `ALLOWED_SCHEME.*https` grep matches
+- Hard cap 600 (1): `MAX_LEN = 600` grep matches
+- No `dangerouslySetInnerHTML` (1): grep returns empty
+- Vitest exits 0 (1): no FAIL/✗ lines in output
+- All ~17 tests pass (1): 21/21 actual count
+- Length boundary explicit (600 OK, 601 throws) (1): both `"a".repeat(600)` and `"a".repeat(601)` grep match
+- Ordering test grep — link wrapping bold (1): `Important.*lasprezz` grep matches
+- HTML-escape regression covered (1): `script.*alert` grep matches
+- tsc clean for new files (1): zero `personalNoteMarkdown` errors in `npx tsc --noEmit`
+- No AI attribution (1): grep `claude|anthropic|generated by|co-authored` returns 0 matches in both files
+
+Plus the user-mandated additions:
+- **Multi-blank-line collapse asserted explicitly** (Tests 5 and 6 above) — PASS
+- **All 5 common non-https schemes rejected explicitly**: `javascript:`, `data:`, `http:`, `mailto:`, `ftp:` (Tests 14–18) — PASS
+
+## TDD Gate Compliance (Task 2)
+
+Plan 46-04 Task 2 was tagged `tdd="true"`. Gate sequence verified:
+
+1. **RED gate** — commit `b331bd8` `test(46-04): add failing tests for personalNote markdown serializer (D-5..D-8)`. Tests fail because the implementation file does not yet exist (vitest reports `Cannot find module './personalNoteMarkdown'`).
+2. **GREEN gate** — commit `e7b71a7` `feat(46-04): implement constrained markdown serializer for personalNote (D-5..D-8)`. All 21 tests pass on first run.
+3. **REFACTOR gate** — not needed; the implementation passed tests on first run with no follow-up cleanup required.
+
+Gate sequence valid: `test(...)` commit precedes `feat(...)` commit, both within the same plan scope.
+
+## Commits (Task 2)
+
+| Commit | Type | Subject |
+|---|---|---|
+| `b331bd8` | test | add failing tests for personalNote markdown serializer (D-5..D-8) |
+| `e7b71a7` | feat | implement constrained markdown serializer for personalNote (D-5..D-8) |
+
+## Threat Surface Scan (Task 2)
+
+The serializer is the **trust boundary** for designer-authored markdown flowing into client-facing emails. Threats addressed:
+
+| Threat | Mitigation in code | Test coverage |
+|---|---|---|
+| Cross-site scripting via `<script>` injection in link label | React JSX text rendering escapes `<`/`>`/`&` automatically — no `dangerouslySetInnerHTML` anywhere in the module | Test 21 (HTML-escape regression) |
+| Phishing via `javascript:` URL scheme | `ALLOWED_SCHEME = /^https:\/\//i` allowlist; non-matches throw before render | Tests 14, 19 |
+| Data exfiltration via `data:` URL scheme | Same allowlist | Test 15 |
+| Network downgrade via `http:` URL scheme | Same allowlist (https-only) | Test 16 |
+| Email-client mail-app hijack via `mailto:` URL scheme | Same allowlist | Test 17 |
+| Legacy file-protocol exfiltration via `ftp:` | Same allowlist | Test 18 |
+| Denial via oversized payload (long-string memory pressure on render path) | 600-char hard cap, validated FIRST before any tokenization work | Test 20 |
+| Stacked empty `<p>` elements affecting render layout in Outlook | `text.split(/\n{2,}/)` + `.filter(Boolean)` on trimmed paragraphs | Tests 5, 6 |
+
+**No new threat-flag emissions** — the module fits cleanly within the phase-level threat model's existing "designer markdown sanitization on `personalNote`" envelope. If a future plan introduces a different markdown subset (e.g., for system emails or internal-only notes), it should land as a separate parser file, not by widening this one.
+
+## Self-Check: PASSED (Task 2)
+
+Verified all created files exist on disk:
+- `src/lib/email/personalNoteMarkdown.ts` — present
+- `src/lib/email/personalNoteMarkdown.test.ts` — present
+
+Verified both Task 2 commits present in git log:
+- `b331bd8` (test RED) — found
+- `e7b71a7` (feat GREEN) — found
+
+All 21/21 tests pass. tsc clean for new files. All 12 acceptance criteria + 2 user-mandated additions green.
+
+## Next (after Task 2)
+
+User reviews this output. If approved, Task 3 of plan 46-04 is dispatched: the SendUpdate `Body.tsx` section component, which imports `parsePersonalNote` and renders the parsed nodes inside the `EmailShell` body slot. Task 3's read_first list includes `src/lib/email/personalNoteMarkdown.ts` (this Task's output).
