@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 03 Tasks 1-7 complete (D-16 audit refreshed at 7367d03; Checkpoint 1 user-approved; atomic D-14 cutover landed at 6fcd666 -- 3 call-site rewires + 6 legacy file deletions + List-Unsubscribe wiring, +268/-1300 lines). Task 8 Outlook desktop merge-gate **REJECTED** by Liz on 2026-04-28; three findings documented in 46-UAT.md (greeting double-render, formatDate Invalid Date on empty input, audit completeness gap on ProcurementStatus enum closure). Phase 46.1 opened as gap-closure with 3 parallel plans; Phase 46 plan 46-03 closure gates on 46.1 commits + Outlook re-test
-last_updated: "2026-04-28T19:00:00.000Z"
-last_activity: 2026-04-28 -- Phase 46 plan 46-03 cutover landed; merge-gate rejected; Phase 46.1 opened for gap closure
+stopped_at: "Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO."
+last_updated: "2026-04-28T20:26:08.675Z"
+last_activity: 2026-04-28 -- Phase 46.1 planning complete
 progress:
   total_phases: 11
   completed_phases: 3
@@ -28,8 +28,8 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 Phase: 46.1 (merge-gate-gap-closure) — READY TO PLAN
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
 Plan: TBD — 3 parallel plans defined in 46.1-CONTEXT.md (greeting double-render fix, formatDate empty-input guard, PLAN-AUTHORING-PATTERNS strengthening)
-Status: Phase 46 plan 46-03 cutover landed atomically; merge-gate rejected; gap-closure routing through Phase 46.1
-Last activity: 2026-04-28 -- 46-UAT.md captures merge-gate findings; Phase 46.1 opened with locked CONTEXT (D-1..D-5)
+Status: Ready to execute
+Last activity: 2026-04-28 -- Phase 46.1 planning complete
 
 ## v5.3 Phase Map
 
