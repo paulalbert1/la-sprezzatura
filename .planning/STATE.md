@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 04 Task 2 complete (constrained markdown serializer for personalNote -- 21/21 tests pass, https-only URL allowlist, 600-char hard cap, forward-migration proven); awaiting user review before Task 3 dispatch
-last_updated: "2026-04-28T12:37:07.000Z"
+stopped_at: Phase 46 Plan 04 Task 3 complete (Body + ReviewItems + Milestones + Procurement section components, 18/18 acceptance criteria green, all 4 files tsc-clean; SendUpdate.tsx + tests intentionally broken pending Task 4 + 5); awaiting user review before Task 4 dispatch
+last_updated: "2026-04-28T13:26:15.000Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 10
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 46 (send-update-work-order-migration) — EXECUTING
-Plan: 04 (supersedes 02) — Tasks 1 + 2 of 6 complete
-Status: Plan 04 Task 2 complete (constrained markdown serializer for personalNote — `src/lib/email/personalNoteMarkdown.{ts,test.ts}`, 21/21 vitest cases pass, https-only URL allowlist, 600-char hard cap, forward-migration plain-text path proven). User reviews before Task 3 dispatch.
+Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 of 6 complete
+Status: Plan 04 Task 3 complete (four section components: Body.tsx + ReviewItems.tsx new, Milestones.tsx + Procurement.tsx rewritten in place; designer-first DOM order + sub-line three-state composition + accessibility-corrected sentence-case pill labels). 18/18 acceptance criteria green. SendUpdate.tsx and SendUpdate.test.ts intentionally broken until Task 4 (composition rewrite + atomic legacy delete + compose helper) and Task 5 (test rewrite + new fixtures + ordering assertion) land. User reviews before Task 4 dispatch.
 Last activity: 2026-04-28
 
 ## v5.3 Phase Map
