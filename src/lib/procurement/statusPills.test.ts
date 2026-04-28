@@ -1,9 +1,10 @@
 // src/lib/procurement/statusPills.test.ts
 // Phase 46-04 -- property assertions on the canonical procurement palette (D-31).
 //
-// Test premise: completeness, accessibility, structural integrity. NOT identity
-// with DESIGN-SYSTEM.md -- that file mirrors statusPills.ts (D-30 precedence rule).
-// Asserting they agree would just assert the file matches itself.
+// Test premise: completeness, accessibility, structural integrity. The
+// designer-reference spec file mirrors this module by documentation discipline
+// (D-30 precedence rule), not by test coupling -- asserting they agree would
+// just assert the file matches itself.
 
 import { describe, it, expect } from "vitest";
 import {
