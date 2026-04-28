@@ -59,6 +59,8 @@ Extracted the procurement status pill palette from `ProcurementEditor.tsx` into 
 
 **This summary covers Task 1 only.** Plan 46-04 has six tasks; Tasks 2–6 are not yet started. The user reviews this output before authorizing dispatch of Task 2.
 
+**Explicitly out of Task 1 scope:** Task 1 made no changes to email templates or the email rendering surface. The palette extraction is upstream infrastructure — admin UI consumes it today, and the email render path will consume it from Task 4 onward (Procurement.tsx rewrite). If a reviewer is investigating "when did the SendUpdate email start using the canonical palette?", the answer is Task 4, not Task 1. Wiring the email side to `statusPills.ts` is Task 4 work; vendor/spec consumption in the email is also Task 4 work.
+
 ## What Shipped
 
 ### 1. `src/lib/procurement/statusPills.ts` (new, leaf module)
