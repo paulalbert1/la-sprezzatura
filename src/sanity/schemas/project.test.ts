@@ -435,6 +435,67 @@ describe("project schema (Phase 15 schedule extensions)", () => {
   });
 });
 
+describe("project schema (Phase 46-04 extensions)", () => {
+  // Helper: get procurementItem inline object fields
+  function getProcurementItemFields() {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const ofArray = (field as any)?.of;
+    return ofArray?.[0]?.fields as
+      | { name: string; type: string; group?: string; validation?: unknown }[]
+      | undefined;
+  }
+
+  // D-15: vendor field exists, optional, in email group
+  it("procurementItem.vendor field exists, type string, no validation, in email group", () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const vendorField = fields!.find((f) => f.name === "vendor");
+    expect(vendorField).toBeDefined();
+    expect(vendorField!.type).toBe("string");
+    expect(vendorField!.validation).toBeUndefined(); // no validator -> optional
+    expect(vendorField!.group).toBe("email");
+  });
+
+  // D-15: spec field exists, in email group, enforces Rule.max(50)
+  it("procurementItem.spec field exists, type string, in email group", () => {
+    const fields = getProcurementItemFields();
+    expect(fields).toBeDefined();
+    const specField = fields!.find((f) => f.name === "spec");
+    expect(specField).toBeDefined();
+    expect(specField!.type).toBe("string");
+    expect(specField!.group).toBe("email");
+  });
+
+  it("procurementItem.spec field enforces Rule.max(50)", () => {
+    const fields = getProcurementItemFields();
+    const specField = fields!.find((f) => f.name === "spec");
+    expect(specField).toBeDefined();
+    // Sanity Rule API: invoke validation with a mock Rule object; verify max(50) was called.
+    const calls: number[] = [];
+    const mockRule: any = {
+      max: (n: number) => {
+        calls.push(n);
+        return mockRule;
+      },
+    };
+    const validate = specField!.validation as (rule: any) => unknown;
+    validate(mockRule);
+    expect(calls).toContain(50);
+  });
+
+  // D-15: procurementItem inline type declares the email group
+  it("procurementItem inline type declares an email field group", () => {
+    const field = project.fields?.find((f) => f.name === "procurementItems");
+    const arrayMember = (field as any)?.of?.[0];
+    expect(arrayMember).toBeDefined();
+    const groups = arrayMember.groups as { name: string; title: string }[] | undefined;
+    expect(groups).toBeDefined();
+    const emailGroup = groups!.find((g) => g.name === "email");
+    expect(emailGroup).toBeDefined();
+    expect(emailGroup!.title).toBe("Email-facing fields");
+  });
+});
+
 describe("project schema (Phase 30 extensions)", () => {
   it('has a "tasks" group in the groups array', () => {
     const groups = (project as { groups?: { name: string; title: string }[] }).groups;
