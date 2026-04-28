@@ -53,3 +53,34 @@ When in doubt, accompany the check with a comment explaining what it's trying to
 The comment lets a future executor distinguish "real violation" from "prose collision" without spelunking the plan.
 
 **Surfaced by:** Phase 46 Plan 04 Tasks 1, 3 (2026-04-28). Threshold for institutional capture: three consecutive occurrences across two tasks.
+
+---
+
+## Plan-listed test counts are floors, not ceilings
+
+**Problem.** Plan task bodies typically list a target test count ("~17 tests covering X, Y, Z scenarios"). Executors interpret this as the maximum and stop there, OR they exceed it for uniformity and surface the divergence as a deviation requiring justification. Both readings are noisy: under-coverage if "~17" is treated as a ceiling, deviation-paperwork if it's exceeded for legitimate reasons.
+
+**Where this has bitten Phase 46-04 (three consecutive occurrences):**
+- Task 2: 21 tests vs plan's "~17" — executor added 2 user-mandated double-blank-line tests + 1 `ftp:` rejection for uniform "all common non-https schemes" coverage
+- Task 3: deviations included one test addition for symmetry across status pill rendering
+- Task 4: 10 tests vs plan's "~9" — case-insensitive assertion split
+
+Each individual case is defensible. The recurring "executor adds 1–3 tests beyond plan list, surfaces as deviation" pattern signals the plan-vs-execution interface is mis-shaped, not the executions.
+
+**Why it recurs.** A plan author writing "~17 tests" intends to communicate scope, not to forbid additions. An executor reading the same number reasonably treats it as an acceptance-criteria target. The number reads as more authoritative than the prose around it.
+
+**Default to ship.** Frame test counts in plan bodies as floors with explicit "executor may add for uniformity" language. Concretely:
+
+```markdown
+**Behavioral tests (target: at minimum 17, list non-exhaustive):**
+1. ...
+17. ...
+
+**Executor discretion:** Add tests where uniform coverage of a category beats arbitrary partial coverage. Example: if 4 of 5 sibling cases are tested explicitly, round to all 5. Document additions in the SUMMARY without flagging them as deviations.
+```
+
+This shifts the contract: the plan's listed tests are mandatory (acceptance criteria assert their presence), additions are encouraged when they improve coverage symmetry, and the executor doesn't have to choose between under-covering or paperwork.
+
+**Exceptions.** When the test count IS a ceiling for a real reason (e.g., performance constraints, snapshot reviewability caps, intentional minimal-surface-area for a leaf utility), the plan body must state it explicitly: *"Maximum 5 fixtures — adding more degrades reviewability per CONTEXT D-22."* Without that explicit statement, "~N tests" defaults to floor semantics.
+
+**Surfaced by:** Phase 46 Plan 04 Tasks 2, 3, 4 (2026-04-28). Threshold for institutional capture: three consecutive occurrences across distinct tasks.
