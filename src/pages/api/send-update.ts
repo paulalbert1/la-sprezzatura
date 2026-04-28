@@ -4,17 +4,23 @@ import type { APIRoute } from "astro";
 import { sanityWriteClient } from "../../sanity/writeClient";
 import { generatePortalToken } from "../../lib/generateToken";
 import { getSession } from "../../lib/session";
-import {
-  buildSendUpdateEmail,
-  type SendUpdateProject,
-  type PendingArtifact,
-} from "../../lib/sendUpdate/emailTemplate";
+import { render } from "@react-email/render";
+import { createElement } from "react";
+import { SendUpdate, formatLongDate, type SendUpdateEmailInput, type PendingArtifact } from "../../emails/sendUpdate/SendUpdate";
+import { LA_SPREZZATURA_TENANT } from "../../lib/email/tenantBrand";
+import type { ProcurementStatus } from "../../lib/procurement/statusPills";
 
 // Phase 34 Plan 04 — Send Update API route
+// Phase 46 Plan 03 — rewired to react-email render (D-14 cutover); RFC 8058
+// List-Unsubscribe header on every send (D-10, EMAIL-06); preheader at call
+// site (D-13); plain-text via render(..., { plainText: true }) (D-8).
+//
 // Source of truth:
 //   - .planning/phases/34-settings-and-studio-retirement/34-04-PLAN.md Task 1 + Task 2
 //   - .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md D-13..D-18
-//   - Threats: T-34-03 (admin gate), T-34-05 (lazy-gen race)
+//   - .planning/phases/46-send-update-work-order-migration/46-03-PLAN.md
+//   - Threats: T-34-03 (admin gate), T-34-05 (lazy-gen race),
+//              T-46-03-01 (List-Unsubscribe header static), T-46-03-06 (token preserved)
 //
 // POST body shape (Task 2 additions):
 //   {
@@ -31,6 +37,45 @@ import {
 // The loop MUST await each recipient in sequence — do not parallelize — so the
 // re-fetch step observes the linearized Sanity write order.
 
+// GROQ-projection shape for the project fetch. Distinct from the new
+// SendUpdate `SendUpdateProject` shape (which uses label/state and
+// vendor/spec/eta) -- this type matches what the GROQ query actually returns.
+// `adaptProjectForEmail()` below maps from this shape into the SendUpdate
+// input shape.
+interface FetchedProject {
+  _id: string;
+  title: string;
+  engagementType: string;
+  clients?: Array<{
+    client?: {
+      _id: string;
+      name?: string;
+      email?: string;
+      portalToken?: string;
+    };
+  }>;
+  milestones?: Array<{
+    _key?: string;
+    name?: string;
+    date?: string;
+    completed?: boolean;
+  }>;
+  procurementItems?: Array<{
+    _key?: string;
+    name?: string;
+    status?: string;
+    installDate?: string;
+    expectedDeliveryDate?: string;
+  }>;
+  artifacts?: Array<{
+    _key?: string;
+    artifactType?: string;
+    customTypeName?: string;
+    currentVersionKey?: string;
+    hasApproval?: boolean;
+  }>;
+}
+
 function resolveBaseUrl(request: Request): string {
   // Prefer the incoming request's origin so dev (localhost) and preview deploys
   // produce working portal links. Fall back to the configured SITE (prod) and
@@ -38,6 +83,35 @@ function resolveBaseUrl(request: Request): string {
   const origin = new URL(request.url).origin;
   if (origin && !origin.includes("0.0.0.0")) return origin;
   return (import.meta.env.SITE as string) || "https://lasprezz.com";
+}
+
+// D-10 RFC 8058 mailto-only List-Unsubscribe header value. Static literal -- no
+// user-controlled string is interpolated (T-46-03-01). Angle brackets are part
+// of the RFC 8058 syntax, not decorative.
+const SEND_UPDATE_LIST_UNSUBSCRIBE =
+  "<mailto:liz@lasprezz.com?subject=Unsubscribe%20Send%20Update&body=Please%20remove%20me%20from%20Send%20Update%20emails.>";
+
+// Map the GROQ-projected project shape onto the new SendUpdate
+// `SendUpdateProject` shape: milestones[].name -> label, completed -> state,
+// procurementItems[].installDate||expectedDeliveryDate -> eta, status preserved
+// (cast to ProcurementStatus -- legacy DB values match the closed enum).
+function adaptProjectForEmail(
+  project: FetchedProject,
+): SendUpdateEmailInput["project"] {
+  return {
+    _id: project._id,
+    title: project.title,
+    milestones: (project.milestones ?? []).map((m) => ({
+      label: m.name ?? "",
+      date: m.date ?? "",
+      state: m.completed ? "completed" : "upcoming",
+    })),
+    procurementItems: (project.procurementItems ?? []).map((p) => ({
+      name: p.name ?? "",
+      status: (p.status as ProcurementStatus | undefined) ?? "ordered",
+      eta: p.installDate ?? p.expectedDeliveryDate ?? "",
+    })),
+  };
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
@@ -91,7 +165,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       }
     `,
       { projectId },
-    )) as SendUpdateProject | null;
+    )) as FetchedProject | null;
 
     if (!project) {
       return new Response(
@@ -161,6 +235,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const apiKey = import.meta.env.RESEND_API_KEY;
     const recipientEmails: string[] = [];
 
+    // Adapt the GROQ shape to the SendUpdate component shape once -- the
+    // adapted project is identical across all recipients in a single send.
+    const adaptedProject = adaptProjectForEmail(project);
+    // D-13: preheader computed at call site, passed via prop. Identical for
+    // every recipient in this send (no per-recipient personalization).
+    const preheader = `Project Update for ${project.title} — ${formatLongDate(new Date().toISOString())}`;
+
     if (apiKey) {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
@@ -189,17 +270,30 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           }
 
           const perRecipientCtaHref = `${baseUrl}/portal/client/${token}`;
-          const perRecipientHtml = buildSendUpdateEmail({
-            project,
+          const perRecipientProps: SendUpdateEmailInput = {
+            project: adaptedProject,
             personalNote,
+            // 46-04 D-1 / scope boundary: v1 API call sites pass [] for
+            // designer-typed action items; the compose UI for this field is
+            // a separable plan.
+            personalActionItems: [],
+            pendingArtifacts,
             showMilestones,
             showProcurement,
-            showArtifacts,
-            pendingArtifacts,
+            // showArtifacts collapses into showReviewItems on the new template
+            // (D-3 merged designer prose + auto-derived artifacts into one
+            // section). Designer rows are empty in v1, so showReviewItems
+            // tracks showArtifacts directly.
+            showReviewItems: showArtifacts,
             baseUrl,
             ctaHref: perRecipientCtaHref,
             clientFirstName: client.name?.split(" ")[0],
-          });
+            tenant: LA_SPREZZATURA_TENANT,
+            preheader,
+          };
+          const perRecipientElement = createElement(SendUpdate, perRecipientProps);
+          const perRecipientHtml = await render(perRecipientElement);
+          const perRecipientText = await render(perRecipientElement, { plainText: true });
 
           recipientEmails.push(client.email);
           const cc: string[] = [];
@@ -208,8 +302,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             from: resolvedFrom,
             to: [client.email],
             ...(cc.length > 0 && { cc }),
-            subject: `Project Weekly Update - ${client.name || project.title}`,
+            subject: `Project update — ${project.title || client.name || "your project"}`,
             html: perRecipientHtml,
+            text: perRecipientText,
+            // D-10 / EMAIL-06: RFC 8058 mailto-only List-Unsubscribe header on
+            // every Send Update send. Static literal -- T-46-03-01.
+            headers: {
+              "List-Unsubscribe": SEND_UPDATE_LIST_UNSUBSCRIBE,
+            },
           });
           if (resendResult.error) {
             console.error("[SendUpdate] Resend error:", resendResult.error, "to:", client.email);
@@ -224,25 +324,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
           const client = entry?.client;
           if (!client?.email) continue;
           recipientEmails.push(client.email);
-          const html = buildSendUpdateEmail({
-            project,
+          const props: SendUpdateEmailInput = {
+            project: adaptedProject,
             personalNote,
+            personalActionItems: [],
+            pendingArtifacts,
             showMilestones,
             showProcurement,
-            showArtifacts,
-            pendingArtifacts,
+            showReviewItems: showArtifacts,
             baseUrl,
             ctaHref: `${baseUrl}/portal/dashboard`,
             clientFirstName: client.name?.split(" ")[0],
-          });
+            tenant: LA_SPREZZATURA_TENANT,
+            preheader,
+          };
+          const element = createElement(SendUpdate, props);
+          const html = await render(element);
+          const text = await render(element, { plainText: true });
           const cc: string[] = [];
           if (ccDefault) cc.push(...resolvedCcList);
           const resendResult = await resend.emails.send({
             from: resolvedFrom,
             to: [client.email],
             ...(cc.length > 0 && { cc }),
-            subject: `Project Weekly Update - ${client.name || project.title}`,
+            subject: `Project update — ${project.title || client.name || "your project"}`,
             html,
+            text,
+            // D-10 / EMAIL-06: RFC 8058 mailto-only List-Unsubscribe header on
+            // every Send Update send. Static literal -- T-46-03-01.
+            headers: {
+              "List-Unsubscribe": SEND_UPDATE_LIST_UNSUBSCRIBE,
+            },
           });
           if (resendResult.error) {
             console.error("[SendUpdate] Resend error:", resendResult.error, "to:", client.email);

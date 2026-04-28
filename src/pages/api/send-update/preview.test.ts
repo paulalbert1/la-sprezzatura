@@ -121,7 +121,7 @@ describe("GET /api/send-update/preview (Phase 34 Plan 04)", () => {
     expect(res.headers.get("Content-Type")).toBe("text/html; charset=utf-8");
   });
 
-  it("response body is full HTML from buildSendUpdateEmail (contains project.title)", async () => {
+  it("response body is full HTML from SendUpdate render (contains project.title)", async () => {
     adminSession();
     mockFetch.mockResolvedValueOnce(baseProjectSnapshot());
     const res = await callGet({
@@ -129,8 +129,16 @@ describe("GET /api/send-update/preview (Phase 34 Plan 04)", () => {
       cookies: makeCookies(),
     });
     const html = await res.text();
-    expect(html).toContain("<!DOCTYPE html>");
-    expect(html).toContain("Project Update: Preview Project");
+    // 46-03 cutover: react-email emits the full XHTML doctype, not the
+    // bare "<!DOCTYPE html>" the legacy hand-rolled string used. Assert on
+    // the substring "DOCTYPE html" which both forms share.
+    expect(html).toContain("DOCTYPE html");
+    // 46-03 cutover: greeting renders as "Project Update" H1 plus a
+    // separate sub-line carrying project.title; the legacy literal
+    // "Project Update: Preview Project" was a single string in the old
+    // hand-rolled template. Assert on the project title independently --
+    // its presence is what the test is actually verifying.
+    expect(html).toContain("Preview Project");
   });
 
   it("honors clientId query param for per-client CTA preview", async () => {
@@ -204,7 +212,7 @@ describe("GET /api/send-update/preview (Phase 34 Plan 04)", () => {
     expect(mockPatch).not.toHaveBeenCalled();
   });
 
-  it("section flags are parsed from query string and passed to buildSendUpdateEmail", async () => {
+  it("section flags are parsed from query string and passed to SendUpdate render", async () => {
     adminSession();
     mockFetch.mockResolvedValueOnce(
       baseProjectSnapshot({

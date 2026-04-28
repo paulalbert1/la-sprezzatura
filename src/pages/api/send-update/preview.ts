@@ -3,13 +3,16 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { getSession } from "../../../lib/session";
 import { sanityWriteClient } from "../../../sanity/writeClient";
-import {
-  buildSendUpdateEmail,
-  type SendUpdateProject,
-  type PendingArtifact,
-} from "../../../lib/sendUpdate/emailTemplate";
+import { render } from "@react-email/render";
+import { createElement } from "react";
+import { SendUpdate, type SendUpdateEmailInput, type PendingArtifact } from "../../../emails/sendUpdate/SendUpdate";
+import { LA_SPREZZATURA_TENANT } from "../../../lib/email/tenantBrand";
+import type { ProcurementStatus } from "../../../lib/procurement/statusPills";
 
 // Phase 34 Plan 04 Task 2 — Send Update HTML preview endpoint.
+// Phase 46 Plan 03 — rewired to react-email render (D-14 cutover); preheader
+// at call site (D-13). NO unsubscribe header in preview (preview returns
+// HTML for tab rendering; not an email send -- D-12 + CONTEXT clarification).
 // Source of truth:
 //   - .planning/phases/34-settings-and-studio-retirement/34-04-PLAN.md Task 2
 //   - .planning/phases/34-settings-and-studio-retirement/34-CONTEXT.md D-16
@@ -31,6 +34,62 @@ import {
 //   - READ-ONLY. Never calls sanityWriteClient.patch; no token lazy-gen.
 //   - Returns Content-Type: text/html so the preview renders directly in the
 //     browser tab (NOT JSON).
+
+// Local GROQ-projected project shape -- matches the legacy
+// `SendUpdateProject` shape; mapped onto the new SendUpdate component shape
+// via `adaptProjectForEmail()` below. Distinct from emails/sendUpdate types.
+interface FetchedProject {
+  _id: string;
+  title: string;
+  engagementType: string;
+  clients?: Array<{
+    client?: {
+      _id: string;
+      name?: string;
+      email?: string;
+      portalToken?: string;
+    };
+  }>;
+  milestones?: Array<{
+    _key?: string;
+    name?: string;
+    date?: string;
+    completed?: boolean;
+  }>;
+  procurementItems?: Array<{
+    _key?: string;
+    name?: string;
+    status?: string;
+    installDate?: string;
+    expectedDeliveryDate?: string;
+  }>;
+  artifacts?: Array<{
+    _key?: string;
+    artifactType?: string;
+    customTypeName?: string;
+    currentVersionKey?: string;
+    hasApproval?: boolean;
+  }>;
+}
+
+function adaptProjectForEmail(
+  project: FetchedProject,
+): SendUpdateEmailInput["project"] {
+  return {
+    _id: project._id,
+    title: project.title,
+    milestones: (project.milestones ?? []).map((m) => ({
+      label: m.name ?? "",
+      date: m.date ?? "",
+      state: m.completed ? "completed" : "upcoming",
+    })),
+    procurementItems: (project.procurementItems ?? []).map((p) => ({
+      name: p.name ?? "",
+      status: (p.status as ProcurementStatus | undefined) ?? "ordered",
+      eta: p.installDate ?? p.expectedDeliveryDate ?? "",
+    })),
+  };
+}
 
 const PROJECT_FOR_PREVIEW_QUERY = `*[_type == "project" && _id == $projectId][0] {
   _id, title, engagementType,
@@ -84,7 +143,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
   const project = (await sanityWriteClient.fetch(
     PROJECT_FOR_PREVIEW_QUERY,
     { projectId },
-  )) as SendUpdateProject | null;
+  )) as FetchedProject | null;
 
   if (!project) {
     return new Response("Project not found", { status: 404 });
@@ -136,17 +195,26 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     : project.clients?.[0]?.client;
   const clientFirstName = previewClient?.name?.split(" ")[0];
 
-  const html = buildSendUpdateEmail({
-    project,
+  const props: SendUpdateEmailInput = {
+    project: adaptProjectForEmail(project),
     personalNote: note,
+    // 46-04 D-1 / scope boundary: v1 preview passes [] for designer-typed
+    // action items -- the compose UI for that field is a separable plan.
+    personalActionItems: [],
+    pendingArtifacts,
     showMilestones,
     showProcurement,
-    showArtifacts,
-    pendingArtifacts,
+    // 46-04 D-3: showArtifacts collapses into showReviewItems (designer
+    // prose + auto-derived artifacts merge into one section).
+    showReviewItems: showArtifacts,
     baseUrl,
     ctaHref,
     clientFirstName,
-  });
+    tenant: LA_SPREZZATURA_TENANT,
+    // D-13: preheader computed at call site, passed via prop.
+    preheader: `Project Update for ${project.title} — preview`,
+  };
+  const html = await render(createElement(SendUpdate, props));
 
   return new Response(html, {
     status: 200,

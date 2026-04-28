@@ -5,12 +5,14 @@ import { sanityWriteClient } from "../../../../../sanity/writeClient";
 import { generatePortalToken } from "../../../../../lib/generateToken";
 import { getSession } from "../../../../../lib/session";
 import { redis } from "../../../../../lib/redis";
-import {
-  buildWorkOrderEmail,
-  buildWorkOrderPlainText,
-} from "../../../../../lib/workOrder/emailTemplate";
+import { render } from "@react-email/render";
+import { createElement } from "react";
+import { WorkOrder } from "../../../../../emails/workOrder/WorkOrder";
 
 // Phase 39 Plan 04 Task 2 — POST /api/admin/work-orders/[id]/send
+// Phase 46 Plan 03 — rewired to react-email render (D-14 cutover);
+// plain-text via render(..., { plainText: true }) (D-8). NO unsubscribe
+// header (D-12: Work Order is not a bulk message).
 // Source of truth:
 //   .planning/phases/39-work-order-documents-panels/39-04-PLAN.md § Task 2
 //   .planning/phases/39-work-order-documents-panels/39-PATTERNS.md § api/admin/work-orders/[id]/send.ts
@@ -127,22 +129,19 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
     if (apiKey) {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
-      const htmlBody = buildWorkOrderEmail({
+      const workOrderProps = {
         project: wo.project,
         contractor: wo.contractor,
         workOrderId: wo._id,
         baseUrl,
         fromDisplayName,
         verifyUrl,
-      });
-      const textBody = buildWorkOrderPlainText({
-        project: wo.project,
-        contractor: wo.contractor,
-        workOrderId: wo._id,
-        baseUrl,
-        fromDisplayName,
-        verifyUrl,
-      });
+        // D-13: preheader computed at call site, passed via prop.
+        preheader: `Work order ready for ${wo.project.title} — view your latest version`,
+      };
+      const workOrderElement = createElement(WorkOrder, workOrderProps);
+      const htmlBody = await render(workOrderElement);
+      const textBody = await render(workOrderElement, { plainText: true });
       const result = await resend.emails.send({
         from: resolvedFrom,
         to: [wo.contractor.email],
