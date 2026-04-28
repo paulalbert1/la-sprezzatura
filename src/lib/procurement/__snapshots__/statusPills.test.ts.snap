@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`statusPills (Phase 46-04 D-31) > STATUS_LABELS snapshot (intentional-diff review) 1`] = `
+{
+  "delivered": "Delivered",
+  "in-transit": "In Transit",
+  "installed": "Installed",
+  "ordered": "Ordered",
+  "pending": "Pending order",
+  "scheduled": "Scheduled",
+  "warehouse": "Warehouse",
+}
+`;
+
+exports[`statusPills (Phase 46-04 D-31) > STATUS_PILL_STYLES palette snapshot (intentional-diff review) 1`] = `
+{
+  "delivered": {
+    "bg": "#EDF5E8",
+    "border": "#C4DBA8",
+    "text": "#3A6620",
+  },
+  "in-transit": {
+    "bg": "#FBF2E2",
+    "border": "#E8CFA0",
+    "text": "#8A5E1A",
+  },
+  "installed": {
+    "bg": "#EDF5E8",
+    "border": "#A8C98C",
+    "text": "#3A6620",
+  },
+  "ordered": {
+    "bg": "#E8F0F9",
+    "border": "#B0CAE8",
+    "text": "#2A5485",
+  },
+  "pending": {
+    "bg": "#FDEEE6",
+    "border": "#F2C9B8",
+    "text": "#9B3A2A",
+  },
+  "scheduled": {
+    "bg": "#F3EFE9",
+    "border": "#E0D5C5",
+    "text": "#6B5E52",
+  },
+  "warehouse": {
+    "bg": "#F3EDE3",
+    "border": "#D4C8B8",
+    "text": "#6B5E52",
+  },
+}
+`;
