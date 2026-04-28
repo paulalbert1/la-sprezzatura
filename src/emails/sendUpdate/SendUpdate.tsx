@@ -102,12 +102,16 @@ export function getArtifactLabel(type: string, customName?: string): string {
 }
 
 export function formatDate(d: string | Date): string {
+  if (!d) return "";
   const date = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(date.getTime())) return "";
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function formatLongDate(d: string | Date): string {
+  if (!d) return "";
   const date = typeof d === "string" ? new Date(d) : d;
+  if (isNaN(date.getTime())) return "";
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 

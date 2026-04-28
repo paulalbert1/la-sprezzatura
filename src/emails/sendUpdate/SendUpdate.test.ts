@@ -16,7 +16,7 @@
 import { describe, it, expect } from "vitest";
 import { createElement } from "react";
 import { render } from "@react-email/render";
-import { SendUpdate } from "./SendUpdate";
+import { SendUpdate, formatDate, formatLongDate } from "./SendUpdate";
 import { FIXTURES, baseInput } from "./fixtures";
 
 // ---------------------------------------------------------------------------
@@ -291,5 +291,82 @@ describe("SendUpdate (Phase 46-04 redesign)", () => {
   it("Reply-affordance copy is locked string (D-9 regression guard)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     expect(html).toContain("You can reply to this email directly.");
+  });
+});
+
+// ============================================================================
+// Phase 46.1 D-2 -- formatDate / formatLongDate empty-input guard (gap-2)
+//
+// Added in Phase 46.1 plan 46.1-02. The previous formatters called
+// `new Date(d).toLocaleDateString(...)` directly; for `d === ""` (empty Sanity
+// installDate AND expectedDeliveryDate) `new Date("")` is invalid and
+// `.toLocaleDateString(...)` returns the literal string "Invalid Date", which
+// JSX rendered into the procurement ETA cell. Liz caught this in the Outlook
+// merge-gate UAT (46-UAT.md gap-2). Guard now returns "" for empty/invalid.
+// ============================================================================
+
+describe("formatDate (46.1 D-2 -- gap-2 fix)", () => {
+  it("returns \"\" for empty string", () => {
+    expect(formatDate("")).toBe("");
+  });
+
+  it("returns \"\" for undefined (typescript-bypass guard)", () => {
+    expect(formatDate(undefined as unknown as string)).toBe("");
+  });
+
+  it("returns \"\" for unparseable string", () => {
+    expect(formatDate("not-a-date")).toBe("");
+  });
+
+  it("formats a valid Date object as 'May 14' (regression-protect Date overload)", () => {
+    // Use local-time Date constructor (year, monthIndex, day) so the assertion
+    // is timezone-independent. `new Date("2026-05-14")` parses as UTC midnight
+    // and renders as "May 13" via toLocaleDateString in any negative-UTC zone
+    // (the existing snapshot fixtures encode this drift -- see __snapshots__).
+    expect(formatDate(new Date(2026, 4, 14))).toBe("May 14");
+  });
+});
+
+describe("formatLongDate (46.1 D-2 -- gap-2 parity)", () => {
+  it("returns \"\" for empty string", () => {
+    expect(formatLongDate("")).toBe("");
+  });
+
+  it("returns \"\" for undefined (typescript-bypass guard)", () => {
+    expect(formatLongDate(undefined as unknown as string)).toBe("");
+  });
+
+  it("returns \"\" for unparseable string", () => {
+    expect(formatLongDate("not-a-date")).toBe("");
+  });
+
+  it("formats a valid Date object as 'May 14, 2026' (regression-protect Date overload)", () => {
+    // Local-time Date constructor for timezone independence -- see formatDate Date-overload test above.
+    expect(formatLongDate(new Date(2026, 4, 14))).toBe("May 14, 2026");
+  });
+});
+
+describe("Procurement empty-eta render (46.1 gap-2 -- end-to-end)", () => {
+  it("renders an empty ETA cell when procurement row has eta=\"\" -- does NOT render the literal 'Invalid Date'", async () => {
+    // Build a fixture-shaped input with one procurement row whose eta is empty.
+    // Mirror the FIXTURES.full() structure but override procurementItems.
+    const input = baseInput({
+      project: {
+        ...FIXTURES.full().project,
+        procurementItems: [
+          {
+            name: "Italian Pendant Lights (set of 3)",
+            vendor: "Flos",
+            spec: "IC",
+            status: "pending",
+            eta: "",
+          },
+        ],
+      },
+      showProcurement: true,
+    });
+    const html = await render(createElement(SendUpdate, input));
+    expect(html).not.toContain("Invalid Date");
+    expect(html).toContain("Italian Pendant Lights (set of 3)");
   });
 });
