@@ -26,6 +26,13 @@ When an issue is fixed (opportunistically or otherwise), strike it through and a
 - **Opportunistic-fix guidance:** No 46-04 task is expected to enter this file. Defer until a phase that legitimately touches `projectWorkflow.test.ts` (likely a future Sanity workflow plan). Leave alone otherwise.
 - **Surfaced by:** Phase 46 Plan 04 Task 1 (verified pre-existing, 2026-04-28).
 
+### Two untracked files at repo root: `src/sanity/components/` and `vercel.json`
+
+- **Problem:** `git status` shows two untracked entries that have appeared in two consecutive Phase 46-04 task summaries' "pre-existing, out of scope" disclosures.
+- **Why not fixed now:** Out of every 46-04 task's scope. Verified pre-existing via `git stash` discipline by the Task 1 executor (no file modifications by Task 1 or Task 2 caused them to appear).
+- **Opportunistic-fix guidance:** If you have signal on whether `src/sanity/components/` is real in-progress work or stale scaffolding, decide and either commit or delete. Same for `vercel.json` — Vercel deploy config typically belongs in the repo, but it's untracked here, suggesting it was generated locally and never committed; verify whether it should be tracked or `.gitignore`d. Neither is blocking.
+- **Surfaced by:** Phase 46 Plan 04 Task 1 + Task 2 (logged here per user's "stop disclosing per-task once flagged twice" rule, 2026-04-28).
+
 ### `ProcurementItem.status` typed as `string`, not `ProcurementStatus`
 
 - **Problem:** After Phase 46 Plan 04 Task 1 extracted the canonical procurement palette to `src/lib/procurement/statusPills.ts` with a closed-enum `ProcurementStatus` type, the upstream `ProcurementItem.status` is still typed as a broader `string` (likely Sanity-typegen-derived). Consumers must cast at index sites — currently a `as ProcurementStatus` cast in `src/components/admin/ProcurementEditor.tsx`.

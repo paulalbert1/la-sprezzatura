@@ -403,8 +403,20 @@ The serializer is the **trust boundary** for designer-authored markdown flowing 
 | Legacy file-protocol exfiltration via `ftp:` | Same allowlist | Test 18 |
 | Denial via oversized payload (long-string memory pressure on render path) | 600-char hard cap, validated FIRST before any tokenization work | Test 20 |
 | Stacked empty `<p>` elements affecting render layout in Outlook | `text.split(/\n{2,}/)` + `.filter(Boolean)` on trimmed paragraphs | Tests 5, 6 |
+| Markdown injection via designer prose (zero-width chars, Unicode lookalikes for `*`/`_`/`[`/`]` from pasted Word/Google-Docs content) | **Accept** — internal-only authoring boundary; designers are trusted; no external content flows through this parser. Worst case is a malformed render, not a security breach. If a future plan introduces external/customer markdown authoring, this disposition needs revisiting. | No test (accept disposition) |
 
 **No new threat-flag emissions** — the module fits cleanly within the phase-level threat model's existing "designer markdown sanitization on `personalNote`" envelope. If a future plan introduces a different markdown subset (e.g., for system emails or internal-only notes), it should land as a separate parser file, not by widening this one.
+
+### Error contract for downstream consumers (Studio compose UI)
+
+`PersonalNoteParseError.details` is a structured `Record<string, unknown>` keyed for end-user error rendering:
+
+| Code | `.details` shape | Studio UI surface |
+|---|---|---|
+| `OVER_LIMIT` | `{ length: number, max: 600 }` | Render: *"Note is `${length}` characters; limit is `${max}`."* |
+| `INVALID_URL_SCHEME` | `{ url: string }` | Render: *"Link `${url}` is not allowed — only `https://` URLs are permitted."* — UI can extract the scheme via `new URL(url).protocol` for shorter messaging if multiple bad links need disambiguating |
+
+The future Studio compose UI plan can rely on this `.details` shape — both fields are guaranteed present and stable for v1. If a third error code is added later, the Studio UI's switch-on-`.code` pattern is forward-compat.
 
 ## Self-Check: PASSED (Task 2)
 
