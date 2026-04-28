@@ -148,3 +148,83 @@ The diff is dominated by structural changes that were the entire point of the
 phase (D-1 flex→table, D-2 round→square, react-email Outlook VML wrapper,
 preheader injection for EMAIL-03). No unexpected deltas, no missing content,
 no off-domain hrefs, no security regressions. Cutover may proceed to Tasks 3-8.
+
+---
+
+## Status (post-46-04): Harness Stale — Resume Blocked on Approach Decision
+
+**Date:** 2026-04-28
+**Trigger:** Plan 46-04 (SendUpdate visual redesign) shipped and superseded
+Plan 46-02 (per `46-04-CONTEXT.md` D-1). The audit above (commit `c9ef35b`)
+compared legacy `buildSendUpdateEmail()` against the **46-02-version-of-new**
+SendUpdate. Both sides of that comparison are now obsolete on the SendUpdate
+side: the new template is 46-04's redesign, and the fixture shape diverged
+materially from legacy `SendUpdateEmailInput`.
+
+The diff harness (`scripts/_phase46-diff-old-vs-new.ts`) compares legacy
+`buildSendUpdateEmail()` output against `render(<SendUpdate />)` output
+fixture-by-fixture. It works by `as`-casting the new fixture to
+`LegacySendUpdateInput` and feeding it to the legacy builder — which was
+sound when 46-02's fixture shape was a near-superset of legacy. After 46-04,
+that cast no longer produces meaningful legacy renders.
+
+### Material field divergences (46-04 fixture vs. legacy `SendUpdateEmailInput`)
+
+| Field | Legacy | 46-04 fixture |
+|---|---|---|
+| `project.engagementType` | required | absent |
+| `project.clients[]` | optional | absent |
+| `project.milestones[].name` / `.completed` | yes | renamed to `label` / `state` |
+| `project.procurementItems[].installDate` / `.expectedDeliveryDate` | yes | renamed to `eta` |
+| `project.procurementItems[].vendor` / `.spec` | absent | new |
+| `project.artifacts[]` | yes | deleted in 46-04 |
+| `project.clientActionItems[]` | yes | replaced by top-level `personalActionItems[]` |
+| `showArtifacts` / `showClientActionItems` | yes | replaced by `showReviewItems` |
+| `tenant` / `preheader` | absent | required |
+
+Fixture set also changed: legacy run had 6 SU fixtures
+(`allSections`, `noProcurement`, `noActionItems`, `noArtifacts`,
+`noMilestones`, `minimal`); 46-04 ships 5
+(`full`, `noReviewItems`, `noProcurement`, `noBody`, `mixedSubLines`).
+The byte-count table above does not map onto the new set.
+
+WorkOrder fixtures and template are unchanged in 46-04 (`46-04-PLAN.md`
+`files_modified` does not touch `src/emails/workOrder/`), so the WO portion
+of the harness is still sound.
+
+### What that means for Checkpoint 1
+
+The diff harness requires re-design before Checkpoint 1 can replay. The
+choice is non-mechanical: it determines what Checkpoint 1's safety gate
+actually verifies post-redesign.
+
+**Three approaches on the table — D-28 author to decide before 46-03 resume:**
+
+1. **Legacy adapter shim.** Add `function adaptToLegacy(fixture):
+   LegacySendUpdateInput` inside the diff script that maps 46-04 fixture
+   shape back to legacy input shape (`label` → `name`, `state` → `completed`,
+   `eta` → `installDate`, `personalActionItems` → `clientActionItems`, etc.).
+   Diff becomes "technically meaningful" again. Concern: an adapter that
+   maps `state` back to `completed` throws away the information the redesign
+   added; the resulting diff is enormous and most of it is "yes, the
+   redesign happened" rather than the regression-detection signal Checkpoint 1
+   was supposed to provide.
+
+2. **WorkOrder-only diff + design-intent review for SendUpdate.** Re-run
+   harness for WorkOrder fixtures only (still compatible). Document
+   SendUpdate side as "structural redesign — no legacy-comparable rendering
+   possible; review against UI-SPEC + 46-04-CONTEXT visual locks instead."
+   This changes what Checkpoint 1 means; the change should be made
+   deliberately, not landed as a quiet harness compromise.
+
+3. **Full re-design of the harness.** Replace legacy-vs-new comparison with
+   a different regression-detection mechanism (e.g. golden snapshot of
+   46-04's output frozen at this commit; UI-SPEC contract assertions; visual
+   regression against design-locked screenshots).
+
+### Action required
+
+D-28 author to decide harness approach in a fresh thread before Plan 46-03
+resumes from Checkpoint 1. No harness re-run, no script edits, and no
+adapter were written in this prep pass — the question is non-mechanical and
+belongs to the 46-03 resume context, not to a prep commit.
