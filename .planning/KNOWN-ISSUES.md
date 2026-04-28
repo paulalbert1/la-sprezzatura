@@ -46,6 +46,13 @@ When an issue is fixed (opportunistically or otherwise), strike it through and a
 - **Opportunistic-fix guidance:** If you have signal on whether `src/sanity/components/` is real in-progress work or stale scaffolding, decide and either commit or delete. Same for `vercel.json` — Vercel deploy config typically belongs in the repo, but it's untracked here, suggesting it was generated locally and never committed; verify whether it should be tracked or `.gitignore`d. Neither is blocking.
 - **Surfaced by:** Phase 46 Plan 04 Task 1 + Task 2 (logged here per user's "stop disclosing per-task once flagged twice" rule, 2026-04-28).
 
+### `state` field at `src/sanity/schemas/project.ts:289` is a grep false-positive trap
+
+- **Problem:** `src/sanity/schemas/project.ts:289` defines a Sanity schema field `name: "state"` for a postal address (next field on line 290 is `name: "zip"`). It's unrelated to milestone state, but a naive `grep -rn "state" src/sanity/` returns this line as a top hit, producing 30 seconds of doubt for anyone investigating milestone-state typing or related work.
+- **Why not fixed now:** The field is correct as written — `state` is the natural name for "US state" in an address schema. Renaming to disambiguate (e.g., `addressState`, `usState`) would touch every consumer of the address shape and offers limited value.
+- **Opportunistic-fix guidance:** When grepping for milestone state, scope to `src/emails/sendUpdate/` or use the type name `MilestoneState` as the disambiguating token — it's defined at `src/emails/sendUpdate/Milestones.tsx:18` (`export type MilestoneState = "completed" | "upcoming"`). For broader codebase-wide work, no fix needed; just ignore the line-289 hit.
+- **Surfaced by:** Phase 46 Plan 03 Checkpoint 1 — load-bearing-assumption verification (commit `7367d03`, 2026-04-28).
+
 ### `ProcurementItem.status` typed as `string`, not `ProcurementStatus`
 
 - **Problem:** After Phase 46 Plan 04 Task 1 extracted the canonical procurement palette to `src/lib/procurement/statusPills.ts` with a closed-enum `ProcurementStatus` type, the upstream `ProcurementItem.status` is still typed as a broader `string` (likely Sanity-typegen-derived). Consumers must cast at index sites — currently a `as ProcurementStatus` cast in `src/components/admin/ProcurementEditor.tsx`.

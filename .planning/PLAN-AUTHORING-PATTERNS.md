@@ -116,3 +116,77 @@ grep -qE 'expect\(.*\)\.not\.toContain.*"sub-line"' file.test.ts    # asserts a 
 **Exceptions.** Sometimes the test NAME itself is load-bearing — e.g., it's part of a documented contract or surfaces in a CI report that downstream automation parses. In those cases, lock the name explicitly in the plan body ("test name MUST be `'renders vendor-only sub-line'` for downstream CI matching") and the criterion can be exact. Without that explicit lock, prefer concept-matching regex.
 
 **Surfaced by:** Phase 46 Plan 04 Task 5 (2026-04-28). Logged here at the first occurrence because it shares mechanics with the identity-token-grep lesson and the unified pattern (criteria couple to text/structure) generalizes both — easier to reach for the right tool when the family of failure modes is named.
+
+---
+
+## Carry-over content presence checks for structural-rewrite audits
+
+**Problem.** When a phase audits a structural rewrite (legacy template → new template, old API → new API, schema migration) using byte-count deltas + visual review + numbered-decision enumeration, the audit can pass while silently dropping carry-over content. A milestone label, action item, or procurement name that appears in the legacy render but not the new one is exactly the failure mode summary-level audits structurally cannot catch — the byte-count differential is small relative to the section's total, and visual review can miss a single missing row in a multi-row table.
+
+**Where this surfaced.** Phase 46 Plan 03 Checkpoint 1 (the cutover gate). The audit document enumerated expected deltas (D-1 flex→table, D-2 round→square, 46-04 D-2 section reorder, etc.) and mapped each to a numbered decision. That structure is right but insufficient: enumeration verifies "the new template has what was added," not "the new template still has what was carried over." Adding a carry-over presence grep across all fixture content strings (milestone labels, action item labels, procurement names, CTA href, footer location, greeting first-name) caught nothing — but the grep returning 67/67 strings present in both renders converted "audit probably right" into "audit verifiably right." A future cutover with a regression in the rewire would trip the grep where the byte-count and visual review would both miss it.
+
+**Why it recurs.** Plan authors writing audit acceptance criteria reach for byte-count tables (cheap, quantitative) and visual spot-checks (cheap, intuitive). Presence-checking every carry-over content string requires mechanically extracting strings from fixtures and grepping both renders — slightly more setup than either alternative, and the value only shows up when something fails. So it's typically skipped. The asymmetry is wrong: the cost is low, the failure mode it catches is one neither alternative does.
+
+**Default to ship.** When a plan involves a structural-rewrite audit comparing rendered legacy output to rendered new output, add an acceptance criterion of the shape:
+
+```bash
+# For every carry-over content string in each fixture (NOT new-only redesign deltas),
+# verify presence in BOTH legacy and new rendered output.
+for fixture in fixture1 fixture2 ...; do
+  for string in "<milestone label>" "<action item>" "<procurement name>" "<cta>" "<location>"; do
+    legacy_n=$(grep -o -F -- "$string" "${fixture}-legacy.html" | wc -l)
+    new_n=$(grep -o -F -- "$string" "${fixture}-new.html" | wc -l)
+    [ "$legacy_n" -gt 0 ] && [ "$new_n" -gt 0 ] || echo "FAIL: $fixture : '$string'"
+  done
+done
+# Acceptance: zero FAIL output across all fixture × string pairs.
+```
+
+The criterion's strength is that it's *concrete* about what counts as a regression: "this string appears on both sides." Not "no unexpected diff" (vague), not "structure preserved" (interpretive) — a literal presence test on every carry-over string the fixtures define.
+
+**What goes in the string list.** Every fixture-defined content surface that the rewrite is supposed to preserve verbatim:
+- All milestone / event / row labels
+- All action item / task / line-item descriptions
+- All procurement / inventory / catalog item names (NOT vendor / spec / other new-only fields)
+- All CTA labels and `href` prefixes
+- All footer / signature / location strings that map across both designs
+- Greeting first-name token and project / parent-record title
+
+**What stays OUT of the list.** Anything new-only by design — fields the legacy template didn't render and the new template adds (preheader, reply line, vendor sub-lines if vendor is a new field, state pills if state is new, formal vs casual signoff if the signature register changed). Those are checked by the *expected-deltas* enumeration, not the carry-over presence grep.
+
+**Exceptions.** When the fixtures themselves are entirely new-shape and have no carry-over content (e.g., a green-field component with no legacy counterpart), this check doesn't apply. In that case the byte-count + numbered-decision enumeration is the whole audit.
+
+**Surfaced by:** Phase 46 Plan 03 Checkpoint 1 (2026-04-28). Logged at first occurrence because the failure mode it catches is structurally inaccessible to the alternatives, and the cost asymmetry argues for making it default rather than waiting for three occurrences.
+
+---
+
+## Cheap verifications on load-bearing audit assumptions
+
+**Problem.** Audits and plan acceptance criteria often rest on a small number of load-bearing assumptions — usually about a type's value space, a function's contract, or a config's defaults. The audit can be probably-right when those assumptions hold and quietly-wrong when they don't, and the audit document itself is the wrong place to discover the assumption was wrong (by then the audit is shipping). A 30-second verification of the load-bearing assumption upgrades probably-right to definitely-right at near-zero cost.
+
+**Where this surfaced.** Phase 46 Plan 03 Checkpoint 1. The migration-diff harness's `adaptSendUpdateLegacy()` shim collapses the new `state: "completed" | "upcoming"` field onto the legacy `completed: boolean` via `m.state === "completed"`. The audit's milestone-row claims (strikethrough behavior, indicator shape, row count) all rest on this collapse being lossless — i.e., on `MilestoneState` being a 2-valued type. If the type were 3+ valued (`completed | upcoming | in-progress | delayed`), every non-completed state would render identically in legacy, and the audit's "milestone rows are carry-over content" claim would silently be partly false. A 30-second `grep -n "MilestoneState" src/emails/sendUpdate/Milestones.tsx` resolved the question (2-valued, lossless) and made the audit's milestone claims definitely-right rather than probably-right.
+
+**Why it recurs.** Audit authors compress to make the audit readable. Compression hides the load-bearing assumptions inside narrative ("the adapter's collapse is bijective") or footnotes ("acknowledged trade-off"). The reviewer reading the audit then has to either trust the compression or surface the assumption and check it independently — the second option is rare because the audit reads as authoritative. Authors don't routinely list "things this audit assumes" because they don't think of them as assumptions, they think of them as facts.
+
+**Default to ship.** For any audit that includes adapters, shims, mapping functions, or "we treat X as if it were Y" reductions, add an acceptance criterion of the shape:
+
+```bash
+# Each load-bearing assumption gets a one-line check in the audit document.
+# Format: ASSUMPTION → VERIFICATION → RESULT.
+#
+# Examples:
+#   "MilestoneState is 2-valued"  →  grep -E '^export type MilestoneState' src/emails/sendUpdate/Milestones.tsx
+#   "ProcurementStatus enum is closed at 4 values"  →  grep -E '^export const PROCUREMENT_STATUSES' src/lib/procurement/statusPills.ts
+#   "tenant.signoffNameFormal exists on every tenant"  →  rg 'signoffNameFormal' src/sanity/schemas/tenant.ts
+#
+# Run all checks BEFORE the audit document closes. Each check passes or fails;
+# failures block the audit from shipping until the assumption is resolved.
+```
+
+The discipline is identifying the load-bearing assumptions, not running the checks — the checks are 30 seconds each. The audit author's job is to enumerate the assumptions explicitly so they CAN be checked. "List the assumptions you're making" is the prompt; the verifications follow mechanically.
+
+**Where to put the assumption list.** Inside the audit document, in a section titled "Load-Bearing Assumptions" between the introduction and the per-fixture spot checks. Each entry: assumption (English), verification (shell command or file:line reference), result (pass / fail). When all entries are pass, the audit is definitely-right on the things it depends on. When any entry is fail, the audit doesn't ship — the failed assumption gets resolved (either by the audit acknowledging the multi-value case explicitly, or by the shim being revised) before approval.
+
+**Exceptions.** Audits with no adapters / shims / reductions — pure side-by-side comparisons of the same input through two pipelines — have no load-bearing assumptions beyond the fixtures themselves. In that case this section is empty by construction.
+
+**Surfaced by:** Phase 46 Plan 03 Checkpoint 1 (2026-04-28). Logged at first occurrence because the cost (30 seconds per assumption) is so low and the failure mode it catches (audit ships on a partly-false assumption) is so consequential that the threshold for institutional capture should be lower than the usual three-occurrences rule.
