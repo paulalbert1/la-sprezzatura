@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 04 Task 6 complete (forward-compat portal section IDs per D-27 -- id="milestones" on MilestoneSection.astro, id="procurement" on ProcurementTable.astro, id="artifacts" on ArtifactSection.astro); 7/7 acceptance criteria green; 11/11 portal tests pass (no regressions); pure markup, no scroll JS, no aria-labelledby; plan 46-04 all six tasks complete -- awaiting user plan-close action
-last_updated: "2026-04-28T15:24:30.000Z"
-last_activity: 2026-04-28
+stopped_at: Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output (legacy adapter shim added, 14 HTML pairs regenerated, 46-MIGRATION-DIFF.md rewritten with GO conclusion); parked at Checkpoint 1 awaiting user approve/approve-rgb/hold to release Tasks 3-8 (call-site rewires + List-Unsubscribe + atomic delete-and-replace cutover)
+last_updated: "2026-04-28T17:00:00.000Z"
+last_activity: 2026-04-28 -- Phase 46 Plan 03 Task 1 complete; parked at Checkpoint 1
 progress:
   total_phases: 10
   completed_phases: 3
-  total_plans: 21
-  completed_plans: 21
-  percent: 95
+  total_plans: 22
+  completed_plans: 22
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 46 (send-update-work-order-migration) — EXECUTING
-Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 + 4 + 5 + 6 of 6 complete
-Status: Plan 04 Task 6 complete (forward-compat portal section IDs per D-27: id="milestones" added to outermost <section> in MilestoneSection.astro; id="procurement" in ProcurementTable.astro; id="artifacts" in ArtifactSection.astro; pure markup -- no scroll-handling JS, no aria-labelledby scaffolding, no consumer changes in v1). 7/7 acceptance criteria green. 11/11 portal tests pass (`src/components/portal/ProcurementTable.test.ts`); 18 todo skipped pre-existing. Single commit `ccaeef2` for the three Astro edits. All six tasks of plan 46-04 are now complete -- user closes the plan and updates ROADMAP.md separately. After plan 46-04 closes, plan 46-03 (cutover) unblocks per D-28 (depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness re-runs).
-Last activity: 2026-04-28
+Plan: 03 (cutover) — parked at Checkpoint 1 (Task 1 complete, Tasks 3-8 awaiting GO/NO-GO)
+Status: Executing Phase 46
+Last activity: 2026-04-28 -- Phase 46 Plan 03 Task 1 complete; D-16 diff harness refreshed; Checkpoint 1 hand-review awaiting user response
 
 ## v5.3 Phase Map
 
@@ -134,7 +134,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-28T15:24:30.000Z
-Stopped at: Phase 46 Plan 04 Task 6 complete -- forward-compat portal section IDs landed on commit ccaeef2; all six tasks of plan 46-04 done; awaiting user plan-close action (ROADMAP.md update is user-driven, not auto)
+Last session: 2026-04-28T17:00:00.000Z
+Stopped at: Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO.
 Resume file: None
-Next action: User reviews Task 6 output and closes plan 46-04 (updates ROADMAP.md plan-progress row + marks requirements EMAIL-01/02/03/06/07 complete via the appropriate close command). After plan 46-04 closes, plan 46-03 (cutover) unblocks per D-28: depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness re-runs against the redesigned SendUpdate output, audit document refreshes, then API route cutover proceeds.
+Next action: Checkpoint 1 hand-review. User reads `.planning/phases/46-send-update-work-order-migration/46-MIGRATION-DIFF.md` and replies `approve` / `approve-rgb` / `hold`. On approve, a continuation agent resumes Plan 46-03 from Task 3 (rewire send-update.ts both branches + List-Unsubscribe + plainText render) through Task 8 (Outlook merge-gate screenshot).
