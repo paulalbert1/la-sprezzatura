@@ -420,6 +420,7 @@ export const project = defineType({
         defineArrayMember({
           type: "object",
           name: "procurementItem",
+          groups: [{ name: "email", title: "Email-facing fields" }],
           fields: [
             defineField({
               name: "name",
@@ -465,12 +466,23 @@ export const project = defineType({
               type: "string",
             }),
             // Phase 32: Procurement editor fields
+            // Phase 46-04 (D-15): vendor description augmented + email group;
+            // spec added adjacent. Both surface under the item name in client
+            // project update emails.
             defineField({
               name: "vendor",
               title: "Vendor",
               type: "string",
-              description:
-                "Supplier/vendor name (e.g., Restoration Hardware)",
+              group: "email",
+              description: "Vendor or maker name (e.g., Restoration Hardware). Shown to clients under the item name in project update emails.",
+            }),
+            defineField({
+              name: "spec",
+              title: "Spec",
+              type: "string",
+              group: "email",
+              validation: (Rule) => Rule.max(50),
+              description: "Short specification line (e.g., '96″ three-seat, walnut'). Shown to clients under the vendor name in project update emails. Keep under 50 characters.",
             }),
             defineField({
               name: "notes",

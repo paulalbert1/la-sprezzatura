@@ -1,6 +1,22 @@
 import { sanityClient } from "sanity:client";
 import type { SanityClient } from "@sanity/client";
 
+// Phase 46-04 (D-15): shared TypeScript shape for procurementItem rows passed
+// through the SendUpdate render path. vendor + spec are optional email-facing
+// fields surfaced under the item name in client project update emails.
+export interface ProcurementItem {
+  _key: string;
+  name: string;
+  status: string;
+  orderDate?: string | null;
+  expectedDeliveryDate?: string | null;
+  installDate?: string | null;
+  trackingNumber?: string | null;
+  vendor?: string;
+  spec?: string;
+  notes?: string | null;
+}
+
 // Portfolio overview -- only projects marked for public portfolio, ordered by portfolio order
 export async function getProjects() {
   return sanityClient.fetch(`
@@ -985,7 +1001,7 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     ...select(engagementType == "full-interior-design" => {
       "procurementItems": procurementItems[] {
         _key, name, status, orderDate, expectedDeliveryDate, installDate,
-        trackingNumber, vendor, notes,
+        trackingNumber, vendor, spec, notes,
         carrierETA, carrierName, trackingUrl, lastSyncAt, syncSource,
         retrievedStatus,
         itemUrl,
