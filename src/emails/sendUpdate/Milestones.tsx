@@ -3,7 +3,8 @@
 //
 // Completed: filled stone square + strikethrough title + "Complete" pill.
 // Upcoming: outlined square (1px border, transparent fill) + "Upcoming" pill.
-// Unicode ○ glyph is forbidden -- every indicator is a styled <span>.
+// The unicode open-circle glyph (U+25CB) is forbidden -- every indicator
+// is a styled <span> with explicit pixel width/height. (D-11)
 //
 // Pill source text uses sentence-case "Complete"/"Upcoming" -- the visual
 // uppercase rendering is a CSS treatment via text-transform: uppercase.

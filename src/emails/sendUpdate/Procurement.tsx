@@ -12,11 +12,7 @@
 
 import type { CSSProperties } from "react";
 import { Column, Row, Section, Text } from "@react-email/components";
-import {
-  STATUS_PILL_STYLES,
-  STATUS_LABELS,
-  type ProcurementStatus,
-} from "../../lib/procurement/statusPills";
+import { STATUS_PILL_STYLES, STATUS_LABELS, type ProcurementStatus } from "../../lib/procurement/statusPills";
 
 export interface ProcurementRow {
   name: string;
