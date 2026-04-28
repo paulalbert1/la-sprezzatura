@@ -1,77 +1,127 @@
 // src/emails/sendUpdate/Procurement.tsx
-// Phase 46 -- Procurement table (Item / Status / ETA), table-safe via
-// react-email <Row>/<Column>.
+// Phase 46-04 -- Procurement section with canonical pill palette + sub-line (D-12..D-14).
 //
-// Source of truth:
-//   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-1)
-//   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (Procurement.tsx)
-//   src/lib/sendUpdate/emailTemplate.ts lines 256-291 (legacy <table>; mechanical port)
+// Pill palette imported from src/lib/procurement/statusPills.ts (single source of truth).
+// Sub-line composition (D-14):
+//   - vendor AND spec  -> `${vendor} · ${spec}`
+//   - vendor OR spec   -> the present one alone
+//   - neither          -> entire <span> wrapper omitted (no empty span, no nbsp placeholder)
 //
-// The legacy template is already a <table>; this is a mechanical port to
-// react-email primitives. Status color comes from getStatusColor() (re-exported
-// from SendUpdate.tsx); same fixed STATUS_COLOR map -- T-46-02-05 mitigated.
+// Mixed-mode rendering must look intentional row-by-row -- rows shorten without
+// misalignment because the wrapper is conditional, not the content.
 
+import type { CSSProperties } from "react";
 import { Column, Row, Section, Text } from "@react-email/components";
 import {
-  formatDate,
-  formatStatusText,
-  getStatusColor,
-  type SendUpdateProcurementItem,
-} from "./SendUpdate";
+  STATUS_PILL_STYLES,
+  STATUS_LABELS,
+  type ProcurementStatus,
+} from "../../lib/procurement/statusPills";
+
+export interface ProcurementRow {
+  name: string;
+  vendor?: string;
+  spec?: string;
+  status: ProcurementStatus;
+  eta: string;            // formatted upstream
+}
 
 export interface ProcurementProps {
-  items: SendUpdateProcurementItem[];
+  items: ProcurementRow[];
+}
+
+const EYEBROW_STYLE = {
+  fontSize: 10,
+  lineHeight: "24px",
+  letterSpacing: "0.14em",
+  color: "#8A8478",
+  textTransform: "uppercase" as const,
+  fontWeight: 600,
+  margin: 0,
+  marginBottom: 12,
+} as const;
+
+const HEADER_LABEL_STYLE = {
+  fontSize: 10,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase" as const,
+  color: "#B8AFA4",
+  paddingTop: 10,
+  paddingBottom: 10,
+} as const;
+
+const ROW_STYLE = {
+  borderBottom: "0.5px solid #E8DDD0",
+  paddingTop: 12,
+  paddingBottom: 12,
+  verticalAlign: "middle" as const,
+};
+
+const ITEM_NAME_STYLE = {
+  fontSize: 14,
+  color: "#2C2926",
+} as const;
+
+const SUBLINE_STYLE = {
+  display: "block" as const,
+  fontSize: 11.5,
+  color: "#8A8478",
+  marginTop: 2,
+  letterSpacing: "0.02em",
+};
+
+const ETA_STYLE = {
+  fontSize: 13,
+  color: "#4A4540",
+  letterSpacing: "0.02em",
+} as const;
+
+function composeSubLine(vendor?: string, spec?: string): string | null {
+  const v = vendor?.trim();
+  const s = spec?.trim();
+  if (v && s) return `${v} · ${s}`;
+  return v || s || null;
+}
+
+function pillStyle(status: ProcurementStatus): CSSProperties {
+  const palette = STATUS_PILL_STYLES[status];
+  return {
+    display: "inline-block",
+    backgroundColor: palette.bg,
+    color: palette.text,
+    border: `0.5px solid ${palette.border}`,
+    padding: "3px 10px",
+    borderRadius: "2px",   // longhand only -- Phase 46 D-3
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  };
 }
 
 export function Procurement({ items }: ProcurementProps) {
+  if (!items.length) return null;
   return (
-    <Section className="px-[40px] pb-[24px]">
-      <Text className="text-[10px] tracking-[0.14em] text-stone uppercase font-body m-0 mb-[12px]">
-        Procurement
-      </Text>
-      <Row className="border-b-[0.5px] border-stone-light">
-        <Column
-          className="text-[10px] tracking-[0.1em] text-stone-light uppercase py-[10px]"
-          style={{ width: "50%" }}
-        >
-          Item
-        </Column>
-        <Column
-          align="center"
-          className="text-[10px] tracking-[0.1em] text-stone-light uppercase py-[10px]"
-        >
-          Status
-        </Column>
-        <Column
-          align="right"
-          className="text-[10px] tracking-[0.1em] text-stone-light uppercase py-[10px]"
-        >
-          ETA
-        </Column>
+    <Section style={{ paddingLeft: 40, paddingRight: 40, paddingBottom: 24 }}>
+      <Text style={EYEBROW_STYLE}>Procurement</Text>
+      <Row style={{ borderBottom: "0.5px solid #E8DDD0" }}>
+        <Column style={{ ...HEADER_LABEL_STYLE, width: "50%" }}>Item</Column>
+        <Column align="center" style={HEADER_LABEL_STYLE}>Status</Column>
+        <Column align="right" style={HEADER_LABEL_STYLE}>ETA</Column>
       </Row>
-      {items.map((item, idx) => {
-        const status = item.status ?? "pending";
-        const eta = item.expectedDeliveryDate ?? item.installDate;
+      {items.map((it, i) => {
+        const subLine = composeSubLine(it.vendor, it.spec);
         return (
-          <Row
-            key={item._key ?? idx}
-            className="border-b-[0.5px] border-cream-dark"
-          >
-            <Column className="text-[13px] text-charcoal py-[10px]">
-              {item.name ?? "Untitled"}
+          <Row key={`p-${i}`} style={ROW_STYLE}>
+            <Column style={{ verticalAlign: "middle", width: "50%" }}>
+              <span style={ITEM_NAME_STYLE}>{it.name}</span>
+              {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
             </Column>
-            <Column
-              align="center"
-              className="text-[12px] py-[10px]"
-              style={{ color: getStatusColor(status) }}
-            >
-              {formatStatusText(status)}
+            <Column align="center" style={{ verticalAlign: "middle" }}>
+              <span style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
             </Column>
-            <Column
-              align="right"
-              className="text-[12px] text-stone py-[10px]"
-            >
-              {eta ? formatDate(eta) : ""}
+            <Column align="right" style={{ verticalAlign: "middle" }}>
+              <span style={ETA_STYLE}>{it.eta}</span>
             </Column>
           </Row>
         );
