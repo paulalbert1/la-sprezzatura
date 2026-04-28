@@ -1,77 +1,114 @@
 // src/emails/sendUpdate/Milestones.tsx
-// Phase 46 -- Milestones section, table-safe (D-1) with 7x7 colored-square
-// status indicators (D-2).
+// Phase 46-04 -- Milestones section with completed/upcoming state (D-10, D-11).
 //
-// Source of truth:
-//   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-1, D-2)
-//   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (Milestones.tsx)
-//   src/lib/sendUpdate/emailTemplate.ts lines 187-220 (legacy, flex-rewrite source)
+// Completed: filled stone square + strikethrough title + "Complete" pill.
+// Upcoming: outlined square (1px border, transparent fill) + "Upcoming" pill.
+// Unicode ○ glyph is forbidden -- every indicator is a styled <span>.
 //
-// D-1: every legacy `display: flex` row is rewritten as <Row>/<Column> which
-//      emits <table role="presentation"> -- Outlook-safe.
-// D-2: status indicator is an inline-block 7x7 <span> with explicit pixel
-//      width/height and no border-radius.
-//
-// Color values mirror legacy STATUS_COLOR map for completed (#7D9E6E green)
-// vs pending (#D4C9BC neutral) per emailTemplate.ts lines 196 + 105-113.
+// Pill source text uses sentence-case "Complete"/"Upcoming" -- the visual
+// uppercase rendering is a CSS treatment via text-transform: uppercase.
+// This is a load-bearing accessibility constraint: screen readers read
+// literal source text, so "COMPLETE" gets spelled out C-O-M-P-L-E-T-E
+// while "Complete" with text-transform: uppercase reads naturally as
+// "complete" while still rendering visually uppercase.
 
 import { Column, Row, Section, Text } from "@react-email/components";
-import { formatDate, type SendUpdateMilestone } from "./SendUpdate";
 
-export interface MilestonesProps {
-  milestones: SendUpdateMilestone[];
+export type MilestoneState = "completed" | "upcoming";
+
+export interface MilestoneRow {
+  label: string;
+  date: string;            // formatted upstream by SendUpdate.tsx via formatDate()
+  state: MilestoneState;
 }
 
+export interface MilestonesProps {
+  milestones: MilestoneRow[];
+}
+
+const EYEBROW_STYLE = {
+  fontSize: 10,
+  lineHeight: "24px",
+  letterSpacing: "0.14em",
+  color: "#8A8478",
+  textTransform: "uppercase" as const,
+  fontWeight: 600,
+  margin: 0,
+  marginBottom: 12,
+} as const;
+
+const ROW_STYLE = {
+  borderBottom: "0.5px solid #E8DDD0",
+  paddingTop: 12,
+  paddingBottom: 12,
+  verticalAlign: "middle" as const,
+};
+
+const SQUARE_BASE = {
+  display: "inline-block",
+  width: 7,
+  height: 7,
+  marginRight: 12,
+  verticalAlign: "middle" as const,
+  boxSizing: "border-box" as const,
+};
+
+const SQUARE_COMPLETED = { ...SQUARE_BASE, backgroundColor: "#D4C9BC" };
+const SQUARE_UPCOMING = {
+  ...SQUARE_BASE,
+  border: "1px solid #D4C9BC",
+  backgroundColor: "transparent",
+};
+
+const TITLE_COMPLETED = {
+  fontSize: 14,
+  color: "#8A8478",
+  textDecoration: "line-through" as const,
+};
+
+const TITLE_UPCOMING = {
+  fontSize: 14,
+  color: "#2C2926",
+};
+
+const STATE_PILL_STYLE = {
+  fontSize: 11,
+  color: "#8A8478",
+  marginLeft: 8,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase" as const,
+};
+
+const DATE_STYLE = {
+  fontSize: 13,
+  color: "#8A8478",
+  letterSpacing: "0.02em",
+} as const;
+
 export function Milestones({ milestones }: MilestonesProps) {
+  if (!milestones.length) return null;
   return (
-    <Section className="px-[40px] pb-[24px]">
-      <Text className="text-[10px] tracking-[0.14em] text-stone uppercase font-body m-0 mb-[12px]">
-        Milestones
-      </Text>
-      {milestones.map((m, idx) => (
-        <Row
-          key={m._key ?? idx}
-          className="border-b-[0.5px] border-cream-dark py-[10px]"
-          style={{ verticalAlign: "middle" }}
-        >
-          <Column style={{ verticalAlign: "middle" }}>
-            <span
-              style={{
-                display: "inline-block",
-                width: "7px",
-                height: "7px",
-                backgroundColor: m.completed ? "#7D9E6E" : "#D4C9BC",
-                marginRight: "10px",
-              }}
-            />
-            <span
-              style={
-                m.completed
-                  ? {
-                      fontSize: "14px",
-                      color: "#9A8F82",
-                      textDecoration: "line-through",
-                    }
-                  : { fontSize: "14px", color: "#2C2A26" }
-              }
-            >
-              {m.name ?? "Untitled"}
-            </span>
-          </Column>
-          <Column align="right" style={{ verticalAlign: "middle" }}>
-            {m.date && (
-              <span
-                style={{
-                  fontSize: "13px",
-                  color: m.completed ? "#B8AFA4" : "#4A4540",
-                }}
-              >
-                {formatDate(m.date)}
-              </span>
-            )}
-          </Column>
-        </Row>
-      ))}
+    <Section style={{ paddingLeft: 40, paddingRight: 40, paddingBottom: 24 }}>
+      <Text style={EYEBROW_STYLE}>Milestones</Text>
+      {milestones.map((m, i) => {
+        const squareStyle = m.state === "completed" ? SQUARE_COMPLETED : SQUARE_UPCOMING;
+        const titleStyle = m.state === "completed" ? TITLE_COMPLETED : TITLE_UPCOMING;
+        // Sentence-case source strings + textTransform: uppercase styling --
+        // accessibility-driven (see header comment).
+        const pillLabel = m.state === "completed" ? "Complete" : "Upcoming";
+        return (
+          <Row key={`m-${i}`} style={ROW_STYLE}>
+            <Column style={{ verticalAlign: "middle" }}>
+              <span style={squareStyle} />
+              <span style={titleStyle}>{m.label}</span>
+              <span style={STATE_PILL_STYLE}>{pillLabel}</span>
+            </Column>
+            <Column align="right" style={{ verticalAlign: "middle" }}>
+              <span style={DATE_STYLE}>{m.date}</span>
+            </Column>
+          </Row>
+        );
+      })}
     </Section>
   );
 }
