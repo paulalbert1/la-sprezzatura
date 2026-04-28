@@ -1,7 +1,7 @@
 ---
 phase: 46-send-update-work-order-migration
 type: uat
-status: resolved
+status: diagnosed
 gate: merge-gate
 verdict: REJECTED
 date: 2026-04-28
@@ -12,6 +12,7 @@ gap_closure_commits:
   - eaea038  # gap-1: defensive greeting strip + admin compose helper
   - 9b5cb08  # gap-2: formatDate/formatLongDate empty-input guard
   - 889477e  # gap-3: PLAN-AUTHORING-PATTERNS strengthening
+re_test_round_2: 2026-04-28  # round 2 surfaced gap-4 and gap-5; gap-1 visually confirmed fixed
 updated: 2026-04-28
 ---
 
@@ -151,11 +152,68 @@ Strengthen the "Cheap verifications on load-bearing audit assumptions" pattern i
 
 ---
 
+### gap-4 — Outlook desktop dark-mode contrast inversion (round 2 — supersedes "Items NOT issues #1")
+
+- **status:** failed
+- **debug_session:** none — root cause read from EmailShell.tsx + known Outlook desktop behavior
+- **resolves_in:** 46.1 (plan 46.1-04 — Outlook-specific CSS in EmailShell)
+- **supersedes:** "Items NOT issues" #1 — the original 2026-04-28 14:42 ET review classified Outlook dark-mode auto-darken as "acceptable"; the round-2 re-test on 2026-04-28 ~16:53 ET reversed that call after seeing the real-world result.
+
+**What Liz saw (round 2 re-test):**
+
+In Outlook desktop dark mode, the SendUpdate body washed out — "Hi Victoria,\n\nWassup. This is your latest update." rendered as low-contrast cream-on-dark-gray, near-illegible. Outlook auto-darkened the cream `#FAF8F5` body background to dark gray but did NOT correspondingly invert the cream/stone-light text colors (which stayed near-light), collapsing the contrast ratio.
+
+**Mechanism:**
+
+`src/emails/shell/EmailShell.tsx:72-73` already declares `<meta name="color-scheme" content="only light">` and `<meta name="supported-color-schemes" content="light">`. New Outlook (web/M365) and Apple Mail respect those meta tags and skip auto-darken. **Outlook desktop ignores them** — it runs its own auto-darken pass via the `[data-ogsc]` (Outlook-Generated-Style-Color) and `[data-ogsb]` (Outlook-Generated-Style-Background) selector hooks, which only affect colors the email author hasn't explicitly locked through those same selectors. The result is a half-inverted color scheme: dark background + light text colors that were already light.
+
+**Fix surface (covered by 46.1-04):**
+
+Add Outlook-desktop-specific CSS to `EmailShell.tsx` `<Head>` that locks all text and background colors against the auto-darken pass:
+1. `<style>` block with `[data-ogsc]` selectors re-pinning text colors to their light-mode values.
+2. `[data-ogsb]` selectors re-pinning background colors to cream `#FAF8F5` and section backgrounds.
+3. MSO conditional `<!--[if mso]><style>...</style><![endif]-->` block forcing `mso-color-scheme: light` for older Outlook desktop builds where data-ogs hooks don't reach.
+
+Locked colors: cream `#FAF8F5` (body bg), `#2C2926` (dark text), `#4A4540` (mid text), `#8A8478` (stone-light), `#B8AFA4` (header label), `#E8DDD0` (cream-dark divider), terracotta `#C4836A` (SU CTA bg) and gold `#9A7B4B` (WO CTA bg). Plus pill chrome from `statusPills.ts` (7 backgrounds × 7 text × 7 borders).
+
+This is "force light mode in Outlook desktop," not "design a dark variant." No new design tokens; existing palette stays as-is.
+
+**Tests:** HTML inspection assertions that the rendered email contains the `[data-ogsc]` / `[data-ogsb]` selectors and the MSO conditional block. Visual confirmation requires re-test in Outlook desktop (round-3 merge-gate).
+
+---
+
+### gap-5 — Right-aligned date/ETA columns push content to far edge
+
+- **status:** failed
+- **debug_session:** none — read directly from Milestones.tsx + Procurement.tsx
+- **resolves_in:** 46.1 (plan 46.1-05 — column align changes)
+
+**What Liz saw (round 2 re-test):**
+
+In the Milestones section the dates ("Feb 17", "Mar 12", "Apr 9", "Apr 30") render flush against the right edge of the email card, far from their corresponding milestone names. Visually disconnected — the eye reads "Initial Consultation COMPLETE [long gap] Feb 17" as two separate things instead of one row. Same pattern applies to the Procurement ETA column, and the Status column's centered pill compounds the issue.
+
+**Mechanism:**
+
+- `src/emails/sendUpdate/Milestones.tsx:107` — `<Column align="right">` on the date column
+- `src/emails/sendUpdate/Procurement.tsx:106,119` — `<Column align="right">` on ETA header + cells
+- `src/emails/sendUpdate/Procurement.tsx:105,116` — `<Column align="center">` on Status header + cells
+
+**Fix surface (covered by 46.1-05):**
+
+Change all `align="right"` and `align="center"` to `align="left"` so all table cell content reads left-to-right with no right-anchored or centered cells. Specifically:
+- Milestones date: `right` → `left`
+- Procurement ETA header + cell: `right` → `left`
+- Procurement Status header + cell: `center` → `left`
+
+Snapshots regenerate. Visual confirmation manual via re-test.
+
+---
+
 ## Items NOT issues (confirmed correct after viewing screenshots)
 
 These were checked against the redesign decisions and verified correct in the screenshots — included here so a future reader doesn't re-flag them as bugs:
 
-1. **Outlook dark-mode rendering.** Outlook desktop auto-darkened the cream `#FAF8F5` body background to dark gray in dark mode (visible in screenshots 01, 02, 05, 07; light-mode comparison in 06, 08). This is Outlook's `aw-darkmode` behavior, not a template bug. Both modes render legibly; the cream-on-dark inversion is acceptable.
+1. ~~**Outlook dark-mode rendering.** Outlook desktop auto-darkened the cream `#FAF8F5` body background to dark gray in dark mode (visible in screenshots 01, 02, 05, 07; light-mode comparison in 06, 08). This is Outlook's `aw-darkmode` behavior, not a template bug. Both modes render legibly; the cream-on-dark inversion is acceptable.~~ **REVERSED 2026-04-28 round 2 — see gap-4 above.** The round-1 "acceptable" call did not survive contact with the real-world re-test; the half-inversion (dark bg + still-light text colors) is unreadable, not just inverted. Now treated as a real bug, fixed in 46.1-04.
 2. **Work Order rendering** (`screenshots/03-outlook-dark-wo-default.png`, `04-outlook-light-wo-default.png`).
    - Greeting "Marco," renders single ✓
    - Body copy "Your work order for Gramercy Park Apartment is ready. Use the link below to view the latest version — it always reflects our most recent edits." renders correctly ✓
