@@ -1,111 +1,100 @@
 // src/emails/sendUpdate/fixtures.ts
-// Phase 46 -- typed fixture exports for SendUpdate snapshot tests (D-20).
+// Phase 46-04 -- five representative fixtures (D-22).
 //
 // Source of truth:
-//   .planning/phases/46-send-update-work-order-migration/46-CONTEXT.md (D-13, D-20)
-//   .planning/phases/46-send-update-work-order-migration/46-PATTERNS.md (sendUpdate/fixtures.ts)
-//   src/lib/sendUpdate/emailTemplate.test.ts lines 13-61 (legacy fixtures extracted here)
+//   .planning/phases/46-send-update-work-order-migration/46-04-CONTEXT.md (D-22, D-23)
 //
-// Six fixtures per D-20: one baseline + one per-section toggled off + minimal.
-// preheader is set on baseInput per D-13 (call site override pattern; the
-// fixture is treated as a call site for test purposes).
+// Locked fixture names (do NOT add a sixth without amending D-22):
+//   full           -- every section populated; markdown body with bold + inline link;
+//                     2 designer items + 2 auto-derived artifacts;
+//                     3 procurement rows with full vendor+spec each;
+//                     2 completed + 2 upcoming milestones.
+//   noReviewItems  -- empty personalActionItems AND empty pendingArtifacts
+//                     (verifies ReviewItems' empty-both omission rule, D-3).
+//   noProcurement  -- empty procurementItems AND showProcurement: false.
+//   noBody         -- personalNote: "" (verifies Body opt-out path, D-6).
+//   mixedSubLines  -- 3 procurement rows with progressive vendor/spec presence
+//                     (both | vendor-only | neither) -- the only fixture that
+//                     exercises Procurement sub-line composition variants (D-14).
+//
+// Cardinality variants beyond these five land as it() blocks in
+// SendUpdate.test.ts -- not as new fixtures (D-23 maintenance policy).
 
-import type {
-  SendUpdateEmailInput,
-  SendUpdateProject,
-  PendingArtifact,
-} from "./SendUpdate";
+import { SAMPLE_TENANT } from "../fixtures.shared";
+import type { SendUpdateEmailInput } from "./SendUpdate";
+import type { PersonalActionItem } from "./ReviewItems";
 
-export function fixtureProject(): SendUpdateProject {
+export const PROJECT_BASE: SendUpdateEmailInput["project"] = {
+  _id: "P1",
+  title: "Kimball Residence",
+  milestones: [
+    { label: "Design intake", date: "2026-02-28", state: "completed" },
+    { label: "Construction kickoff", date: "2026-04-14", state: "completed" },
+    { label: "Millwork install", date: "2026-05-22", state: "upcoming" },
+    { label: "Final walkthrough", date: "2026-06-30", state: "upcoming" },
+  ],
+  procurementItems: [
+    { name: "Custom sofa", vendor: "Verellen", spec: "96\" three-seat", status: "ordered", eta: "2026-04-30" },
+    { name: "Dining table", vendor: "BDDW", spec: "walnut, 84\"", status: "in-transit", eta: "2026-05-06" },
+    { name: "Foyer pendant", vendor: "Apparatus", spec: "Cloud 19", status: "delivered", eta: "2026-04-22" },
+  ],
+};
+
+export const samplePersonalActionItems: PersonalActionItem[] = [
+  { label: "Approve the floor plan", dueLabel: "Due May 9" },
+  { label: "Review the lighting proposal", dueLabel: "No deadline" },
+];
+
+export const samplePendingArtifacts: SendUpdateEmailInput["pendingArtifacts"] = [
+  { _key: "a1", artifactType: "proposal" },
+  { _key: "a2", artifactType: "design-board" },
+];
+
+const SAMPLE_BODY = [
+  "Construction kicked off two weeks ago and the site is in good rhythm.",
+  "The new fabric samples landed Friday — the [Schumacher](https://lasprezz.com/portal/projects/kimball) reads even better in person than on the board, and I'd love your eyes on it before we lock the order.",
+  "One thing on your plate this week: the floor plan needs your approval by **May 9** to keep the trades on schedule. Everything else is moving.",
+].join("\n\n");
+
+export function baseInput(overrides: Partial<SendUpdateEmailInput> = {}): SendUpdateEmailInput {
   return {
-    _id: "project-123",
-    title: "Kimball Residence",
-    engagementType: "full-interior-design",
-    clients: [
-      {
-        client: {
-          _id: "client-1",
-          name: "Sarah Kimball",
-          email: "sarah@example.com",
-        },
-      },
-    ],
-    milestones: [
-      { _key: "m1", name: "Design intake", date: "2026-03-01", completed: true },
-      {
-        _key: "m2",
-        name: "Construction kickoff",
-        date: "2026-04-15",
-        completed: false,
-      },
-    ],
-    procurementItems: [
-      {
-        _key: "p1",
-        name: "Sofa",
-        status: "ordered",
-        installDate: "2026-05-01",
-      },
-    ],
-    artifacts: [
-      {
-        _key: "a1",
-        artifactType: "proposal",
-        currentVersionKey: "v1",
-        hasApproval: false,
-      },
-    ],
-    clientActionItems: [
-      {
-        _key: "ai1",
-        description: "Approve the floor plan",
-        dueDate: "2026-05-10",
-        completed: false,
-      },
-    ],
-  };
-}
-
-function fixturePendingArtifacts(): PendingArtifact[] {
-  return [{ _key: "a1", artifactType: "proposal" }];
-}
-
-export function baseInput(
-  overrides: Partial<SendUpdateEmailInput> = {},
-): SendUpdateEmailInput {
-  return {
-    project: fixtureProject(),
-    personalNote: "Loving the new fabric samples.",
+    project: PROJECT_BASE,
+    personalNote: SAMPLE_BODY,
+    personalActionItems: samplePersonalActionItems,
+    pendingArtifacts: samplePendingArtifacts,
     showMilestones: true,
     showProcurement: true,
-    showArtifacts: true,
-    showClientActionItems: true,
-    pendingArtifacts: fixturePendingArtifacts(),
+    showReviewItems: true,
     baseUrl: "https://lasprezz.com",
-    ctaHref: "https://lasprezz.com/portal/dashboard",
-    preheader: "Project Update for Kimball Residence -- April 27, 2026",
+    ctaHref: "https://lasprezz.com/portal/client/abc123",
+    ctaLabel: "Open Portal",
     clientFirstName: "Sarah",
+    tenant: SAMPLE_TENANT,
+    preheader: "Project update for Kimball Residence — one approval needed by May 9.",
+    sentDate: "April 27, 2026",
     ...overrides,
   };
 }
 
 export const FIXTURES = {
-  allSections: () => baseInput(),
+  full: () => baseInput(),
+  noReviewItems: () =>
+    baseInput({ personalActionItems: [], pendingArtifacts: [], showReviewItems: false }),
   noProcurement: () =>
     baseInput({
+      project: { ...PROJECT_BASE, procurementItems: [] },
       showProcurement: false,
-      project: { ...fixtureProject(), engagementType: "consultation-only" },
     }),
-  noActionItems: () => baseInput({ showClientActionItems: false }),
-  noArtifacts: () => baseInput({ showArtifacts: false, pendingArtifacts: [] }),
-  noMilestones: () => baseInput({ showMilestones: false }),
-  minimal: () =>
+  noBody: () => baseInput({ personalNote: "" }),
+  mixedSubLines: () =>
     baseInput({
-      showMilestones: false,
-      showProcurement: false,
-      showArtifacts: false,
-      showClientActionItems: false,
-      pendingArtifacts: [],
-      personalNote: "",
+      project: {
+        ...PROJECT_BASE,
+        procurementItems: [
+          { name: "Custom sofa", vendor: "Verellen", spec: "96\" three-seat", status: "ordered", eta: "2026-04-30" },
+          { name: "Dining table", vendor: "BDDW", status: "in-transit", eta: "2026-05-06" },
+          { name: "Foyer pendant", status: "delivered", eta: "2026-04-22" },
+        ],
+      },
     }),
 };
