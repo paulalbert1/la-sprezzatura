@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { isProcurementOverdue } from "../../lib/dashboardUtils";
 import { getTrackingInfo } from "../../lib/trackingUrl";
+import { STATUS_PILL_STYLES, STATUS_LABELS, PROCUREMENT_STATUSES } from "../../lib/procurement/statusPills";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import ProcurementItemModal, {
   type ProcurementItemModalItem,
@@ -58,37 +59,9 @@ interface Props {
   }) => void;
 }
 
-// Luxury status pills — border-outlined on tinted backgrounds
-const STATUS_PILL_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  scheduled: { bg: "#F3EFE9", text: "#6B5E52", border: "#E0D5C5" },
-  warehouse: { bg: "#F3EDE3", text: "#6B5E52", border: "#D4C8B8" },
-  "in-transit": { bg: "#FBF2E2", text: "#8A5E1A", border: "#E8CFA0" },
-  ordered: { bg: "#E8F0F9", text: "#2A5485", border: "#B0CAE8" },
-  pending: { bg: "#FDEEE6", text: "#9B3A2A", border: "#F2C9B8" },
-  delivered: { bg: "#EDF5E8", text: "#3A6620", border: "#C4DBA8" },
-  installed: { bg: "#EDF5E8", text: "#3A6620", border: "#A8C98C" },
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  scheduled: "Scheduled",
-  warehouse: "Warehouse",
-  "in-transit": "In Transit",
-  ordered: "Ordered",
-  pending: "Pending order",
-  delivered: "Delivered",
-  installed: "Installed",
-};
-
-// Display/sort order per product spec.
-const STATUS_ORDER = [
-  "scheduled",
-  "warehouse",
-  "in-transit",
-  "ordered",
-  "pending",
-  "delivered",
-  "installed",
-];
+// Phase 46-04 (D-13): canonical pill palette + labels + ordered status array
+// imported from src/lib/procurement/statusPills.ts. Both this admin UI and the
+// SendUpdate email render consume the single source of truth.
 
 export default function ProcurementEditor({ items, projectId, onOpenModal }: Props) {
   const [localItems, setLocalItems] = useState<ProcurementItem[]>(items);
@@ -510,7 +483,7 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
               role="listbox"
               onClick={(e) => e.stopPropagation()}
             >
-              {STATUS_ORDER.map((s) => {
+              {PROCUREMENT_STATUSES.map((s) => {
                 const sPill = STATUS_PILL_STYLES[s];
                 return (
                   <button
