@@ -91,18 +91,19 @@ Gold `#9A7B4B` is the only accent color in the luxury admin theme. It must be us
 
 #### Status colors (procurement pipeline)
 
-The 6 procurement statuses are the **only place the admin theme uses color-coded pills**. These colors extend the luxury palette with warm, desaturated analogs of the standard pipeline colors — no generic `emerald-50` / `blue-50` / `red-600`. Source of truth: `ProcurementEditor.tsx` lines 42–49.
+The 7 procurement statuses are the **only place the admin theme uses color-coded pills**. These colors extend the luxury palette with warm, desaturated analogs of the standard pipeline colors — no generic `emerald-50` / `blue-50` / `red-600`.
 
 | Status | Background | Text | Border |
 |--------|-----------|------|--------|
-| Pending | `#F3EDE3` | `#9E8E80` | `#E8DDD0` |
-| Ordered | `#E8F0F9` | `#2A5485` | `#B0CAE8` |
+| Scheduled | `#F3EFE9` | `#6B5E52` | `#E0D5C5` |
 | Warehouse | `#F3EDE3` | `#6B5E52` | `#D4C8B8` |
 | In Transit | `#FBF2E2` | `#8A5E1A` | `#E8CFA0` |
+| Ordered | `#E8F0F9` | `#2A5485` | `#B0CAE8` |
+| Pending | `#FDEEE6` | `#9B3A2A` | `#F2C9B8` |
 | Delivered | `#EDF5E8` | `#3A6620` | `#C4DBA8` |
 | Installed | `#EDF5E8` | `#3A6620` | `#A8C98C` |
 
-> **Important:** These do not match what `32-UI-SPEC.md` documents. `32-UI-SPEC.md` was written against an earlier draft of ProcurementEditor that used Tailwind default pills; the code was subsequently reskinned to the luxury warm palette without updating the spec. The values above are the actual current state.
+> **Source of truth: `src/lib/procurement/statusPills.ts`.** The hex values in this table are mirrored from that module for designer reference. **If this table disagrees with `statusPills.ts`, the module is correct — update this file.** A future plan can promote this prose-level pinning to a generated artifact if drift recurs.
 
 #### Usage badge thresholds
 
