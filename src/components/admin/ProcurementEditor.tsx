@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { isProcurementOverdue } from "../../lib/dashboardUtils";
 import { getTrackingInfo } from "../../lib/trackingUrl";
-import { STATUS_PILL_STYLES, STATUS_LABELS, PROCUREMENT_STATUSES } from "../../lib/procurement/statusPills";
+import { STATUS_PILL_STYLES, STATUS_LABELS, PROCUREMENT_STATUSES, type ProcurementStatus } from "../../lib/procurement/statusPills";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import ProcurementItemModal, {
   type ProcurementItemModalItem,
@@ -428,14 +428,17 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
   function renderStatusDropdown(item: ProcurementItem) {
     const isOpen = statusDropdownKey === item._key;
     const isSaving = savingStatus === item._key;
-    const pill = STATUS_PILL_STYLES[item.status] || STATUS_PILL_STYLES.pending;
+    // item.status is typed as string at runtime (Sanity returns whatever is stored).
+    // The shared palette is typed Record<ProcurementStatus, ...>; cast and fall back.
+    const statusKey = item.status as ProcurementStatus;
+    const pill = STATUS_PILL_STYLES[statusKey] || STATUS_PILL_STYLES.pending;
 
     return (
       <>
         <button
           type="button"
           ref={isOpen ? dropdownTriggerRef : undefined}
-          aria-label={STATUS_LABELS[item.status] || item.status}
+          aria-label={STATUS_LABELS[statusKey] || item.status}
           onClick={(e) => {
             e.stopPropagation();
             if (isOpen) {
@@ -462,7 +465,7 @@ export default function ProcurementEditor({ items, projectId, onOpenModal }: Pro
           }}
           disabled={isSaving}
         >
-          {STATUS_LABELS[item.status] || item.status}
+          {STATUS_LABELS[statusKey] || item.status}
           <ChevronDown className="w-3 h-3" />
         </button>
         {isOpen &&
