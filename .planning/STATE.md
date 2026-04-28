@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 04 Task 5 complete (fixtures.ts rewrite with five locked shapes per D-22 + SendUpdate.test.ts rewrite with 25 behavioral tests + 5 HTML snapshots + 1 plain-text snapshot for `full` only per D-26 + load-bearing D-24 ordering assertion); 21/21 acceptance criteria green; 41/41 sendUpdate dir tests pass (31 SendUpdate + 10 compose); SendUpdate.test.ts back to GREEN, resolves Task 4 disclosed-RED transient on commit 05b1a8a; awaiting user review before Task 6 dispatch
-last_updated: "2026-04-28T14:34:51.000Z"
+stopped_at: Phase 46 Plan 04 Task 6 complete (forward-compat portal section IDs per D-27 -- id="milestones" on MilestoneSection.astro, id="procurement" on ProcurementTable.astro, id="artifacts" on ArtifactSection.astro); 7/7 acceptance criteria green; 11/11 portal tests pass (no regressions); pure markup, no scroll JS, no aria-labelledby; plan 46-04 all six tasks complete -- awaiting user plan-close action
+last_updated: "2026-04-28T15:24:30.000Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 10
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 46 (send-update-work-order-migration) — EXECUTING
-Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 + 4 + 5 of 6 complete
-Status: Plan 04 Task 5 complete (fixtures.ts rewritten with five locked representative shapes per D-22: full / noReviewItems / noProcurement / noBody / mixedSubLines; SendUpdate.test.ts rewritten with 31 tests = 25 behavioral + 5 HTML snapshots + 1 plain-text snapshot for `full` only per D-26; load-bearing D-24 ordering assertion locked in via indexOf comparison on non-empty designer + artifact arrays; containsTokenColor round-trip for cream + terracotta + stone per D-25). 21/21 acceptance criteria green. 41/41 sendUpdate dir tests pass (31 SendUpdate + 10 compose). SendUpdate.test.ts back to GREEN -- resolves Task 4 disclosed-RED transient on commit 05b1a8a. WorkOrder snapshot date-drift remains pre-existing/deferred per Task 4 SUMMARY (out of Task 5 scope). User reviews before Task 6 dispatch (forward-compat portal section IDs per D-27).
+Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 + 4 + 5 + 6 of 6 complete
+Status: Plan 04 Task 6 complete (forward-compat portal section IDs per D-27: id="milestones" added to outermost <section> in MilestoneSection.astro; id="procurement" in ProcurementTable.astro; id="artifacts" in ArtifactSection.astro; pure markup -- no scroll-handling JS, no aria-labelledby scaffolding, no consumer changes in v1). 7/7 acceptance criteria green. 11/11 portal tests pass (`src/components/portal/ProcurementTable.test.ts`); 18 todo skipped pre-existing. Single commit `ccaeef2` for the three Astro edits. All six tasks of plan 46-04 are now complete -- user closes the plan and updates ROADMAP.md separately. After plan 46-04 closes, plan 46-03 (cutover) unblocks per D-28 (depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness re-runs).
 Last activity: 2026-04-28
 
 ## v5.3 Phase Map
@@ -134,7 +134,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-28T14:34:51.000Z
-Stopped at: Phase 46 Plan 04 Task 5 complete -- SendUpdate.test.ts back to GREEN; awaiting user review before Task 6 dispatch
+Last session: 2026-04-28T15:24:30.000Z
+Stopped at: Phase 46 Plan 04 Task 6 complete -- forward-compat portal section IDs landed on commit ccaeef2; all six tasks of plan 46-04 done; awaiting user plan-close action (ROADMAP.md update is user-driven, not auto)
 Resume file: None
-Next action: User reviews Task 5 output, then dispatches Task 6 (forward-compat portal section IDs per D-27 -- pure markup additions to MilestoneSection.astro + ProcurementTable.astro + ArtifactSection.astro). After Task 6 ships, plan 46-04 closes; plan 46-03 unblocks per D-28 (cutover -- depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness regenerates).
+Next action: User reviews Task 6 output and closes plan 46-04 (updates ROADMAP.md plan-progress row + marks requirements EMAIL-01/02/03/06/07 complete via the appropriate close command). After plan 46-04 closes, plan 46-03 (cutover) unblocks per D-28: depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness re-runs against the redesigned SendUpdate output, audit document refreshes, then API route cutover proceeds.

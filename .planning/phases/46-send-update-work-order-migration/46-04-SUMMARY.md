@@ -1,11 +1,11 @@
 ---
 phase: 46-send-update-work-order-migration
 plan: 04
-scope: tasks-1-and-2
-status: tasks-1-and-2-complete
-subsystem: procurement-palette + sanity-schema + design-system-spec + personal-note-markdown
-tags: [email, procurement, palette-extraction, sanity-schema, design-system-reconciliation, markdown-serializer, security-allowlist]
-tasks_complete: 2
+scope: tasks-1-through-6
+status: plan-46-04-complete
+subsystem: procurement-palette + sanity-schema + design-system-spec + personal-note-markdown + send-update-redesign + portal-section-ids
+tags: [email, procurement, palette-extraction, sanity-schema, design-system-reconciliation, markdown-serializer, security-allowlist, forward-compat-ids, portal-anchors]
+tasks_complete: 6
 tasks_total: 6
 requires:
   - 46-04 D-12 (canonical procurement palette)
@@ -1011,3 +1011,59 @@ After Task 6 ships, plan 46-04 closes; plan 46-03 (cutover) is unblocked per D-2
 | Tests added | 31 (replacing 15 legacy tests; net +16) |
 | Tests passing | 41/41 in scope (31 SendUpdate + 10 compose unchanged from Task 4) |
 | Snapshots written | 6 (5 HTML + 1 plain-text) |
+
+## Task 6 — Forward-compat portal section IDs
+
+Added stable HTML `id` anchors to the three portal section components so future deep-link work (e.g. "Action Items as portal entity") can target specific sections via URL fragment without retrofitting markup. Pure markup additions per CONTEXT D-27 — no JavaScript, no `aria-labelledby` accessibility scaffolding, no consumer changes in v1 (the single-CTA Open Portal pattern in SendUpdate does not deep-link).
+
+### Changes
+
+| File | ID added | Element |
+|------|----------|---------|
+| `src/components/portal/MilestoneSection.astro` | `id="milestones"` | outermost `<section>` |
+| `src/components/portal/ProcurementTable.astro` | `id="procurement"` | outermost `<section>` |
+| `src/components/portal/ArtifactSection.astro` | `id="artifacts"` | outermost `<section>` |
+
+IDs locked per D-27: lowercase, no prefixes/suffixes, plural forms (`milestones`, `artifacts`) match section semantics; `procurement` is the singular mass noun. Each ID placed on the outermost `<section>` element so browser-default fragment scrolling lands on the correct visual landmark.
+
+### Acceptance criteria — 7/7 green
+
+- `grep 'id="milestones"' src/components/portal/MilestoneSection.astro` → 1 match
+- `grep 'id="procurement"' src/components/portal/ProcurementTable.astro` → 1 match
+- `grep 'id="artifacts"' src/components/portal/ArtifactSection.astro` → 1 match
+- Each ID appears exactly once per file (no duplicates)
+- `npx vitest run src/components/portal/ --reporter=basic` → 11 passed, 18 todo, 0 failed
+- `! grep -rE 'scrollIntoView|location\.hash' [three files]` → exits 1 (no scroll-handling JS)
+- No `aria-labelledby` added (markup-only per D-27)
+
+### Deviations from plan
+
+None. Plan executed exactly as written.
+
+### Task 6 metrics
+
+| Metric | Value |
+|--------|-------|
+| Start | 2026-04-28T15:20:34Z |
+| End | 2026-04-28T15:24:00Z (approx) |
+| Duration | ~3m 30s |
+| Commits | 1 (`ccaeef2` — three Astro edits in one commit) |
+| Files modified | 3 (MilestoneSection.astro, ProcurementTable.astro, ArtifactSection.astro) |
+| Files created | 0 |
+| Acceptance criteria | 7/7 green |
+| Tests added | 0 (pure markup; existing portal tests verify no regression) |
+| Tests passing | 11/11 in scope (`src/components/portal/ProcurementTable.test.ts`); 18 todo unchanged |
+| Net diff | +3 / -3 (each `<section>` line replaced with `id="..."` + class) |
+
+## Plan 46-04 — Complete
+
+All six tasks of plan 46-04 are complete:
+
+1. Canonical procurement palette + schema fields + spec reconciliation
+2. Personal-note markdown serializer with https-only URL allowlist
+3. SendUpdate redesign — composition helpers + types
+4. SendUpdate.tsx redesign — render component + brand-token round-trip
+5. fixtures.ts + SendUpdate.test.ts rewrite (5 locked shapes, 31 behavioral tests, 6 snapshots)
+6. Forward-compat portal section IDs (this task)
+
+**Plan 46-04 closes after this summary.** Per D-28, plan 46-03 (cutover) is now unblocked: `depends_on` flips to `[46-01, 46-04]`, wave 3 → 4, migration-diff harness re-runs, audit document refreshes, then the API route cutover proceeds. ROADMAP update is the user's separate plan-close action.
