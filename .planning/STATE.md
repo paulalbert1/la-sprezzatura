@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 04 Task 4 complete (SendUpdate composition rewrite + atomic D-21 legacy delete + compose helper + EmailButton terracotta variant + TenantBrand closed-enum register); 29/29 acceptance criteria green; 10/10 compose tests pass; SendUpdate.test.ts + fixtures.ts intentionally RED pending Task 5; awaiting user review before Task 5 dispatch
-last_updated: "2026-04-28T13:59:51.000Z"
+stopped_at: Phase 46 Plan 04 Task 5 complete (fixtures.ts rewrite with five locked shapes per D-22 + SendUpdate.test.ts rewrite with 25 behavioral tests + 5 HTML snapshots + 1 plain-text snapshot for `full` only per D-26 + load-bearing D-24 ordering assertion); 21/21 acceptance criteria green; 41/41 sendUpdate dir tests pass (31 SendUpdate + 10 compose); SendUpdate.test.ts back to GREEN, resolves Task 4 disclosed-RED transient on commit 05b1a8a; awaiting user review before Task 6 dispatch
+last_updated: "2026-04-28T14:34:51.000Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 10
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 46 (send-update-work-order-migration) — EXECUTING
-Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 + 4 of 6 complete
-Status: Plan 04 Task 4 complete (SendUpdate composition root rewritten with new D-2 section order; ActionItems.tsx + PendingArtifacts.tsx + legacy snapshot atomically deleted per D-21; Greeting simplified to drop the body prop entirely; compose helper added owning subject pattern + render + plain-text + ComposeError wrapping; EmailButton gains terracotta variant; TenantBrand promoted to closed-enum register signoffNameFormal/signoffNameCasual with EmailShell signoffStyle prop default casual). 29/29 acceptance criteria green (3 with documented identity-token-grep scoping per PLAN-AUTHORING-PATTERNS lesson). 10/10 compose.test.ts behavioral tests pass. WorkOrder render byte-identical via casual-register default (verified ex date-drift snapshot). SendUpdate.test.ts + fixtures.ts intentionally RED pending Task 5. User reviews before Task 5 dispatch.
+Plan: 04 (supersedes 02) — Tasks 1 + 2 + 3 + 4 + 5 of 6 complete
+Status: Plan 04 Task 5 complete (fixtures.ts rewritten with five locked representative shapes per D-22: full / noReviewItems / noProcurement / noBody / mixedSubLines; SendUpdate.test.ts rewritten with 31 tests = 25 behavioral + 5 HTML snapshots + 1 plain-text snapshot for `full` only per D-26; load-bearing D-24 ordering assertion locked in via indexOf comparison on non-empty designer + artifact arrays; containsTokenColor round-trip for cream + terracotta + stone per D-25). 21/21 acceptance criteria green. 41/41 sendUpdate dir tests pass (31 SendUpdate + 10 compose). SendUpdate.test.ts back to GREEN -- resolves Task 4 disclosed-RED transient on commit 05b1a8a. WorkOrder snapshot date-drift remains pre-existing/deferred per Task 4 SUMMARY (out of Task 5 scope). User reviews before Task 6 dispatch (forward-compat portal section IDs per D-27).
 Last activity: 2026-04-28
 
 ## v5.3 Phase Map
@@ -134,7 +134,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-27T16:10:00.000Z
-Stopped at: Phase 46 Plan 02 complete -- SendUpdate structural rewrite shipped
+Last session: 2026-04-28T14:34:51.000Z
+Stopped at: Phase 46 Plan 04 Task 5 complete -- SendUpdate.test.ts back to GREEN; awaiting user review before Task 6 dispatch
 Resume file: None
-Next action: `/gsd-execute-phase 46` to run Plan 03 (cutover -- rewire call sites + add List-Unsubscribe header + delete legacy templates)
+Next action: User reviews Task 5 output, then dispatches Task 6 (forward-compat portal section IDs per D-27 -- pure markup additions to MilestoneSection.astro + ProcurementTable.astro + ArtifactSection.astro). After Task 6 ships, plan 46-04 closes; plan 46-03 unblocks per D-28 (cutover -- depends_on flips to [46-01, 46-04], wave 3 → 4, migration-diff harness regenerates).

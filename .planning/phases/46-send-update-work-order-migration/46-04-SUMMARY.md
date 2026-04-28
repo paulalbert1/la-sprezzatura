@@ -855,3 +855,159 @@ User reviews this output. If approved, Task 5 of plan 46-04 is dispatched: rewri
 | Acceptance criteria | 29/29 green (3 scoped per identity-token-grep lesson) |
 | Tests added | 10 (compose.test.ts) |
 | Tests passing | 45/45 in scope (compose:10 + statusPills:7 + personalNoteMarkdown:21 + ProcurementEditor:7); 8/11 WorkOrder (3 deferred date-drift) |
+
+---
+
+# Phase 46 Plan 04 Task 5: New Fixtures + Behavioral Tests + Snapshots Summary
+
+Rewrote `src/emails/sendUpdate/fixtures.ts` with the five locked representative shapes from D-22 (`full`, `noReviewItems`, `noProcurement`, `noBody`, `mixedSubLines`), rewrote `src/emails/sendUpdate/SendUpdate.test.ts` with 31 tests covering 5 HTML snapshots + 1 plain-text snapshot + 25 behavioral assertions (including the load-bearing D-24 ordering assertion that the designer-typed action-item rows render before auto-derived artifact rows in the merged ReviewItems section), and regenerated `src/emails/sendUpdate/__snapshots__/SendUpdate.test.ts.snap` from scratch with vitest. Brings `SendUpdate.test.ts` back to GREEN, resolving the disclosed Task 4 RED-state transient on commit `05b1a8a`.
+
+## Scope
+
+**This section covers Task 5 only.** Tasks 1, 2, 3, and 4 are documented above; Task 6 is not yet started. Task 6 owns forward-compat portal section IDs (`id="milestones"` / `id="procurement"` / `id="artifacts"` on the three portal Astro components per D-27). The user reviews this output before authorizing Task 6 dispatch.
+
+## Files changed
+
+| File | Status | Notes |
+|------|--------|-------|
+| `src/emails/sendUpdate/fixtures.ts` | rewritten | Five locked fixtures per D-22: `full`, `noReviewItems`, `noProcurement`, `noBody`, `mixedSubLines`. Imports `SAMPLE_TENANT` from `../fixtures.shared` (per Phase 46 D-6 -- isolates test fixtures from production `LA_SPREZZATURA_TENANT`). Body markdown for the `full` fixture exercises both bold token (`**May 9**`) and inline https link (`[Schumacher](https://lasprezz.com/portal/projects/kimball)`). `mixedSubLines` is the only fixture that exercises Procurement sub-line composition variants -- 3 rows with progressive vendor/spec presence (both, vendor-only, neither) per D-14. |
+| `src/emails/sendUpdate/SendUpdate.test.ts` | rewritten | 31 tests total: 5 HTML snapshot tests (Object.entries(FIXTURES) loop) + 1 plain-text snapshot for `full` only (D-26) + 25 behavioral tests. `containsTokenColor` helper carried verbatim from `src/emails/scaffold.test.ts` per D-25, extended to round-trip cream + terracotta + stone tokens. Uses `React.createElement` so the file stays a plain `.ts` per the colocated convention. |
+| `src/emails/sendUpdate/__snapshots__/SendUpdate.test.ts.snap` | new (regenerated from scratch) | 6 snapshots written by vitest on first run: 5 HTML (one per fixture) + 1 plain-text (full only). Replaces the legacy snapshot file deleted by Task 4 commit `05b1a8a` per D-21. |
+
+## Commits (Task 5)
+
+| # | Hash | Files | Description |
+|---|------|-------|-------------|
+| 1 | `67258ac` | `fixtures.ts` | Rewrite fixtures.ts with five representative shapes (D-22). Independently typecheck-clean against the new `SendUpdateEmailInput` shape. SendUpdate.test.ts remained in disclosed-RED state at this commit (referenced legacy fixture names) -- resolved in commit 2. |
+| 2 | `6b381e5` | `SendUpdate.test.ts` (rewrite) + `__snapshots__/SendUpdate.test.ts.snap` (new) | Rewrite SendUpdate.test.ts with 31 tests + regenerate the snapshot file via vitest. Independently green: 31/31 tests pass; SendUpdate.test.ts goes from RED to GREEN, resolving the Task 4 transient. |
+
+## What shipped (test inventory)
+
+The plan listed `~17 behavioral tests` as a target floor. Final shape ships **25 behavioral tests + 6 snapshot tests = 31 tests total** -- the additions land where uniform coverage of a category beats arbitrary partial coverage, per the `test-counts-are-floors-not-ceilings` lesson in `.planning/PLAN-AUTHORING-PATTERNS.md` (and per executor-resilience guidance from the spawning prompt).
+
+| Category | Count | Notes |
+|----------|-------|-------|
+| HTML snapshots | 5 | one per locked fixture (D-22), via `Object.entries(FIXTURES)` loop |
+| Plain-text snapshot | 1 | `full` only (D-26); produced via `render(..., { plainText: true })` per Phase 46 D-8 |
+| ReviewItems ordering (D-24) | 1 | load-bearing -- `indexOf` comparison on non-empty designer + artifact arrays; verifies both rows present before asserting order |
+| ReviewItems empty/asymmetric | 3 | empty-both omits section; designer-only renders section; artifact-only renders section |
+| Procurement pill palettes (D-12) | 3 | Ordered (#E8F0F9 + #2A5485) / In Transit (#FBF2E2 + #8A5E1A) / Delivered (#EDF5E8 + #3A6620) |
+| Procurement sub-line composition (D-14) | 3 | both → `vendor · spec` / vendor-only → bare vendor / neither → no `display:block` span (grouped under `describe("Procurement sub-line composition (D-14)")` so terse `it()` names match the plan acceptance grep) |
+| Milestone state rendering (D-10, D-11) | 3 | completed → strikethrough + sentence-case "Complete" + `text-transform:uppercase` / upcoming → 1px-solid #D4C9BC outline + sentence-case "Upcoming" / no `○` glyph anywhere |
+| Body markdown rendering (D-5) | 3 | `**May 9**` → `<strong>May 9</strong>` / `[Schumacher](https://...)` → `<a href="...">` / empty body → no body paragraphs (verifies D-6 opt-out) |
+| Brand-token round-trip (D-25) | 3 | cream / terracotta / stone via `containsTokenColor` (handles both hex + rgb post-inliner forms) |
+| Structural copy regressions | 6 | H1 "Project Update" / ctaHref / ctaLabel "Open Portal" / "Sent via Sprezza Hub" attribution (Phase 45.5 D-2) / "Elizabeth Lewis" footer signature (D-29 formal register) / "You can reply to this email directly." reply-affordance (D-9) |
+
+The "Procurement sub-line composition" tests are wrapped in a nested `describe()` block so the `it()` names can be terse enough to satisfy the plan's identity-token grep checks (`"vendor.*spec when both present"`, `"falls back to vendor-only"`, `"OMITTED when both vendor and spec are empty"`) without losing context for human readers.
+
+The 8 additional behavioral tests beyond the plan's `~17` floor (asymmetric ReviewItems inclusion, three milestone variants instead of one combined, three body-markdown branches, the empty-body verification) tighten coverage of categories the plan body called out as load-bearing. None of them substitute for or weaken the plan's named tests.
+
+## Acceptance criteria (Task 5)
+
+All 21 plan-listed acceptance criteria pass:
+
+| AC | Criterion | Result |
+|----|-----------|--------|
+| 1 | 5 named fixtures (`full`, `noReviewItems`, `noProcurement`, `noBody`, `mixedSubLines`) | 5 ✓ |
+| 2 | `SAMPLE_TENANT` imported, `LA_SPREZZATURA_TENANT` absent | both checks pass |
+| 3 | `mixedSubLines` has exactly 3 procurement rows with progressive shapes | 3 ✓ |
+| 4 | `Object.entries(FIXTURES)` snapshot loop | found |
+| 5 | plain-text snapshot for `full` only | grep matches `FIXTURES.full` once |
+| 6 | Ordering assertion (D-24) uses `toBeLessThan` after `BEFORE auto-derived` | found |
+| 7 | Empty-both omission test | found |
+| 8 | Pill palette tests cover at least 3 statuses | 6 hex hits ≥ 3 ✓ |
+| 9 | Sub-line tests cover all three branches | 3 matches (terse-named per the plan's grep, framed by enclosing describe) |
+| 10 | Milestone state tests for both completed AND upcoming | 2 matches |
+| 11 | Markdown bold + link rendering tested | both present |
+| 12 | `containsTokenColor` for cream + terracotta + stone | 6 token-name hits ≥ 6 ✓ |
+| 13 | Reply-affordance regression guard | found |
+| 14 | Sprezza Hub attribution | found |
+| 15 | `compose.test.ts` exists | found (Task 4 created it) |
+| 16 | compose tests cover em dash + fallback + reply_to | 5 hits ≥ 3 ✓ |
+| 17 | Snapshot file written | found |
+| 18 | vitest exits 0 (sendUpdate dir) | 0 FAIL/✗ lines ✓ |
+| 19 | Snapshot count == 6 (5 HTML + 1 plain-text) | 6 ✓ |
+| 20 | No legacy fixture names (`allSections`, `noActionItems`, `noArtifacts`, `noMilestones`, `minimal`) | absent ✓ |
+| 21 | Full sendUpdate suite green | 41/41 pass (31 SendUpdate + 10 compose) |
+
+The "compose.test.ts exists" criterion (AC15) was already satisfied at Task 4 -- compose.test.ts shipped in Task 4 commit `05b1a8a` with 10 tests. Task 5 verified the file is still present and still passes; no Task 5 changes to that file (per scope_constraint).
+
+## Decisions made
+
+- **Plain-text test restructured to satisfy the plan's `plainText.*FIXTURES.full` grep on a single line.** First draft put `{ plainText: true }` on a separate line from the `FIXTURES.full()` call; the plan's acceptance grep doesn't span lines. Refactored to extract `const opts = { plainText: true } as const;` and assemble the call inline so `plainText` and `FIXTURES.full` co-occur on one line. Behavior unchanged; the rewrite is purely to align with the criterion's grep.
+- **Procurement sub-line tests grouped under nested `describe()` block.** The plan's identity-token grep for AC9 requires three exact `it()` names: `vendor + ' · ' + spec when both present`, `falls back to vendor-only`, `OMITTED when both vendor and spec are empty`. Bare those names are too terse for human readability. Grouped them under `describe("Procurement sub-line composition (D-14)")` so the contextual framing lives at the describe level while the `it()` names match the grep -- best of both worlds, no acceptance compromise.
+- **Test count = 25 behavioral + 6 snapshot rather than the plan's `~17` floor.** Per `.planning/PLAN-AUTHORING-PATTERNS.md` (test-counts-are-floors-not-ceilings) and the spawning prompt's resilience note, the additions cover categories the plan called out as load-bearing where uniform coverage beats partial coverage (asymmetric ReviewItems inclusion, three separate milestone variants, three separate body-markdown branches, the explicit empty-body verification). Documented in "What shipped" without flagging as a deviation.
+- **Did NOT modify `compose.test.ts` despite the plan body's Task 5 action step #4 listing it.** Task 4 already created `compose.test.ts` at commit `05b1a8a` with 10 tests covering all the patterns the plan Task 5 listed. The scope_constraint in the spawning prompt explicitly said `Task 5 does NOT: ... modify compose.ts or compose.test.ts (Task 4 owns those)`. Verified Task 5's acceptance criterion AC15 (`test -f src/emails/sendUpdate/compose.test.ts`) and AC16 (em-dash + fallback + reply_to coverage in that file) pass against the existing Task 4-shipped file.
+
+## Deviations from plan
+
+### Stylistic (no behavior change)
+
+**1. `it()` test names for the Procurement sub-line composition adjusted to satisfy the plan's identity-token grep**
+
+- **Found during:** running the AC9 grep `'"vendor.*spec when both present"|"falls back to vendor-only"|"OMITTED when both vendor and spec are empty"'` after the first draft.
+- **Issue:** First-draft test names started with `Procurement sub-line ...` -- a leading prefix that prevented the regex from matching `"vendor` (which requires a literal `"` immediately before `vendor`). Same shape for the other two names.
+- **Fix:** Wrapped the three tests in `describe("Procurement sub-line composition (D-14)", ...)` and shortened the `it()` names to literally `vendor + ' · ' + spec when both present`, `falls back to vendor-only`, `OMITTED when both vendor and spec are empty`. Test reporter output reads `Procurement sub-line composition (D-14) > vendor + ' · ' + spec when both present` -- contextual framing preserved. Comment in the test file documents why the names are intentionally terse.
+- **Files modified:** `src/emails/sendUpdate/SendUpdate.test.ts` (test name + describe wrapping only; assertions unchanged).
+
+### Scope-bounded (intentional non-action)
+
+**2. Did not regenerate WorkOrder snapshots; did not retest plan 46-03 / 46-MIGRATION-DIFF.md.**
+
+- **WorkOrder snapshot date drift** is documented in Task 4's "Deferred Issues" section as out of scope and pre-existing -- 3 failing tests purely a `April 27, 2026` → `April 28, 2026` diff. Today is `2026-04-28`, those tests still fail today (not a regression Task 5 introduced).
+- **Plan 46-03 cutover** is the sole owner of `46-MIGRATION-DIFF.md` re-generation per D-28; Task 5 has no obligation to touch it.
+
+These are out of scope per the spawning prompt's `scope_constraint` clause.
+
+## Known Stubs
+
+None. All five fixtures pass real data through to populated section components; no placeholder strings, no `=[]` defaults flowing to UI rendering.
+
+## Threat surface scan
+
+No new threat-flag emissions for Task 5. The fixture rewrite and test rewrite do not introduce new code paths -- they exercise existing component code paths from Task 3 and Task 4. The plan-listed XSS regression coverage (legacy test "escapes HTML in interpolated user values via JSX") is structurally satisfied: all interpolated values flow through React's JSX-escaping path because Task 3 and Task 4 components use `{value}` interpolation rather than `dangerouslySetInnerHTML`. The Body component's markdown rendering goes through `parsePersonalNote` (Task 2) which whitelists allowed tokens and rejects non-https URLs; this is exercised by the `compose.test.ts` "wraps PersonalNoteParseError as ComposeError" test (Task 4) for `javascript:` URL rejection.
+
+## Self-Check: PASSED (Task 5)
+
+Verified all created/modified files exist on disk:
+
+- `src/emails/sendUpdate/fixtures.ts` -- rewritten, 90 lines (vs 111 legacy)
+- `src/emails/sendUpdate/SendUpdate.test.ts` -- rewritten, 263 lines (vs 101 legacy)
+- `src/emails/sendUpdate/__snapshots__/SendUpdate.test.ts.snap` -- new, 6 snapshots (5 HTML + 1 plain-text)
+
+Verified all 2 Task 5 commits in `git log --oneline`:
+
+- `67258ac` rewrite fixtures.ts with five representative shapes (D-22) -- found
+- `6b381e5` rewrite SendUpdate.test.ts and regenerate snapshots (D-23, D-24) -- found
+
+Verified vitest green for the sendUpdate dir:
+
+- `npx vitest run src/emails/sendUpdate/ --reporter=basic` → `Test Files 2 passed (2), Tests 41 passed (41)`
+- 0 FAIL lines, 0 ✗ markers
+
+Verified snapshot count: 6 (matches D-22 + D-26 expectation: 5 HTML one per fixture + 1 plain-text for `full` only).
+
+Verified no legacy fixture names remain: `! grep -E "(allSections|noActionItems|noArtifacts|noMilestones|minimal):" src/emails/sendUpdate/fixtures.ts` exits 1 (no matches).
+
+All 21 plan-listed acceptance criteria green.
+
+## Next (after Task 5)
+
+User reviews this output. If approved, Task 6 of plan 46-04 is dispatched: forward-compat portal section IDs per D-27 -- add `id="milestones"` to `src/components/portal/MilestoneSection.astro`, `id="procurement"` to `src/components/portal/ProcurementTable.astro`, and `id="artifacts"` to `src/components/portal/ArtifactSection.astro`. Pure markup additions, no consumer changes in v1 (the single-CTA Open Portal pattern doesn't deep-link), removes a prerequisite from the future "Action Items as portal entity" phase.
+
+After Task 6 ships, plan 46-04 closes; plan 46-03 (cutover) is unblocked per D-28 (re-sequenced after 46-04 verifies; `depends_on` flips to `[46-01, 46-04]`, wave flips from 3 to 4, migration-diff harness re-run, audit document refreshed, then the API route cutover proceeds).
+
+## Task 5 metrics
+
+| Metric | Value |
+|--------|-------|
+| Start | 2026-04-28T14:28:00Z (approx -- recorded from session opening) |
+| End | 2026-04-28T14:34:51Z |
+| Duration | ~7m |
+| Commits | 2 (per plan strategy: 1 fixtures + 1 tests-and-snapshot) |
+| Files rewritten | 2 (fixtures.ts, SendUpdate.test.ts) |
+| Files created | 1 (SendUpdate.test.ts.snap, regenerated from scratch) |
+| Acceptance criteria | 21/21 green |
+| Tests added | 31 (replacing 15 legacy tests; net +16) |
+| Tests passing | 41/41 in scope (31 SendUpdate + 10 compose unchanged from Task 4) |
+| Snapshots written | 6 (5 HTML + 1 plain-text) |
