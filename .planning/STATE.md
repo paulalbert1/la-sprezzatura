@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output (legacy adapter shim added, 14 HTML pairs regenerated, 46-MIGRATION-DIFF.md rewritten with GO conclusion); parked at Checkpoint 1 awaiting user approve/approve-rgb/hold to release Tasks 3-8 (call-site rewires + List-Unsubscribe + atomic delete-and-replace cutover)
-last_updated: "2026-04-28T17:00:00.000Z"
-last_activity: 2026-04-28 -- Phase 46 Plan 03 Task 1 complete; parked at Checkpoint 1
+stopped_at: Phase 46 Plan 03 Tasks 1-7 complete (D-16 audit refreshed at 7367d03; Checkpoint 1 user-approved; atomic D-14 cutover landed at 6fcd666 -- 3 call-site rewires + 6 legacy file deletions + List-Unsubscribe wiring, +268/-1300 lines). Task 8 Outlook desktop merge-gate **REJECTED** by Liz on 2026-04-28; three findings documented in 46-UAT.md (greeting double-render, formatDate Invalid Date on empty input, audit completeness gap on ProcurementStatus enum closure). Phase 46.1 opened as gap-closure with 3 parallel plans; Phase 46 plan 46-03 closure gates on 46.1 commits + Outlook re-test
+last_updated: "2026-04-28T19:00:00.000Z"
+last_activity: 2026-04-28 -- Phase 46 plan 46-03 cutover landed; merge-gate rejected; Phase 46.1 opened for gap closure
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 3
-  total_plans: 22
+  total_plans: 25
   completed_plans: 22
-  percent: 100
+  percent: 88
 ---
 
 # Project State
@@ -25,10 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46 (send-update-work-order-migration) — EXECUTING
-Plan: 03 (cutover) — parked at Checkpoint 1 (Task 1 complete, Tasks 3-8 awaiting GO/NO-GO)
-Status: Executing Phase 46
-Last activity: 2026-04-28 -- Phase 46 Plan 03 Task 1 complete; D-16 diff harness refreshed; Checkpoint 1 hand-review awaiting user response
+Phase: 46.1 (merge-gate-gap-closure) — READY TO PLAN
+Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
+Plan: TBD — 3 parallel plans defined in 46.1-CONTEXT.md (greeting double-render fix, formatDate empty-input guard, PLAN-AUTHORING-PATTERNS strengthening)
+Status: Phase 46 plan 46-03 cutover landed atomically; merge-gate rejected; gap-closure routing through Phase 46.1
+Last activity: 2026-04-28 -- 46-UAT.md captures merge-gate findings; Phase 46.1 opened with locked CONTEXT (D-1..D-5)
 
 ## v5.3 Phase Map
 
@@ -36,7 +37,8 @@ Last activity: 2026-04-28 -- Phase 46 Plan 03 Task 1 complete; D-16 diff harness
 |-------|------|------|--------------|--------|
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
-| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | TBD | Unblocked — ready for `/gsd-discuss-phase 46` |
+| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 3 | Ready to plan — 46.1-CONTEXT.md locked (D-1..D-5); 3 parallel plans for greeting double-render, formatDate guard, patterns-doc strengthening |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |

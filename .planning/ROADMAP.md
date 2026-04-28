@@ -324,7 +324,8 @@ Plans:
 
 - [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
 - [x] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand). Complete 2026-04-27. Admin chrome (AdminNav, login, trades pages) reads "Sprezza Hub"; Send Update + Work Order email footers carry "Sent via Sprezza Hub" attribution; `src/lib/email/system.ts` forward-looking sender constants stub added. Zero `Linha` references remain in src/, docs/ (excluding frozen specs), or scripts/. Tenant brand surfaces (LA SPREZZATURA wordmark, public marketing site, sender domain lasprezz.com, tenants.json slug, package.json name) byte-identical. 7 email-snapshot tests flipped FAIL → PASS post-snapshot-regen; full-suite test count improved 68 → 60 failures with zero new failures.
-- [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — 4 plans: 46-01 ✓, 46-02 superseded by 46-04, 46-04 ✓, 46-03 parked at Checkpoint 1 (awaiting re-sequencing per 46-04-CONTEXT D-28)
+- [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — 4 plans: 46-01 ✓, 46-02 superseded by 46-04, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** 2026-04-28 (3 findings, see `46-UAT.md`); awaits 46.1 gap closure + re-test
+- [ ] **Phase 46.1: Merge-Gate Gap Closure** — 0 numbered reqs (gap-closure of Phase 46 merge-gate UAT) — 3 plans: greeting double-render fix, formatDate empty-input guard, PLAN-AUTHORING-PATTERNS enum-closure strengthening
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
 - [ ] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08)
@@ -394,9 +395,27 @@ Plans:
 Plans:
 - [x] 46-01-PLAN.md (shell + WorkOrder port) — Wave 1: src/emails/shell/{EmailShell,EmailButton,Preheader}.tsx + src/lib/email/tenantBrand.ts + src/emails/workOrder/{WorkOrder.tsx,fixtures.ts,WorkOrder.test.ts} + src/emails/fixtures.shared.ts (D-4, D-5, D-6, D-7; satisfies EMAIL-01..03 for Work Order)
 - 🚫 ~~46-02-PLAN.md (SendUpdate structural rewrite)~~ — **Superseded by 46-04** — table-safe Row/Column plumbing, plain-text rendering pattern, and fixture/snapshot infrastructure proven by 46-02 carry forward unchanged into 46-04; the section component composition was rewritten against the new design language. See 46-04-CONTEXT.md D-1.
-- [ ] 46-03-PLAN.md (cutover + List-Unsubscribe + merge gate) — Wave 3 (to be re-sequenced to wave 4): parked at Checkpoint 1; D-16 migration-diff audit at commit `c9ef35b` is now stale (compared legacy → 46-02-version-of-new; 46-04 supersedes 46-02). Diff harness must re-run against 46-04's SendUpdate output before Checkpoint 1 replays. Per 46-04-CONTEXT D-28: depends_on flips from `[46-01, 46-02]` to `[46-01, 46-04]`. (D-8, D-10, D-12, D-14, D-16, D-17; closes EMAIL-06 + finalizes EMAIL-01..03)
+- [ ] 46-03-PLAN.md (cutover + List-Unsubscribe + merge gate) — Tasks 1–7 complete: D-16 diff harness refreshed (`7367d03`), Checkpoint 1 user-approved with pre-conditions verified (MilestoneState 2-valued, scope-leak grep 0/63, carry-over presence 67/67), atomic D-14 cutover landed (`6fcd666`: 3 call-site rewires + 6 legacy file deletions + List-Unsubscribe wiring + fixture-script extension + preview.test.ts string fixes; +268 / −1300 lines). Task 8 (Outlook desktop merge-gate) **REJECTED** 2026-04-28 — see `46-UAT.md` for the three gaps. Gap closure routes through Phase 46.1; re-test gates 46-03 closure
 - [x] 46-04-PLAN.md (SendUpdate visual redesign — supersedes 46-02) — Wave 3: 6 tasks, 32 commits, all gates green. Section components rewrite (Body, ReviewItems with merged designer-prose-first ordering D-24, Milestones with state field + COMPLETE/UPCOMING pills, Procurement with status pills + vendor/spec sub-line); composeSendUpdateEmail helper owning subject pattern; atomic D-21 ActionItems/PendingArtifacts deletion; canonical pill palette extracted to src/lib/procurement/statusPills.ts (consumed by both admin UI and email render); Sanity vendor + spec fields with email-facing descriptions; DESIGN-SYSTEM.md procurement palette reconciled toward production code with precedence pointer; tenantBrand schema rename to formal/casual signoff registers; markdown serializer for personalNote (constrained subset, https-only URL allowlist, 600-char hard cap); forward-compat portal section IDs (D-1..D-31; satisfies EMAIL-01..03 + EMAIL-07 for Send Update path)
 **UI hint**: yes
+
+### Phase 46.1: Merge-Gate Gap Closure
+**Goal**: Resolve the three findings from the Phase 46 Outlook desktop merge-gate UAT on 2026-04-28 so plan 46-03 (cutover) can close. After 46.1 commits, the parent UAT artifact replays — Liz re-tests in Outlook desktop and on `approved` Phase 46 closes.
+**Depends on**: Phase 46 plan 46-03 cutover commit `6fcd666` landed; UAT artifact `46-UAT.md` written and committed
+**Requirements**: 0 numbered REQUIREMENTS.md rows (gap closure of an existing phase's merge-gate)
+**Success Criteria** (what must be TRUE):
+  1. SendUpdate no longer renders "Hi {firstName}," twice when personalNote starts with the same greeting — defensive strip in render + admin compose UI helper text
+  2. `formatDate("")` and `formatLongDate("")` (and `undefined` / unparseable input) return empty string `""` instead of the literal "Invalid Date" — guard added at `src/emails/sendUpdate/SendUpdate.tsx`, parity guard on the long form, tests cover all four cases
+  3. PLAN-AUTHORING-PATTERNS.md "Cheap verifications on load-bearing audit assumptions" entry strengthened with an explicit admonition to apply the pattern to EVERY enum the audit references, plus a Phase 46 example block referencing the `ProcurementStatus` 7-vs-3 audit gap
+  4. Parent phase 46-UAT.md gaps `status: failed` → `status: resolved`, frontmatter `status: diagnosed` → `status: resolved`
+**Plans**: 3 plans, all parallel (no file overlap):
+- [ ] 46.1-01-PLAN.md (greeting double-render fix) — Wave 1: defensive strip in `src/emails/sendUpdate/Body.tsx` + admin compose UI helper text + tests covering the strip pattern's narrow scope (literal "Hi {Name},?" only, NOT "Hello/Dear/Hey/etc.")
+- [ ] 46.1-02-PLAN.md (formatDate empty-input guard) — Wave 1: one-line guard in `formatDate` at `SendUpdate.tsx:104` + parity guard on `formatLongDate` at `:109` + 8 tests (4 each)
+- [ ] 46.1-03-PLAN.md (PLAN-AUTHORING-PATTERNS strengthening) — Wave 1: docs-only edit to add the bold admonition + Phase 46 example block + checklist nudge
+
+**Out of scope** (deferred): the design conversation about re-toning `pending` procurement palette away from the warm-red family that visually competes with the terracotta CTA. Surfaced in `46-UAT.md` Finding 3b; not blocking phase 46 closure.
+
+**UI hint**: yes (admin compose UI helper text in 46.1-01)
 
 ### Phase 47: Portal Layout Hoist
 **Goal**: Portal chrome (header, footer, banner slot) is hoisted into a single `PortalLayout.astro` shell with extracted `PortalHeader` and `PortalFooter` components, so every recipient-facing page in `/portal/*` shares one source of truth for brand mark, role-aware sub-label, sign-out, and the layout slot that the impersonation banner will occupy in Phase 50.
