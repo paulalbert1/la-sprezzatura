@@ -12,13 +12,29 @@
 import { Section } from "@react-email/components";
 import { parsePersonalNote } from "../../lib/email/personalNoteMarkdown";
 
+// Strip a single leading "Hi {firstName}{,|!}?\n+" occurrence to prevent the
+// double-greeting collision when admin types personalNote that starts with the
+// same greeting the structural Greeting component already emits.
+//
+// Narrow by design (46.1 D-1): case-sensitive "Hi", single-word firstName,
+// optional `,` or `!`, >=1 trailing newline. Does NOT match "Hello", "Dear",
+// "Hey", or lowercase "hi". Does NOT iterate -- strips ONE leading match only.
+// Does NOT match mid-paragraph occurrences (anchored at start).
+const LEADING_GREETING_RE = /^Hi\s+\w+[,!]?\s*\n+/;
+
+export function stripLeadingGreeting(personalNote: string): string {
+  return personalNote.replace(LEADING_GREETING_RE, "");
+}
+
 export interface BodyProps {
   personalNote: string;
 }
 
 export function Body({ personalNote }: BodyProps) {
   if (!personalNote.trim()) return null;
-  const nodes = parsePersonalNote(personalNote);
+  const stripped = stripLeadingGreeting(personalNote);
+  if (!stripped.trim()) return null;
+  const nodes = parsePersonalNote(stripped);
   if (nodes.length === 0) return null;
   return (
     <Section

@@ -471,6 +471,17 @@ export default function SendUpdateModal({
           >
             Appears at the top of the email, above the status sections.
           </p>
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: "11px",
+              color: "#9E8E80",
+              fontStyle: "italic",
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            Don't include &quot;Hi {"{firstName}"},&quot; — it's added automatically.
+          </p>
         </div>
 
         {/* Sections to include */}
