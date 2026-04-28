@@ -84,3 +84,35 @@ This shifts the contract: the plan's listed tests are mandatory (acceptance crit
 **Exceptions.** When the test count IS a ceiling for a real reason (e.g., performance constraints, snapshot reviewability caps, intentional minimal-surface-area for a leaf utility), the plan body must state it explicitly: *"Maximum 5 fixtures — adding more degrades reviewability per CONTEXT D-22."* Without that explicit statement, "~N tests" defaults to floor semantics.
 
 **Surfaced by:** Phase 46 Plan 04 Tasks 2, 3, 4 (2026-04-28). Threshold for institutional capture: three consecutive occurrences across distinct tasks.
+
+---
+
+## Acceptance criteria that grep test names couple structure to text
+
+**Problem.** Acceptance criteria of the form `grep -q "it('renders vendor-only sub-line"` couple the executor's `describe`/`it` nesting choices to the criterion phrasing. The criterion intends to verify a specific test exists; what it actually verifies is "a top-level `it()` block with this exact phrasing exists." If the executor nests inside a `describe()` for organizational reasons, or if the test name reads more naturally with different word ordering, the criterion fails on a structural choice that's not load-bearing for behavior.
+
+**Where this has bitten Phase 46-04:**
+- Task 5 (1 occurrence): The executor needed three sub-line tests to match plan grep patterns (`"vendor.*spec when both present"`, `"falls back to vendor-only"`, `"OMITTED when both vendor and spec are empty"`). Solved by nesting in `describe("Procurement sub-line composition (D-14)")` so the bare `it()` names stayed terse enough to satisfy the patterns. Defensible workaround, but it surfaces the same coupling problem as the identity-token-grep lesson — the structural shape was forced by the criterion, not chosen for clarity.
+
+**Same family as the identity-token-grep lesson** but specifically about test-name greps. Listed separately because the resolution pattern is different.
+
+**Why it recurs.** A plan author who wants to verify "test X exists" reaches for `grep -q "<exact test name>"` because it's the literal answer to the question. The cost — coupling structure to text — only shows up when the executor wants to organize tests differently than the plan implicitly assumed.
+
+**Default to ship.** Match content, not structure. Pick from these patterns:
+
+```bash
+# 1. Relax the regex to match key concept words, not exact phrasing
+grep -qE "vendor.only.sub.line" file.test.ts          # matches "vendor-only sub-line", "vendor only sub-line", "vendor (only) sub-line", etc.
+
+# 2. Match the BODY of the test (assertions), not the name
+grep -B2 'expect(.*)\.toContain.*"vendor-only-marker"' file.test.ts | grep -q 'it\|test'
+
+# 3. Match a meaningful regex over the assertion content rather than the it() title
+grep -qE 'expect\(.*\)\.not\.toContain.*"sub-line"' file.test.ts    # asserts a "no empty sub-line" test exists by what it tests, not how it's named
+
+# 4. Use AST-aware tools for exhaustive structural verification (ast-grep, ts-morph)
+```
+
+**Exceptions.** Sometimes the test NAME itself is load-bearing — e.g., it's part of a documented contract or surfaces in a CI report that downstream automation parses. In those cases, lock the name explicitly in the plan body ("test name MUST be `'renders vendor-only sub-line'` for downstream CI matching") and the criterion can be exact. Without that explicit lock, prefer concept-matching regex.
+
+**Surfaced by:** Phase 46 Plan 04 Task 5 (2026-04-28). Logged here at the first occurrence because it shares mechanics with the identity-token-grep lesson and the unified pattern (criteria couple to text/structure) generalizes both — easier to reach for the right tool when the family of failure modes is named.
