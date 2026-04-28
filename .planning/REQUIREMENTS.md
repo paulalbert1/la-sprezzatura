@@ -74,13 +74,13 @@ Each requirement maps to exactly one phase. Phase numbering continues from Phase
 
 | Requirement | Phase | Notes |
 |---|---|---|
-| EMAIL-01 | Phase 46 | Outlook/Gmail/Apple Mail rendering — verified on Send Update + Work Order migration; pattern inherited by Phase 48 templates via shared shell |
-| EMAIL-02 | Phase 46 | Plain-text alternative — `render(component, { plainText: true })` becomes the default at the migration; Phase 48 inherits |
-| EMAIL-03 | Phase 46 | Preheader text — pattern established on Send Update + Work Order; inherited by Phase 48 |
+| EMAIL-01 | Phase 46 | Outlook/Gmail/Apple Mail rendering — Work Order satisfied by 46-01; Send Update satisfied by 46-04 (supersedes 46-02). Pattern inherited by Phase 48 via shared shell. |
+| EMAIL-02 | Phase 46 | Plain-text alternative — `render(component, { plainText: true })` is the only source. Work Order via 46-01; Send Update via 46-04 compose helper. Phase 48 inherits. |
+| EMAIL-03 | Phase 46 | Preheader text — pattern established on Work Order (46-01) and Send Update (46-04). Inherited by Phase 48. |
 | EMAIL-04 | Phase 48 | "Or paste this link" fallback — fully exercised across the three smaller invitation emails; Work Order in Phase 46 conforms to the same pattern |
 | EMAIL-05 | Phase 48 | Link-expiry copy — same scope as EMAIL-04 |
-| EMAIL-06 | Phase 46 | List-Unsubscribe header — Send Update only |
-| EMAIL-07 | Phase 46 | Outlook-safe `<table>` markup — Send Update is the priority migration target; Work Order already conforms |
+| EMAIL-06 | Phase 46 | List-Unsubscribe header — Send Update only. **Header wiring deferred to Plan 46-03** (parked at Checkpoint 1; pending re-sequencing per 46-04-CONTEXT D-28). **Preference store** (data model, HMAC tokens, `POST /api/unsubscribe` endpoint, `/portal/preferences` page, send-time gating) **deferred to a future phase** — out of v5.3 scope per 46-04-CONTEXT § Scope boundary. |
+| EMAIL-07 | Phase 46 | Outlook-safe `<table>` markup — Work Order already conformed (46-01); Send Update satisfied by 46-04 redesign (table-safe `<Row>/<Column>` markup throughout; no `display:flex`, no `gap`, no `rem`, no shorthand `border-radius`). |
 | EMAIL-08 | Phase 45 | Shared `brand-tokens.ts` module — foundation prerequisite |
 | EMAIL-09 | Phase 45 | Golden HTML snapshots + Litmus harness — foundation prerequisite |
 | EMAIL-10 | Phase 45 | Email asset CDN host — foundation prerequisite |
