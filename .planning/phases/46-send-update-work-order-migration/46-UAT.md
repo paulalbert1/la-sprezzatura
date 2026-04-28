@@ -1,13 +1,17 @@
 ---
 phase: 46-send-update-work-order-migration
 type: uat
-status: diagnosed
+status: resolved
 gate: merge-gate
 verdict: REJECTED
 date: 2026-04-28
 reviewer: Liz (Outlook desktop)
 cutover_commit: 6fcd666
 gap_closure_phase: 46.1
+gap_closure_commits:
+  - eaea038  # gap-1: defensive greeting strip + admin compose helper
+  - 9b5cb08  # gap-2: formatDate/formatLongDate empty-input guard
+  - 889477e  # gap-3: PLAN-AUTHORING-PATTERNS strengthening
 updated: 2026-04-28
 ---
 
@@ -25,7 +29,7 @@ Liz triggered real test sends from staging on 2026-04-28 ~14:42 ET, captured eig
 
 ### gap-1 — Greeting double-render on SendUpdate
 
-- **status:** failed
+- **status:** resolved (commit `eaea038`, plan 46.1-01)
 - **debug_session:** none — root cause read from code in this UAT, not a multi-cycle investigation
 - **resolves_in:** 46.1 (single plan, code change + admin UX helper)
 
@@ -56,7 +60,7 @@ Both, not either-or. Defensive strip is the safety net for past-and-future mista
 
 ### gap-2 — "Invalid Date" rendered on procurement row when ETA is empty
 
-- **status:** failed
+- **status:** resolved (commit `9b5cb08`, plan 46.1-02)
 - **debug_session:** none — root cause read from code in this UAT
 - **resolves_in:** 46.1 (one-line guard in `formatDate` + parity guard in `formatLongDate`)
 
@@ -117,7 +121,7 @@ Apply parity guard to `formatLongDate` at `SendUpdate.tsx:109` to prevent the sa
 
 ### gap-3 — `PENDING ORDER` status pill: NOT a code bug, but two real meta-findings
 
-- **status:** failed (mis-classified as bug; actual fix is documentation + design)
+- **status:** resolved (commit `889477e`, plan 46.1-03 — Finding 3a; Finding 3b explicitly deferred out of 46.1 scope)
 - **debug_session:** none
 - **resolves_in:** 46.1 (audit pattern strengthening — docs only) + a separate design conversation (re-toning `pending` to neutral) deferred outside 46.1
 
