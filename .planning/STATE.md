@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46.1 plan 06 (gap-7 outlook-mac dark-mode survival spike) complete at `af52ca5`. Spike artifact `46.1-SPIKE-OUTLOOK-MAC.md` lands the chosen combination ((a) `<table bgcolor>` body wrapper + (b) `@media (prefers-color-scheme: dark)` block + (d) inline body-attribute paint -- ADDITIVE on top of the existing 46.1-04 lock) that 46.1-08 will apply to `EmailShell.tsx`. Archaeology PASS for all three chosen techniques against gap-5 / gap-6 left-alignment invariants. Out-of-scope per Q8 lock: Litmus / Email on Acid as CI gate; Playwright dark-mode emulation as verification gate. 19 existing EmailShell.test.ts assertions stay valid -- chosen combination is purely additive."
-last_updated: "2026-04-29T14:31:42.174Z"
+stopped_at: "Phase 46.1 plan 08 (gap-7 outlook-mac dark-mode survival code-fix half) complete at `9f9cd05`. Applied chosen combination (a)+(b)+(d) per 46.1-SPIKE-OUTLOOK-MAC.md ## Recommendation: <table bgcolor=\"#FAF8F5\"> body wrapper + @media (prefers-color-scheme: dark) block + inline body-attribute paint, ADDITIVE on top of the existing 46.1-04 [data-ogsc]/[data-ogsb]/MSO lock. All 19 existing 46.1-04 lock-marker assertions preserved + 10 new gap-7 marker assertions added (5 SU + 5 WO mirrored). Both SendUpdate and WorkOrder snapshots regenerated with diff scoped to <head> + wrapper additions; body content byte-identical (verified marker-by-marker). Phase 46.1 plans now 8/8 complete. Round-4 Liz visual re-test on Outlook for Mac dark + Windows dark + web dark is the human gate."
+last_updated: "2026-04-29T14:41:17.407Z"
 last_activity: 2026-04-29
 progress:
   total_phases: 11
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 30
-  completed_plans: 29
-  percent: 97
+  completed_plans: 30
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — EXECUTING
-Plan: 3 of 8 (next: 46.1-07 gap-6 procurement layout fix; depends-on for 46.1-08 met by SPIKE artifact)
+Phase: 46.1 (merge-gate-gap-closure) — ALL PLANS COMPLETE; awaits round-4 Liz visual re-test
+Plan: 8 of 8 complete (final plan: 46.1-08 gap-7 outlook-mac dark-mode survival code-fix half at `9f9cd05`)
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plans: 6 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3 wave 1: 46.1-06 af52ca5 SPIKE artifact for gap-7). Round-3 wave 1 in progress (46.1-07 next), round-3 wave 2 pending (46.1-08 reads SPIKE).
-Status: Ready to execute
-Next: 46.1-07 gap-6 procurement layout fix (parallel-safe with 46.1-06 in wave 1; touches Procurement.tsx + SendUpdate.test.ts + snapshot regen). After both wave-1 plans complete, 46.1-08 reads 46.1-SPIKE-OUTLOOK-MAC.md ## Recommendation and applies the chosen combination (a + b + d) to EmailShell.tsx.
+Plans: 8 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6 -- gap-4 lock, 46.1-05 14dabb9 -- gap-5 left-align; round 3: 46.1-06 af52ca5 -- gap-7 SPIKE, 46.1-07 016c41c -- gap-6 column widths, 46.1-08 9f9cd05 -- gap-7 fix applied).
+Status: Ready for round-4 Liz visual re-test
+Next: Round-4 Liz visual re-test on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark to confirm the chosen combination (a)+(b)+(d) actually survives in production. If round-4 PASSES, parent UAT 46-UAT.md gap-7 flips status:failed -> status:resolved and phase 46.1 closes; phase 46 merge-gate clears for 46-03 cutover finalization. If round-4 FAILS on any variant, re-open gap-7 with the specific variant + technique that didn't survive (next-round candidates: investigate react-email's compiled <Body> structure; or escalate to VML / mso-element directives per SPIKE.md ## Out-of-scope considered alternatives).
 Last activity: 2026-04-29
 
 ## v5.3 Phase Map
@@ -40,7 +40,7 @@ Last activity: 2026-04-29
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
-| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 8 | **In progress** (round 3 wave 1) — Wave 1 ✓ (46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e); Wave 2 ✓ (46.1-04 f867da6 -- gap-4 Outlook auto-darken lock; 46.1-05 14dabb9 -- gap-5 left-align cells). Round-3 Wave 1: 46.1-06 ✓ (af52ca5 -- gap-7 outlook-mac dark-mode survival spike artifact); 46.1-07 (gap-6 procurement layout) NEXT. Round-3 Wave 2: 46.1-08 (gap-7 fix, depends-on 46.1-06) PENDING |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 8 | **All plans complete** — awaits round-4 Liz visual re-test. Wave 1 ✓ (46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e); Wave 2 ✓ (46.1-04 f867da6 -- gap-4; 46.1-05 14dabb9 -- gap-5). Round-3: 46.1-06 ✓ (af52ca5 -- gap-7 SPIKE), 46.1-07 ✓ (016c41c -- gap-6 column widths), 46.1-08 ✓ (9f9cd05 -- gap-7 fix applied per SPIKE chosen combination (a)+(b)+(d)). Phase closes when round-4 visual re-test passes. |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
@@ -120,6 +120,7 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - **D-7** (Phase 45-04): `@react-email/tailwind@^2.0.7` normalizes hex colors to `rgb(r,g,b)` during inlining; brand-token round-trip assertions in email tests must accept either hex OR rgb form. `containsTokenColor()` helper in `src/emails/scaffold.test.ts` is the canonical pattern for Phase 46+ template tests. Update 45-RESEARCH.md Pitfall 7 to reflect this when convenient.
 - [Phase ?]: D-8 (Phase 45-05): Playwright 1.59 ships its own react/jsx-runtime that breaks renderToString when JSX components are imported from spec files; the workaround is a two-process globalSetup that shells out to vite-node + vitest.config.ts so @vitejs/plugin-react's react-jsx automatic transform is in effect. Phase 46 spec files MUST follow this pattern (pre-render in scripts/render-email-fixtures-impl.ts, read via readFileSync in the spec).
 - [Phase ?]: 46.1-07: Locked Procurement column widths to 60/22/18 via Column width attribute + verticalAlign:top on body-row Columns + outer Section paddingTop:16 wrapper. Closes UAT gap-6.
+- [Phase ?]: 46.1-08: applied chosen combination (a) <table bgcolor> body wrapper + (b) @media (prefers-color-scheme: dark) + (d) inline body-attribute paint per 46.1-SPIKE-OUTLOOK-MAC.md, ADDITIVE on top of the existing 46.1-04 lock. (c) class-hook selectors REJECTED -- shares failing <style>-block delivery vehicle. Closes parent UAT 46-UAT.md gap-7 code-fix half (round-4 Liz visual re-test is the human gate).
 
 ### Pending Todos
 
@@ -139,7 +140,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-29T14:31:42.168Z
+Last session: 2026-04-29T14:40:57.589Z
 Stopped at: Phase 46.1 plan 06 (gap-7 outlook-mac dark-mode survival spike) complete at `af52ca5`. Spike artifact `46.1-SPIKE-OUTLOOK-MAC.md` lands the chosen combination ((a) `<table bgcolor>` body wrapper + (b) `@media (prefers-color-scheme: dark)` block + (d) inline body-attribute paint -- ADDITIVE on top of the existing 46.1-04 lock) that 46.1-08 will apply to `EmailShell.tsx`. Archaeology PASS for all three chosen techniques against gap-5 / gap-6 left-alignment invariants. Out-of-scope per Q8 lock: Litmus / Email on Acid as CI gate; Playwright dark-mode emulation as verification gate. 19 existing EmailShell.test.ts assertions stay valid -- chosen combination is purely additive.
 Resume file: None
 Next action: Execute 46.1-07 (gap-6 procurement layout fix) as the second wave-1 plan. Then execute 46.1-08 (gap-7 fix) which reads 46.1-SPIKE-OUTLOOK-MAC.md `## Recommendation` to author `EmailShell.tsx` additions on top of (NOT replacing) the existing 46.1-04 `[data-ogsc]`/`[data-ogsb]`/MSO lock. After all three round-3 plans commit, parent UAT 46-UAT.md replays for round-4 Liz visual re-test on Outlook for Mac dark + Windows dark + web dark.
