@@ -464,3 +464,102 @@ describe("Milestones + Procurement section-scoped left-alignment (46.1 D-7 -- ga
     expect(tdLeftInProc.length).toBeGreaterThanOrEqual(8);
   });
 });
+
+// ============================================================================
+// 46.1 D-12 + D-13 -- gap-6 regression guard: Procurement column widths +
+// body-row verticalAlign:top + outer Section paddingTop:16. Section-scoped:
+// slices the rendered HTML by Procurement eyebrow (>Procurement</p>) and
+// asserts the load-bearing layout markers are present. Mirrors the
+// element-scoped slice-and-match pattern from 46.1-05.
+// ============================================================================
+
+describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D-13 -- gap-6 fix)", () => {
+  it("Procurement section emits <td width=\"60%\"> on Item column (D-13)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const procStart = html.indexOf(">Procurement</p>");
+    expect(procStart).toBeGreaterThan(-1);
+    const procSlice = html.slice(procStart);
+    // Must appear on BOTH the header row AND each body row (3 rows in
+    // FIXTURES.full() per fixtures.ts PROJECT_BASE.procurementItems).
+    // Floor of 4 covers header + 3 body rows; >= guards against future
+    // fixture-row additions.
+    const widthMatches = procSlice.match(/<td[^>]*width="60%"/g) || [];
+    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("Procurement section emits <td width=\"22%\"> on Status column (D-13)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const procStart = html.indexOf(">Procurement</p>");
+    const procSlice = html.slice(procStart);
+    const widthMatches = procSlice.match(/<td[^>]*width="22%"/g) || [];
+    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("Procurement section emits <td width=\"18%\"> on ETA column (D-13)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const procStart = html.indexOf(">Procurement</p>");
+    const procSlice = html.slice(procStart);
+    const widthMatches = procSlice.match(/<td[^>]*width="18%"/g) || [];
+    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("Procurement BODY rows compile verticalAlign:top to compiled HTML (D-12)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const procStart = html.indexOf(">Procurement</p>");
+    const procSlice = html.slice(procStart);
+    // react-email may compile React `verticalAlign: "top"` to either
+    // `valign="top"` HTML attribute OR `vertical-align:top` inline style on
+    // the <td>. Accept either path -- the load-bearing claim is "the
+    // Procurement body rows are top-aligned in the rendered output", not
+    // "the markup uses one specific compiler representation". If the
+    // compiler emits both representations on the same cell, that's fine
+    // (count merges via either-branch match).
+    const valignAttr = procSlice.match(/<td[^>]*valign="top"/g) || [];
+    const valignStyle = procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*top/gi) || [];
+    const totalTopAligned = valignAttr.length + valignStyle.length;
+    // FIXTURES.full() has 3 procurement rows x 3 Columns = 9 body-row <td>
+    // cells expected to be top-aligned. Floor of 9 guards against fixture
+    // changes. The header row also has 3 Columns; if the compiler emits
+    // valign="top" on those too (the Row-level verticalAlign:middle on the
+    // header Row should anchor them mid-cell, but compiler behavior may
+    // vary), the >= bound stays valid.
+    expect(totalTopAligned).toBeGreaterThanOrEqual(9);
+  });
+
+  it("Procurement section is wrapped in an outer Section with paddingTop:16 (D-13)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    // The outer Section's compiled `padding-top:16px` should appear UPSTREAM
+    // of the Procurement eyebrow (the wrapper opens before its child Section
+    // opens, so its <table>/<td> with padding-top renders before the eyebrow
+    // <p>). Slice from the previous section's eyebrow (>Milestones</p>) to
+    // the Procurement eyebrow -- the wrapper sits in that gap.
+    const milesStart = html.indexOf(">Milestones</p>");
+    const procStart = html.indexOf(">Procurement</p>");
+    expect(milesStart).toBeGreaterThan(-1);
+    expect(procStart).toBeGreaterThan(milesStart);
+    const gapSlice = html.slice(milesStart, procStart);
+    // react-email compiles `style={{ paddingTop: 16 }}` to inline
+    // `style="padding-top:16px"` (or possibly `padding:16px 0 0` shorthand
+    // depending on the compiler). Accept either representation. The
+    // load-bearing claim is "an outer wrapper with 16px top padding exists
+    // immediately upstream of the Procurement section."
+    const paddingMatch =
+      /padding-top:\s*16px/i.test(gapSlice) ||
+      /padding:\s*16px\s+0\s+0/i.test(gapSlice);
+    expect(paddingMatch).toBe(true);
+  });
+
+  it("Procurement D-7 invariants from 46.1-05 still hold (gap-6 does not regress gap-5)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const procStart = html.indexOf(">Procurement</p>");
+    const procSlice = html.slice(procStart);
+    // D-7 invariant: zero <td align="right"> and zero <td align="center">
+    // within the Procurement section. This re-asserts 46.1-05's claim
+    // post-gap-6 to prove the layout change did not silently re-introduce
+    // right/center alignment.
+    const tdRight = procSlice.match(/<td[^>]*align="right"/g) || [];
+    const tdCenter = procSlice.match(/<td[^>]*align="center"/g) || [];
+    expect(tdRight.length).toBe(0);
+    expect(tdCenter.length).toBe(0);
+  });
+});

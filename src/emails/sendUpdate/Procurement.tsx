@@ -98,30 +98,32 @@ function pillStyle(status: ProcurementStatus): CSSProperties {
 export function Procurement({ items }: ProcurementProps) {
   if (!items.length) return null;
   return (
-    <Section style={{ paddingLeft: 40, paddingRight: 40, paddingBottom: 24 }}>
-      <Text style={EYEBROW_STYLE}>Procurement</Text>
-      <Row style={{ borderBottom: "0.5px solid #E8DDD0" }}>
-        <Column style={{ ...HEADER_LABEL_STYLE, width: "50%" }}>Item</Column>
-        <Column align="left" style={HEADER_LABEL_STYLE}>Status</Column>
-        <Column align="left" style={HEADER_LABEL_STYLE}>ETA</Column>
-      </Row>
-      {items.map((it, i) => {
-        const subLine = composeSubLine(it.vendor, it.spec);
-        return (
-          <Row key={`p-${i}`} style={ROW_STYLE}>
-            <Column style={{ verticalAlign: "middle", width: "50%" }}>
-              <span style={ITEM_NAME_STYLE}>{it.name}</span>
-              {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
-            </Column>
-            <Column align="left" style={{ verticalAlign: "middle" }}>
-              <span style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
-            </Column>
-            <Column align="left" style={{ verticalAlign: "middle" }}>
-              <span style={ETA_STYLE}>{it.eta}</span>
-            </Column>
-          </Row>
-        );
-      })}
+    <Section style={{ paddingTop: 16 }}>
+      <Section style={{ paddingLeft: 40, paddingRight: 40, paddingBottom: 24 }}>
+        <Text style={EYEBROW_STYLE}>Procurement</Text>
+        <Row style={{ borderBottom: "0.5px solid #E8DDD0" }}>
+          <Column width="60%" style={HEADER_LABEL_STYLE}>Item</Column>
+          <Column width="22%" align="left" style={HEADER_LABEL_STYLE}>Status</Column>
+          <Column width="18%" align="left" style={HEADER_LABEL_STYLE}>ETA</Column>
+        </Row>
+        {items.map((it, i) => {
+          const subLine = composeSubLine(it.vendor, it.spec);
+          return (
+            <Row key={`p-${i}`} style={ROW_STYLE}>
+              <Column width="60%" style={{ verticalAlign: "top" }}>
+                <span style={ITEM_NAME_STYLE}>{it.name}</span>
+                {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
+              </Column>
+              <Column width="22%" align="left" style={{ verticalAlign: "top" }}>
+                <span style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
+              </Column>
+              <Column width="18%" align="left" style={{ verticalAlign: "top" }}>
+                <span style={ETA_STYLE}>{it.eta}</span>
+              </Column>
+            </Row>
+          );
+        })}
+      </Section>
     </Section>
   );
 }
