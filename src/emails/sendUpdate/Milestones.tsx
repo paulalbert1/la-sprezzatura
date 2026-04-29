@@ -101,12 +101,20 @@ export function Milestones({ milestones }: MilestonesProps) {
         const rowStyle = isLast ? { ...ROW_STYLE, borderBottom: "none" } : ROW_STYLE;
         return (
           <Row key={`m-${i}`} style={rowStyle}>
-            <Column style={{ verticalAlign: "middle" }}>
+            {/* Lock column widths so the date column starts at the same
+                x-position across every row (was auto-sized per row, which
+                drifted by ~5-15px row-to-row depending on label length).
+                85/15 split keeps long milestone labels (e.g. "Design
+                Development Review") on a single line while reserving
+                enough width for the date column to fit "Sep 30, 2026"
+                shapes without wrapping. align="left" pins date to the
+                column's left edge so dates form a clean vertical column. */}
+            <Column width="85%" style={{ verticalAlign: "middle" }}>
               <span style={squareStyle} />
               <span style={titleStyle}>{m.label}</span>
               <span style={STATE_PILL_STYLE}>{pillLabel}</span>
             </Column>
-            <Column align="left" style={{ verticalAlign: "middle" }}>
+            <Column width="15%" align="left" style={{ verticalAlign: "middle" }}>
               <span style={DATE_STYLE}>{m.date}</span>
             </Column>
           </Row>

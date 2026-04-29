@@ -95,6 +95,11 @@ function pillStyle(status: ProcurementStatus): CSSProperties {
     fontWeight: 600,
     textTransform: "uppercase",
     letterSpacing: "0.06em",
+    // Status badges should stay single-line; without nowrap, multi-word
+    // labels (e.g. "Pending order", "In transit") line-break on the
+    // intra-label space when the column-width constraint squeezes the
+    // pill, producing a 2-line oval instead of a single-line badge.
+    whiteSpace: "nowrap" as const,
   };
 }
 
