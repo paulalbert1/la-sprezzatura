@@ -118,6 +118,17 @@ describe("stripLeadingGreeting (46.1 D-1 -- gap-1 fix)", () => {
     expect(stripLeadingGreeting(input, "Sarah")).toBe(input);
   });
 
+  it("does NOT strip 'Hi Victoria,' when clientFirstName='' (empty firstName disables strip per coercion at SendUpdate boundary -- IN-R4-02 / WR-R4-02)", () => {
+    // Regression guard for WR-R4-02: SendUpdate.tsx:173 coerces undefined
+    // clientFirstName to "" before passing to <Body>. With clientFirstName="",
+    // the captured firstName from the regex (always at least one [\w'-] char)
+    // never equals "", so the strip is a no-op. This test pins the no-op so a
+    // future caller that drops the ?? "" coercion upstream cannot silently
+    // regress gap-1 for clients without a firstName field.
+    const input = "Hi Victoria,\n\nBody.";
+    expect(stripLeadingGreeting(input, "")).toBe(input);
+  });
+
   it("strips 'Hi sarah,' when clientFirstName='Sarah' (case-insensitive firstName match -- WR-02)", () => {
     // Greeting word stays "Hi" capital (regex case-sensitive on greeting).
     // Only firstName comparison is case-insensitive.

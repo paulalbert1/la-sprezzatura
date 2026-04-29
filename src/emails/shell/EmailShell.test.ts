@@ -87,19 +87,31 @@ describe("EmailShell auto-darken lock (46.1 D-6 -- gap-4)", () => {
       expect(html).toContain("[data-ogsb]");
     });
 
-    it("rendered HTML contains MSO conditional open <!--[if mso]>", async () => {
+    it("MSO conditional sits in HTML context (no unclosed <style> open at <!--[if mso]> position) -- IN-R4-01", async () => {
+      // Round-4 BLOCKER (CR-R4-01) regression guard. Round-4 (46.1-09 / WR-05) shipped the
+      // MSO conditional inside a sibling <style dangerouslySetInnerHTML> in <head>. The
+      // substring-only assertions this test replaces (rendered HTML contains <!--[if mso]>,
+      // <![endif]-->, mso-color-scheme: light) all passed green against the broken-context
+      // placement -- false confidence, same category-error as round-3 hex-substring assertions
+      // on dead pill rules. CR-R4-01 fix (round-5 / 46.1-10) relocates the conditional out of
+      // <head> and into <Body>. This assertion locks the conditional in HTML context: any
+      // future regression that puts it back inside a <style> element fails this test rather
+      // than passing green.
       const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
-      expect(html).toContain("<!--[if mso]>");
-    });
-
-    it("rendered HTML contains MSO conditional close <![endif]-->", async () => {
-      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
-      expect(html).toContain("<![endif]-->");
-    });
-
-    it("rendered HTML contains mso-color-scheme: light declaration", async () => {
-      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
-      expect(html).toContain("mso-color-scheme: light");
+      // (1) Substring presence (preserves the round-2 baseline assertion).
+      const condIdx = html.indexOf("<!--[if mso]>");
+      expect(condIdx).toBeGreaterThan(-1);
+      // (2) HTML context: the conditional must sit AFTER <body opens.
+      const beforeCond = html.slice(0, condIdx);
+      expect(beforeCond).toMatch(/<body\b/);
+      // (3) No unclosed <style> may be open at condIdx -- the CR-R4-01 regression guard.
+      const lastStyleOpen = beforeCond.lastIndexOf("<style");
+      const lastStyleClose = beforeCond.lastIndexOf("</style>");
+      expect(lastStyleClose).toBeGreaterThan(lastStyleOpen);
+      // (4) Directive integrity: the inner <style> payload survives intact in the conditional.
+      expect(html).toMatch(
+        /<!--\[if mso\]><style>body \{ mso-color-scheme: light !important; \}<\/style><!\[endif\]-->/,
+      );
     });
 
     it("rendered HTML contains !important inside the locked style block", async () => {
@@ -245,15 +257,24 @@ describe("EmailShell auto-darken lock (46.1 D-6 -- gap-4)", () => {
       expect(html).toContain("[data-ogsb]");
     });
 
-    it("rendered HTML contains MSO conditional open + close", async () => {
+    it("MSO conditional sits in HTML context (no unclosed <style> open at <!--[if mso]> position) -- IN-R4-01", async () => {
+      // CR-R4-01 regression guard, WorkOrder render path (proves shared-shell propagation).
+      // See SendUpdate render block above for full rationale.
       const html = await render(createElement(WorkOrder, buildWO()));
-      expect(html).toContain("<!--[if mso]>");
-      expect(html).toContain("<![endif]-->");
-    });
-
-    it("rendered HTML contains mso-color-scheme: light declaration", async () => {
-      const html = await render(createElement(WorkOrder, buildWO()));
-      expect(html).toContain("mso-color-scheme: light");
+      // (1) Substring presence.
+      const condIdx = html.indexOf("<!--[if mso]>");
+      expect(condIdx).toBeGreaterThan(-1);
+      // (2) HTML context: the conditional must sit AFTER <body opens.
+      const beforeCond = html.slice(0, condIdx);
+      expect(beforeCond).toMatch(/<body\b/);
+      // (3) No unclosed <style> may be open at condIdx.
+      const lastStyleOpen = beforeCond.lastIndexOf("<style");
+      const lastStyleClose = beforeCond.lastIndexOf("</style>");
+      expect(lastStyleClose).toBeGreaterThan(lastStyleOpen);
+      // (4) Directive integrity.
+      expect(html).toMatch(
+        /<!--\[if mso\]><style>body \{ mso-color-scheme: light !important; \}<\/style><!\[endif\]-->/,
+      );
     });
 
     it("cream body bg #FAF8F5 appears inside a [data-ogsb] rule", async () => {

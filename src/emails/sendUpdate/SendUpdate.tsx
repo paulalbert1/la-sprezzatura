@@ -170,6 +170,16 @@ export function SendUpdate(input: SendUpdateEmailInput) {
   return (
     <EmailShell tenant={tenant} preheader={preheader} signoffStyle="formal">
       <Greeting project={project} firstName={clientFirstName} sentDate={sentDateFormatted} />
+      {/* WR-R4-02 trade-off (round-5 / 46.1-10): when caller supplies undefined firstName
+          (Sanity client document missing firstName field, or admin "preview without selected
+          client"), Body receives "" and stripLeadingGreeting becomes a no-op (capturedFirstName
+          !== ""). This means a doubled "Hi Victoria,..." sent without a known firstName ships
+          unstripped. Production /api/send-update reads firstName from the Sanity client doc,
+          so the hot path is OK. Future call sites that can't supply firstName must default to
+          a placeholder upstream of this boundary. Round-4 review chose Option C (document +
+          test) as cheapest available fix; behavior is preserved exactly as round-4 shipped.
+          The empty firstName disables strip case is regression-tested at Body.test.ts
+          (IN-R4-02). */}
       <Body personalNote={personalNote} clientFirstName={clientFirstName ?? ""} />
       {showReviewItems && (
         <ReviewItems personalActionItems={personalActionItems} pendingArtifacts={pendingArtifacts} />

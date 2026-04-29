@@ -118,8 +118,8 @@ export function EmailShell({
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* Body bg + bg-cream class hook (body element selector + dead .bg-cream tail) */
-              [data-ogsb] body, [data-ogsb] .bg-cream { background-color: #FAF8F5 !important; }
+              /* Body bg (body element selector) */
+              [data-ogsb] body { background-color: #FAF8F5 !important; }
 
               /* CTA backgrounds (hand-written -- only 2 variants) */
               [data-ogsb] .cta-terracotta { background-color: #C4836A !important; }
@@ -150,22 +150,12 @@ export function EmailShell({
                  required for source-order specificity tie-resolution against any
                  Outlook-Mac-injected dark-mode rule. */
               @media (prefers-color-scheme: dark) {
-                body, .bg-cream { background-color: #FAF8F5 !important; }
+                body { background-color: #FAF8F5 !important; }
                 .cta-terracotta { background-color: #C4836A !important; }
                 .cta-gold { background-color: #9A7B4B !important; }
                 ${mediaPillRules}
               }
             `,
-          }}
-        />
-        {/* MSO conditional -- older Outlook desktop builds where [data-ogs*] doesn't reach.
-            46.1 D-19 WR-05 (round-2 carryover): moved out of a display-none div
-            wrapper (invalid HTML5 in <head>) into a sibling <style dangerouslySetInnerHTML>
-            element. The <!--[if mso]> + <![endif]--> + mso-color-scheme: light substrings
-            still appear in the rendered HTML so existing test surface is preserved. */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `<!--[if mso]>body { mso-color-scheme: light !important; }<![endif]-->`,
           }}
         />
       </Head>
@@ -179,6 +169,26 @@ export function EmailShell({
             byte-identical to the [data-ogsb] body bg rule above. */}
         <Body className="bg-cream font-body" style={{ backgroundColor: "#FAF8F5" }}>
           <Preheader>{preheader}</Preheader>
+          {/* MSO conditional -- 46.1-10 CR-R4-01 (round-5).
+              Round-4 (46.1-09 / WR-05) moved this out of an invalid <div style={display:none}>
+              wrapper in <head> into a sibling <style dangerouslySetInnerHTML> in <head>. The
+              new placement avoided the HTML5 head-content violation but put the conditional in
+              CSS-parsing context: per CSS Syntax Level 3 §4.3.2, <!-- and --> are consumed as
+              CDO/CDC tokens and the [if mso]>body {} payload parsed as a [if=mso] > body
+              attribute selector matching no element. The mso-color-scheme: light directive
+              never reached Outlook desktop's word-engine.
+              CR-R4-01 fix (Option A from round-4 review): relocate to <Body> as a child after
+              <Preheader>. The conditional now sits in HTML context where Outlook's HTML parser
+              interprets <!--[if mso]>...<![endif]--> as conditional comment boundaries. The
+              inner <style>body { mso-color-scheme: light !important; }</style> is parsed as
+              CSS only when MSO activates (older Outlook desktop builds where [data-ogs*]
+              doesn't reach -- the gap-4 layered defense's MSO sub-layer). Modern Outlook web,
+              Apple Mail, Outlook for Mac/Windows skip the conditional entirely. */}
+          <div
+            dangerouslySetInnerHTML={{
+              __html: `<!--[if mso]><style>body { mso-color-scheme: light !important; }</style><![endif]-->`,
+            }}
+          />
           {/* gap-7 (46.1 D-10/D-11) -- candidate (a) <table bgcolor> body wrapper per
               .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
               Recommendation. Wraps the existing <Container> in a top-level <table>
