@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46.1 plan 08 (gap-7 outlook-mac dark-mode survival code-fix half) complete at `9f9cd05`. Applied chosen combination (a)+(b)+(d) per 46.1-SPIKE-OUTLOOK-MAC.md ## Recommendation: <table bgcolor=\"#FAF8F5\"> body wrapper + @media (prefers-color-scheme: dark) block + inline body-attribute paint, ADDITIVE on top of the existing 46.1-04 [data-ogsc]/[data-ogsb]/MSO lock. All 19 existing 46.1-04 lock-marker assertions preserved + 10 new gap-7 marker assertions added (5 SU + 5 WO mirrored). Both SendUpdate and WorkOrder snapshots regenerated with diff scoped to <head> + wrapper additions; body content byte-identical (verified marker-by-marker). Phase 46.1 plans now 8/8 complete. Round-4 Liz visual re-test on Outlook for Mac dark + Windows dark + web dark is the human gate."
+stopped_at: "Phase 46.1 round-3 plans 06/07/08 all complete in code (af52ca5 / 016c41c / 9f9cd05). Code review (a59cf25) flagged CR-R3-01 (BLOCKER): dark-mode lock palette in EmailShell.tsx targets className hooks (pill-*, cta-*, text-stone, text-cream, border-cream-dark) that never appear on rendered elements -- Procurement.tsx pillStyle() returns inline-style only, EmailButton.tsx is inline-only, and the Tailwind email compiler strips classes and inlines them as styles. Snapshot confirms zero class=\"pill-*\" matches. Only the body-element selector and the new <table bgcolor> + inline <body style> paint actually fire. EmailShell.test.ts assertions pass via substring-match against the dead <style> block declarations themselves, not on rendered elements. Result: gap-4 pill-text contrast inversion is unfixed; gap-7 dark-mode protection is partially functional only. Phase 46.1 RE-OPENED for round-4 gap closure (plan 46.1-09 to apply explicit className strings on pill <span> + CTA <Button>) BEFORE Liz visual re-test."
 last_updated: "2026-04-29T14:41:17.407Z"
 last_activity: 2026-04-29
 progress:
   total_phases: 11
-  completed_phases: 4
+  completed_phases: 3
   total_plans: 30
   completed_plans: 30
   percent: 100
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — ALL PLANS COMPLETE; awaits round-4 Liz visual re-test
-Plan: 8 of 8 complete (final plan: 46.1-08 gap-7 outlook-mac dark-mode survival code-fix half at `9f9cd05`)
+Phase: 46.1 (merge-gate-gap-closure) — RE-OPENED FOR ROUND 4 (CR-R3-01 BLOCKER)
+Plan: 8 of 8 complete in code; round-4 plan TBD (46.1-09 — apply explicit className strings to pills + CTA buttons so dark-mode lock rules actually fire)
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plans: 8 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6 -- gap-4 lock, 46.1-05 14dabb9 -- gap-5 left-align; round 3: 46.1-06 af52ca5 -- gap-7 SPIKE, 46.1-07 016c41c -- gap-6 column widths, 46.1-08 9f9cd05 -- gap-7 fix applied).
-Status: Ready for round-4 Liz visual re-test
-Next: Round-4 Liz visual re-test on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark to confirm the chosen combination (a)+(b)+(d) actually survives in production. If round-4 PASSES, parent UAT 46-UAT.md gap-7 flips status:failed -> status:resolved and phase 46.1 closes; phase 46 merge-gate clears for 46-03 cutover finalization. If round-4 FAILS on any variant, re-open gap-7 with the specific variant + technique that didn't survive (next-round candidates: investigate react-email's compiled <Body> structure; or escalate to VML / mso-element directives per SPIKE.md ## Out-of-scope considered alternatives).
+Plans: 8 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6 -- gap-4 lock, 46.1-05 14dabb9 -- gap-5 left-align; round 3: 46.1-06 af52ca5 -- gap-7 SPIKE, 46.1-07 016c41c -- gap-6 column widths, 46.1-08 9f9cd05 -- gap-7 fix applied). Round-4 plan 46.1-09 TBD.
+Status: Re-opened for round-4 (code review BLOCKER CR-R3-01)
+Next: /gsd-plan-phase 46.1 --gaps -- read 46.1-REVIEW.md round-3 section (CR-R3-01 BLOCKER plus WR-R3-01..04 + IN-R3-01..03) and produce plan 46.1-09 to (a) apply explicit className strings on Procurement.tsx pillStyle() return value <span> + EmailButton.tsx <Button> so the .pill-*, .cta-terracotta, .cta-gold lock rules actually fire on rendered elements; (b) decide whether WorkOrder.tsx text-stone-dark needs a lock-block addition or a class rename; (c) optionally address WR-R3-01 by adding !important to inline pill text colors so the [data-ogsc] * cancellation rule does not strip them. After round-4 lands, re-run code review (verifier may need to be skipped or re-run depending on outcome) before scheduling Liz visual re-test.
 Last activity: 2026-04-29
 
 ## v5.3 Phase Map
@@ -40,7 +40,7 @@ Last activity: 2026-04-29
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
-| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 8 | **All plans complete** — awaits round-4 Liz visual re-test. Wave 1 ✓ (46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e); Wave 2 ✓ (46.1-04 f867da6 -- gap-4; 46.1-05 14dabb9 -- gap-5). Round-3: 46.1-06 ✓ (af52ca5 -- gap-7 SPIKE), 46.1-07 ✓ (016c41c -- gap-6 column widths), 46.1-08 ✓ (9f9cd05 -- gap-7 fix applied per SPIKE chosen combination (a)+(b)+(d)). Phase closes when round-4 visual re-test passes. |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 8 + TBD | **Re-opened for round-4** — code review BLOCKER CR-R3-01: dark-mode lock palette targets className hooks that never appear on rendered elements (Tailwind email compiler strips classes, inlines as styles). Round 1 ✓ (46.1-01..03), Round 2 ✓ (46.1-04 gap-4, 46.1-05 gap-5), Round 3 ✓ in code (46.1-06 SPIKE, 46.1-07 gap-6 widths, 46.1-08 gap-7 fix). Round 4 plan 46.1-09 TBD: apply explicit class strings on Procurement pill <span> + EmailButton CTA so the lock rules fire. |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
