@@ -4,14 +4,14 @@ milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
 stopped_at: "Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO."
-last_updated: "2026-04-28T20:26:08.675Z"
-last_activity: 2026-04-28 -- Phase 46.1 planning complete
+last_updated: "2026-04-29T00:53:42.470Z"
+last_activity: 2026-04-29
 progress:
   total_phases: 11
   completed_phases: 3
-  total_plans: 25
-  completed_plans: 22
-  percent: 88
+  total_plans: 27
+  completed_plans: 26
+  percent: 96
 ---
 
 # Project State
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 46 — send-update-work-order-migration
+**Current focus:** Phase 46.1 — merge-gate-gap-closure
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — READY TO PLAN
+Phase: 46.1 (merge-gate-gap-closure) — EXECUTING
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plan: TBD — 3 parallel plans defined in 46.1-CONTEXT.md (greeting double-render fix, formatDate empty-input guard, PLAN-AUTHORING-PATTERNS strengthening)
-Status: Ready to execute
-Last activity: 2026-04-28 -- Phase 46.1 planning complete
+Plan: 4 of 5 complete (Wave 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; Wave 2: 46.1-04 f867da6 ✓, 46.1-05 next)
+Status: Executing Phase 46.1 — Wave 2 plan 04 (gap-4 Outlook auto-darken lock) committed; plan 05 (gap-5 left-align cells) ready to execute
+Last activity: 2026-04-29 -- Plan 46.1-04 committed at f867da6
 
 ## v5.3 Phase Map
 
@@ -38,7 +38,7 @@ Last activity: 2026-04-28 -- Phase 46.1 planning complete
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
-| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 3 | Ready to plan — 46.1-CONTEXT.md locked (D-1..D-5); 3 parallel plans for greeting double-render, formatDate guard, patterns-doc strengthening |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 5 | In progress — Wave 1 ✓ (46.1-01/02/03); Wave 2 in progress: 46.1-04 ✓ (gap-4 Outlook auto-darken lock at f867da6), 46.1-05 next (gap-5 left-align cells) |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
@@ -136,7 +136,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-28T17:00:00.000Z
+Last session: 2026-04-29T00:53:39.746Z
 Stopped at: Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO.
 Resume file: None
 Next action: Checkpoint 1 hand-review. User reads `.planning/phases/46-send-update-work-order-migration/46-MIGRATION-DIFF.md` and replies `approve` / `approve-rgb` / `hold`. On approve, a continuation agent resumes Plan 46-03 from Task 3 (rewire send-update.ts both branches + List-Unsubscribe + plainText render) through Task 8 (Outlook merge-gate screenshot).

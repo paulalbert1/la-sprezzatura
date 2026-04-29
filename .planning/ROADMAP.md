@@ -325,7 +325,7 @@ Plans:
 - [x] **Phase 45: Email Foundations** — 4 reqs (EMAIL-08 ✓, EMAIL-09 ✓, EMAIL-10 ✓, EMAIL-11 ✓). 5/5 plans complete 2026-04-26. Asset host live at email-assets.sprezzahub.com (Cloudflare DNS-only / grey cloud, Vercel-backed, cookie-less, year-immutable cache); sender domain lasprezz.com aligned for Resend SES (DKIM + SPF + DMARC all green); merge-gate procedure documented at docs/email-merge-gate.md.
 - [x] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand). Complete 2026-04-27. Admin chrome (AdminNav, login, trades pages) reads "Sprezza Hub"; Send Update + Work Order email footers carry "Sent via Sprezza Hub" attribution; `src/lib/email/system.ts` forward-looking sender constants stub added. Zero `Linha` references remain in src/, docs/ (excluding frozen specs), or scripts/. Tenant brand surfaces (LA SPREZZATURA wordmark, public marketing site, sender domain lasprezz.com, tenants.json slug, package.json name) byte-identical. 7 email-snapshot tests flipped FAIL → PASS post-snapshot-regen; full-suite test count improved 68 → 60 failures with zero new failures.
 - [ ] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — 4 plans: 46-01 ✓, 46-02 superseded by 46-04, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** 2026-04-28 (3 findings, see `46-UAT.md`); awaits 46.1 gap closure + re-test
-- [ ] **Phase 46.1: Merge-Gate Gap Closure** — 0 numbered reqs (gap-closure of Phase 46 merge-gate UAT) — 3 plans: greeting double-render fix, formatDate empty-input guard, PLAN-AUTHORING-PATTERNS enum-closure strengthening
+- [ ] **Phase 46.1: Merge-Gate Gap Closure** — 0 numbered reqs (gap-closure of Phase 46 merge-gate UAT) — 5 plans across 2 waves: Wave 1 (gap-1/2/3) ✓ landed in round 1; Wave 2 (gap-4 Outlook auto-darken lock ✓ at f867da6, gap-5 left-align cells in progress)
 - [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
 - [ ] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08)
@@ -408,10 +408,12 @@ Plans:
   2. `formatDate("")` and `formatLongDate("")` (and `undefined` / unparseable input) return empty string `""` instead of the literal "Invalid Date" — guard added at `src/emails/sendUpdate/SendUpdate.tsx`, parity guard on the long form, tests cover all four cases
   3. PLAN-AUTHORING-PATTERNS.md "Cheap verifications on load-bearing audit assumptions" entry strengthened with an explicit admonition to apply the pattern to EVERY enum the audit references, plus a Phase 46 example block referencing the `ProcurementStatus` 7-vs-3 audit gap
   4. Parent phase 46-UAT.md gaps `status: failed` → `status: resolved`, frontmatter `status: diagnosed` → `status: resolved`
-**Plans**: 3 plans, all parallel (no file overlap):
-- [ ] 46.1-01-PLAN.md (greeting double-render fix) — Wave 1: defensive strip in `src/emails/sendUpdate/Body.tsx` + admin compose UI helper text + tests covering the strip pattern's narrow scope (literal "Hi {Name},?" only, NOT "Hello/Dear/Hey/etc.")
-- [ ] 46.1-02-PLAN.md (formatDate empty-input guard) — Wave 1: one-line guard in `formatDate` at `SendUpdate.tsx:104` + parity guard on `formatLongDate` at `:109` + 8 tests (4 each)
-- [ ] 46.1-03-PLAN.md (PLAN-AUTHORING-PATTERNS strengthening) — Wave 1: docs-only edit to add the bold admonition + Phase 46 example block + checklist nudge
+**Plans**: 5 plans across 2 waves:
+- [x] 46.1-01-PLAN.md (greeting double-render fix) — Wave 1: defensive strip in `src/emails/sendUpdate/Body.tsx` + admin compose UI helper text + tests covering the strip pattern's narrow scope (literal "Hi {Name},?" only, NOT "Hello/Dear/Hey/etc.")
+- [x] 46.1-02-PLAN.md (formatDate empty-input guard) — Wave 1: one-line guard in `formatDate` at `SendUpdate.tsx:104` + parity guard on `formatLongDate` at `:109` + 8 tests (4 each)
+- [x] 46.1-03-PLAN.md (PLAN-AUTHORING-PATTERNS strengthening) — Wave 1: docs-only edit to add the bold admonition + Phase 46 example block + checklist nudge
+- [x] 46.1-04-PLAN.md (Outlook desktop dark-mode lock — gap-4) — Wave 2: `[data-ogsc]`/`[data-ogsb]` rules + MSO conditional inside `EmailShell.tsx <Head>` locking existing palette against Outlook auto-darken; new `EmailShell.test.ts` proves shared-shell propagation to BOTH SendUpdate and WorkOrder; landed at `f867da6` (19 new passing tests, snapshots regenerated additive-only)
+- [ ] 46.1-05-PLAN.md (left-align table cells — gap-5) — Wave 2: 5 `align=` attribute changes in `Milestones.tsx` + `Procurement.tsx` (date, status header/cell, ETA header/cell) + snapshot regen
 
 **Out of scope** (deferred): the design conversation about re-toning `pending` procurement palette away from the warm-red family that visually competes with the terracotta CTA. Surfaced in `46-UAT.md` Finding 3b; not blocking phase 46 closure.
 
