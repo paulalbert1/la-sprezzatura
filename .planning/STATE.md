@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46.1 round-4 plan 46.1-09 authored 2026-04-29 at 60ff0ca and committed (1402-line plan + ROADMAP update). Plan-checker VERIFICATION PASSED across all 10 dimensions (requirement coverage, task completeness, dependency correctness, key links, scope, must_haves goal-backward, context compliance, D-15 hard gate, dead-test deletion, D-19 carryover completeness, D-20 atomicity + no AI attribution, snapshot regen handling, WorkOrder snapshot, read_first completeness, threat_model presence, CLAUDE.md compliance). Plan covers D-15..D-21: apply literal className strings (pill-${status} / cta-${variant}) per D-15 with HARD verification gate (snapshot regen + grep, STOP if 0 matches); delete dead [data-ogsc] .text-* + .border-cream-dark + * catch-all per D-16/D-17; module-load CSS-gen from STATUS_PILL_STYLES via buildPillRules() per D-18 IN-R3-02; rewrite EmailShell.test.ts to className-binding-shape + SendUpdate.test.ts to invariant-shaped per-row count per D-18 WR-R3-02/WR-R3-04; fold WR-01/02 (stripLeadingGreeting clientFirstName param) + WR-03 (export MAX_LEN + maxLength + counter) + WR-05 (MSO out of div-in-head) + WR-06 (pill borderRadius deletion) per D-19. Single atomic commit per D-20. 5 tasks, 10 source files + 1-2 snapshots. Ready for /gsd-execute-phase 46.1 to land 46.1-09."
-last_updated: "2026-04-29T16:30:00.000Z"
-last_activity: 2026-04-29
+stopped_at: "Phase 46.1 round-4 plan 46.1-09 EXECUTED at b75ab0b. CR-R3-01 BLOCKER closed (className hooks now bind on rendered elements; pill <span> + EmailButton CTA carry class=\"pill-${status}\" / class=\"cta-${variant}\" alongside existing inline style). Dead [data-ogsc] .text-*/.border-cream-dark rules + [data-ogsc] * catch-all deleted. EmailShell.tsx CSS refactored to module-load-time generation from STATUS_PILL_STYLES via buildPillRules() (single source of truth; eliminates ~40 lines mirrored CSS). WR-01..06 carryovers folded: stripLeadingGreeting takes clientFirstName + case-insensitive exact-match (handles Mary-Anne, O'Brien; preserves Hi all when firstName!=match); MAX_LEN exported + textarea maxLength + character counter; MSO conditional out of <div>-in-<head> into sibling <style>; pill borderRadius deleted (Phase 46 D-3 reserves border-radius for CTA only). Single atomic commit lands 12 files (10 D-20 + SendUpdate.tsx callsite + WorkOrder snapshot). Test gate: zero NEW failures vs baseline (59 = 59); +40 passing tests. SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md. Round-5 gate next: /gsd-code-review 46.1 must report findings.blocker == 0; then Liz schedules round-5 visual UAT on Outlook for Mac/Windows/web dark + light-mode regression per D-21."
+last_updated: "2026-04-29T17:00:00.000Z"
+last_activity: 2026-04-29 -- Phase 46.1-09 executed
 progress:
   total_phases: 11
   completed_phases: 3
-  total_plans: 30
-  completed_plans: 30
+  total_plans: 31
+  completed_plans: 31
   percent: 100
 ---
 
@@ -25,13 +25,13 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — ROUND 4 PLANNED (46.1-09 ready for execution)
-Plan: 8 of 9 complete in code; 46.1-09 authored 2026-04-29 at 60ff0ca (PLANNING + VERIFICATION PASSED, awaiting execution)
-Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plans: 8 of 9 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7). Round-4 plan 46.1-09 authored at 60ff0ca, ready for execution.
-Status: Round-4 planned and verified. Awaiting /gsd-execute-phase to land 46.1-09.
-Next: /gsd-execute-phase 46.1 — execute plan 46.1-09 (Wave 4, single atomic commit). Executor lands D-15 className binding (with HARD STOP gate at the snapshot-regen + grep verification — if class="pill-" / class="cta-" matches are 0 the executor surfaces and stops, do NOT bypass), then D-16/D-17 dead-rule deletion + WR-05 MSO relocation, then D-18 CSS-gen + className-match test rewrites + invariant-shaped valign:top floor, then D-19 WR-01/02 stripLeadingGreeting + WR-03 MAX_LEN export + WR-06 borderRadius deletion, then D-20 final snapshot regen (SendUpdate + WorkOrder if dirty) + atomic commit with NO AI attribution. After commit: /gsd-code-review 46.1 for round-5 BLOCKER==0 confirmation, then notify Liz to schedule round-5 visual re-test (Outlook for Mac dark + Windows dark + web dark + light-mode regression check) per D-21.
-Last activity: 2026-04-29
+Phase: 46.1 (merge-gate-gap-closure) — ROUND 4 EXECUTED (46.1-09 committed at b75ab0b)
+Plan: 9 of 9 complete in code; SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md
+Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED — closure gates on round-5 visual UAT)
+Plans: 9 of 9 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7; round 4: 46.1-09 b75ab0b CR-R3-01 BLOCKER + WR carryovers).
+Status: Round-4 code complete. Round-5 code review + visual UAT are the close-out gates per D-21.
+Next: /gsd-code-review 46.1 — must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check (verify: pill chrome + CTA bg survive auto-darken; gap-1..7 fixes still render correctly; admin compose UI maxLength + character counter live). On clean visual UAT, parent UAT 46-UAT.md replays for round-5 close-out; on `approved`, Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
+Last activity: 2026-04-29 -- Phase 46.1-09 executed at b75ab0b
 
 ## v5.3 Phase Map
 
@@ -40,7 +40,7 @@ Last activity: 2026-04-29
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
 | 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
-| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 8 + TBD | **Re-opened for round-4** — code review BLOCKER CR-R3-01: dark-mode lock palette targets className hooks that never appear on rendered elements (Tailwind email compiler strips classes, inlines as styles). Round 1 ✓ (46.1-01..03), Round 2 ✓ (46.1-04 gap-4, 46.1-05 gap-5), Round 3 ✓ in code (46.1-06 SPIKE, 46.1-07 gap-6 widths, 46.1-08 gap-7 fix). Round 4 plan 46.1-09 TBD: apply explicit class strings on Procurement pill <span> + EmailButton CTA so the lock rules fire. |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 9 | **Round-4 code complete** (9/9 plans) — round-5 code review + Liz visual UAT are the close-out gates per D-21. Round 1 ✓ (46.1-01..03), Round 2 ✓ (46.1-04 gap-4, 46.1-05 gap-5), Round 3 ✓ (46.1-06 SPIKE, 46.1-07 gap-6 widths, 46.1-08 gap-7 fix), Round 4 ✓ (46.1-09 CR-R3-01 BLOCKER + WR-01..06 carryovers at b75ab0b). |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
@@ -121,6 +121,7 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - [Phase ?]: D-8 (Phase 45-05): Playwright 1.59 ships its own react/jsx-runtime that breaks renderToString when JSX components are imported from spec files; the workaround is a two-process globalSetup that shells out to vite-node + vitest.config.ts so @vitejs/plugin-react's react-jsx automatic transform is in effect. Phase 46 spec files MUST follow this pattern (pre-render in scripts/render-email-fixtures-impl.ts, read via readFileSync in the spec).
 - [Phase ?]: 46.1-07: Locked Procurement column widths to 60/22/18 via Column width attribute + verticalAlign:top on body-row Columns + outer Section paddingTop:16 wrapper. Closes UAT gap-6.
 - [Phase ?]: 46.1-08: applied chosen combination (a) <table bgcolor> body wrapper + (b) @media (prefers-color-scheme: dark) + (d) inline body-attribute paint per 46.1-SPIKE-OUTLOOK-MAC.md, ADDITIVE on top of the existing 46.1-04 lock. (c) class-hook selectors REJECTED -- shares failing <style>-block delivery vehicle. Closes parent UAT 46-UAT.md gap-7 code-fix half (round-4 Liz visual re-test is the human gate).
+- [Phase ?]: 46.1-09 (round 4): CR-R3-01 BLOCKER closed by binding literal class strings (pill-${status} on Procurement.tsx pill <span>; cta-${variant} on EmailButton.tsx Button) so the [data-ogsc]/[data-ogsb] lock rules actually fire on rendered elements. Verified at HARD task-1 gate: snapshot regen produces 4 class="pill-*" matches + 5 class="cta-*" matches. EmailShell.tsx CSS refactored to module-load-time generation from STATUS_PILL_STYLES via buildPillRules() (D-18 IN-R3-02 -- single source of truth; ~40 lines of mirrored CSS eliminated). Dead [data-ogsc] .text-* + .border-cream-dark + universal-selector catch-all rules deleted (D-16/D-17). WR-01/02 stripLeadingGreeting tightened (clientFirstName param + case-insensitive exact-match; preserves "Hi all," when firstName!=match; handles Mary-Anne, O'Brien). WR-03 MAX_LEN exported + textarea maxLength + character counter wired (PersonalNoteParseError unreachable from admin UI). WR-05 MSO conditional out of <div>-in-<head> into sibling <style>. WR-06 pill borderRadius deleted (Phase 46 D-3 reserves border-radius for CTA only).
 
 ### Pending Todos
 
@@ -140,7 +141,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-29T14:40:57.589Z
-Stopped at: Phase 46.1 plan 06 (gap-7 outlook-mac dark-mode survival spike) complete at `af52ca5`. Spike artifact `46.1-SPIKE-OUTLOOK-MAC.md` lands the chosen combination ((a) `<table bgcolor>` body wrapper + (b) `@media (prefers-color-scheme: dark)` block + (d) inline body-attribute paint -- ADDITIVE on top of the existing 46.1-04 lock) that 46.1-08 will apply to `EmailShell.tsx`. Archaeology PASS for all three chosen techniques against gap-5 / gap-6 left-alignment invariants. Out-of-scope per Q8 lock: Litmus / Email on Acid as CI gate; Playwright dark-mode emulation as verification gate. 19 existing EmailShell.test.ts assertions stay valid -- chosen combination is purely additive.
+Last session: 2026-04-29T17:00:00.000Z
+Stopped at: Phase 46.1-09 (round-4 BLOCKER closure) executed at b75ab0b. Single atomic commit lands 12 files: D-15 className binding on pill <span> + EmailButton CTA (HARD verification gate PASSED -- 4 pill-* + 5 cta-* matches in regenerated SendUpdate snapshot); D-16/D-17 dead-rule deletion; D-18 buildPillRules() CSS-gen from STATUS_PILL_STYLES + className-binding-shape test rewrite; D-19 WR-01/02/03/05/06 carryovers folded. Test gate: 59 failures = baseline (zero new); +40 passing tests. SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md. No AI attribution. No new deps.
 Resume file: None
-Next action: Execute 46.1-07 (gap-6 procurement layout fix) as the second wave-1 plan. Then execute 46.1-08 (gap-7 fix) which reads 46.1-SPIKE-OUTLOOK-MAC.md `## Recommendation` to author `EmailShell.tsx` additions on top of (NOT replacing) the existing 46.1-04 `[data-ogsc]`/`[data-ogsb]`/MSO lock. After all three round-3 plans commit, parent UAT 46-UAT.md replays for round-4 Liz visual re-test on Outlook for Mac dark + Windows dark + web dark.
+Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
