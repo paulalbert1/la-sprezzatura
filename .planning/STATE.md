@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46.1 round-3 plans 06/07/08 all complete in code (af52ca5 / 016c41c / 9f9cd05). Code review (a59cf25) flagged CR-R3-01 (BLOCKER): dark-mode lock palette in EmailShell.tsx targets className hooks (pill-*, cta-*, text-stone, text-cream, border-cream-dark) that never appear on rendered elements -- Procurement.tsx pillStyle() returns inline-style only, EmailButton.tsx is inline-only, and the Tailwind email compiler strips classes and inlines them as styles. Snapshot confirms zero class=\"pill-*\" matches. Only the body-element selector and the new <table bgcolor> + inline <body style> paint actually fire. EmailShell.test.ts assertions pass via substring-match against the dead <style> block declarations themselves, not on rendered elements. Result: gap-4 pill-text contrast inversion is unfixed; gap-7 dark-mode protection is partially functional only. Phase 46.1 RE-OPENED for round-4 gap closure (plan 46.1-09 to apply explicit className strings on pill <span> + CTA <Button>) BEFORE Liz visual re-test."
-last_updated: "2026-04-29T14:41:17.407Z"
+stopped_at: "Phase 46.1 round-4 plan 46.1-09 authored 2026-04-29 at 60ff0ca and committed (1402-line plan + ROADMAP update). Plan-checker VERIFICATION PASSED across all 10 dimensions (requirement coverage, task completeness, dependency correctness, key links, scope, must_haves goal-backward, context compliance, D-15 hard gate, dead-test deletion, D-19 carryover completeness, D-20 atomicity + no AI attribution, snapshot regen handling, WorkOrder snapshot, read_first completeness, threat_model presence, CLAUDE.md compliance). Plan covers D-15..D-21: apply literal className strings (pill-${status} / cta-${variant}) per D-15 with HARD verification gate (snapshot regen + grep, STOP if 0 matches); delete dead [data-ogsc] .text-* + .border-cream-dark + * catch-all per D-16/D-17; module-load CSS-gen from STATUS_PILL_STYLES via buildPillRules() per D-18 IN-R3-02; rewrite EmailShell.test.ts to className-binding-shape + SendUpdate.test.ts to invariant-shaped per-row count per D-18 WR-R3-02/WR-R3-04; fold WR-01/02 (stripLeadingGreeting clientFirstName param) + WR-03 (export MAX_LEN + maxLength + counter) + WR-05 (MSO out of div-in-head) + WR-06 (pill borderRadius deletion) per D-19. Single atomic commit per D-20. 5 tasks, 10 source files + 1-2 snapshots. Ready for /gsd-execute-phase 46.1 to land 46.1-09."
+last_updated: "2026-04-29T16:30:00.000Z"
 last_activity: 2026-04-29
 progress:
   total_phases: 11
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — RE-OPENED FOR ROUND 4 (CR-R3-01 BLOCKER)
-Plan: 8 of 8 complete in code; round-4 plan TBD (46.1-09 — apply explicit className strings to pills + CTA buttons so dark-mode lock rules actually fire)
+Phase: 46.1 (merge-gate-gap-closure) — ROUND 4 PLANNED (46.1-09 ready for execution)
+Plan: 8 of 9 complete in code; 46.1-09 authored 2026-04-29 at 60ff0ca (PLANNING + VERIFICATION PASSED, awaiting execution)
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plans: 8 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6 -- gap-4 lock, 46.1-05 14dabb9 -- gap-5 left-align; round 3: 46.1-06 af52ca5 -- gap-7 SPIKE, 46.1-07 016c41c -- gap-6 column widths, 46.1-08 9f9cd05 -- gap-7 fix applied). Round-4 plan 46.1-09 TBD.
-Status: Re-opened for round-4 (code review BLOCKER CR-R3-01)
-Next: /gsd-plan-phase 46.1 --gaps -- read 46.1-REVIEW.md round-3 section (CR-R3-01 BLOCKER plus WR-R3-01..04 + IN-R3-01..03) and produce plan 46.1-09 to (a) apply explicit className strings on Procurement.tsx pillStyle() return value <span> + EmailButton.tsx <Button> so the .pill-*, .cta-terracotta, .cta-gold lock rules actually fire on rendered elements; (b) decide whether WorkOrder.tsx text-stone-dark needs a lock-block addition or a class rename; (c) optionally address WR-R3-01 by adding !important to inline pill text colors so the [data-ogsc] * cancellation rule does not strip them. After round-4 lands, re-run code review (verifier may need to be skipped or re-run depending on outcome) before scheduling Liz visual re-test.
+Plans: 8 of 9 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7). Round-4 plan 46.1-09 authored at 60ff0ca, ready for execution.
+Status: Round-4 planned and verified. Awaiting /gsd-execute-phase to land 46.1-09.
+Next: /gsd-execute-phase 46.1 — execute plan 46.1-09 (Wave 4, single atomic commit). Executor lands D-15 className binding (with HARD STOP gate at the snapshot-regen + grep verification — if class="pill-" / class="cta-" matches are 0 the executor surfaces and stops, do NOT bypass), then D-16/D-17 dead-rule deletion + WR-05 MSO relocation, then D-18 CSS-gen + className-match test rewrites + invariant-shaped valign:top floor, then D-19 WR-01/02 stripLeadingGreeting + WR-03 MAX_LEN export + WR-06 borderRadius deletion, then D-20 final snapshot regen (SendUpdate + WorkOrder if dirty) + atomic commit with NO AI attribution. After commit: /gsd-code-review 46.1 for round-5 BLOCKER==0 confirmation, then notify Liz to schedule round-5 visual re-test (Outlook for Mac dark + Windows dark + web dark + light-mode regression check) per D-21.
 Last activity: 2026-04-29
 
 ## v5.3 Phase Map
