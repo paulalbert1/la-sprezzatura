@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO."
-last_updated: "2026-04-29T14:21:00.000Z"
-last_activity: 2026-04-29 -- Phase 46.1 plan 06 complete (gap-7 outlook-mac dark-mode survival spike)
+stopped_at: "Phase 46.1 plan 06 (gap-7 outlook-mac dark-mode survival spike) complete at `af52ca5`. Spike artifact `46.1-SPIKE-OUTLOOK-MAC.md` lands the chosen combination ((a) `<table bgcolor>` body wrapper + (b) `@media (prefers-color-scheme: dark)` block + (d) inline body-attribute paint -- ADDITIVE on top of the existing 46.1-04 lock) that 46.1-08 will apply to `EmailShell.tsx`. Archaeology PASS for all three chosen techniques against gap-5 / gap-6 left-alignment invariants. Out-of-scope per Q8 lock: Litmus / Email on Acid as CI gate; Playwright dark-mode emulation as verification gate. 19 existing EmailShell.test.ts assertions stay valid -- chosen combination is purely additive."
+last_updated: "2026-04-29T14:31:42.174Z"
+last_activity: 2026-04-29
 progress:
   total_phases: 11
   completed_phases: 3
   total_plans: 30
-  completed_plans: 28
-  percent: 93
+  completed_plans: 29
+  percent: 97
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 46.1 (merge-gate-gap-closure) — EXECUTING
-Plan: 2 of 8 (next: 46.1-07 gap-6 procurement layout fix; depends-on for 46.1-08 met by SPIKE artifact)
+Plan: 3 of 8 (next: 46.1-07 gap-6 procurement layout fix; depends-on for 46.1-08 met by SPIKE artifact)
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
 Plans: 6 of 8 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3 wave 1: 46.1-06 af52ca5 SPIKE artifact for gap-7). Round-3 wave 1 in progress (46.1-07 next), round-3 wave 2 pending (46.1-08 reads SPIKE).
-Status: Executing Phase 46.1 round 3 wave 1
+Status: Ready to execute
 Next: 46.1-07 gap-6 procurement layout fix (parallel-safe with 46.1-06 in wave 1; touches Procurement.tsx + SendUpdate.test.ts + snapshot regen). After both wave-1 plans complete, 46.1-08 reads 46.1-SPIKE-OUTLOOK-MAC.md ## Recommendation and applies the chosen combination (a + b + d) to EmailShell.tsx.
-Last activity: 2026-04-29 -- Phase 46.1 plan 06 complete (gap-7 outlook-mac dark-mode survival spike)
+Last activity: 2026-04-29
 
 ## v5.3 Phase Map
 
@@ -119,6 +119,7 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - New dependencies: `react-email@^6.0.0`, `@react-email/render`, `@react-email/tailwind`, `@axe-core/playwright@^4.11.2`, `@playwright/test@latest` (a11y harness manual-only, no CI gate)
 - **D-7** (Phase 45-04): `@react-email/tailwind@^2.0.7` normalizes hex colors to `rgb(r,g,b)` during inlining; brand-token round-trip assertions in email tests must accept either hex OR rgb form. `containsTokenColor()` helper in `src/emails/scaffold.test.ts` is the canonical pattern for Phase 46+ template tests. Update 45-RESEARCH.md Pitfall 7 to reflect this when convenient.
 - [Phase ?]: D-8 (Phase 45-05): Playwright 1.59 ships its own react/jsx-runtime that breaks renderToString when JSX components are imported from spec files; the workaround is a two-process globalSetup that shells out to vite-node + vitest.config.ts so @vitejs/plugin-react's react-jsx automatic transform is in effect. Phase 46 spec files MUST follow this pattern (pre-render in scripts/render-email-fixtures-impl.ts, read via readFileSync in the spec).
+- [Phase ?]: 46.1-07: Locked Procurement column widths to 60/22/18 via Column width attribute + verticalAlign:top on body-row Columns + outer Section paddingTop:16 wrapper. Closes UAT gap-6.
 
 ### Pending Todos
 
@@ -138,7 +139,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-29T14:21:00.000Z
+Last session: 2026-04-29T14:31:42.168Z
 Stopped at: Phase 46.1 plan 06 (gap-7 outlook-mac dark-mode survival spike) complete at `af52ca5`. Spike artifact `46.1-SPIKE-OUTLOOK-MAC.md` lands the chosen combination ((a) `<table bgcolor>` body wrapper + (b) `@media (prefers-color-scheme: dark)` block + (d) inline body-attribute paint -- ADDITIVE on top of the existing 46.1-04 lock) that 46.1-08 will apply to `EmailShell.tsx`. Archaeology PASS for all three chosen techniques against gap-5 / gap-6 left-alignment invariants. Out-of-scope per Q8 lock: Litmus / Email on Acid as CI gate; Playwright dark-mode emulation as verification gate. 19 existing EmailShell.test.ts assertions stay valid -- chosen combination is purely additive.
 Resume file: None
 Next action: Execute 46.1-07 (gap-6 procurement layout fix) as the second wave-1 plan. Then execute 46.1-08 (gap-7 fix) which reads 46.1-SPIKE-OUTLOOK-MAC.md `## Recommendation` to author `EmailShell.tsx` additions on top of (NOT replacing) the existing 46.1-04 `[data-ogsc]`/`[data-ogsb]`/MSO lock. After all three round-3 plans commit, parent UAT 46-UAT.md replays for round-4 Liz visual re-test on Outlook for Mac dark + Windows dark + web dark.
