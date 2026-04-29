@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: executing
-stopped_at: "Phase 46 Plan 03 Task 1 complete -- D-16 diff harness refreshed against 46-04 SendUpdate output. Adapter shim (`adaptSendUpdateLegacy()`) added to `scripts/_phase46-diff-old-vs-new.ts` re-projecting 46-04 fixture shape (label/state/eta/personalActionItems/showReviewItems/vendor/spec/tenant/preheader) onto legacy `SendUpdateEmailInput`. Re-ran via vite-node; 14 HTML pairs (5 SU + 2 WO) at `tests/email-snapshots/.phase46-diff/` (gitignored). `46-MIGRATION-DIFF.md` rewritten end-to-end with refreshed byte-count table, expected-deltas section split into Phase 46 originals (D-1..D-7) and 46-04 redesign deltas (D-2..D-29), and per-fixture spot checks. Conclusion: GO."
-last_updated: "2026-04-29T01:01:41.369Z"
-last_activity: 2026-04-29
+status: planning
+stopped_at: "Phase 46.1 round-3 re-test (Liz, Outlook for Mac, 2026-04-29) surfaced 2 new gaps: gap-6 (procurement layout regression -- ETA cells not horizontally aligned across rows because Item column too narrow + uneven row heights) and gap-7 (Outlook-for-Mac dark-mode persists despite 46.1-04 lock -- the [data-ogsc]/[data-ogsb] hooks target classic Outlook-for-Windows engine, not New Outlook for Mac). Round-3 plan needed. Tests 1, 2, 5 (gap-1, gap-2, items-not-issues regression) all visually confirmed PASSED."
+last_updated: "2026-04-29T13:05:00.000Z"
+last_activity: 2026-04-29 -- Phase 46.1 re-opened for round-3 (gap-6 + gap-7)
 progress:
   total_phases: 11
   completed_phases: 4
@@ -25,11 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — EXECUTING
+Phase: 46.1 (merge-gate-gap-closure) — RE-OPENED FOR ROUND 3
 Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED)
-Plan: 5 of 5 complete (Wave 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; Wave 2: 46.1-04 f867da6 ✓, 46.1-05 14dabb9 ✓)
-Status: Phase 46.1 plans complete -- ready for gap-closure-finalization (artifact-level UAT updates flipping gap-4 + gap-5 status: failed -> resolved) and round-3 Liz re-test in Outlook desktop
-Last activity: 2026-04-29
+Plans: 5 of 5 complete in code (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9). Round-3 plans TBD.
+Status: Round-3 re-test (Liz, Outlook for Mac, 2026-04-29) found gap-1, gap-2, gap-5-light-mode, items-not-issues all visually fixed; gap-4 (Outlook-Mac dark-mode) and gap-5 (procurement table layout) require round-3 follow-up. New gap-6 (procurement layout) and gap-7 (Outlook-Mac dark-mode) added to parent UAT 46-UAT.md. Routing to /gsd-plan-phase 46.1 --gaps.
+Next: /gsd-plan-phase 46.1 --gaps -- read 46-UAT.md gap-6 + gap-7 entries and the open questions Q1-Q6 inline; produce one or two new fix plans (TBD slugs) and re-discuss as needed before executing.
+Last activity: 2026-04-29 -- Phase 46.1 re-opened for round-3
 
 ## v5.3 Phase Map
 

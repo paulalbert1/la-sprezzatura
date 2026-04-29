@@ -1,7 +1,7 @@
 ---
 phase: 46-send-update-work-order-migration
 type: uat
-status: resolved
+status: diagnosed
 gate: merge-gate
 verdict: REJECTED
 date: 2026-04-28
@@ -12,11 +12,11 @@ gap_closure_commits:
   - eaea038  # gap-1: defensive greeting strip + admin compose helper
   - 9b5cb08  # gap-2: formatDate/formatLongDate empty-input guard
   - 889477e  # gap-3: PLAN-AUTHORING-PATTERNS strengthening
-  - f867da6  # gap-4: Outlook desktop dark-mode lock (data-ogsc/data-ogsb/MSO)
-  - 14dabb9  # gap-5: left-align Milestones + Procurement table cells
+  - f867da6  # gap-4: Outlook desktop dark-mode lock (data-ogsc/data-ogsb/MSO) -- INSUFFICIENT, see gap-7
+  - 14dabb9  # gap-5: left-align Milestones + Procurement table cells -- regression introduced ETA mis-alignment, see gap-6
 re_test_round_2: 2026-04-28  # round 2 surfaced gap-4 and gap-5; gap-1 visually confirmed fixed
-re_test_round_3: pending      # round 3 (Liz Outlook desktop) gates parent Phase 46 closure per 46.1-CONTEXT.md D-9
-updated: 2026-04-28
+re_test_round_3: 2026-04-29   # round 3 surfaced gap-6 (procurement layout) and gap-7 (Outlook Mac dark-mode persists); gap-1, gap-2, gap-5-light-mode-alignment visually confirmed fixed
+updated: 2026-04-29
 ---
 
 # Phase 46 — Outlook Desktop Merge-Gate UAT
@@ -209,6 +209,92 @@ Change all `align="right"` and `align="center"` to `align="left"` so all table c
 - Procurement Status header + cell: `center` → `left`
 
 Snapshots regenerate. Visual confirmation manual via re-test.
+
+---
+
+### gap-6 — Procurement table layout: ETA cells not horizontally aligned across rows + first column too narrow
+
+- **status:** failed
+- **debug_session:** none — diagnosed from round-3 web-preview screenshot 2026-04-29
+- **resolves_in:** 46.1 (round-3 plan, TBD slug)
+- **surfaced_by:** round-3 re-test (light-mode web-preview render in admin compose UI). The gap-5 left-align swap landed correctly, but exposed a separate underlying layout problem the right-align state had visually masked.
+
+**What Liz saw (round 3, web preview light mode):**
+
+In the Procurement table the three rows have unequal heights because the Item column is too narrow:
+- Row 1 "Custom Sectional Sofa — Kravet Crypton Fabric" wraps to 2 lines
+- Row 2 "Handknotted Wool & Silk Rug — 9x12" fits on 1 line
+- Row 3 "Italian Pendant Lights (set of 3) — Flos IC" wraps to 2 lines
+
+Because each `<Column verticalAlign="middle">` centers its content against its own row, the ETA values "May 14", "Apr 23", and the row-3 cell sit at three different y-positions. The eye expects a clean ETA stripe but reads three offset values. The Status pill column has the same issue (PENDING ORDER pill visually clipped/shifted in row 3). Visual: the ETA column does not form a horizontal stripe across rows.
+
+User additional ask: a bit more vertical margin above the Procurement section (current spacing reads tight against the Milestones section).
+
+**Mechanism (preliminary, planner to verify):**
+
+- `src/emails/sendUpdate/Procurement.tsx` — `<Column>` widths are not explicitly set; react-email distributes width evenly or by content-fit. With three columns and uneven content, Item gets squeezed.
+- `<Column verticalAlign="middle">` (current) anchors each cell to its row's vertical center. With 2-line rows interleaved with 1-line rows, ETA cells form a zig-zag, not a stripe.
+- Procurement section's outer `<Section style={...}>` has whatever marginTop the existing styles set; user wants more.
+
+**Fix surface (covered by 46.1 round-3 plan):**
+
+Two complementary knobs — both probably needed:
+
+1. **Explicit column widths.** Set Item column wide enough to fit the longest realistic item-name + vendor sub-line on one line in the 600px email card. Status and ETA columns get narrower fixed widths matching their content. Tentative ratios (planner to confirm against fixture data): Item ~60%, Status ~22%, ETA ~18%, with `<Column width="60%">` etc. (react-email supports this via the `width` attribute or inline style.)
+2. **`verticalAlign="top"` on row Columns.** Anchor each cell to the top of its row so when Item wraps to 2 lines, Status pill and ETA value sit at the row's top edge. ETA stripe stays horizontally aligned across rows even when rows have different heights.
+3. **Increase marginTop above the Procurement `<Section>`.** Current value TBD by planner; bump it to a clearly-readable gap.
+
+The combination: even if a future item name is genuinely too long for a 60% Item column, `verticalAlign="top"` guarantees the ETA stripe stays clean.
+
+**Open questions for planning (Paul to answer in /gsd-plan-phase 46.1 --gaps):**
+
+- (Q1) Hard column ratios (60/22/18) or planner-researched react-email-safe values?
+- (Q2) Confirm `verticalAlign="top"` is the desired behavior (ETA value sits adjacent to the FIRST line of a wrapped Item name) — vs `bottom` or staying at `middle`.
+- (Q3) Numeric value for the new Procurement marginTop (e.g. 32px, 40px) — or "match the Milestones-to-ReviewItems gap whatever that is".
+
+**Tests:** snapshot regen + new section-scoped HTML inspection asserting `<col>` / `<td width=...>` widths are present on the Procurement columns, and that Item column has the largest declared width. Visual confirmation requires another round-4 re-test from Liz.
+
+---
+
+### gap-7 — Outlook (Mac) desktop dark-mode contrast inversion persists despite [data-ogsc]/[data-ogsb] lock
+
+- **status:** failed
+- **debug_session:** TBD — best-guess root cause is New-Outlook-for-Mac (or web-wrapper variant) using a different dark-mode pipeline than classic Windows Outlook desktop. Spike likely needed.
+- **resolves_in:** 46.1 (round-3 plan, TBD slug) — possibly with research/spike step
+- **supersedes:** none (extends gap-4; the [data-ogsc]/[data-ogsb]/MSO lock from 46.1-04 was insufficient)
+
+**What Liz saw (round 3 re-test, 2026-04-29):**
+
+In Outlook desktop dark mode, the SendUpdate body STILL renders as half-inverted: dark gray background, cream/beige text. The fix from 46.1-04 (commit `f867da6`) added `[data-ogsc]` text-color rules, `[data-ogsb]` background rules, and an MSO conditional, but the visual result is unchanged from round-2. The 19 EmailShell.test.ts assertions confirm the lock markers ARE in the rendered HTML — but Outlook is not honoring them.
+
+Web-app preview (light mode in admin compose UI) renders correctly — confirming the source HTML is correct and only the email-client layer is the problem. Light-mode rendering in real Outlook is presumed correct (Liz's screenshot was dark-mode only); planner should confirm.
+
+**Mechanism (best guess — to verify in spike):**
+
+The `[data-ogsc]` and `[data-ogsb]` selector hooks are a CLASSIC OUTLOOK FOR WINDOWS technique. New Outlook for Mac (and the macOS Outlook web-wrapper, "the new Outlook" UX) appears to use a different dark-mode rendering pipeline that:
+
+- Either doesn't paint the `data-ogsc`/`data-ogsb` attributes onto inline-styled elements (so our `[data-ogsc]` rules never match anything)
+- Or applies its dark-mode CSS at a higher specificity than our `!important` rules
+- Or uses a completely different selector hook that we haven't matched yet
+
+Liz's screenshot title bar shows "Summarize" in a stylized button — that's a New Outlook for Mac UI signature, not classic Outlook for Windows. So we're fighting a different rendering engine than we targeted in 46.1-04.
+
+**Fix surface (covered by 46.1 round-3 plan, requires research/spike first):**
+
+Likely candidates (planner to research and lock):
+
+1. **Force background paint at the body/wrapper level.** Instead of relying on inline styles being preserved, paint the cream `#FAF8F5` background via a top-level `<table bgcolor="#FAF8F5">` or `<div style="background:#FAF8F5">` wrapper that Outlook Mac cannot easily override. This is the "Outlook Mac dark-mode survival" pattern documented in HTML-email community sources.
+2. **Add CSS media query for `prefers-color-scheme: dark`** with explicit overrides matching the locked palette. Some Outlook variants honor `@media (prefers-color-scheme: dark)` even when they ignore `color-scheme: only light`.
+3. **Add `class~="email-shell"` selectors with `!important`** as a third selector path that may match where `[data-ogsc]` doesn't.
+4. **Investigate New-Outlook-Mac-specific quirks** — e.g. whether it strips `<style>` blocks in `<head>` (in which case all our locks are dead before they execute), and whether body-level `style="background:#X"` survives as an inline attribute when class-level CSS doesn't.
+
+**Open questions for planning (Paul to answer in /gsd-plan-phase 46.1 --gaps):**
+
+- (Q4) Outlook desktop on Mac, Windows, or both? The screenshot shows New Outlook for Mac UI; need to confirm whether the same fix needs to also work on Windows classic Outlook (where 46.1-04's lock probably IS sufficient).
+- (Q5) Is investing more in defeating Outlook-Mac dark-mode worth it for round-3, or do we accept that "half-inverted but still legible" is the floor and document it as a known-limitation?
+- (Q6) If we DO push back, is a spike (research + prototype) required before the fix plan, or can the planner draft a fix plan straight from a literature review?
+
+**Tests:** depends on fix path. If we add a `<div bgcolor>` wrapper, automated tests assert the wrapper exists in rendered HTML for both SendUpdate and WorkOrder. Visual confirmation requires another round-4 Liz re-test in Outlook for Mac dark mode (and possibly Outlook for Windows for cross-check).
 
 ---
 
