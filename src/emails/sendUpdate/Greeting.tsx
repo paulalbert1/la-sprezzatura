@@ -40,14 +40,14 @@ const GREETING_STYLE = {
   lineHeight: "28px",
   color: "#4A4540",
   margin: 0,
-  marginBottom: 14,
+  marginBottom: 0,
 } as const;
 
 const SECTION_STYLE = {
   paddingLeft: 40,
   paddingRight: 40,
   paddingTop: 8,
-  paddingBottom: 12,
+  paddingBottom: 4,
 } as const;
 
 export function Greeting({ project, firstName, sentDate }: GreetingProps) {

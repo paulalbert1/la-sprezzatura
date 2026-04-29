@@ -8,6 +8,7 @@ import { redis } from "../../../../../lib/redis";
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { WorkOrder } from "../../../../../emails/workOrder/WorkOrder";
+import { getTenantBrand } from "../../../../../lib/email/tenantBrand";
 
 // Phase 39 Plan 04 Task 2 — POST /api/admin/work-orders/[id]/send
 // Phase 46 Plan 03 — rewired to react-email render (D-14 cutover);
@@ -138,6 +139,9 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
         verifyUrl,
         // D-13: preheader computed at call site, passed via prop.
         preheader: `Work order ready for ${wo.project.title} — view your latest version`,
+        // Tenant brand (signoff name + location + wordmark) -- resolved from
+        // siteSettings so the operator can edit it via /admin/settings.
+        tenant: await getTenantBrand(sanityWriteClient),
       };
       const workOrderElement = createElement(WorkOrder, workOrderProps);
       const htmlBody = await render(workOrderElement);

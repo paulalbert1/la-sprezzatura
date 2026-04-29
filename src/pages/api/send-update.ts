@@ -7,7 +7,7 @@ import { getSession } from "../../lib/session";
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { SendUpdate, formatLongDate, type SendUpdateEmailInput, type PendingArtifact } from "../../emails/sendUpdate/SendUpdate";
-import { LA_SPREZZATURA_TENANT } from "../../lib/email/tenantBrand";
+import { getTenantBrand } from "../../lib/email/tenantBrand";
 import type { ProcurementStatus } from "../../lib/procurement/statusPills";
 
 // Phase 34 Plan 04 — Send Update API route
@@ -242,6 +242,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     // every recipient in this send (no per-recipient personalization).
     const preheader = `Project Update for ${project.title} — ${formatLongDate(new Date().toISOString())}`;
 
+    // Resolve the tenant brand once (signoff name + location + wordmark).
+    // Single Sanity fetch shared across all recipients in this send.
+    const tenant = await getTenantBrand(sanityWriteClient);
+
     if (apiKey) {
       const { Resend } = await import("resend");
       const resend = new Resend(apiKey);
@@ -288,7 +292,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             baseUrl,
             ctaHref: perRecipientCtaHref,
             clientFirstName: client.name?.split(" ")[0],
-            tenant: LA_SPREZZATURA_TENANT,
+            tenant,
             preheader,
           };
           const perRecipientElement = createElement(SendUpdate, perRecipientProps);
@@ -335,7 +339,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             baseUrl,
             ctaHref: `${baseUrl}/portal/dashboard`,
             clientFirstName: client.name?.split(" ")[0],
-            tenant: LA_SPREZZATURA_TENANT,
+            tenant,
             preheader,
           };
           const element = createElement(SendUpdate, props);

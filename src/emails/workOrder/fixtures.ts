@@ -7,6 +7,9 @@
 //
 // Two fixtures: default and longTitle (stresses table column widths).
 
+import type { TenantBrand } from "../../lib/email/tenantBrand";
+import { LA_SPREZZATURA_TENANT } from "../../lib/email/tenantBrand";
+
 export interface WorkOrderEmailInput {
   project: { _id: string; title: string };
   contractor: { _id: string; name: string; email: string };
@@ -15,6 +18,7 @@ export interface WorkOrderEmailInput {
   fromDisplayName: string;
   verifyUrl?: string;
   preheader?: string;
+  tenant?: TenantBrand;
 }
 
 export function baseInput(overrides: Partial<WorkOrderEmailInput> = {}): WorkOrderEmailInput {
@@ -24,6 +28,7 @@ export function baseInput(overrides: Partial<WorkOrderEmailInput> = {}): WorkOrd
     workOrderId: "WO1",
     baseUrl: "https://example.com",
     fromDisplayName: "Liz Albert",
+    tenant: LA_SPREZZATURA_TENANT,
     ...overrides,
   };
 }

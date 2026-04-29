@@ -49,6 +49,7 @@ type SiteSettingsRow = {
   contactEmail?: string;
   contactPhone?: string;
   studioLocation?: string;
+  signoffName?: string;
   defaultFromEmail?: string;
   defaultCcEmail?: string;
   socialLinks?: { instagram?: string; pinterest?: string; houzz?: string };
@@ -76,6 +77,7 @@ const initialSettings = {
   contactEmail: row.contactEmail ?? "",
   contactPhone: row.contactPhone ?? "",
   studioLocation: row.studioLocation ?? "",
+  signoffName: row.signoffName ?? "",
   defaultFromEmail: row.defaultFromEmail ?? "",
   defaultCcEmail: row.defaultCcEmail ?? "",
   socialLinks: {

@@ -224,9 +224,13 @@ export function EmailShell({
                     )}
                     <Hr className="border-cream-dark m-0" />
                     <Section className="px-[40px] py-[16px] text-center">
-                      <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0">
-                        {signoffName} {"·"} {tenant.signoffLocation}
-                      </Text>
+                      {(signoffName || tenant.signoffLocation) && (
+                        <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0">
+                          {signoffName && tenant.signoffLocation
+                            ? `${signoffName} · ${tenant.signoffLocation}`
+                            : signoffName || tenant.signoffLocation}
+                        </Text>
+                      )}
                       <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0 mt-[8px]">
                         Sent via Sprezza Hub
                       </Text>

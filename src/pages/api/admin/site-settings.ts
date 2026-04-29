@@ -59,6 +59,7 @@ interface GeneralFields {
   contactEmail?: unknown;
   contactPhone?: unknown;
   studioLocation?: unknown;
+  signoffName?: unknown;
   defaultFromEmail?: unknown;
   defaultCcEmail?: unknown;
 }
@@ -101,6 +102,22 @@ function validateUpdateBody(body: Record<string, unknown>): string | null {
     const trimmed = general.contactEmail.trim();
     if (trimmed.length > 0 && !EMAIL_REGEX.test(trimmed)) {
       return "contactEmail must be a valid email address";
+    }
+  }
+
+  // signoffName — optional string used in outbound email footer.
+  // Reject CR/LF for parity with email-related fields (header-injection
+  // hygiene; this string never reaches an SMTP header today, but the same
+  // rule keeps it future-safe and matches operator expectation).
+  if (general.signoffName !== undefined) {
+    if (typeof general.signoffName !== "string") {
+      return "signoffName must be a string";
+    }
+    if (general.signoffName.length > MAX_SITE_TITLE) {
+      return `signoffName must be ${MAX_SITE_TITLE} characters or less`;
+    }
+    if (/[\r\n]/.test(general.signoffName)) {
+      return "signoffName must not contain newlines";
     }
   }
 
@@ -222,6 +239,9 @@ function buildUpdatePayload(
   }
   if (general.studioLocation !== undefined) {
     out.studioLocation = general.studioLocation;
+  }
+  if (general.signoffName !== undefined) {
+    out.signoffName = (general.signoffName as string).trim();
   }
   if (general.defaultFromEmail !== undefined) {
     out.defaultFromEmail = (general.defaultFromEmail as string).trim();

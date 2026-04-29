@@ -97,8 +97,10 @@ export function Milestones({ milestones }: MilestonesProps) {
         // Sentence-case source strings + textTransform: uppercase styling --
         // accessibility-driven (see header comment).
         const pillLabel = m.state === "completed" ? "Complete" : "Upcoming";
+        const isLast = i === milestones.length - 1;
+        const rowStyle = isLast ? { ...ROW_STYLE, borderBottom: "none" } : ROW_STYLE;
         return (
-          <Row key={`m-${i}`} style={ROW_STYLE}>
+          <Row key={`m-${i}`} style={rowStyle}>
             <Column style={{ verticalAlign: "middle" }}>
               <span style={squareStyle} />
               <span style={titleStyle}>{m.label}</span>

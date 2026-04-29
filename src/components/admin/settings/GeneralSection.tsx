@@ -13,6 +13,7 @@ export interface GeneralValues {
   contactEmail: string;
   contactPhone: string;
   studioLocation: string;
+  signoffName: string;
   // Phase 38 — Send Update sender config (SETT-10 / SETT-11)
   defaultFromEmail: string;
   defaultCcEmail: string;
@@ -152,6 +153,20 @@ export default function GeneralSection({
           placeholder="Long Island, NY"
         />
         <HelperText>General area — not a home address</HelperText>
+      </div>
+
+      <div>
+        <FieldLabel>Email Signoff Name</FieldLabel>
+        <input
+          type="text"
+          className="luxury-input w-full"
+          value={values.signoffName}
+          onChange={handle("signoffName")}
+          placeholder="Elizabeth Olivier"
+        />
+        <HelperText>
+          Signs outbound emails (Send Update, Work Order). Renders next to Studio Location in the footer.
+        </HelperText>
       </div>
 
       {/* Phase 38 — Send Update sender config (SETT-10). D-01: appended after

@@ -36,6 +36,13 @@ export const siteSettings = defineType({
       description: "General area (e.g., Long Island, NY) -- not a home address",
     }),
     defineField({
+      name: "signoffName",
+      title: "Email Signoff Name",
+      type: "string",
+      description:
+        "Name that signs outbound emails (Send Update, Work Order). Appears alongside Studio Location in the email footer (e.g., 'Elizabeth Olivier · Long Island, NY').",
+    }),
+    defineField({
       name: "defaultFromEmail",
       title: "Send Update — Default From",
       type: "string",

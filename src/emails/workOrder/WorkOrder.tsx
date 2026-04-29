@@ -20,7 +20,7 @@ import type { WorkOrderEmailInput } from "./fixtures";
 export type { WorkOrderEmailInput };
 
 export function WorkOrder(props: WorkOrderEmailInput) {
-  const { project, contractor, workOrderId, baseUrl, verifyUrl, preheader } = props;
+  const { project, contractor, workOrderId, baseUrl, verifyUrl, preheader, tenant } = props;
   const firstName = contractor.name?.split(" ")[0] ?? "there";
   const ctaHref =
     verifyUrl ?? `${baseUrl}/workorder/project/${project._id}/orders/${workOrderId}`;
@@ -34,7 +34,7 @@ export function WorkOrder(props: WorkOrderEmailInput) {
 
   return (
     <EmailShell
-      tenant={LA_SPREZZATURA_TENANT}
+      tenant={tenant ?? LA_SPREZZATURA_TENANT}
       preheader={computedPreheader}
       cta={{ href: ctaHref, label: "VIEW WORK ORDER" }}
     >

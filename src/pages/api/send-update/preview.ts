@@ -6,7 +6,7 @@ import { sanityWriteClient } from "../../../sanity/writeClient";
 import { render } from "@react-email/render";
 import { createElement } from "react";
 import { SendUpdate, type SendUpdateEmailInput, type PendingArtifact } from "../../../emails/sendUpdate/SendUpdate";
-import { LA_SPREZZATURA_TENANT } from "../../../lib/email/tenantBrand";
+import { getTenantBrand } from "../../../lib/email/tenantBrand";
 import type { ProcurementStatus } from "../../../lib/procurement/statusPills";
 
 // Phase 34 Plan 04 Task 2 — Send Update HTML preview endpoint.
@@ -210,7 +210,7 @@ export const GET: APIRoute = async ({ url, cookies }) => {
     baseUrl,
     ctaHref,
     clientFirstName,
-    tenant: LA_SPREZZATURA_TENANT,
+    tenant: await getTenantBrand(sanityWriteClient),
     // D-13: preheader computed at call site, passed via prop.
     preheader: `Project Update for ${project.title} — preview`,
   };

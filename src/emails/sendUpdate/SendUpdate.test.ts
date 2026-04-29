@@ -486,57 +486,38 @@ describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D
     const procStart = html.indexOf(">Procurement</p>");
     expect(procStart).toBeGreaterThan(-1);
     const procSlice = html.slice(procStart);
-    // Body rows carry the border-bottom sentinel (per ROW_STYLE in Procurement.tsx).
-    // Header tr does NOT carry it. Decoupled from fixture row count.
-    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
-    // element with the border-bottom in its inline style (the Row primitive
-    // wraps a <table>, not a <tr>). Both header and body rows carry the
-    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
-    // Row). The total count = 1 header + N body rows; bodyRowCount derives
-    // by subtracting the header (always 1).
-    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
-    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
-    const bodyRowCount = allBorderRows - 1;
-    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    // Anchor: the column-width attribute appears on EVERY row (header + body),
+    // independent of the border-bottom sentinel. Counting by width keeps this
+    // test honest after the "no border on last row" change in
+    // src/emails/sendUpdate/Procurement.tsx (each row gets a width regardless
+    // of whether it's the last). bodyRowCount derives by subtracting the
+    // header (always 1).
     const widthMatches = (procSlice.match(/<td[^>]*width="60%"/g) || []).length;
-    // Floor: header (1) + each body row -> bodyRowCount + 1.
-    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
+    expect(widthMatches).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = widthMatches - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
   });
 
   it("Procurement section emits <td width=\"22%\"> on Status column for header + each body row (D-13 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     const procSlice = html.slice(procStart);
-    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
-    // element with the border-bottom in its inline style (the Row primitive
-    // wraps a <table>, not a <tr>). Both header and body rows carry the
-    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
-    // Row). The total count = 1 header + N body rows; bodyRowCount derives
-    // by subtracting the header (always 1).
-    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
-    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
-    const bodyRowCount = allBorderRows - 1;
-    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    // See Item-column test above for the width-anchored counting rationale.
     const widthMatches = (procSlice.match(/<td[^>]*width="22%"/g) || []).length;
-    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
+    expect(widthMatches).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = widthMatches - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
   });
 
   it("Procurement section emits <td width=\"18%\"> on ETA column for header + each body row (D-13 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     const procSlice = html.slice(procStart);
-    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
-    // element with the border-bottom in its inline style (the Row primitive
-    // wraps a <table>, not a <tr>). Both header and body rows carry the
-    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
-    // Row). The total count = 1 header + N body rows; bodyRowCount derives
-    // by subtracting the header (always 1).
-    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
-    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
-    const bodyRowCount = allBorderRows - 1;
-    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    // See Item-column test above for the width-anchored counting rationale.
     const widthMatches = (procSlice.match(/<td[^>]*width="18%"/g) || []).length;
-    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
+    expect(widthMatches).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = widthMatches - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
   });
 
   it("Procurement BODY rows compile verticalAlign:top to compiled HTML (D-12 -- invariant per-row count, WR-R3-04)", async () => {
@@ -544,17 +525,10 @@ describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D
     const procStart = html.indexOf(">Procurement</p>");
     expect(procStart).toBeGreaterThan(-1);
     const procSlice = html.slice(procStart);
-    // Body rows carry the border-bottom sentinel (per ROW_STYLE in Procurement.tsx).
-    // Header tr does NOT carry it. Decoupled from fixture row count.
-    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
-    // element with the border-bottom in its inline style (the Row primitive
-    // wraps a <table>, not a <tr>). Both header and body rows carry the
-    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
-    // Row). The total count = 1 header + N body rows; bodyRowCount derives
-    // by subtracting the header (always 1).
-    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
-    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
-    const bodyRowCount = allBorderRows - 1;
+    // See Item-column test above for the width-anchored counting rationale.
+    const widthMatches = (procSlice.match(/<td[^>]*width="60%"/g) || []).length;
+    expect(widthMatches).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = widthMatches - 1;
     expect(bodyRowCount).toBeGreaterThanOrEqual(3);
     // react-email may compile React `verticalAlign: "top"` to either
     // `valign="top"` HTML attribute OR `vertical-align:top` inline style on

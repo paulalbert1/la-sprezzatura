@@ -539,6 +539,7 @@ export const SITE_SETTINGS_QUERY = `
     contactEmail,
     contactPhone,
     studioLocation,
+    signoffName,
     defaultFromEmail,
     defaultCcEmail,
     socialLinks {

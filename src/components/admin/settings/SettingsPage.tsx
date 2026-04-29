@@ -34,6 +34,7 @@ export interface SiteSettingsPayload {
   contactEmail: string;
   contactPhone: string;
   studioLocation: string;
+  signoffName: string;
   socialLinks: SocialLinksValues;
   heroSlideshow: HeroSlide[];
   renderingAllocation: number;
@@ -86,6 +87,7 @@ function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [], inU
     contactEmail: initialSettings.contactEmail ?? "",
     contactPhone: initialSettings.contactPhone ?? "",
     studioLocation: initialSettings.studioLocation ?? "",
+    signoffName: initialSettings.signoffName ?? "",
     defaultFromEmail: initialSettings.defaultFromEmail ?? "",
     defaultCcEmail: initialSettings.defaultCcEmail ?? "",
   });
@@ -204,6 +206,7 @@ function SettingsPageInner({ initialSettings, initialWorkflowTemplates = [], inU
       contactEmail: reset.contactEmail ?? "",
       contactPhone: reset.contactPhone ?? "",
       studioLocation: reset.studioLocation ?? "",
+      signoffName: reset.signoffName ?? "",
       defaultFromEmail: reset.defaultFromEmail ?? "",
       defaultCcEmail: reset.defaultCcEmail ?? "",
     });

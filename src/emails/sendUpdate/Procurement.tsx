@@ -111,8 +111,10 @@ export function Procurement({ items }: ProcurementProps) {
         </Row>
         {items.map((it, i) => {
           const subLine = composeSubLine(it.vendor, it.spec);
+          const isLast = i === items.length - 1;
+          const rowStyle = isLast ? { ...ROW_STYLE, borderBottom: "none" } : ROW_STYLE;
           return (
-            <Row key={`p-${i}`} style={ROW_STYLE}>
+            <Row key={`p-${i}`} style={rowStyle}>
               <Column width="60%" style={{ verticalAlign: "top" }}>
                 <span style={ITEM_NAME_STYLE}>{it.name}</span>
                 {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
