@@ -120,14 +120,21 @@ export function Procurement({ items }: ProcurementProps) {
           const rowStyle = isLast ? { ...ROW_STYLE, borderBottom: "none" } : ROW_STYLE;
           return (
             <Row key={`p-${i}`} style={rowStyle}>
+              {/* Item cell stays top-aligned so the item name + optional
+                  sub-line stack from the top of the row when wrapping.
+                  Status and ETA cells shift to middle so they center
+                  against the full Item cell height -- a 2-line item now
+                  has its pill + date aligned to the middle of those 2
+                  lines, which reads as intentional alignment instead of
+                  the previous "all top-anchored" zig-zag. */}
               <Column width="60%" style={{ verticalAlign: "top" }}>
                 <span style={ITEM_NAME_STYLE}>{it.name}</span>
                 {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
               </Column>
-              <Column width="22%" align="left" style={{ verticalAlign: "top" }}>
+              <Column width="22%" align="left" style={{ verticalAlign: "middle" }}>
                 <span className={`pill-${it.status}`} style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
               </Column>
-              <Column width="18%" align="left" style={{ verticalAlign: "top" }}>
+              <Column width="18%" align="left" style={{ verticalAlign: "middle" }}>
                 <span style={ETA_STYLE}>{it.eta}</span>
               </Column>
             </Row>

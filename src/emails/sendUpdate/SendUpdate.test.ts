@@ -520,7 +520,7 @@ describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D
     expect(bodyRowCount).toBeGreaterThanOrEqual(3);
   });
 
-  it("Procurement BODY rows compile verticalAlign:top to compiled HTML (D-12 -- invariant per-row count, WR-R3-04)", async () => {
+  it("Procurement BODY rows compile mixed verticalAlign: Item top + Status/ETA middle (post-46.1-07 D-12 amendment -- pill+date center against multi-line item cell)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     expect(procStart).toBeGreaterThan(-1);
@@ -530,15 +530,21 @@ describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D
     expect(widthMatches).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
     const bodyRowCount = widthMatches - 1;
     expect(bodyRowCount).toBeGreaterThanOrEqual(3);
-    // react-email may compile React `verticalAlign: "top"` to either
-    // `valign="top"` HTML attribute OR `vertical-align:top` inline style on
-    // the <td>. Accept either path.
-    const valignAttr = (procSlice.match(/<td[^>]*valign="top"/g) || []).length;
-    const valignStyle = (procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*top/gi) || []).length;
-    const valignHits = valignAttr + valignStyle;
-    // Invariant: every body row has at least one valign:top cell. Floor of
-    // bodyRowCount captures "regression" without false-positives on fixture growth.
-    expect(valignHits).toBeGreaterThanOrEqual(bodyRowCount);
+    // react-email may compile React `verticalAlign: ...` to either
+    // `valign="..."` HTML attribute OR `vertical-align: ...` inline style.
+    // Accept either path.
+    const valignTopHits =
+      (procSlice.match(/<td[^>]*valign="top"/g) || []).length +
+      (procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*top/gi) || []).length;
+    const valignMiddleHits =
+      (procSlice.match(/<td[^>]*valign="middle"/g) || []).length +
+      (procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*middle/gi) || []).length;
+    // Invariant: each body row contributes 1 valign:top (Item cell) and
+    // 2 valign:middle cells (Status + ETA). Floors at bodyRowCount and
+    // 2*bodyRowCount capture regressions without false-positives on
+    // fixture growth.
+    expect(valignTopHits).toBeGreaterThanOrEqual(bodyRowCount);
+    expect(valignMiddleHits).toBeGreaterThanOrEqual(2 * bodyRowCount);
   });
 
   it("Procurement section is wrapped in an outer Section with paddingTop:16 (D-13)", async () => {
