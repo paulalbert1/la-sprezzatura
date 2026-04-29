@@ -1,7 +1,7 @@
 ---
 phase: 46-send-update-work-order-migration
 type: uat
-status: diagnosed
+status: resolved
 gate: merge-gate
 verdict: REJECTED
 date: 2026-04-28
@@ -12,7 +12,10 @@ gap_closure_commits:
   - eaea038  # gap-1: defensive greeting strip + admin compose helper
   - 9b5cb08  # gap-2: formatDate/formatLongDate empty-input guard
   - 889477e  # gap-3: PLAN-AUTHORING-PATTERNS strengthening
+  - f867da6  # gap-4: Outlook desktop dark-mode lock (data-ogsc/data-ogsb/MSO)
+  - 14dabb9  # gap-5: left-align Milestones + Procurement table cells
 re_test_round_2: 2026-04-28  # round 2 surfaced gap-4 and gap-5; gap-1 visually confirmed fixed
+re_test_round_3: pending      # round 3 (Liz Outlook desktop) gates parent Phase 46 closure per 46.1-CONTEXT.md D-9
 updated: 2026-04-28
 ---
 
@@ -154,7 +157,7 @@ Strengthen the "Cheap verifications on load-bearing audit assumptions" pattern i
 
 ### gap-4 — Outlook desktop dark-mode contrast inversion (round 2 — supersedes "Items NOT issues #1")
 
-- **status:** failed
+- **status:** resolved (commit `f867da6`, plan 46.1-04)
 - **debug_session:** none — root cause read from EmailShell.tsx + known Outlook desktop behavior
 - **resolves_in:** 46.1 (plan 46.1-04 — Outlook-specific CSS in EmailShell)
 - **supersedes:** "Items NOT issues" #1 — the original 2026-04-28 14:42 ET review classified Outlook dark-mode auto-darken as "acceptable"; the round-2 re-test on 2026-04-28 ~16:53 ET reversed that call after seeing the real-world result.
@@ -184,7 +187,7 @@ This is "force light mode in Outlook desktop," not "design a dark variant." No n
 
 ### gap-5 — Right-aligned date/ETA columns push content to far edge
 
-- **status:** failed
+- **status:** resolved (commit `14dabb9`, plan 46.1-05)
 - **debug_session:** none — read directly from Milestones.tsx + Procurement.tsx
 - **resolves_in:** 46.1 (plan 46.1-05 — column align changes)
 
