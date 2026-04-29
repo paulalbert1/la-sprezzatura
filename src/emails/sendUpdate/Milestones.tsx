@@ -104,7 +104,7 @@ export function Milestones({ milestones }: MilestonesProps) {
               <span style={titleStyle}>{m.label}</span>
               <span style={STATE_PILL_STYLE}>{pillLabel}</span>
             </Column>
-            <Column align="right" style={{ verticalAlign: "middle" }}>
+            <Column align="left" style={{ verticalAlign: "middle" }}>
               <span style={DATE_STYLE}>{m.date}</span>
             </Column>
           </Row>

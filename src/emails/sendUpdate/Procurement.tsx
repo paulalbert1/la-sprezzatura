@@ -102,8 +102,8 @@ export function Procurement({ items }: ProcurementProps) {
       <Text style={EYEBROW_STYLE}>Procurement</Text>
       <Row style={{ borderBottom: "0.5px solid #E8DDD0" }}>
         <Column style={{ ...HEADER_LABEL_STYLE, width: "50%" }}>Item</Column>
-        <Column align="center" style={HEADER_LABEL_STYLE}>Status</Column>
-        <Column align="right" style={HEADER_LABEL_STYLE}>ETA</Column>
+        <Column align="left" style={HEADER_LABEL_STYLE}>Status</Column>
+        <Column align="left" style={HEADER_LABEL_STYLE}>ETA</Column>
       </Row>
       {items.map((it, i) => {
         const subLine = composeSubLine(it.vendor, it.spec);
@@ -113,10 +113,10 @@ export function Procurement({ items }: ProcurementProps) {
               <span style={ITEM_NAME_STYLE}>{it.name}</span>
               {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
             </Column>
-            <Column align="center" style={{ verticalAlign: "middle" }}>
+            <Column align="left" style={{ verticalAlign: "middle" }}>
               <span style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
             </Column>
-            <Column align="right" style={{ verticalAlign: "middle" }}>
+            <Column align="left" style={{ verticalAlign: "middle" }}>
               <span style={ETA_STYLE}>{it.eta}</span>
             </Column>
           </Row>

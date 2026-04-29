@@ -370,3 +370,97 @@ describe("Procurement empty-eta render (46.1 gap-2 -- end-to-end)", () => {
     expect(html).toContain("Italian Pendant Lights (set of 3)");
   });
 });
+
+// ============================================================================
+// 46.1 D-7 -- gap-5 regression guard: Milestones + Procurement table CELLS are
+// left-aligned. Section-scoped: slices the rendered HTML by section eyebrow
+// (>Milestones</p>, >Procurement</p>) and asserts zero <td ... align="right">
+// and zero <td ... align="center"> cells exist within the Milestones and
+// Procurement slices. Section-scoping is required because:
+//   - <table align="center"> attributes from react-email Container/Section/Row
+//     primitives are the standard email-safe centering pattern -- emitted at
+//     ~77 sites in the rendered HTML, NOT in D-7 scope.
+//   - <td align="right"> cells inside ReviewItems' due-label column are
+//     legitimate (CONTEXT.md D-7 covers Milestones + Procurement only).
+//     ReviewItems renders BEFORE Procurement (SendUpdate.tsx line 174), so
+//     its cells are upstream of >Procurement</p> and excluded automatically
+//     by the slice start sentinel.
+// Procurement slice ends at html.length: Procurement is the last enumerated
+// content section before the CTA + Footer chrome, and that chrome was
+// verified at plan time to contain zero <td align="right|center"> cells
+// across all four Procurement-bearing snapshot blocks (full, mixedSubLines,
+// noBody, noReviewItems).
+// The tests below scope the assertion to the exact JSX call sites D-7 flipped.
+// ============================================================================
+
+describe("Milestones + Procurement section-scoped left-alignment (46.1 D-7 -- gap-5 fix)", () => {
+  it("Procurement section contains no <td align=\"center\"> or <td align=\"right\"> cells", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    // Slice from the Procurement eyebrow to end-of-string. Procurement is the
+    // last enumerated content section before the CTA + Footer chrome; the
+    // chrome region was verified at plan time to contain zero <td align=
+    // "right|center"> cells across all four Procurement-bearing fixtures.
+    // Any future section inserted between Procurement and the CTA (or any new
+    // <td align="right|center"> cell in the chrome) will surface here as a
+    // regression worth investigating -- a useful guard, not a false positive.
+    const procStart = html.indexOf(">Procurement</p>");
+    expect(procStart).toBeGreaterThan(-1);
+    const procSlice = html.slice(procStart);
+
+    // <td-element-scoped: table-level align attrs from react-email primitives are
+    // <table align="..."> which the [^>]* lookahead from <td deliberately misses.
+    const tdRightInProc = procSlice.match(/<td[^>]*align="right"/g) || [];
+    const tdCenterInProc = procSlice.match(/<td[^>]*align="center"/g) || [];
+    expect(tdRightInProc.length).toBe(0);
+    expect(tdCenterInProc.length).toBe(0);
+  });
+
+  it("Milestones section contains no <td align=\"right\"> cells", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    // Slice from the Milestones eyebrow to the next-section eyebrow (Procurement).
+    const milesStart = html.indexOf(">Milestones</p>");
+    expect(milesStart).toBeGreaterThan(-1);
+    const milesEnd = html.indexOf(">Procurement</p>", milesStart);
+    expect(milesEnd).toBeGreaterThan(milesStart);
+    const milesSlice = html.slice(milesStart, milesEnd);
+
+    const tdRightInMiles = milesSlice.match(/<td[^>]*align="right"/g) || [];
+    expect(tdRightInMiles.length).toBe(0);
+    // Milestones never used `center`, but assert it stays absent for symmetry.
+    const tdCenterInMiles = milesSlice.match(/<td[^>]*align="center"/g) || [];
+    expect(tdCenterInMiles.length).toBe(0);
+  });
+
+  it("Milestones section contains <td align=\"left\"> cells (positive lock for D-7 row 1)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    const milesStart = html.indexOf(">Milestones</p>");
+    const milesEnd = html.indexOf(">Procurement</p>", milesStart);
+    const milesSlice = html.slice(milesStart, milesEnd);
+    // FIXTURES.full() has 4 milestones (see fixtures.ts PROJECT_BASE.milestones);
+    // each row has one date column. Post-D-7 every one is align="left". Use >= 4
+    // (rather than == 4) for robustness against future render-pass variations
+    // that emit additional align="left" columns elsewhere within the slice.
+    const tdLeftInMiles = milesSlice.match(/<td[^>]*align="left"/g) || [];
+    expect(tdLeftInMiles.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("Procurement section contains <td align=\"left\"> cells (positive lock for D-7 rows 2-5)", async () => {
+    const html = await render(createElement(SendUpdate, FIXTURES.full()));
+    // Same slice strategy as the negative test above: start at Procurement
+    // eyebrow, end at end-of-string. The post-Procurement chrome contributes
+    // zero <td align="left"> cells (it has no <td> elements with align attrs
+    // at all -- verified at plan time), so >= 8 reflects the load-bearing
+    // Status/ETA cells inside Procurement only.
+    const procStart = html.indexOf(">Procurement</p>");
+    const procSlice = html.slice(procStart);
+    // 1 Status header + 1 ETA header + N Status cells + N ETA cells where N is
+    // the number of procurement rows in FIXTURES.full() (3 per fixtures.ts
+    // PROJECT_BASE.procurementItems). Post-D-7 that contributes 2 + 3 + 3 = 8
+    // align="left" hits from Procurement Status/ETA columns alone, plus the
+    // Item column on each row (header + 3 cells = 4 more). Conservative floor
+    // of >= 8 covers the load-bearing Status/ETA flips without depending on
+    // whether the Item column also emits align="left" or has no align attr.
+    const tdLeftInProc = procSlice.match(/<td[^>]*align="left"/g) || [];
+    expect(tdLeftInProc.length).toBeGreaterThanOrEqual(8);
+  });
+});
