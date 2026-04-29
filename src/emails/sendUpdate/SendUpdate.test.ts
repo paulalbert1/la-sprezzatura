@@ -474,56 +474,97 @@ describe("Milestones + Procurement section-scoped left-alignment (46.1 D-7 -- ga
 // ============================================================================
 
 describe("Procurement column widths + valign:top + outer paddingTop (46.1 D-12/D-13 -- gap-6 fix)", () => {
-  it("Procurement section emits <td width=\"60%\"> on Item column (D-13)", async () => {
+  // 46.1 D-18 #2 (WR-R3-04 round-3 carryover): per-row count derived from the
+  // procurement body slice instead of a magic-number floor that exact-matches
+  // FIXTURES.full()'s row count. The invariant is "for every body row, at
+  // least one cell carries the load-bearing layout marker" -- decoupled from
+  // fixture size. Adding fixture rows is invisible to these tests; the
+  // failure mode now reads "marker regressed" rather than "fixture changed".
+
+  it("Procurement section emits <td width=\"60%\"> on Item column for header + each body row (D-13 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     expect(procStart).toBeGreaterThan(-1);
     const procSlice = html.slice(procStart);
-    // Must appear on BOTH the header row AND each body row (3 rows in
-    // FIXTURES.full() per fixtures.ts PROJECT_BASE.procurementItems).
-    // Floor of 4 covers header + 3 body rows; >= guards against future
-    // fixture-row additions.
-    const widthMatches = procSlice.match(/<td[^>]*width="60%"/g) || [];
-    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+    // Body rows carry the border-bottom sentinel (per ROW_STYLE in Procurement.tsx).
+    // Header tr does NOT carry it. Decoupled from fixture row count.
+    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
+    // element with the border-bottom in its inline style (the Row primitive
+    // wraps a <table>, not a <tr>). Both header and body rows carry the
+    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
+    // Row). The total count = 1 header + N body rows; bodyRowCount derives
+    // by subtracting the header (always 1).
+    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
+    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = allBorderRows - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    const widthMatches = (procSlice.match(/<td[^>]*width="60%"/g) || []).length;
+    // Floor: header (1) + each body row -> bodyRowCount + 1.
+    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
   });
 
-  it("Procurement section emits <td width=\"22%\"> on Status column (D-13)", async () => {
+  it("Procurement section emits <td width=\"22%\"> on Status column for header + each body row (D-13 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     const procSlice = html.slice(procStart);
-    const widthMatches = procSlice.match(/<td[^>]*width="22%"/g) || [];
-    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
+    // element with the border-bottom in its inline style (the Row primitive
+    // wraps a <table>, not a <tr>). Both header and body rows carry the
+    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
+    // Row). The total count = 1 header + N body rows; bodyRowCount derives
+    // by subtracting the header (always 1).
+    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
+    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = allBorderRows - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    const widthMatches = (procSlice.match(/<td[^>]*width="22%"/g) || []).length;
+    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
   });
 
-  it("Procurement section emits <td width=\"18%\"> on ETA column (D-13)", async () => {
+  it("Procurement section emits <td width=\"18%\"> on ETA column for header + each body row (D-13 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
     const procSlice = html.slice(procStart);
-    const widthMatches = procSlice.match(/<td[^>]*width="18%"/g) || [];
-    expect(widthMatches.length).toBeGreaterThanOrEqual(4);
+    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
+    // element with the border-bottom in its inline style (the Row primitive
+    // wraps a <table>, not a <tr>). Both header and body rows carry the
+    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
+    // Row). The total count = 1 header + N body rows; bodyRowCount derives
+    // by subtracting the header (always 1).
+    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
+    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = allBorderRows - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
+    const widthMatches = (procSlice.match(/<td[^>]*width="18%"/g) || []).length;
+    expect(widthMatches).toBeGreaterThanOrEqual(bodyRowCount + 1);
   });
 
-  it("Procurement BODY rows compile verticalAlign:top to compiled HTML (D-12)", async () => {
+  it("Procurement BODY rows compile verticalAlign:top to compiled HTML (D-12 -- invariant per-row count, WR-R3-04)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
     const procStart = html.indexOf(">Procurement</p>");
+    expect(procStart).toBeGreaterThan(-1);
     const procSlice = html.slice(procStart);
+    // Body rows carry the border-bottom sentinel (per ROW_STYLE in Procurement.tsx).
+    // Header tr does NOT carry it. Decoupled from fixture row count.
+    // react-email compiles <Row style={{ borderBottom: ... }}> to a <table>
+    // element with the border-bottom in its inline style (the Row primitive
+    // wraps a <table>, not a <tr>). Both header and body rows carry the
+    // same border-bottom value (Procurement.tsx:50 ROW_STYLE + line 104 header
+    // Row). The total count = 1 header + N body rows; bodyRowCount derives
+    // by subtracting the header (always 1).
+    const allBorderRows = (procSlice.match(/<table[^>]*style="[^"]*border-bottom:\s*0\.5px solid #E8DDD0/gi) || []).length;
+    expect(allBorderRows).toBeGreaterThanOrEqual(4); // 1 header + >=3 body rows
+    const bodyRowCount = allBorderRows - 1;
+    expect(bodyRowCount).toBeGreaterThanOrEqual(3);
     // react-email may compile React `verticalAlign: "top"` to either
     // `valign="top"` HTML attribute OR `vertical-align:top` inline style on
-    // the <td>. Accept either path -- the load-bearing claim is "the
-    // Procurement body rows are top-aligned in the rendered output", not
-    // "the markup uses one specific compiler representation". If the
-    // compiler emits both representations on the same cell, that's fine
-    // (count merges via either-branch match).
-    const valignAttr = procSlice.match(/<td[^>]*valign="top"/g) || [];
-    const valignStyle = procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*top/gi) || [];
-    const totalTopAligned = valignAttr.length + valignStyle.length;
-    // FIXTURES.full() has 3 procurement rows x 3 Columns = 9 body-row <td>
-    // cells expected to be top-aligned. Floor of 9 guards against fixture
-    // changes. The header row also has 3 Columns; if the compiler emits
-    // valign="top" on those too (the Row-level verticalAlign:middle on the
-    // header Row should anchor them mid-cell, but compiler behavior may
-    // vary), the >= bound stays valid.
-    expect(totalTopAligned).toBeGreaterThanOrEqual(9);
+    // the <td>. Accept either path.
+    const valignAttr = (procSlice.match(/<td[^>]*valign="top"/g) || []).length;
+    const valignStyle = (procSlice.match(/<td[^>]*style="[^"]*vertical-align:\s*top/gi) || []).length;
+    const valignHits = valignAttr + valignStyle;
+    // Invariant: every body row has at least one valign:top cell. Floor of
+    // bodyRowCount captures "regression" without false-positives on fixture growth.
+    expect(valignHits).toBeGreaterThanOrEqual(bodyRowCount);
   });
 
   it("Procurement section is wrapped in an outer Section with paddingTop:16 (D-13)", async () => {

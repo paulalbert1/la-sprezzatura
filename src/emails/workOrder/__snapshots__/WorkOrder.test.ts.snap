@@ -23,12 +23,14 @@ Sent via Sprezza Hub"
 
 exports[`WorkOrder (Phase 46 react-email port) > snapshot: default 1`] = `
 "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="en"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/><meta name="color-scheme" content="only light"/><meta name="supported-color-schemes" content="light"/><style>
-              /* Backgrounds */
+              /* Body bg + bg-cream class hook (body element selector + dead .bg-cream tail) */
               [data-ogsb] body, [data-ogsb] .bg-cream { background-color: #FAF8F5 !important; }
-              /* CTA backgrounds */
+
+              /* CTA backgrounds (hand-written -- only 2 variants) */
               [data-ogsb] .cta-terracotta { background-color: #C4836A !important; }
               [data-ogsb] .cta-gold { background-color: #9A7B4B !important; }
-              /* Procurement pill backgrounds (statusPills.ts STATUS_PILL_STYLES.*.bg) */
+
+              /* Procurement pill backgrounds -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02) */
               [data-ogsb] .pill-scheduled { background-color: #F3EFE9 !important; }
               [data-ogsb] .pill-warehouse { background-color: #F3EDE3 !important; }
               [data-ogsb] .pill-in-transit { background-color: #FBF2E2 !important; }
@@ -37,31 +39,23 @@ exports[`WorkOrder (Phase 46 react-email port) > snapshot: default 1`] = `
               [data-ogsb] .pill-delivered { background-color: #EDF5E8 !important; }
               [data-ogsb] .pill-installed { background-color: #EDF5E8 !important; }
 
-              /* Text colors */
-              [data-ogsc] .text-stone { color: #8A8478 !important; }
-              [data-ogsc] .text-stone-light { color: #B8AFA4 !important; }
-              [data-ogsc] .text-charcoal,
-              [data-ogsc] .text-dark { color: #2C2926 !important; }
-              [data-ogsc] .text-mid { color: #4A4540 !important; }
-              [data-ogsc] .text-cream { color: #FAF8F5 !important; }
-              [data-ogsc] .text-cream-ivory { color: #FAF7F2 !important; }
-              /* Procurement pill text (statusPills.ts STATUS_PILL_STYLES.*.text) */
-              [data-ogsc] .pill-scheduled,
+              /* Procurement pill text -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Bind via className on the pill <span> (D-15). Tailwind utility .text- and
+                 .border-cream-dark rules previously here are DELETED per 46.1 D-16 -- they
+                 targeted className hooks Tailwind compiles + strips, so they never bound.
+                 The universal-selector catch-all is also DELETED per 46.1 D-17 -- it
+                 actively cancelled every inline color in dark mode. */
+              [data-ogsc] .pill-scheduled { color: #6B5E52 !important; }
               [data-ogsc] .pill-warehouse { color: #6B5E52 !important; }
               [data-ogsc] .pill-in-transit { color: #8A5E1A !important; }
               [data-ogsc] .pill-ordered { color: #2A5485 !important; }
               [data-ogsc] .pill-pending { color: #9B3A2A !important; }
-              [data-ogsc] .pill-delivered,
+              [data-ogsc] .pill-delivered { color: #3A6620 !important; }
               [data-ogsc] .pill-installed { color: #3A6620 !important; }
-              /* All elements: catch-all auto-darken cancellation -- targets the
-                 Outlook desktop preserving-light-text-on-darkened-bg half-inversion
-                 that Liz observed. Without this rule, ANY non-classed inline-styled
-                 text gets auto-darkened against the now-locked light background. */
-              [data-ogsc] * { color: inherit !important; }
 
-              /* Borders -- Outlook auto-darken treats border as text-adjacent, so
-                 [data-ogsc] is the correct hook (not [data-ogsb]). */
-              [data-ogsc] .border-cream-dark { border-color: #E8DDD0 !important; }
+              /* Procurement pill borders -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Outlook auto-darken treats border as text-adjacent, so [data-ogsc] is the
+                 correct hook (not [data-ogsb]). */
               [data-ogsc] .pill-scheduled { border-color: #E0D5C5 !important; }
               [data-ogsc] .pill-warehouse { border-color: #D4C8B8 !important; }
               [data-ogsc] .pill-in-transit { border-color: #E8CFA0 !important; }
@@ -74,52 +68,35 @@ exports[`WorkOrder (Phase 46 react-email port) > snapshot: default 1`] = `
                  per .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
                  Recommendation. ADDITIVE on top of the [data-ogsc]/[data-ogsb] block above.
                  Re-pins the locked light palette so any Outlook variant honoring
-                 prefers-color-scheme keeps cream bg + dark text in dark mode. Color values
-                 byte-identical to the [data-ogsc]/[data-ogsb] rules above (no parallel
-                 palette). !important is required for source-order specificity tie-resolution
-                 against any Outlook-Mac-injected dark-mode rule. */
+                 prefers-color-scheme keeps cream bg + dark text in dark mode. Pill rules
+                 generated from STATUS_PILL_STYLES (single source of truth). !important is
+                 required for source-order specificity tie-resolution against any
+                 Outlook-Mac-injected dark-mode rule. */
               @media (prefers-color-scheme: dark) {
                 body, .bg-cream { background-color: #FAF8F5 !important; }
                 .cta-terracotta { background-color: #C4836A !important; }
                 .cta-gold { background-color: #9A7B4B !important; }
-                .pill-scheduled { background-color: #F3EFE9 !important; }
-                .pill-warehouse { background-color: #F3EDE3 !important; }
-                .pill-in-transit { background-color: #FBF2E2 !important; }
-                .pill-ordered { background-color: #E8F0F9 !important; }
-                .pill-pending { background-color: #FDEEE6 !important; }
-                .pill-delivered { background-color: #EDF5E8 !important; }
-                .pill-installed { background-color: #EDF5E8 !important; }
-                .text-stone { color: #8A8478 !important; }
-                .text-stone-light { color: #B8AFA4 !important; }
-                .text-charcoal, .text-dark { color: #2C2926 !important; }
-                .text-mid { color: #4A4540 !important; }
-                .text-cream { color: #FAF8F5 !important; }
-                .text-cream-ivory { color: #FAF7F2 !important; }
-                .pill-scheduled, .pill-warehouse { color: #6B5E52 !important; }
-                .pill-in-transit { color: #8A5E1A !important; }
-                .pill-ordered { color: #2A5485 !important; }
-                .pill-pending { color: #9B3A2A !important; }
-                .pill-delivered, .pill-installed { color: #3A6620 !important; }
-                .border-cream-dark { border-color: #E8DDD0 !important; }
-                .pill-scheduled { border-color: #E0D5C5 !important; }
-                .pill-warehouse { border-color: #D4C8B8 !important; }
-                .pill-in-transit { border-color: #E8CFA0 !important; }
-                .pill-ordered { border-color: #B0CAE8 !important; }
-                .pill-pending { border-color: #F2C9B8 !important; }
-                .pill-delivered { border-color: #C4DBA8 !important; }
-                .pill-installed { border-color: #A8C98C !important; }
+                .pill-scheduled { background-color: #F3EFE9 !important; color: #6B5E52 !important; border-color: #E0D5C5 !important; }
+              .pill-warehouse { background-color: #F3EDE3 !important; color: #6B5E52 !important; border-color: #D4C8B8 !important; }
+              .pill-in-transit { background-color: #FBF2E2 !important; color: #8A5E1A !important; border-color: #E8CFA0 !important; }
+              .pill-ordered { background-color: #E8F0F9 !important; color: #2A5485 !important; border-color: #B0CAE8 !important; }
+              .pill-pending { background-color: #FDEEE6 !important; color: #9B3A2A !important; border-color: #F2C9B8 !important; }
+              .pill-delivered { background-color: #EDF5E8 !important; color: #3A6620 !important; border-color: #C4DBA8 !important; }
+              .pill-installed { background-color: #EDF5E8 !important; color: #3A6620 !important; border-color: #A8C98C !important; }
               }
-            </style><div style="display:none"><!--[if mso]><style type="text/css">body { mso-color-scheme: light !important; }</style><![endif]--></div></head><body style="background-color:#FAF8F5"><!--$--><!--html--><!--head--><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#FAF8F5;font-family:&quot;DM Sans&quot;,&quot;system-ui&quot;,sans-serif"><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Work order ready for Acme Home — view your latest version<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><table bgcolor="#FAF8F5" width="100%" cellPadding="0" cellSpacing="0" border="0" role="presentation" style="background-color:#FAF8F5"><tbody><tr><td align="center" valign="top" style="background-color:#FAF8F5"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:580px;margin-right:auto;margin-left:auto"><tbody><tr style="width:100%"><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-top:32px;padding-bottom:24px"><tbody><tr><td><p style="font-size:11.5px;line-height:24px;letter-spacing:0.14em;color:rgb(138,132,120);text-transform:uppercase;font-weight:600;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">LA SPREZZATURA</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><h1 style="font-size:22px;font-family:&quot;Cormorant Garamond&quot;,&quot;Georgia&quot;,serif;color:rgb(44,41,38);margin:0;margin-bottom:12px">Work order ready for review</h1><p class="text-stone-dark" style="font-size:13px;line-height:24px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Acme Home<!-- --> <!-- -->·<!-- --> <!-- -->April 29, 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px"><tbody><tr><td><p style="font-size:13px;line-height:20.8px;margin:0;margin-bottom:16px;margin-top:0;margin-left:0;margin-right:0">Marco,</p><p style="font-size:13px;line-height:20.8px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Your work order for <!-- -->Acme Home<!-- --> is ready. Use the link below to view the latest version — it always reflects our most recent edits.</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><a href="https://example.com/workorder/project/P1/orders/WO1" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#9A7B4B;color:#FAF7F2;padding-top:13.6px;padding-bottom:13.6px;padding-left:32px;padding-right:32px;letter-spacing:0.14em;text-transform:uppercase;font-size:11px;font-weight:600;border-radius:2px" target="_blank"><span><!--[if mso]><i style="mso-font-width:400%;mso-text-raise:20.4" hidden>&#8202;&#8202;&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:10.2px">VIEW WORK ORDER</span><span><!--[if mso]><i style="mso-font-width:400%" hidden>&#8202;&#8202;&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><hr class="border-cream-dark" style="width:100%;border:none;border-top:1px solid #eaeaea;margin:0"/><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:16px;padding-top:16px;text-align:center"><tbody><tr><td><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Elizabeth<!-- --> <!-- -->·<!-- --> <!-- -->Darien, CT</p><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:8px;margin-bottom:0;margin-left:0;margin-right:0">Sent via Sprezza Hub</p></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>"
+            </style><style><!--[if mso]>body { mso-color-scheme: light !important; }<![endif]--></style></head><body style="background-color:#FAF8F5"><!--$--><!--html--><!--head--><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#FAF8F5;font-family:&quot;DM Sans&quot;,&quot;system-ui&quot;,sans-serif"><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Work order ready for Acme Home — view your latest version<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><table bgcolor="#FAF8F5" width="100%" cellPadding="0" cellSpacing="0" border="0" role="presentation" style="background-color:#FAF8F5"><tbody><tr><td align="center" valign="top" style="background-color:#FAF8F5"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:580px;margin-right:auto;margin-left:auto"><tbody><tr style="width:100%"><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-top:32px;padding-bottom:24px"><tbody><tr><td><p style="font-size:11.5px;line-height:24px;letter-spacing:0.14em;color:rgb(138,132,120);text-transform:uppercase;font-weight:600;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">LA SPREZZATURA</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><h1 style="font-size:22px;font-family:&quot;Cormorant Garamond&quot;,&quot;Georgia&quot;,serif;color:rgb(44,41,38);margin:0;margin-bottom:12px">Work order ready for review</h1><p class="text-stone-dark" style="font-size:13px;line-height:24px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Acme Home<!-- --> <!-- -->·<!-- --> <!-- -->April 29, 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px"><tbody><tr><td><p style="font-size:13px;line-height:20.8px;margin:0;margin-bottom:16px;margin-top:0;margin-left:0;margin-right:0">Marco,</p><p style="font-size:13px;line-height:20.8px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Your work order for <!-- -->Acme Home<!-- --> is ready. Use the link below to view the latest version — it always reflects our most recent edits.</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><a href="https://example.com/workorder/project/P1/orders/WO1" class="cta-gold" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#9A7B4B;color:#FAF7F2;padding-top:13.6px;padding-bottom:13.6px;padding-left:32px;padding-right:32px;letter-spacing:0.14em;text-transform:uppercase;font-size:11px;font-weight:600;border-radius:2px" target="_blank"><span><!--[if mso]><i style="mso-font-width:400%;mso-text-raise:20.4" hidden>&#8202;&#8202;&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:10.2px">VIEW WORK ORDER</span><span><!--[if mso]><i style="mso-font-width:400%" hidden>&#8202;&#8202;&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><hr class="border-cream-dark" style="width:100%;border:none;border-top:1px solid #eaeaea;margin:0"/><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:16px;padding-top:16px;text-align:center"><tbody><tr><td><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Elizabeth<!-- --> <!-- -->·<!-- --> <!-- -->Darien, CT</p><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:8px;margin-bottom:0;margin-left:0;margin-right:0">Sent via Sprezza Hub</p></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>"
 `;
 
 exports[`WorkOrder (Phase 46 react-email port) > snapshot: longTitle 1`] = `
 "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="en"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/><meta name="color-scheme" content="only light"/><meta name="supported-color-schemes" content="light"/><style>
-              /* Backgrounds */
+              /* Body bg + bg-cream class hook (body element selector + dead .bg-cream tail) */
               [data-ogsb] body, [data-ogsb] .bg-cream { background-color: #FAF8F5 !important; }
-              /* CTA backgrounds */
+
+              /* CTA backgrounds (hand-written -- only 2 variants) */
               [data-ogsb] .cta-terracotta { background-color: #C4836A !important; }
               [data-ogsb] .cta-gold { background-color: #9A7B4B !important; }
-              /* Procurement pill backgrounds (statusPills.ts STATUS_PILL_STYLES.*.bg) */
+
+              /* Procurement pill backgrounds -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02) */
               [data-ogsb] .pill-scheduled { background-color: #F3EFE9 !important; }
               [data-ogsb] .pill-warehouse { background-color: #F3EDE3 !important; }
               [data-ogsb] .pill-in-transit { background-color: #FBF2E2 !important; }
@@ -128,31 +105,23 @@ exports[`WorkOrder (Phase 46 react-email port) > snapshot: longTitle 1`] = `
               [data-ogsb] .pill-delivered { background-color: #EDF5E8 !important; }
               [data-ogsb] .pill-installed { background-color: #EDF5E8 !important; }
 
-              /* Text colors */
-              [data-ogsc] .text-stone { color: #8A8478 !important; }
-              [data-ogsc] .text-stone-light { color: #B8AFA4 !important; }
-              [data-ogsc] .text-charcoal,
-              [data-ogsc] .text-dark { color: #2C2926 !important; }
-              [data-ogsc] .text-mid { color: #4A4540 !important; }
-              [data-ogsc] .text-cream { color: #FAF8F5 !important; }
-              [data-ogsc] .text-cream-ivory { color: #FAF7F2 !important; }
-              /* Procurement pill text (statusPills.ts STATUS_PILL_STYLES.*.text) */
-              [data-ogsc] .pill-scheduled,
+              /* Procurement pill text -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Bind via className on the pill <span> (D-15). Tailwind utility .text- and
+                 .border-cream-dark rules previously here are DELETED per 46.1 D-16 -- they
+                 targeted className hooks Tailwind compiles + strips, so they never bound.
+                 The universal-selector catch-all is also DELETED per 46.1 D-17 -- it
+                 actively cancelled every inline color in dark mode. */
+              [data-ogsc] .pill-scheduled { color: #6B5E52 !important; }
               [data-ogsc] .pill-warehouse { color: #6B5E52 !important; }
               [data-ogsc] .pill-in-transit { color: #8A5E1A !important; }
               [data-ogsc] .pill-ordered { color: #2A5485 !important; }
               [data-ogsc] .pill-pending { color: #9B3A2A !important; }
-              [data-ogsc] .pill-delivered,
+              [data-ogsc] .pill-delivered { color: #3A6620 !important; }
               [data-ogsc] .pill-installed { color: #3A6620 !important; }
-              /* All elements: catch-all auto-darken cancellation -- targets the
-                 Outlook desktop preserving-light-text-on-darkened-bg half-inversion
-                 that Liz observed. Without this rule, ANY non-classed inline-styled
-                 text gets auto-darkened against the now-locked light background. */
-              [data-ogsc] * { color: inherit !important; }
 
-              /* Borders -- Outlook auto-darken treats border as text-adjacent, so
-                 [data-ogsc] is the correct hook (not [data-ogsb]). */
-              [data-ogsc] .border-cream-dark { border-color: #E8DDD0 !important; }
+              /* Procurement pill borders -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Outlook auto-darken treats border as text-adjacent, so [data-ogsc] is the
+                 correct hook (not [data-ogsb]). */
               [data-ogsc] .pill-scheduled { border-color: #E0D5C5 !important; }
               [data-ogsc] .pill-warehouse { border-color: #D4C8B8 !important; }
               [data-ogsc] .pill-in-transit { border-color: #E8CFA0 !important; }
@@ -165,40 +134,21 @@ exports[`WorkOrder (Phase 46 react-email port) > snapshot: longTitle 1`] = `
                  per .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
                  Recommendation. ADDITIVE on top of the [data-ogsc]/[data-ogsb] block above.
                  Re-pins the locked light palette so any Outlook variant honoring
-                 prefers-color-scheme keeps cream bg + dark text in dark mode. Color values
-                 byte-identical to the [data-ogsc]/[data-ogsb] rules above (no parallel
-                 palette). !important is required for source-order specificity tie-resolution
-                 against any Outlook-Mac-injected dark-mode rule. */
+                 prefers-color-scheme keeps cream bg + dark text in dark mode. Pill rules
+                 generated from STATUS_PILL_STYLES (single source of truth). !important is
+                 required for source-order specificity tie-resolution against any
+                 Outlook-Mac-injected dark-mode rule. */
               @media (prefers-color-scheme: dark) {
                 body, .bg-cream { background-color: #FAF8F5 !important; }
                 .cta-terracotta { background-color: #C4836A !important; }
                 .cta-gold { background-color: #9A7B4B !important; }
-                .pill-scheduled { background-color: #F3EFE9 !important; }
-                .pill-warehouse { background-color: #F3EDE3 !important; }
-                .pill-in-transit { background-color: #FBF2E2 !important; }
-                .pill-ordered { background-color: #E8F0F9 !important; }
-                .pill-pending { background-color: #FDEEE6 !important; }
-                .pill-delivered { background-color: #EDF5E8 !important; }
-                .pill-installed { background-color: #EDF5E8 !important; }
-                .text-stone { color: #8A8478 !important; }
-                .text-stone-light { color: #B8AFA4 !important; }
-                .text-charcoal, .text-dark { color: #2C2926 !important; }
-                .text-mid { color: #4A4540 !important; }
-                .text-cream { color: #FAF8F5 !important; }
-                .text-cream-ivory { color: #FAF7F2 !important; }
-                .pill-scheduled, .pill-warehouse { color: #6B5E52 !important; }
-                .pill-in-transit { color: #8A5E1A !important; }
-                .pill-ordered { color: #2A5485 !important; }
-                .pill-pending { color: #9B3A2A !important; }
-                .pill-delivered, .pill-installed { color: #3A6620 !important; }
-                .border-cream-dark { border-color: #E8DDD0 !important; }
-                .pill-scheduled { border-color: #E0D5C5 !important; }
-                .pill-warehouse { border-color: #D4C8B8 !important; }
-                .pill-in-transit { border-color: #E8CFA0 !important; }
-                .pill-ordered { border-color: #B0CAE8 !important; }
-                .pill-pending { border-color: #F2C9B8 !important; }
-                .pill-delivered { border-color: #C4DBA8 !important; }
-                .pill-installed { border-color: #A8C98C !important; }
+                .pill-scheduled { background-color: #F3EFE9 !important; color: #6B5E52 !important; border-color: #E0D5C5 !important; }
+              .pill-warehouse { background-color: #F3EDE3 !important; color: #6B5E52 !important; border-color: #D4C8B8 !important; }
+              .pill-in-transit { background-color: #FBF2E2 !important; color: #8A5E1A !important; border-color: #E8CFA0 !important; }
+              .pill-ordered { background-color: #E8F0F9 !important; color: #2A5485 !important; border-color: #B0CAE8 !important; }
+              .pill-pending { background-color: #FDEEE6 !important; color: #9B3A2A !important; border-color: #F2C9B8 !important; }
+              .pill-delivered { background-color: #EDF5E8 !important; color: #3A6620 !important; border-color: #C4DBA8 !important; }
+              .pill-installed { background-color: #EDF5E8 !important; color: #3A6620 !important; border-color: #A8C98C !important; }
               }
-            </style><div style="display:none"><!--[if mso]><style type="text/css">body { mso-color-scheme: light !important; }</style><![endif]--></div></head><body style="background-color:#FAF8F5"><!--$--><!--html--><!--head--><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#FAF8F5;font-family:&quot;DM Sans&quot;,&quot;system-ui&quot;,sans-serif"><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Work order ready for The Very Long Estate Name That Stresses Column Widths Across All Email Clients — view your latest version<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><table bgcolor="#FAF8F5" width="100%" cellPadding="0" cellSpacing="0" border="0" role="presentation" style="background-color:#FAF8F5"><tbody><tr><td align="center" valign="top" style="background-color:#FAF8F5"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:580px;margin-right:auto;margin-left:auto"><tbody><tr style="width:100%"><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-top:32px;padding-bottom:24px"><tbody><tr><td><p style="font-size:11.5px;line-height:24px;letter-spacing:0.14em;color:rgb(138,132,120);text-transform:uppercase;font-weight:600;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">LA SPREZZATURA</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><h1 style="font-size:22px;font-family:&quot;Cormorant Garamond&quot;,&quot;Georgia&quot;,serif;color:rgb(44,41,38);margin:0;margin-bottom:12px">Work order ready for review</h1><p class="text-stone-dark" style="font-size:13px;line-height:24px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">The Very Long Estate Name That Stresses Column Widths Across All Email Clients<!-- --> <!-- -->·<!-- --> <!-- -->April 29, 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px"><tbody><tr><td><p style="font-size:13px;line-height:20.8px;margin:0;margin-bottom:16px;margin-top:0;margin-left:0;margin-right:0">Marco,</p><p style="font-size:13px;line-height:20.8px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Your work order for <!-- -->The Very Long Estate Name That Stresses Column Widths Across All Email Clients<!-- --> is ready. Use the link below to view the latest version — it always reflects our most recent edits.</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><a href="https://example.com/workorder/project/P2/orders/WO1" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#9A7B4B;color:#FAF7F2;padding-top:13.6px;padding-bottom:13.6px;padding-left:32px;padding-right:32px;letter-spacing:0.14em;text-transform:uppercase;font-size:11px;font-weight:600;border-radius:2px" target="_blank"><span><!--[if mso]><i style="mso-font-width:400%;mso-text-raise:20.4" hidden>&#8202;&#8202;&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:10.2px">VIEW WORK ORDER</span><span><!--[if mso]><i style="mso-font-width:400%" hidden>&#8202;&#8202;&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><hr class="border-cream-dark" style="width:100%;border:none;border-top:1px solid #eaeaea;margin:0"/><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:16px;padding-top:16px;text-align:center"><tbody><tr><td><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Elizabeth<!-- --> <!-- -->·<!-- --> <!-- -->Darien, CT</p><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:8px;margin-bottom:0;margin-left:0;margin-right:0">Sent via Sprezza Hub</p></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>"
+            </style><style><!--[if mso]>body { mso-color-scheme: light !important; }<![endif]--></style></head><body style="background-color:#FAF8F5"><!--$--><!--html--><!--head--><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#FAF8F5;font-family:&quot;DM Sans&quot;,&quot;system-ui&quot;,sans-serif"><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Work order ready for The Very Long Estate Name That Stresses Column Widths Across All Email Clients — view your latest version<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><table bgcolor="#FAF8F5" width="100%" cellPadding="0" cellSpacing="0" border="0" role="presentation" style="background-color:#FAF8F5"><tbody><tr><td align="center" valign="top" style="background-color:#FAF8F5"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:580px;margin-right:auto;margin-left:auto"><tbody><tr style="width:100%"><td><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-top:32px;padding-bottom:24px"><tbody><tr><td><p style="font-size:11.5px;line-height:24px;letter-spacing:0.14em;color:rgb(138,132,120);text-transform:uppercase;font-weight:600;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">LA SPREZZATURA</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><h1 style="font-size:22px;font-family:&quot;Cormorant Garamond&quot;,&quot;Georgia&quot;,serif;color:rgb(44,41,38);margin:0;margin-bottom:12px">Work order ready for review</h1><p class="text-stone-dark" style="font-size:13px;line-height:24px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">The Very Long Estate Name That Stresses Column Widths Across All Email Clients<!-- --> <!-- -->·<!-- --> <!-- -->April 29, 2026</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px"><tbody><tr><td><p style="font-size:13px;line-height:20.8px;margin:0;margin-bottom:16px;margin-top:0;margin-left:0;margin-right:0">Marco,</p><p style="font-size:13px;line-height:20.8px;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Your work order for <!-- -->The Very Long Estate Name That Stresses Column Widths Across All Email Clients<!-- --> is ready. Use the link below to view the latest version — it always reflects our most recent edits.</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:24px;padding-top:24px"><tbody><tr><td><a href="https://example.com/workorder/project/P2/orders/WO1" class="cta-gold" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#9A7B4B;color:#FAF7F2;padding-top:13.6px;padding-bottom:13.6px;padding-left:32px;padding-right:32px;letter-spacing:0.14em;text-transform:uppercase;font-size:11px;font-weight:600;border-radius:2px" target="_blank"><span><!--[if mso]><i style="mso-font-width:400%;mso-text-raise:20.4" hidden>&#8202;&#8202;&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:10.2px">VIEW WORK ORDER</span><span><!--[if mso]><i style="mso-font-width:400%" hidden>&#8202;&#8202;&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><hr class="border-cream-dark" style="width:100%;border:none;border-top:1px solid #eaeaea;margin:0"/><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="padding-right:40px;padding-left:40px;padding-bottom:16px;padding-top:16px;text-align:center"><tbody><tr><td><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:0;margin-bottom:0;margin-left:0;margin-right:0">Elizabeth<!-- --> <!-- -->·<!-- --> <!-- -->Darien, CT</p><p class="text-stone-light" style="font-size:10px;line-height:24px;letter-spacing:0.06em;margin:0;margin-top:8px;margin-bottom:0;margin-left:0;margin-right:0">Sent via Sprezza Hub</p></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>"
 `;

@@ -81,13 +81,16 @@ function composeSubLine(vendor?: string, spec?: string): string | null {
 
 function pillStyle(status: ProcurementStatus): CSSProperties {
   const palette = STATUS_PILL_STYLES[status];
+  // 46.1 D-19 WR-06 (round-2 carryover): pill renders flat-edge per Phase 46 D-3,
+  // which explicitly reserves the 2px corner radius for the CTA <a> only. The
+  // previous assignment violated D-3 on TWO axes: shorthand form (D-3 mandates
+  // longhand for Outlook compatibility) AND wrong element (pill <span>, not CTA).
   return {
     display: "inline-block",
     backgroundColor: palette.bg,
     color: palette.text,
     border: `0.5px solid ${palette.border}`,
     padding: "3px 10px",
-    borderRadius: "2px",   // longhand only -- Phase 46 D-3
     fontSize: 11,
     fontWeight: 600,
     textTransform: "uppercase",
@@ -115,7 +118,7 @@ export function Procurement({ items }: ProcurementProps) {
                 {subLine && <span style={SUBLINE_STYLE}>{subLine}</span>}
               </Column>
               <Column width="22%" align="left" style={{ verticalAlign: "top" }}>
-                <span style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
+                <span className={`pill-${it.status}`} style={pillStyle(it.status)}>{STATUS_LABELS[it.status]}</span>
               </Column>
               <Column width="18%" align="left" style={{ verticalAlign: "top" }}>
                 <span style={ETA_STYLE}>{it.eta}</span>

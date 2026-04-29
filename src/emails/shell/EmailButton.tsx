@@ -37,6 +37,7 @@ export function EmailButton({ href, variant = "gold", children }: EmailButtonPro
   return (
     <Button
       href={href}
+      className={`cta-${variant}`}
       style={{
         display: "inline-block",
         backgroundColor: colors.bg,

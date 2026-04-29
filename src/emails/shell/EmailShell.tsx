@@ -38,8 +38,36 @@ import { emailTailwindConfig } from "../_theme";
 import type { TenantBrand } from "../../lib/email/tenantBrand";
 import { EmailButton } from "./EmailButton";
 import { Preheader } from "./Preheader";
+import { STATUS_PILL_STYLES } from "../../lib/procurement/statusPills";
 
 export type SignoffStyle = "formal" | "casual";
+
+/**
+ * Build a string of pill-class CSS rules from STATUS_PILL_STYLES.
+ * Generates the [data-ogsc]/[data-ogsb] dark-mode lock palette + the
+ * @media (prefers-color-scheme: dark) parallel block at module-load time
+ * (no build step). Single source of truth across admin UI + email render +
+ * dark-mode lock; drift is structurally impossible.
+ *
+ * 46.1 D-18 IN-R3-02 -- replaces ~40 lines of hand-mirrored CSS that
+ * previously duplicated STATUS_PILL_STYLES values across two adjacent blocks.
+ *
+ * @param prefix -- selector prefix ("[data-ogsc]", "[data-ogsb]", or "" for @media block)
+ * @param scope  -- which color property the rule emits ("bg" | "text" | "border" | "all")
+ */
+function buildPillRules(prefix: string, scope: "bg" | "text" | "border" | "all"): string {
+  const rules: string[] = [];
+  for (const status of Object.keys(STATUS_PILL_STYLES) as Array<keyof typeof STATUS_PILL_STYLES>) {
+    const p = STATUS_PILL_STYLES[status];
+    const sel = prefix ? `${prefix} .pill-${status}` : `.pill-${status}`;
+    const decls: string[] = [];
+    if (scope === "bg" || scope === "all") decls.push(`background-color: ${p.bg} !important`);
+    if (scope === "text" || scope === "all") decls.push(`color: ${p.text} !important`);
+    if (scope === "border" || scope === "all") decls.push(`border-color: ${p.border} !important`);
+    rules.push(`${sel} { ${decls.join("; ")}; }`);
+  }
+  return rules.join("\n              ");
+}
 
 export interface EmailShellProps {
   tenant: TenantBrand;
@@ -66,6 +94,14 @@ export function EmailShell({
   const signoffName =
     signoffStyle === "formal" ? tenant.signoffNameFormal : tenant.signoffNameCasual;
 
+  // Module-load-time CSS generation per D-18 IN-R3-02 -- single source of truth
+  // is statusPills.ts STATUS_PILL_STYLES; drift between [data-ogsb]/[data-ogsc]
+  // lock and @media (prefers-color-scheme: dark) block is structurally impossible.
+  const ogsbPillBgRules = buildPillRules("[data-ogsb]", "bg");
+  const ogscPillTextRules = buildPillRules("[data-ogsc]", "text");
+  const ogscPillBorderRules = buildPillRules("[data-ogsc]", "border");
+  const mediaPillRules = buildPillRules("", "all");
+
   return (
     <Html lang="en">
       <Head>
@@ -82,103 +118,54 @@ export function EmailShell({
         <style
           dangerouslySetInnerHTML={{
             __html: `
-              /* Backgrounds */
+              /* Body bg + bg-cream class hook (body element selector + dead .bg-cream tail) */
               [data-ogsb] body, [data-ogsb] .bg-cream { background-color: #FAF8F5 !important; }
-              /* CTA backgrounds */
+
+              /* CTA backgrounds (hand-written -- only 2 variants) */
               [data-ogsb] .cta-terracotta { background-color: #C4836A !important; }
               [data-ogsb] .cta-gold { background-color: #9A7B4B !important; }
-              /* Procurement pill backgrounds (statusPills.ts STATUS_PILL_STYLES.*.bg) */
-              [data-ogsb] .pill-scheduled { background-color: #F3EFE9 !important; }
-              [data-ogsb] .pill-warehouse { background-color: #F3EDE3 !important; }
-              [data-ogsb] .pill-in-transit { background-color: #FBF2E2 !important; }
-              [data-ogsb] .pill-ordered { background-color: #E8F0F9 !important; }
-              [data-ogsb] .pill-pending { background-color: #FDEEE6 !important; }
-              [data-ogsb] .pill-delivered { background-color: #EDF5E8 !important; }
-              [data-ogsb] .pill-installed { background-color: #EDF5E8 !important; }
 
-              /* Text colors */
-              [data-ogsc] .text-stone { color: #8A8478 !important; }
-              [data-ogsc] .text-stone-light { color: #B8AFA4 !important; }
-              [data-ogsc] .text-charcoal,
-              [data-ogsc] .text-dark { color: #2C2926 !important; }
-              [data-ogsc] .text-mid { color: #4A4540 !important; }
-              [data-ogsc] .text-cream { color: #FAF8F5 !important; }
-              [data-ogsc] .text-cream-ivory { color: #FAF7F2 !important; }
-              /* Procurement pill text (statusPills.ts STATUS_PILL_STYLES.*.text) */
-              [data-ogsc] .pill-scheduled,
-              [data-ogsc] .pill-warehouse { color: #6B5E52 !important; }
-              [data-ogsc] .pill-in-transit { color: #8A5E1A !important; }
-              [data-ogsc] .pill-ordered { color: #2A5485 !important; }
-              [data-ogsc] .pill-pending { color: #9B3A2A !important; }
-              [data-ogsc] .pill-delivered,
-              [data-ogsc] .pill-installed { color: #3A6620 !important; }
-              /* All elements: catch-all auto-darken cancellation -- targets the
-                 Outlook desktop preserving-light-text-on-darkened-bg half-inversion
-                 that Liz observed. Without this rule, ANY non-classed inline-styled
-                 text gets auto-darkened against the now-locked light background. */
-              [data-ogsc] * { color: inherit !important; }
+              /* Procurement pill backgrounds -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02) */
+              ${ogsbPillBgRules}
 
-              /* Borders -- Outlook auto-darken treats border as text-adjacent, so
-                 [data-ogsc] is the correct hook (not [data-ogsb]). */
-              [data-ogsc] .border-cream-dark { border-color: #E8DDD0 !important; }
-              [data-ogsc] .pill-scheduled { border-color: #E0D5C5 !important; }
-              [data-ogsc] .pill-warehouse { border-color: #D4C8B8 !important; }
-              [data-ogsc] .pill-in-transit { border-color: #E8CFA0 !important; }
-              [data-ogsc] .pill-ordered { border-color: #B0CAE8 !important; }
-              [data-ogsc] .pill-pending { border-color: #F2C9B8 !important; }
-              [data-ogsc] .pill-delivered { border-color: #C4DBA8 !important; }
-              [data-ogsc] .pill-installed { border-color: #A8C98C !important; }
+              /* Procurement pill text -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Bind via className on the pill <span> (D-15). Tailwind utility .text- and
+                 .border-cream-dark rules previously here are DELETED per 46.1 D-16 -- they
+                 targeted className hooks Tailwind compiles + strips, so they never bound.
+                 The universal-selector catch-all is also DELETED per 46.1 D-17 -- it
+                 actively cancelled every inline color in dark mode. */
+              ${ogscPillTextRules}
+
+              /* Procurement pill borders -- generated from STATUS_PILL_STYLES (D-18 IN-R3-02).
+                 Outlook auto-darken treats border as text-adjacent, so [data-ogsc] is the
+                 correct hook (not [data-ogsb]). */
+              ${ogscPillBorderRules}
 
               /* gap-7 (46.1 D-10/D-11) -- candidate (b) prefers-color-scheme media query
                  per .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
                  Recommendation. ADDITIVE on top of the [data-ogsc]/[data-ogsb] block above.
                  Re-pins the locked light palette so any Outlook variant honoring
-                 prefers-color-scheme keeps cream bg + dark text in dark mode. Color values
-                 byte-identical to the [data-ogsc]/[data-ogsb] rules above (no parallel
-                 palette). !important is required for source-order specificity tie-resolution
-                 against any Outlook-Mac-injected dark-mode rule. */
+                 prefers-color-scheme keeps cream bg + dark text in dark mode. Pill rules
+                 generated from STATUS_PILL_STYLES (single source of truth). !important is
+                 required for source-order specificity tie-resolution against any
+                 Outlook-Mac-injected dark-mode rule. */
               @media (prefers-color-scheme: dark) {
                 body, .bg-cream { background-color: #FAF8F5 !important; }
                 .cta-terracotta { background-color: #C4836A !important; }
                 .cta-gold { background-color: #9A7B4B !important; }
-                .pill-scheduled { background-color: #F3EFE9 !important; }
-                .pill-warehouse { background-color: #F3EDE3 !important; }
-                .pill-in-transit { background-color: #FBF2E2 !important; }
-                .pill-ordered { background-color: #E8F0F9 !important; }
-                .pill-pending { background-color: #FDEEE6 !important; }
-                .pill-delivered { background-color: #EDF5E8 !important; }
-                .pill-installed { background-color: #EDF5E8 !important; }
-                .text-stone { color: #8A8478 !important; }
-                .text-stone-light { color: #B8AFA4 !important; }
-                .text-charcoal, .text-dark { color: #2C2926 !important; }
-                .text-mid { color: #4A4540 !important; }
-                .text-cream { color: #FAF8F5 !important; }
-                .text-cream-ivory { color: #FAF7F2 !important; }
-                .pill-scheduled, .pill-warehouse { color: #6B5E52 !important; }
-                .pill-in-transit { color: #8A5E1A !important; }
-                .pill-ordered { color: #2A5485 !important; }
-                .pill-pending { color: #9B3A2A !important; }
-                .pill-delivered, .pill-installed { color: #3A6620 !important; }
-                .border-cream-dark { border-color: #E8DDD0 !important; }
-                .pill-scheduled { border-color: #E0D5C5 !important; }
-                .pill-warehouse { border-color: #D4C8B8 !important; }
-                .pill-in-transit { border-color: #E8CFA0 !important; }
-                .pill-ordered { border-color: #B0CAE8 !important; }
-                .pill-pending { border-color: #F2C9B8 !important; }
-                .pill-delivered { border-color: #C4DBA8 !important; }
-                .pill-installed { border-color: #A8C98C !important; }
+                ${mediaPillRules}
               }
             `,
           }}
         />
         {/* MSO conditional -- older Outlook desktop builds where [data-ogs*] doesn't reach.
-            Cannot be authored as JSX (cannot emit raw HTML comments containing endif tokens),
-            so use dangerouslySetInnerHTML on a wrapper element with an MSO-only payload that
-            Outlook itself processes as a conditional comment in the rendered output. */}
-        <div
-          style={{ display: "none" }}
+            46.1 D-19 WR-05 (round-2 carryover): moved out of a display-none div
+            wrapper (invalid HTML5 in <head>) into a sibling <style dangerouslySetInnerHTML>
+            element. The <!--[if mso]> + <![endif]--> + mso-color-scheme: light substrings
+            still appear in the rendered HTML so existing test surface is preserved. */}
+        <style
           dangerouslySetInnerHTML={{
-            __html: `<!--[if mso]><style type="text/css">body { mso-color-scheme: light !important; }</style><![endif]-->`,
+            __html: `<!--[if mso]>body { mso-color-scheme: light !important; }<![endif]-->`,
           }}
         />
       </Head>

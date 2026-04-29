@@ -170,7 +170,7 @@ export function SendUpdate(input: SendUpdateEmailInput) {
   return (
     <EmailShell tenant={tenant} preheader={preheader} signoffStyle="formal">
       <Greeting project={project} firstName={clientFirstName} sentDate={sentDateFormatted} />
-      <Body personalNote={personalNote} />
+      <Body personalNote={personalNote} clientFirstName={clientFirstName ?? ""} />
       {showReviewItems && (
         <ReviewItems personalActionItems={personalActionItems} pendingArtifacts={pendingArtifacts} />
       )}

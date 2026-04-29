@@ -20,7 +20,12 @@
 import { Link, Text } from "@react-email/components";
 import { createElement, type ReactNode } from "react";
 
-const MAX_LEN = 600;
+// 46.1 D-19 WR-03 (round-2 carryover): promoted to named export so the admin
+// compose UI (SendUpdateModal.tsx) can apply maxLength={MAX_LEN} to the
+// personalNote textarea and render a live character counter. Single source of
+// truth -- changing the cap here changes both the parser cap AND the textarea
+// enforcement.
+export const MAX_LEN = 600;
 const ALLOWED_SCHEME = /^https:\/\//i;
 
 export type PersonalNoteParseErrorCode = "OVER_LIMIT" | "INVALID_URL_SCHEME";

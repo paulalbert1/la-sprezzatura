@@ -2,6 +2,11 @@ import { useState, useMemo, type ReactNode } from "react";
 import { Check, ExternalLink, Loader2, Mail } from "lucide-react";
 import AdminModal from "./ui/AdminModal";
 import { useToast } from "./ui/ToastContainer";
+// 46.1 D-19 WR-03 (round-2 carryover): import the personalNote length cap
+// from its source-of-truth module so the textarea enforces the same limit
+// the parser enforces. Aliased to PERSONAL_NOTE_MAX_LEN to avoid local-name
+// collisions and to read naturally at the call site.
+import { MAX_LEN as PERSONAL_NOTE_MAX_LEN } from "../../lib/email/personalNoteMarkdown";
 
 // Phase 34 Plan 04 Task 3 — SendUpdateModal
 // Source of truth:
@@ -451,6 +456,7 @@ export default function SendUpdateModal({
           <textarea
             id="send-update-note"
             rows={4}
+            maxLength={PERSONAL_NOTE_MAX_LEN}
             className="luxury-input w-full"
             placeholder="Hi, here's the latest on your project..."
             value={personalNote}
@@ -481,6 +487,16 @@ export default function SendUpdateModal({
             }}
           >
             Don't include &quot;Hi {"{firstName}"},&quot; — it's added automatically.
+          </p>
+          <p
+            style={{
+              margin: "4px 0 0",
+              fontSize: "11px",
+              color: "#9E8E80",
+              fontFamily: "var(--font-sans)",
+            }}
+          >
+            {personalNote.length} / {PERSONAL_NOTE_MAX_LEN} characters
           </p>
         </div>
 
