@@ -128,6 +128,46 @@ export function EmailShell({
               [data-ogsc] .pill-pending { border-color: #F2C9B8 !important; }
               [data-ogsc] .pill-delivered { border-color: #C4DBA8 !important; }
               [data-ogsc] .pill-installed { border-color: #A8C98C !important; }
+
+              /* gap-7 (46.1 D-10/D-11) -- candidate (b) prefers-color-scheme media query
+                 per .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
+                 Recommendation. ADDITIVE on top of the [data-ogsc]/[data-ogsb] block above.
+                 Re-pins the locked light palette so any Outlook variant honoring
+                 prefers-color-scheme keeps cream bg + dark text in dark mode. Color values
+                 byte-identical to the [data-ogsc]/[data-ogsb] rules above (no parallel
+                 palette). !important is required for source-order specificity tie-resolution
+                 against any Outlook-Mac-injected dark-mode rule. */
+              @media (prefers-color-scheme: dark) {
+                body, .bg-cream { background-color: #FAF8F5 !important; }
+                .cta-terracotta { background-color: #C4836A !important; }
+                .cta-gold { background-color: #9A7B4B !important; }
+                .pill-scheduled { background-color: #F3EFE9 !important; }
+                .pill-warehouse { background-color: #F3EDE3 !important; }
+                .pill-in-transit { background-color: #FBF2E2 !important; }
+                .pill-ordered { background-color: #E8F0F9 !important; }
+                .pill-pending { background-color: #FDEEE6 !important; }
+                .pill-delivered { background-color: #EDF5E8 !important; }
+                .pill-installed { background-color: #EDF5E8 !important; }
+                .text-stone { color: #8A8478 !important; }
+                .text-stone-light { color: #B8AFA4 !important; }
+                .text-charcoal, .text-dark { color: #2C2926 !important; }
+                .text-mid { color: #4A4540 !important; }
+                .text-cream { color: #FAF8F5 !important; }
+                .text-cream-ivory { color: #FAF7F2 !important; }
+                .pill-scheduled, .pill-warehouse { color: #6B5E52 !important; }
+                .pill-in-transit { color: #8A5E1A !important; }
+                .pill-ordered { color: #2A5485 !important; }
+                .pill-pending { color: #9B3A2A !important; }
+                .pill-delivered, .pill-installed { color: #3A6620 !important; }
+                .border-cream-dark { border-color: #E8DDD0 !important; }
+                .pill-scheduled { border-color: #E0D5C5 !important; }
+                .pill-warehouse { border-color: #D4C8B8 !important; }
+                .pill-in-transit { border-color: #E8CFA0 !important; }
+                .pill-ordered { border-color: #B0CAE8 !important; }
+                .pill-pending { border-color: #F2C9B8 !important; }
+                .pill-delivered { border-color: #C4DBA8 !important; }
+                .pill-installed { border-color: #A8C98C !important; }
+              }
             `,
           }}
         />
@@ -143,30 +183,62 @@ export function EmailShell({
         />
       </Head>
       <Tailwind config={emailTailwindConfig}>
-        <Body className="bg-cream font-body">
+        {/* gap-7 (46.1 D-10/D-11) -- candidate (d) inline body-attribute paint per
+            .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
+            Recommendation. ADDITIVE on top of the existing className="bg-cream"
+            (which stays for Tailwind compilation + [data-ogsb] selector matching).
+            The inline style attribute has higher specificity than <style>-block
+            rules and survives Outlook-for-Mac <style>-block stripping. Color
+            byte-identical to the [data-ogsb] body bg rule above. */}
+        <Body className="bg-cream font-body" style={{ backgroundColor: "#FAF8F5" }}>
           <Preheader>{preheader}</Preheader>
-          <Container className="mx-auto max-w-[580px]">
-            <Section className="px-[40px] pt-[32px] pb-[24px]">
-              <Text className="text-[11.5px] tracking-[0.14em] text-stone uppercase font-semibold m-0">
-                {tenant.wordmark}
-              </Text>
-            </Section>
-            {children}
-            {cta && (
-              <Section className="px-[40px] py-[24px]">
-                <EmailButton href={cta.href}>{cta.label}</EmailButton>
-              </Section>
-            )}
-            <Hr className="border-cream-dark m-0" />
-            <Section className="px-[40px] py-[16px] text-center">
-              <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0">
-                {signoffName} {"·"} {tenant.signoffLocation}
-              </Text>
-              <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0 mt-[8px]">
-                Sent via Sprezza Hub
-              </Text>
-            </Section>
-          </Container>
+          {/* gap-7 (46.1 D-10/D-11) -- candidate (a) <table bgcolor> body wrapper per
+              .planning/phases/46.1-merge-gate-gap-closure/46.1-SPIKE-OUTLOOK-MAC.md
+              Recommendation. Wraps the existing <Container> in a top-level <table>
+              that delivers the cream paint via the HTML `bgcolor` attribute (not a
+              CSS rule). Survives Outlook-for-Mac <style>-block stripping. Paint-only
+              wrapper -- carries no align= attribute, so per HTML attribute
+              precedence (MDN <td> deprecated align), inner <td align="left"> cells
+              from gap-5 (46.1-05) and gap-6 (46.1-07) keep their alignment.
+              Color byte-identical to [data-ogsb] body bg rule. */}
+          <table
+            bgcolor="#FAF8F5"
+            width="100%"
+            cellPadding={0}
+            cellSpacing={0}
+            border={0}
+            role="presentation"
+            style={{ backgroundColor: "#FAF8F5" }}
+          >
+            <tbody>
+              <tr>
+                <td align="center" valign="top" style={{ backgroundColor: "#FAF8F5" }}>
+                  <Container className="mx-auto max-w-[580px]">
+                    <Section className="px-[40px] pt-[32px] pb-[24px]">
+                      <Text className="text-[11.5px] tracking-[0.14em] text-stone uppercase font-semibold m-0">
+                        {tenant.wordmark}
+                      </Text>
+                    </Section>
+                    {children}
+                    {cta && (
+                      <Section className="px-[40px] py-[24px]">
+                        <EmailButton href={cta.href}>{cta.label}</EmailButton>
+                      </Section>
+                    )}
+                    <Hr className="border-cream-dark m-0" />
+                    <Section className="px-[40px] py-[16px] text-center">
+                      <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0">
+                        {signoffName} {"·"} {tenant.signoffLocation}
+                      </Text>
+                      <Text className="text-[10px] text-stone-light tracking-[0.06em] m-0 mt-[8px]">
+                        Sent via Sprezza Hub
+                      </Text>
+                    </Section>
+                  </Container>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </Body>
       </Tailwind>
     </Html>

@@ -162,3 +162,95 @@ describe("EmailShell auto-darken lock (46.1 D-6 -- gap-4)", () => {
     });
   });
 });
+
+// ============================================================================
+// 46.1 D-10 / D-11 -- gap-7 Outlook-for-Mac dark-mode survival markers.
+// New techniques applied per .planning/phases/46.1-merge-gate-gap-closure/
+// 46.1-SPIKE-OUTLOOK-MAC.md Recommendation section. The existing 46.1-04
+// [data-ogsc]/[data-ogsb]/MSO lock STAYS intact; this block ADDS coverage
+// for the new technique markers. Each marker is asserted on BOTH SendUpdate
+// AND WorkOrder rendered HTML to prove shared-shell propagation.
+//
+// Chosen combination per SPIKE.md ## Recommendation:
+//   (a) <table bgcolor="#FAF8F5"> body wrapper (HTML-attribute paint that
+//       survives <style>-block stripping on Outlook-for-Mac)
+//   (b) @media (prefers-color-scheme: dark) block re-pinning the locked
+//       light palette (catches Outlook variants that honor prefers-color-scheme)
+//   (d) inline style={{backgroundColor:"#FAF8F5"}} on <Body> (higher
+//       specificity than <style>-block rules; second-layer survive)
+// Rejected: (c) class-hook selectors -- shares the failing <style>-block
+//   delivery vehicle with the existing 46.1-04 lock.
+// ============================================================================
+
+describe("EmailShell Outlook-for-Mac dark-mode survival (46.1 D-10/D-11 -- gap-7)", () => {
+  describe("SendUpdate render -- new gap-7 markers", () => {
+    it("rendered HTML contains <table bgcolor=\"#FAF8F5\"> body wrapper (candidate a)", async () => {
+      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
+      expect(html).toMatch(/<table[^>]*bgcolor="#FAF8F5"/i);
+    });
+
+    it("rendered HTML contains @media (prefers-color-scheme: dark) block (candidate b)", async () => {
+      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
+      expect(html).toContain("@media (prefers-color-scheme: dark)");
+    });
+
+    it("@media (prefers-color-scheme: dark) block contains !important declarations (candidate b specificity tie-resolver)", async () => {
+      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
+      const mediaIdx = html.indexOf("@media (prefers-color-scheme: dark)");
+      expect(mediaIdx).toBeGreaterThan(-1);
+      // 4KB window covers the entire media-query body.
+      const mediaWindow = html.slice(mediaIdx, mediaIdx + 4096);
+      expect(mediaWindow).toContain("!important");
+    });
+
+    it("@media (prefers-color-scheme: dark) block re-pins cream bg #FAF8F5 (candidate b palette parity)", async () => {
+      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
+      const mediaIdx = html.indexOf("@media (prefers-color-scheme: dark)");
+      expect(mediaIdx).toBeGreaterThan(-1);
+      const mediaWindow = html.slice(mediaIdx, mediaIdx + 4096);
+      expect(mediaWindow).toContain("#FAF8F5");
+      expect(mediaWindow).toContain("#2C2926");
+    });
+
+    it("rendered HTML <body> element carries inline background-color #FAF8F5 (candidate d)", async () => {
+      const html = await render(createElement(SendUpdate, SU_FIXTURES.full()));
+      // react-email normalizes hex to rgb() during compilation per Phase 45-04 D-7.
+      // Accept either hex or rgb form on the <body> open tag.
+      expect(html).toMatch(/<body[^>]*style="[^"]*background-color:\s*(?:#FAF8F5|rgb\(\s*250\s*,\s*248\s*,\s*245\s*\))/i);
+    });
+  });
+
+  describe("WorkOrder render -- new gap-7 markers (shared-shell propagation)", () => {
+    it("rendered HTML contains <table bgcolor=\"#FAF8F5\"> body wrapper (candidate a)", async () => {
+      const html = await render(createElement(WorkOrder, buildWO()));
+      expect(html).toMatch(/<table[^>]*bgcolor="#FAF8F5"/i);
+    });
+
+    it("rendered HTML contains @media (prefers-color-scheme: dark) block (candidate b)", async () => {
+      const html = await render(createElement(WorkOrder, buildWO()));
+      expect(html).toContain("@media (prefers-color-scheme: dark)");
+    });
+
+    it("@media (prefers-color-scheme: dark) block contains !important declarations (candidate b specificity tie-resolver)", async () => {
+      const html = await render(createElement(WorkOrder, buildWO()));
+      const mediaIdx = html.indexOf("@media (prefers-color-scheme: dark)");
+      expect(mediaIdx).toBeGreaterThan(-1);
+      const mediaWindow = html.slice(mediaIdx, mediaIdx + 4096);
+      expect(mediaWindow).toContain("!important");
+    });
+
+    it("@media (prefers-color-scheme: dark) block re-pins cream bg #FAF8F5 (candidate b palette parity)", async () => {
+      const html = await render(createElement(WorkOrder, buildWO()));
+      const mediaIdx = html.indexOf("@media (prefers-color-scheme: dark)");
+      expect(mediaIdx).toBeGreaterThan(-1);
+      const mediaWindow = html.slice(mediaIdx, mediaIdx + 4096);
+      expect(mediaWindow).toContain("#FAF8F5");
+      expect(mediaWindow).toContain("#2C2926");
+    });
+
+    it("rendered HTML <body> element carries inline background-color #FAF8F5 (candidate d)", async () => {
+      const html = await render(createElement(WorkOrder, buildWO()));
+      expect(html).toMatch(/<body[^>]*style="[^"]*background-color:\s*(?:#FAF8F5|rgb\(\s*250\s*,\s*248\s*,\s*245\s*\))/i);
+    });
+  });
+});
