@@ -20,7 +20,7 @@ import { getTenantBrand } from "../../../../../lib/email/tenantBrand";
 // Pattern reference: src/pages/api/send-update.ts L103-260 (Settings-first
 // resolver + CRLF guard + Resend dynamic import + sendLog-analog append).
 
-export const POST: APIRoute = async ({ request, cookies, params }) => {
+export const POST: APIRoute = async ({ request, cookies, params, locals }) => {
   try {
     // Admin gate (verbatim from artifact-version.ts L10-26).
     const session = await getSession(cookies);
@@ -35,6 +35,20 @@ export const POST: APIRoute = async ({ request, cookies, params }) => {
         status: 403,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Phase 49 D-14 (IMPER-03) — belt-and-braces 403 gate. The middleware
+    // 401 (Plan 07) is the primary block; this layer is depth-of-defense
+    // and ensures resend.emails.send is unreachable from an impersonated
+    // session. 403 specifically (not 401) so future telemetry can
+    // distinguish "impersonation tried to email" from generic mutation
+    // blocks. Placed AFTER the tenant gate so a missing-tenantId session
+    // still receives "No tenant context" first.
+    if (locals.impersonating) {
+      return new Response(
+        JSON.stringify({ error: "Cannot send email during impersonation" }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
+      );
     }
 
     const workOrderId = params.id;
