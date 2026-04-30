@@ -44,10 +44,16 @@ vi.mock("../../../../lib/auth/impersonation", () => ({
 // Import POST AFTER vi.mock hoisted calls above.
 import { POST } from "./index";
 
-function makeCookies(token: string | undefined = "admin-session-tok-AAA"): AstroCookies {
+// Sentinel for "explicitly no cookie" — passing undefined to a defaulted param
+// would silently fall back to the default, masking the test intent.
+const NO_COOKIE = Symbol("NO_COOKIE");
+
+function makeCookies(
+  token: string | typeof NO_COOKIE = "admin-session-tok-AAA",
+): AstroCookies {
   mockCookieGet.mockImplementation((name: string) => {
-    if (name === "portal_session" && token !== undefined) {
-      return { value: token };
+    if (name === "portal_session" && token !== NO_COOKIE) {
+      return { value: token as string };
     }
     return undefined;
   });
@@ -319,8 +325,12 @@ describe("POST /api/admin/impersonate", () => {
 
   it("Test 10b (D-15): missing portal_session cookie → 500 internal error", async () => {
     mockGetSession.mockResolvedValueOnce(freshAdminSession());
+    // Recipient + project resolve so we reach the cookie check.
+    mockFetch
+      .mockResolvedValueOnce({ _id: "client-sarah", name: "Sarah Q" })
+      .mockResolvedValueOnce({ _id: "project-cottage", title: "Cottage Reno" });
     // The admin gate passed (we have a session) but the cookie is somehow gone.
-    const cookies = makeCookies(undefined);
+    const cookies = makeCookies(NO_COOKIE);
 
     const res = await callPost({
       request: makeRequest(validBody),
