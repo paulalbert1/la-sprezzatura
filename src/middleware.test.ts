@@ -491,3 +491,144 @@ describe("PURL session middleware behavior (Phase 34 Plan 06)", () => {
     expect(next).toHaveBeenCalled();
   });
 });
+
+// Phase 49 Plan 07 Task 1: PUBLIC_PATHS extension + sibling impersonation
+// read-only gate. CONTEXT D-03 (sibling, NOT generalization) + D-13
+// (impersonation sessions are read-only) + RESEARCH § Pattern 1 (reuse the
+// gateSession from the PURL branch — no double Redis fetch).
+describe("Phase 49 impersonation gate", () => {
+  beforeEach(async () => {
+    vi.resetModules();
+    sanityFetchMock.mockReset();
+    getSessionMock.mockReset();
+    clearSessionMock.mockReset();
+    hashPortalTokenMock.mockReset();
+    hashPortalTokenMock.mockImplementation((t: string) => `hash(${t})`);
+    timingSafeEqualHashMock.mockReset();
+    timingSafeEqualHashMock.mockImplementation((a: string, b: string) => a === b);
+    getTenantByAdminEmailMock.mockReset();
+  });
+
+  async function loadMiddleware() {
+    const mod = await import("./middleware");
+    return mod.onRequest;
+  }
+
+  // Test 1 (PUBLIC_PATHS extension)
+  it("GET /portal/_enter-impersonation passes the middleware without a session (PUBLIC_PATHS)", async () => {
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/portal/_enter-impersonation" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(next).toHaveBeenCalled();
+    expect(getSessionMock).not.toHaveBeenCalled();
+    expect(ctx.redirect).not.toHaveBeenCalled();
+  });
+
+  // Test 2 (PURL gate untouched — source-scan)
+  it("PURL gate string is present exactly once (PURL branch byte-identical, D-03)", () => {
+    const matches = middlewareSource.match(/PURL sessions are read-only/g) || [];
+    expect(matches.length).toBe(1);
+  });
+
+  // Test 3 (impersonation gate fires on non-safe method)
+  it("POST /api/admin/clients with session.impersonating returns 401 read-only (D-13, IMPER-02)", async () => {
+    getSessionMock.mockResolvedValue({
+      entityId: "admin@example.com",
+      role: "admin",
+      tenantId: "tenant-1",
+      mintedAt: new Date().toISOString(),
+      impersonating: {
+        role: "client",
+        entityId: "client-x",
+        projectId: "proj-1",
+        tenantId: "tenant-1",
+        adminEmail: "admin@example.com",
+        mintedAt: new Date().toISOString(),
+        originalAdminSessionToken: "tok-orig",
+      },
+    });
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({
+      pathname: "/api/admin/clients",
+      method: "POST",
+    });
+    const next = vi.fn();
+    const response = await onRequest(ctx as any, next);
+    expect(response).toBeInstanceOf(Response);
+    expect((response as Response).status).toBe(401);
+    const body = await (response as Response).json();
+    expect(body.error).toBe("Impersonation sessions are read-only");
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  // Test 4 (impersonation gate skips safe methods — D-13 only blocks NON-SAFE)
+  it("GET /api/admin/clients with session.impersonating does NOT return read-only 401 at the gate", async () => {
+    getSessionMock.mockResolvedValue({
+      entityId: "admin@example.com",
+      role: "admin",
+      tenantId: "tenant-1",
+      mintedAt: new Date().toISOString(),
+      impersonating: {
+        role: "client",
+        entityId: "client-x",
+        projectId: "proj-1",
+        tenantId: "tenant-1",
+        adminEmail: "admin@example.com",
+        mintedAt: new Date().toISOString(),
+        originalAdminSessionToken: "tok-orig",
+      },
+    });
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({
+      pathname: "/api/admin/clients",
+      method: "GET",
+    });
+    const next = vi.fn(async () => new Response("ok"));
+    const response = await onRequest(ctx as any, next);
+    // Either next() was called or the admin branch ran — but the response is
+    // NOT the read-only-401 from the gate itself. Verify by checking the body
+    // when status === 401, or just that the gate did not produce the error.
+    if (response instanceof Response && response.status === 401) {
+      const body = await response.json();
+      expect(body.error).not.toBe("Impersonation sessions are read-only");
+    }
+  });
+
+  // Test 5 (sibling not generalization — source-scan)
+  it("impersonation gate is a sibling `if`, NOT a `||` extension of the PURL branch (D-03)", () => {
+    // The PURL branch should close, then a SEPARATE `if (...impersonating)` should follow
+    // within the same outer block. This regex matches: the PURL closing `}`, then optional
+    // whitespace/comments, then `if` checking `purlGateSession?.impersonating`.
+    expect(middlewareSource).toMatch(
+      /source === ["']purl["']\)\s*\{[\s\S]+?\}\s*(?:\/\/[^\n]*\n\s*)*if\s*\([^)]*purlGateSession\?\.impersonating/,
+    );
+  });
+
+  // Test 6 (no double Redis fetch — reuse purlGateSession)
+  it("non-safe API request with impersonating session calls getSession exactly once (Pattern 1: reuse purlGateSession)", async () => {
+    getSessionMock.mockResolvedValue({
+      entityId: "admin@example.com",
+      role: "admin",
+      tenantId: "tenant-1",
+      mintedAt: new Date().toISOString(),
+      impersonating: {
+        role: "client",
+        entityId: "client-x",
+        projectId: "proj-1",
+        tenantId: "tenant-1",
+        adminEmail: "admin@example.com",
+        mintedAt: new Date().toISOString(),
+        originalAdminSessionToken: "tok-orig",
+      },
+    });
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({
+      pathname: "/api/admin/clients",
+      method: "POST",
+    });
+    const next = vi.fn();
+    await onRequest(ctx as any, next);
+    expect(getSessionMock).toHaveBeenCalledTimes(1);
+  });
+});
