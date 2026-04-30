@@ -10,6 +10,11 @@ import {
 const PUBLIC_PATHS = [
   "/portal/login",
   "/portal/verify",
+  // Phase 49 Plan 07 IMPER-02: the redeem route mints a brand-new
+  // impersonated session from a one-shot ticket; it must be reachable
+  // WITHOUT an existing role-matched session (RESEARCH Open Q2). The
+  // route handler itself validates the ticket and mints the session.
+  "/portal/_enter-impersonation",
   // Phase 34 Plan 06 KR-7: the /portal/client/[token] route MUST be public
   // so the route handler itself can mint the PURL session cookie. Trailing
   // slash so a bare /portal/client visit (without token) still falls through
@@ -42,6 +47,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (purlGateSession?.source === "purl") {
       return new Response(
         JSON.stringify({ error: "PURL sessions are read-only" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+    // Phase 49 Plan 07 D-13 / IMPER-02: sibling read-only gate for
+    // impersonation sessions (NOT a generalization of the PURL branch — D-03).
+    // Reuses the same purlGateSession to avoid a second Redis round-trip
+    // (RESEARCH § Pattern 1).
+    if (purlGateSession?.impersonating) {
+      return new Response(
+        JSON.stringify({ error: "Impersonation sessions are read-only" }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
