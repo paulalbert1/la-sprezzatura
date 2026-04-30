@@ -7,7 +7,6 @@ import ConfidentialityBanner from "../../../components/portal/ConfidentialityBan
 import PostProjectBanner from "../../../components/portal/PostProjectBanner.astro";
 import DesignOptionsSection from "../../../components/portal/DesignOptionsSection.astro";
 import MilestoneSection from "../../../components/portal/MilestoneSection.astro";
-import ContractorSection from "../../../components/portal/ContractorSection.astro";
 import ProcurementTable from "../../../components/portal/ProcurementTable.astro";
 import ProjectDocumentsSection from "../../../components/portal/ProjectDocumentsSection.astro";
 import WarrantyClaimForm from "../../../components/portal/WarrantyClaimForm.tsx";
@@ -67,10 +66,6 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
         isCompleted={isCompleted && !isReopened}
         projectId={project._id}
       />
-
-      {showProcurement && project.contractors && (
-        <ContractorSection contractors={project.contractors} />
-      )}
 
       {showProcurement && (
         <ProcurementTable items={project.procurementItems || []} />
