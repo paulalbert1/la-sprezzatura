@@ -11,7 +11,7 @@ describe("isProjectVisible", () => {
     expect(isProjectVisible({ completedAt: null })).toBe(true);
   });
 
-  it("returns true for project completed 10 days ago (within 30-day window)", () => {
+  it("returns true for project completed 10 days ago (within warranty window)", () => {
     const tenDaysAgo = new Date();
     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
     expect(
@@ -19,7 +19,7 @@ describe("isProjectVisible", () => {
     ).toBe(true);
   });
 
-  it("returns false for project completed 31 days ago (past window)", () => {
+  it("returns true for project completed 31 days ago (still within 365d warranty window)", () => {
     const thirtyOneDaysAgo = new Date();
     thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
     expect(
@@ -27,15 +27,26 @@ describe("isProjectVisible", () => {
         completedAt: thirtyOneDaysAgo.toISOString(),
         projectStatus: "completed",
       }),
+    ).toBe(true);
+  });
+
+  it("returns false for project completed 366 days ago (past 365d warranty window)", () => {
+    const past = new Date();
+    past.setDate(past.getDate() - 366);
+    expect(
+      isProjectVisible({
+        completedAt: past.toISOString(),
+        projectStatus: "completed",
+      }),
     ).toBe(false);
   });
 
-  it("returns true for project completed 31 days ago but reopened", () => {
-    const thirtyOneDaysAgo = new Date();
-    thirtyOneDaysAgo.setDate(thirtyOneDaysAgo.getDate() - 31);
+  it("returns true for project completed 400 days ago but reopened (overrides warranty window)", () => {
+    const past = new Date();
+    past.setDate(past.getDate() - 400);
     expect(
       isProjectVisible({
-        completedAt: thirtyOneDaysAgo.toISOString(),
+        completedAt: past.toISOString(),
         projectStatus: "reopened",
       }),
     ).toBe(true);

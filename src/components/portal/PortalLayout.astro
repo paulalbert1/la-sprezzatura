@@ -7,6 +7,14 @@ interface Props {
 }
 
 const { title } = Astro.props;
+
+// Preview mode: detect ?preview=1 query param. The "Open portal as
+// {client}" button on /admin/clients/[clientId] sets this so the
+// designer knows they're looking at the client's view. Cosmetic only:
+// the param is forgeable (anyone with the URL could append it) and
+// has no security implication -- it just renders a banner. The client
+// would never legitimately have ?preview=1 in their URL.
+const previewMode = Astro.url.searchParams.get("preview") === "1";
 ---
 
 <!doctype html>
@@ -20,6 +28,31 @@ const { title } = Astro.props;
     <title>{title}</title>
   </head>
   <body class="bg-cream text-charcoal font-body min-h-screen flex flex-col">
+    {previewMode && (
+      <div
+        id="preview-banner"
+        class="bg-[#9A7B4B] text-white px-6 py-2 text-center text-[12px] tracking-[0.08em] uppercase font-body sticky top-0 z-50"
+        role="status"
+        aria-live="polite"
+      >
+        Preview — you are viewing this as a client. Sign back in to <a href="/admin/dashboard" class="underline hover:no-underline">/admin</a> to continue admin work.
+      </div>
+      <script is:inline>
+        // Strip the ?preview=1 param from the visible URL so the flag
+        // doesn't leak if the URL is shared. The banner stays for the
+        // current page render (server already painted it); subsequent
+        // navigations within the portal won't carry the flag.
+        try {
+          const url = new URL(window.location.href);
+          if (url.searchParams.get("preview") === "1") {
+            url.searchParams.delete("preview");
+            window.history.replaceState({}, "", url.toString());
+          }
+        } catch {
+          /* noop */
+        }
+      </script>
+    )}
     <slot />
     <footer class="mt-auto py-8 text-center">
       <p class="text-xs text-stone tracking-widest uppercase font-body">

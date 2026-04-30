@@ -41,6 +41,42 @@ const breadcrumbs = [
 
 <AdminLayout title={pageTitle + " - Studio"} pageTitle={pageTitle} breadcrumbs={breadcrumbs}>
   <div class="max-w-4xl">
+    {/* Lightweight "view as client" affordance. Opens the PURL in a new
+        tab with ?preview=1 so the portal renders a banner identifying
+        the view as a designer preview. NOTE: the new tab will mint a
+        client-role session under this browser's cookie jar, replacing
+        the admin session — the designer must sign back into /admin
+        afterward. Real impersonation that preserves the admin session
+        is Phase 49/50; this is the lightweight stand-in. */}
+    {!isNew && clientData?.portalToken && (
+      <div class="mb-4 flex items-center gap-2">
+        <a
+          href={`/portal/client/${clientData.portalToken}?preview=1`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Opens the portal in a new tab with a PREVIEW banner. Heads up: clicking will replace your admin session in this browser — sign back in to /admin afterward."
+          class="inline-flex items-center gap-1.5 text-[12px] font-body px-3 py-1.5 rounded-md border border-[#E8DDD0] bg-[#FBF8F3] text-[#6B5E52] hover:bg-[#F3EDE3] transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M15 3h6v6"></path>
+            <path d="M10 14 21 3"></path>
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          </svg>
+          Open portal as {clientData.name?.split(" ")[0] || "client"}
+        </a>
+      </div>
+    )}
     <EntityDetailForm
       client:load
       entityType="client"

@@ -1084,7 +1084,7 @@ export async function getAdminClients(client: SanityClient) {
 export async function getAdminClientDetail(client: SanityClient, clientId: string) {
   return client.fetch(`{
     "client": *[_type == "client" && _id == $clientId][0] {
-      _id, name, email, phone, address, notes
+      _id, name, email, phone, address, notes, portalToken
     },
     "projects": *[_type == "project" && references($clientId)] | order(title asc) {
       _id, title, pipelineStage, engagementType, projectStatus

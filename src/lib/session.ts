@@ -5,7 +5,15 @@ import type { AstroCookies } from "astro";
 
 const COOKIE_NAME = "portal_session";
 const SESSION_TTL = 2592000; // 30 days in seconds
-const PURL_SESSION_TTL = 604800; // 7 days in seconds (Phase 34 Plan 06 D-19)
+// Bumped from 7d to 30d (parity with admin SESSION_TTL). The original 7d
+// limited forwarded-link exposure, but the operator's actual usage pattern
+// is "send a Send Update email; client may not click for weeks." A 7-day
+// session forced a re-click at the email link every week. 30 days lets a
+// client stay logged in across a typical multi-week design review cycle
+// without re-clicking. Token regeneration still kills every active PURL
+// session for that client (middleware re-derives portalTokenHash every
+// /portal/* request), so the manual revoke escape hatch remains.
+const PURL_SESSION_TTL = 2592000; // 30 days in seconds
 
 /**
  * Session data stored in Redis for authenticated users.
