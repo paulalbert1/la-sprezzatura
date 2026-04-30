@@ -21,16 +21,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { AstroCookies } from "astro";
 
 // -- Hoisted mocks (mirrors src/pages/api/send-update.test.ts pattern) --
-const {
-  mockGetSession,
-  mockFetch,
-  mockPatch,
-  mockCommit,
-  mockSetIfMissing,
-  mockAppend,
-  mockSet,
-  mockSend,
-} = vi.hoisted(() => {
+// The Sanity-write builder chain is set up so the mocked sanityWriteClient
+// can satisfy the chain calls inside the handlers. The gate fires BEFORE
+// these chains are exercised, but we configure them defensively so a
+// future regression that moves the gate later in the handler doesn't
+// silently fail this file with an unrelated TypeError.
+const { mockGetSession, mockFetch, mockPatch, mockSend } = vi.hoisted(() => {
   const commit = vi.fn().mockResolvedValue({});
   const send = vi.fn().mockResolvedValue({ data: { id: "stub" }, error: null });
 
@@ -48,10 +44,6 @@ const {
     mockGetSession: vi.fn(),
     mockFetch: vi.fn(),
     mockPatch: patch,
-    mockCommit: commit,
-    mockSetIfMissing: setIfMissing,
-    mockAppend: append,
-    mockSet: set,
     // Single Resend spy reused for BOTH call sites — IMPER-03 ground truth
     // is "spy is never called" regardless of which handler the request hit.
     mockSend: send,
