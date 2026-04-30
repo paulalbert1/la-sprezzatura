@@ -432,7 +432,14 @@ Plans:
   1. A single `PortalLayout.astro` shell renders the same header and footer chrome on every `/portal/*` page (dashboard, project, PURL landing, login, verify, role-select via a `bare` prop), and changing brand-mark wording in one component updates every page (PORTAL-05)
   2. `PortalHeader.astro` and `PortalFooter.astro` are extracted as standalone components, no recipient page inlines its own brand mark or footer
   3. `PortalLayout.astro` exposes a layout slot for the impersonation banner that renders nothing today (component is built in Phase 50) and renders a sticky banner once Phase 50 lands — verified by mounting a stub banner during this phase
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 47-01-PLAN.md — Wave 1: Create PortalHeader.astro + PortalFooter.astro + ImpersonationBannerStub.astro + PortalHeader.test.ts (4 new files)
+- [ ] 47-02-PLAN.md — Wave 2: Wire PortalLayout to mount header + footer + banner slot + bare prop (1 modified file)
+- [ ] 47-03-PLAN.md — Wave 3: Migrate /portal/* pages — strip inlined chrome from dashboard, project, [token], login, role-select (5 files)
+- [ ] 47-04-PLAN.md — Wave 3: Migrate /workorder/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
+- [ ] 47-05-PLAN.md — Wave 3: Migrate /building/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
 **UI hint**: yes
 
 ### Phase 48: Smaller Transactional Emails
