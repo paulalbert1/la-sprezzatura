@@ -44,6 +44,30 @@ export interface SessionData {
    * mental model per D-22 / Plan 06 T-34-07).
    */
   portalTokenHash?: string;
+  /**
+   * Phase 49 (Plan 49-01) — ISO8601 timestamp set on every session write
+   * (createSession + createPurlSession). Optional for backward compatibility
+   * with sessions written before Phase 49 deployed. Used by the impersonation
+   * mint endpoint (IMPER-08) to enforce a fresh-auth window — sessions
+   * without `mintedAt` are treated as stale (Pitfall D / D-11).
+   */
+  mintedAt?: string;
+  /**
+   * Phase 49 (Plan 49-01) — D-02 verbatim. When present, this session is an
+   * admin-issued impersonation session: `role` stays 'admin' (D-01), but
+   * downstream middleware mirrors the impersonated identity into
+   * Astro.locals (D-04). The presence of this field is the read-only-gate
+   * trigger (D-03 / D-13) and the Resend-gate trigger (D-14, IMPER-03).
+   */
+  impersonating?: {
+    role: 'client' | 'contractor' | 'building_manager';
+    entityId: string;
+    projectId: string;
+    tenantId: string;
+    adminEmail: string;
+    mintedAt: string;
+    originalAdminSessionToken: string;
+  };
 }
 
 /**

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -6,6 +6,38 @@ const sessionSource = readFileSync(
   resolve(__dirname, "./session.ts"),
   "utf-8",
 );
+
+// Phase 49 — runtime tests use a mocked Redis client to capture writes
+// and stub reads. The source-grep tests above remain unchanged.
+const mockRedisGet = vi.fn();
+const mockRedisSet = vi.fn().mockResolvedValue("OK");
+const mockRedisDel = vi.fn().mockResolvedValue(1);
+
+vi.mock("./redis", () => ({
+  redis: {
+    get: (...args: unknown[]) => mockRedisGet(...args),
+    set: (...args: unknown[]) => mockRedisSet(...args),
+    del: (...args: unknown[]) => mockRedisDel(...args),
+  },
+}));
+
+// Cookie stub — minimal AstroCookies surface used by createSession /
+// createPurlSession (only set/get/delete with .value getter).
+function makeCookieStub(seed: Record<string, string> = {}) {
+  const store: Record<string, string> = { ...seed };
+  return {
+    set: vi.fn((name: string, value: string) => {
+      store[name] = value;
+    }),
+    get: vi.fn((name: string) =>
+      store[name] === undefined ? undefined : { value: store[name] },
+    ),
+    delete: vi.fn((name: string) => {
+      delete store[name];
+    }),
+    _store: store,
+  };
+}
 
 describe("session module", () => {
   it("exports createSession function", () => {
@@ -96,5 +128,102 @@ describe("session module", () => {
 
   it("createSession stores tenantId in session data when provided", () => {
     expect(sessionSource).toContain("if (tenantId) sessionData.tenantId = tenantId");
+  });
+});
+
+// --- Phase 49 SessionData extensions (Plan 49-01 Task 1) ---
+
+describe("Phase 49 SessionData extensions", () => {
+  beforeEach(() => {
+    mockRedisGet.mockReset();
+    mockRedisSet.mockReset().mockResolvedValue("OK");
+    mockRedisDel.mockReset().mockResolvedValue(1);
+  });
+
+  it("SessionData type accepts an impersonating field with all 7 D-02 sub-fields (typecheck-only)", () => {
+    // Compile-time assertion: a SessionData literal with the full
+    // impersonating sub-shape must typecheck. The runtime check is
+    // structural — every required D-02 sub-field is present.
+    const sample: import("./session").SessionData = {
+      entityId: "admin-123",
+      role: "admin",
+      tenantId: "tenant-a",
+      impersonating: {
+        role: "client",
+        entityId: "client-1",
+        projectId: "project-1",
+        tenantId: "tenant-a",
+        adminEmail: "liz@lasprezz.com",
+        mintedAt: "2026-04-30T12:00:00.000Z",
+        originalAdminSessionToken: "orig-token-abc",
+      },
+    };
+
+    expect(sample.impersonating).toBeDefined();
+    expect(sample.impersonating?.role).toBe("client");
+    expect(sample.impersonating?.entityId).toBe("client-1");
+    expect(sample.impersonating?.projectId).toBe("project-1");
+    expect(sample.impersonating?.tenantId).toBe("tenant-a");
+    expect(sample.impersonating?.adminEmail).toBe("liz@lasprezz.com");
+    expect(sample.impersonating?.mintedAt).toBe("2026-04-30T12:00:00.000Z");
+    expect(sample.impersonating?.originalAdminSessionToken).toBe("orig-token-abc");
+  });
+
+  it("SessionData type accepts an optional mintedAt string field (typecheck-only)", () => {
+    const sample: import("./session").SessionData = {
+      entityId: "admin-123",
+      role: "admin",
+      mintedAt: "2026-04-30T12:00:00.000Z",
+    };
+    expect(sample.mintedAt).toBe("2026-04-30T12:00:00.000Z");
+
+    // Optional — must also accept omission.
+    const sampleNoMint: import("./session").SessionData = {
+      entityId: "client-1",
+      role: "client",
+    };
+    expect(sampleNoMint.mintedAt).toBeUndefined();
+  });
+
+  it("getSession round-trips an impersonating payload through Redis JSON serialization", async () => {
+    const { getSession } = await import("./session");
+    const cookies = makeCookieStub({ portal_session: "tok-1" });
+
+    const stored: import("./session").SessionData = {
+      entityId: "admin-123",
+      role: "admin",
+      tenantId: "tenant-a",
+      mintedAt: "2026-04-30T12:00:00.000Z",
+      impersonating: {
+        role: "client",
+        entityId: "client-1",
+        projectId: "project-1",
+        tenantId: "tenant-a",
+        adminEmail: "liz@lasprezz.com",
+        mintedAt: "2026-04-30T12:00:00.000Z",
+        originalAdminSessionToken: "orig-token-abc",
+      },
+    };
+    // Mimic Upstash auto-parsed object return.
+    mockRedisGet.mockResolvedValue(stored);
+
+    const result = await getSession(cookies as unknown as Parameters<typeof getSession>[0]);
+    expect(result).not.toBeNull();
+    expect(result?.impersonating).toEqual(stored.impersonating);
+    expect(result?.mintedAt).toBe(stored.mintedAt);
+  });
+
+  it("getSession parses a legacy session string without mintedAt without crashing (Pitfall D)", async () => {
+    const { getSession } = await import("./session");
+    const cookies = makeCookieStub({ portal_session: "tok-legacy" });
+
+    // Legacy sessions written before Phase 49 lack mintedAt.
+    mockRedisGet.mockResolvedValue('{"entityId":"x","role":"admin"}');
+
+    const result = await getSession(cookies as unknown as Parameters<typeof getSession>[0]);
+    expect(result).not.toBeNull();
+    expect(result?.entityId).toBe("x");
+    expect(result?.role).toBe("admin");
+    expect(result?.mintedAt).toBeUndefined();
   });
 });
