@@ -1,0 +1,11 @@
+---
+// Phase 47 stub — verifies <slot name="banner"> wiring in PortalLayout
+// without shipping the real impersonation banner UI. Phase 50 replaces
+// this file with the real ImpersonationBanner driven by
+// Astro.locals.impersonating (see env.d.ts).
+//
+// MUST NOT render any user-visible chrome. The banner slot's empty state
+// IS the absence of any rendered content (UI-SPEC § Copywriting Contract).
+---
+
+<div data-testid="banner-slot-mounted" hidden></div>
