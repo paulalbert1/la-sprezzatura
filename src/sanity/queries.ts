@@ -287,63 +287,16 @@ export const PROJECT_DETAIL_QUERY = `
         }
       }
     }),
-    "artifacts": artifacts[shareableWithClient == true] {
+    "projectDocuments": projectDocuments[shareableWithClient == true]{
       _key,
-      artifactType,
-      shareableWithClient,
-      customTypeName,
-      currentVersionKey,
-      signedFile {
-        asset-> {
-          url,
-          originalFilename
-        }
-      },
-      versions[] {
-        _key,
-        file {
-          asset-> {
-            url,
-            originalFilename,
-            mimeType,
-            size
-          }
-        },
-        uploadedAt,
-        note
-      },
-      decisionLog[] {
-        _key,
-        action,
-        versionKey,
-        clientId,
-        clientName,
-        feedback,
-        timestamp
-      },
-      notes[] {
-        _key,
-        text,
-        clientId,
-        clientName,
-        timestamp
-      },
-      notificationLog[] {
-        _key,
-        sentAt,
-        recipientEmail
-      },
-      investmentSummary {
-        tiers[] {
-          _key, name, description,
-          lineItems[] {
-            _key, name, price
-          }
-        },
-        selectedTierKey,
-        eagerness,
-        reservations
-      }
+      label,
+      category,
+      uploadedAt,
+      uploadedByName,
+      "url": file.asset->url,
+      "size": file.asset->size,
+      "originalFilename": file.asset->originalFilename,
+      "mimeType": file.asset->mimeType
     }
   }
 `;
@@ -1015,6 +968,7 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
       _key,
       label,
       category,
+      shareableWithClient,
       uploadedAt,
       uploadedByName,
       "url": file.asset->url,

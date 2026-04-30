@@ -1173,6 +1173,14 @@ export const project = defineType({
               validation: (r) => r.required(),
             }),
             defineField({
+              name: "shareableWithClient",
+              title: "Shareable with client",
+              type: "boolean",
+              description:
+                "When enabled, this document appears on the client portal project page. When disabled (default), the document is admin-only.",
+              initialValue: false,
+            }),
+            defineField({
               name: "uploadedAt",
               title: "Uploaded At",
               type: "datetime",

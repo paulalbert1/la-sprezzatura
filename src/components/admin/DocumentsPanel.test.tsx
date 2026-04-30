@@ -53,12 +53,14 @@ describe("DocumentsPanel — filter tabs", () => {
     ) as HTMLElement[];
     expect(tabs.length).toBe(5);
     const labels = tabs.map((t) => t.textContent?.trim());
+    // Singular labels per operator preference (display map; schema enum
+    // remains plural for back-compat).
     expect(labels).toEqual([
       "All",
-      "Contracts",
-      "Drawings",
-      "Selections",
-      "Presentations",
+      "Contract",
+      "Drawing",
+      "Selection",
+      "Presentation",
     ]);
     const active = tabs.find((t) => t.getAttribute("data-active") === "true");
     expect(active?.getAttribute("data-tab")).toBe("all");

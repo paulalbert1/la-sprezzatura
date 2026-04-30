@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import UploadDocumentModal from "./UploadDocumentModal";
 import ToastContainer, { useToast } from "./ui/ToastContainer";
@@ -31,6 +31,7 @@ export interface ProjectDocument {
   _key: string;
   label: string;
   category: DocumentCategory;
+  shareableWithClient?: boolean;
   uploadedAt: string;
   uploadedByName: string;
   url: string;
@@ -46,12 +47,23 @@ interface DocumentsPanelProps {
 
 type FilterValue = "all" | DocumentCategory;
 
+// Display mapping: schema enum stores plural ("Contracts", "Drawings", ...)
+// for back-compat with existing data; UI shows singular per operator
+// preference. Centralizing this mapping keeps display consistent across
+// tabs, pills, and the empty-state copy without a schema migration.
+const CATEGORY_DISPLAY: Record<DocumentCategory, string> = {
+  Contracts: "Contract",
+  Drawings: "Drawing",
+  Selections: "Selection",
+  Presentations: "Presentation",
+};
+
 const TABS: ReadonlyArray<{ value: FilterValue; label: string }> = [
   { value: "all", label: "All" },
-  { value: "Contracts", label: "Contracts" },
-  { value: "Drawings", label: "Drawings" },
-  { value: "Selections", label: "Selections" },
-  { value: "Presentations", label: "Presentations" },
+  { value: "Contracts", label: "Contract" },
+  { value: "Drawings", label: "Drawing" },
+  { value: "Selections", label: "Selection" },
+  { value: "Presentations", label: "Presentation" },
 ];
 
 const CATEGORY_SINGULAR: Record<DocumentCategory, string> = {
@@ -89,6 +101,8 @@ function DocumentsPanelInner({
     { docKey: string; label: string } | null
   >(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editingLabel, setEditingLabel] = useState<string>("");
 
   const filtered = useMemo(
     () =>
@@ -97,6 +111,86 @@ function DocumentsPanelInner({
       ),
     [documents, activeCategory],
   );
+
+  async function handleToggleShareable(doc: ProjectDocument) {
+    const next = !doc.shareableWithClient;
+    // Optimistic update -- pill flips immediately; revert on failure.
+    setDocuments((docs) =>
+      docs.map((d) =>
+        d._key === doc._key ? { ...d, shareableWithClient: next } : d,
+      ),
+    );
+    try {
+      const res = await fetch(
+        `/api/admin/projects/${projectId}/documents/${doc._key}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shareableWithClient: next }),
+        },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(data.error || "Toggle failed");
+      }
+    } catch (err) {
+      // Revert
+      setDocuments((docs) =>
+        docs.map((d) =>
+          d._key === doc._key
+            ? { ...d, shareableWithClient: doc.shareableWithClient }
+            : d,
+        ),
+      );
+      show({
+        variant: "error",
+        title: (err as Error).message || "Could not change share state",
+        duration: 5000,
+      });
+    }
+  }
+
+  async function handleSaveLabel(doc: ProjectDocument, nextLabel: string) {
+    const trimmed = nextLabel.trim();
+    setEditingKey(null);
+    setEditingLabel("");
+    if (!trimmed || trimmed === doc.label) return;
+    const previous = doc.label;
+    // Optimistic update.
+    setDocuments((docs) =>
+      docs.map((d) => (d._key === doc._key ? { ...d, label: trimmed } : d)),
+    );
+    try {
+      const res = await fetch(
+        `/api/admin/projects/${projectId}/documents/${doc._key}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ label: trimmed }),
+        },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+        };
+        throw new Error(data.error || "Rename failed");
+      }
+    } catch (err) {
+      // Revert
+      setDocuments((docs) =>
+        docs.map((d) =>
+          d._key === doc._key ? { ...d, label: previous } : d,
+        ),
+      );
+      show({
+        variant: "error",
+        title: (err as Error).message || "Rename failed",
+        duration: 5000,
+      });
+    }
+  }
 
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
@@ -188,7 +282,7 @@ function DocumentsPanelInner({
         {showEmptyFiltered && activeCategory !== "all" && (
           <div className="py-10 text-center">
             <p className="text-[12.5px] text-[#9E8E80] max-w-[420px] mx-auto">
-              No {activeCategory.toLowerCase()} yet.{" "}
+              No {CATEGORY_DISPLAY[activeCategory].toLowerCase()}s yet.{" "}
               <button
                 type="button"
                 onClick={() => setActiveCategory("all")}
@@ -226,23 +320,80 @@ function DocumentsPanelInner({
                     {type}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <a
-                      data-doc-link={doc._key}
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[14px] text-[#2C2520] hover:text-[#9A7B4B] hover:underline truncate block"
-                    >
-                      {doc.label}
-                    </a>
+                    {editingKey === doc._key ? (
+                      <input
+                        type="text"
+                        autoFocus
+                        value={editingLabel}
+                        onChange={(e) => setEditingLabel(e.target.value)}
+                        onBlur={() => handleSaveLabel(doc, editingLabel)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            (e.target as HTMLInputElement).blur();
+                          } else if (e.key === "Escape") {
+                            setEditingKey(null);
+                            setEditingLabel("");
+                          }
+                        }}
+                        className="block w-full text-[14px] text-[#2C2520] bg-transparent border-b border-[#9A7B4B] outline-none py-0"
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        title="Click to rename"
+                        onClick={() => {
+                          setEditingKey(doc._key);
+                          setEditingLabel(doc.label);
+                        }}
+                        className="block text-left w-full text-[14px] text-[#2C2520] hover:text-[#9A7B4B] truncate"
+                      >
+                        {doc.label}
+                      </button>
+                    )}
                     <div className="text-[11.5px] text-[#9E8E80]">
                       {formatBytes(doc.size)}
                       {dateLabel ? ` · ${dateLabel}` : ""}
                       {doc.uploadedByName ? ` · ${doc.uploadedByName}` : ""}
+                      {" · "}
+                      <a
+                        data-doc-link={doc._key}
+                        href={doc.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-[#9A7B4B] hover:underline"
+                      >
+                        Open
+                      </a>
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    aria-label={
+                      doc.shareableWithClient
+                        ? "Hide from client portal"
+                        : "Share with client portal"
+                    }
+                    title={
+                      doc.shareableWithClient
+                        ? "Visible on client portal — click to hide"
+                        : "Hidden from client portal — click to share"
+                    }
+                    onClick={() => handleToggleShareable(doc)}
+                    className={`shrink-0 inline-flex items-center gap-1.5 text-[11px] font-body px-2 py-1 rounded-md border transition-colors ${
+                      doc.shareableWithClient
+                        ? "border-[#A8C98C] bg-[#EDF5E8] text-[#3A6620] hover:bg-[#DDE9D2]"
+                        : "border-[#E8DDD0] bg-[#FBF8F3] text-[#9E8E80] hover:bg-[#F3EDE3]"
+                    }`}
+                  >
+                    {doc.shareableWithClient ? (
+                      <Eye size={12} aria-hidden="true" />
+                    ) : (
+                      <EyeOff size={12} aria-hidden="true" />
+                    )}
+                    {doc.shareableWithClient ? "Shared" : "Hidden"}
+                  </button>
                   <span className="text-[11.5px] font-semibold tracking-[0.04em] text-[#6B5E52] bg-[#F3EDE3] px-2 py-0.5 rounded-full">
-                    {doc.category}
+                    {CATEGORY_DISPLAY[doc.category]}
                   </span>
                   <button
                     type="button"

@@ -1,0 +1,123 @@
+---
+// src/components/portal/ProjectDocumentsSection.astro
+//
+// Portal-side render of projectDocuments[] entries that have been
+// flagged shareableWithClient=true on the admin side. Replaces the
+// retired ArtifactSection (which read from the legacy artifacts[]
+// field) so all client-facing documents flow through one source of
+// truth: the admin DocumentsPanel.
+//
+// PROJECT_DETAIL_QUERY (src/sanity/queries.ts) already filters at the
+// data boundary -- this component receives only shareable docs and
+// renders them grouped by category.
+
+import { format, parseISO } from "date-fns";
+
+export interface ProjectDocumentForPortal {
+  _key: string;
+  label?: string;
+  category?: "Contracts" | "Drawings" | "Selections" | "Presentations";
+  uploadedAt?: string;
+  uploadedByName?: string;
+  url?: string;
+  size?: number;
+  originalFilename?: string;
+  mimeType?: string;
+}
+
+interface Props {
+  documents: ProjectDocumentForPortal[];
+}
+
+const { documents } = Astro.props;
+
+// Display mapping mirrors the admin DocumentsPanel CATEGORY_DISPLAY map:
+// schema enum stores plural for back-compat; UI shows singular.
+const CATEGORY_DISPLAY: Record<string, string> = {
+  Contracts: "Contract",
+  Drawings: "Drawing",
+  Selections: "Selection",
+  Presentations: "Presentation",
+};
+
+// Group by category, preserving the schema enum's display order.
+const CATEGORY_ORDER = [
+  "Contracts",
+  "Drawings",
+  "Selections",
+  "Presentations",
+] as const;
+const grouped = CATEGORY_ORDER.map((cat) => ({
+  category: cat,
+  docs: documents.filter((d) => d.category === cat),
+})).filter((g) => g.docs.length > 0);
+
+function formatBytes(bytes: number | undefined): string {
+  if (!bytes) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fileExt(filename?: string, mimeType?: string): string {
+  if (mimeType?.includes("pdf")) return "PDF";
+  if (mimeType?.includes("png")) return "PNG";
+  if (mimeType?.includes("jpeg") || mimeType?.includes("jpg")) return "JPG";
+  const m = filename?.toLowerCase().match(/\.([a-z0-9]+)$/);
+  return m ? m[1].toUpperCase() : "FILE";
+}
+---
+
+<section id="documents" class="py-12 border-t border-stone-light/20">
+  <h2 class="font-heading text-xl font-light text-charcoal mb-6">Documents</h2>
+
+  {documents.length === 0 ? (
+    <div class="text-center py-8">
+      <p class="text-sm text-stone font-body font-light">
+        No documents shared yet.
+      </p>
+      <p class="text-xs text-stone-light font-body mt-1">
+        Liz will share design materials here as your project progresses.
+      </p>
+    </div>
+  ) : (
+    <div class="space-y-8">
+      {grouped.map(({ category, docs }) => (
+        <div>
+          <h3 class="text-[11px] tracking-[0.14em] uppercase text-stone font-semibold mb-3">
+            {CATEGORY_DISPLAY[category] || category}
+          </h3>
+          <div class="space-y-2">
+            {docs.map((doc) => {
+              let dateLabel = "";
+              if (doc.uploadedAt) {
+                try { dateLabel = format(parseISO(doc.uploadedAt), "MMM d, yyyy"); } catch { dateLabel = ""; }
+              }
+              const ext = fileExt(doc.originalFilename, doc.mimeType);
+              return (
+                <a
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-3 px-4 py-3 border border-stone-light/20 rounded-lg hover:border-terracotta hover:bg-cream-dark/30 transition-colors group"
+                >
+                  <span class="shrink-0 w-9 h-9 rounded-md bg-stone-light/10 text-[10px] font-semibold tracking-wider text-stone flex items-center justify-center">
+                    {ext}
+                  </span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm text-charcoal group-hover:text-terracotta truncate font-body">
+                      {doc.label || doc.originalFilename || "Untitled document"}
+                    </div>
+                    <div class="text-[11px] text-stone-light font-body">
+                      {[formatBytes(doc.size), dateLabel].filter(Boolean).join(" · ")}
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
