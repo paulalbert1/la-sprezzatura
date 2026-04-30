@@ -308,104 +308,115 @@ function DocumentsPanelInner({
                 <div
                   key={doc._key}
                   data-doc-row={doc._key}
-                  className="flex items-center gap-3 px-4 py-3 border-b-[0.5px] border-[#E8DDD0] last:border-0"
+                  className="px-4 py-3 border-b-[0.5px] border-[#E8DDD0] last:border-0"
                 >
-                  <div
-                    data-file-badge={type}
-                    className={
-                      "w-8 h-8 rounded-[6px] flex items-center justify-center text-[11.5px] font-semibold tracking-[0.04em] " +
-                      badgeClasses(type)
-                    }
-                  >
-                    {type}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    {editingKey === doc._key ? (
-                      <input
-                        type="text"
-                        autoFocus
-                        value={editingLabel}
-                        onChange={(e) => setEditingLabel(e.target.value)}
-                        onBlur={() => handleSaveLabel(doc, editingLabel)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            (e.target as HTMLInputElement).blur();
-                          } else if (e.key === "Escape") {
-                            setEditingKey(null);
-                            setEditingLabel("");
-                          }
-                        }}
-                        className="block w-full text-[14px] text-[#2C2520] bg-transparent border-b border-[#9A7B4B] outline-none py-0"
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        title="Click to rename"
-                        onClick={() => {
-                          setEditingKey(doc._key);
-                          setEditingLabel(doc.label);
-                        }}
-                        className="block text-left w-full text-[14px] text-[#2C2520] hover:text-[#9A7B4B] truncate"
-                      >
-                        {doc.label}
-                      </button>
-                    )}
-                    <div className="text-[11.5px] text-[#9E8E80]">
-                      {formatBytes(doc.size)}
-                      {dateLabel ? ` · ${dateLabel}` : ""}
-                      {doc.uploadedByName ? ` · ${doc.uploadedByName}` : ""}
-                      {" · "}
-                      <a
-                        data-doc-link={doc._key}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-[#9A7B4B] hover:underline"
-                      >
-                        Open
-                      </a>
+                  {/* Top sub-row: badge + filename + share pill + category pill +
+                      trash. All one-line-height children, so items-center
+                      actually centers them visually. The previous one-flex-row
+                      layout combined the meta line into the same flex parent,
+                      which inflated the row height to ~48px and made the 32px
+                      badge appear top-anchored even though items-center was set. */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      data-file-badge={type}
+                      className={
+                        "w-8 h-8 rounded-[6px] flex items-center justify-center text-[11.5px] font-semibold tracking-[0.04em] shrink-0 " +
+                        badgeClasses(type)
+                      }
+                    >
+                      {type}
                     </div>
+                    <div className="flex-1 min-w-0">
+                      {editingKey === doc._key ? (
+                        <input
+                          type="text"
+                          autoFocus
+                          value={editingLabel}
+                          onChange={(e) => setEditingLabel(e.target.value)}
+                          onBlur={() => handleSaveLabel(doc, editingLabel)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              (e.target as HTMLInputElement).blur();
+                            } else if (e.key === "Escape") {
+                              setEditingKey(null);
+                              setEditingLabel("");
+                            }
+                          }}
+                          className="block w-full text-[14px] text-[#2C2520] bg-transparent border-b border-[#9A7B4B] outline-none py-0"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          title="Click to rename"
+                          onClick={() => {
+                            setEditingKey(doc._key);
+                            setEditingLabel(doc.label);
+                          }}
+                          className="block text-left w-full text-[14px] text-[#2C2520] hover:text-[#9A7B4B] truncate"
+                        >
+                          {doc.label}
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={
+                        doc.shareableWithClient
+                          ? "Hide from client portal"
+                          : "Share with client portal"
+                      }
+                      title={
+                        doc.shareableWithClient
+                          ? "Visible on client portal — click to hide"
+                          : "Hidden from client portal — click to share"
+                      }
+                      onClick={() => handleToggleShareable(doc)}
+                      className={`shrink-0 inline-flex items-center gap-1.5 text-[11px] font-body px-2 py-1 rounded-md border transition-colors ${
+                        doc.shareableWithClient
+                          ? "border-[#A8C98C] bg-[#EDF5E8] text-[#3A6620] hover:bg-[#DDE9D2]"
+                          : "border-[#E8DDD0] bg-[#FBF8F3] text-[#9E8E80] hover:bg-[#F3EDE3]"
+                      }`}
+                    >
+                      {doc.shareableWithClient ? (
+                        <Eye size={12} aria-hidden="true" />
+                      ) : (
+                        <EyeOff size={12} aria-hidden="true" />
+                      )}
+                      {doc.shareableWithClient ? "Shared" : "Hidden"}
+                    </button>
+                    <span className="text-[11.5px] font-semibold tracking-[0.04em] text-[#6B5E52] bg-[#F3EDE3] px-2 py-0.5 rounded-full shrink-0">
+                      {CATEGORY_DISPLAY[doc.category]}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${doc.label}`}
+                      data-delete-row={doc._key}
+                      onClick={() =>
+                        setDeleteTarget({ docKey: doc._key, label: doc.label })
+                      }
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-[#9E8E80] hover:text-[#9B3A2A] hover:bg-[#F3EDE3] shrink-0"
+                    >
+                      <Trash2 size={14} aria-hidden="true" />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    aria-label={
-                      doc.shareableWithClient
-                        ? "Hide from client portal"
-                        : "Share with client portal"
-                    }
-                    title={
-                      doc.shareableWithClient
-                        ? "Visible on client portal — click to hide"
-                        : "Hidden from client portal — click to share"
-                    }
-                    onClick={() => handleToggleShareable(doc)}
-                    className={`shrink-0 inline-flex items-center gap-1.5 text-[11px] font-body px-2 py-1 rounded-md border transition-colors ${
-                      doc.shareableWithClient
-                        ? "border-[#A8C98C] bg-[#EDF5E8] text-[#3A6620] hover:bg-[#DDE9D2]"
-                        : "border-[#E8DDD0] bg-[#FBF8F3] text-[#9E8E80] hover:bg-[#F3EDE3]"
-                    }`}
-                  >
-                    {doc.shareableWithClient ? (
-                      <Eye size={12} aria-hidden="true" />
-                    ) : (
-                      <EyeOff size={12} aria-hidden="true" />
-                    )}
-                    {doc.shareableWithClient ? "Shared" : "Hidden"}
-                  </button>
-                  <span className="text-[11.5px] font-semibold tracking-[0.04em] text-[#6B5E52] bg-[#F3EDE3] px-2 py-0.5 rounded-full">
-                    {CATEGORY_DISPLAY[doc.category]}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label={`Delete ${doc.label}`}
-                    data-delete-row={doc._key}
-                    onClick={() =>
-                      setDeleteTarget({ docKey: doc._key, label: doc.label })
-                    }
-                    className="w-7 h-7 rounded-md flex items-center justify-center text-[#9E8E80] hover:text-[#9B3A2A] hover:bg-[#F3EDE3]"
-                  >
-                    <Trash2 size={14} aria-hidden="true" />
-                  </button>
+
+                  {/* Meta line indented to align with the filename column.
+                      Indent = badge width (w-8 = 32px) + gap (gap-3 = 12px) = 44px. */}
+                  <div className="text-[11.5px] text-[#9E8E80] mt-1 ml-[44px]">
+                    {formatBytes(doc.size)}
+                    {dateLabel ? ` · ${dateLabel}` : ""}
+                    {doc.uploadedByName ? ` · ${doc.uploadedByName}` : ""}
+                    {" · "}
+                    <a
+                      data-doc-link={doc._key}
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#9A7B4B] hover:underline"
+                    >
+                      Open
+                    </a>
+                  </div>
                 </div>
               );
             })}
