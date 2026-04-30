@@ -80,9 +80,16 @@ function makeRequest(body: unknown): Request {
   });
 }
 
-type RouteCtx = { request: Request; cookies: AstroCookies };
+type RouteCtx = {
+  request: Request;
+  cookies: AstroCookies;
+  locals?: Record<string, unknown>;
+};
 const callPost = (ctx: RouteCtx): Promise<Response> =>
-  (POST as unknown as (c: RouteCtx) => Promise<Response>)(ctx);
+  (POST as unknown as (c: RouteCtx) => Promise<Response>)({
+    locals: {},
+    ...ctx,
+  });
 
 function adminSession() {
   mockGetSession.mockResolvedValue({
@@ -627,5 +634,84 @@ describe("POST /api/send-update (Phase 34 Plan 04)", () => {
       .map((c) => c[0]);
     expect(clientPatches).toEqual(expect.arrayContaining(["sarah", "jenny"]));
     expect(clientPatches).not.toContain("mike");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 49 Plan 08 (IMPER-03 belt-and-braces) — 403 gate when impersonating
+// Source of truth: .planning/phases/49-impersonation-architecture/49-CONTEXT.md
+// D-14 — 403 specifically (NOT 401) so future telemetry can distinguish
+// "impersonation tried to email" from generic mutation blocks.
+// ---------------------------------------------------------------------------
+
+describe("POST /api/send-update — Phase 49 IMPER-03 belt-and-braces", () => {
+  const impersonatingLocals = {
+    impersonating: {
+      adminEmail: "liz@lasprezz.com",
+      adminEntityId: "admin-1",
+      mintedAt: "2026-04-30T12:00:00.000Z",
+    },
+  };
+
+  it("returns 403 with body { error: 'Cannot send email during impersonation' } when locals.impersonating is set", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ projectId: "project-abc" }),
+      cookies: makeCookies(),
+      locals: impersonatingLocals,
+    });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toEqual({ error: "Cannot send email during impersonation" });
+  });
+
+  it("never invokes resend.emails.send when locals.impersonating is set (IMPER-03 ground truth)", async () => {
+    adminSession();
+    await callPost({
+      request: makeRequest({ projectId: "project-abc" }),
+      cookies: makeCookies(),
+      locals: impersonatingLocals,
+    });
+    expect(mockResendSend).not.toHaveBeenCalled();
+    // Body parse / Sanity fetch must also be skipped — gate fires BEFORE them.
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("does NOT 403 when locals.impersonating is undefined (no regression on happy path)", async () => {
+    adminSession();
+    mockFetch.mockResolvedValueOnce(
+      baseProjectSnapshot({
+        clients: [
+          {
+            client: {
+              _id: "c1",
+              name: "A",
+              email: "a@x.com",
+              portalToken: "t1",
+            },
+          },
+        ],
+      }),
+    );
+    const res = await callPost({
+      request: makeRequest({
+        projectId: "project-abc",
+        usePersonalLinks: true,
+      }),
+      cookies: makeCookies(),
+      locals: {},
+    });
+    expect(res.status).not.toBe(403);
+  });
+
+  it("uses status code 403 specifically — NOT 401 (D-14 telemetry-separation invariant)", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest({ projectId: "project-abc" }),
+      cookies: makeCookies(),
+      locals: impersonatingLocals,
+    });
+    expect(res.status).toBe(403);
+    expect(res.status).not.toBe(401);
   });
 });
