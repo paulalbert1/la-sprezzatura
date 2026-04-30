@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: Phase 49 CLOSED — Phase 50 (Impersonation UI) unblocked.
-stopped_at: "Phase 49 closed — verifier PASS 6/6 + gap-closure rename of redeem route (Astro v6 underscore exclusion)"
-last_updated: "2026-04-30T20:45:00.000Z"
-last_activity: 2026-04-30 -- Phase 49 closed (verifier PASS, redeem-route rename gap-closure landed)
+status: executing
+stopped_at: Phase 47 UI-SPEC approved
+last_updated: "2026-04-30T22:30:47.307Z"
+last_activity: 2026-04-30 -- Phase 47 planning complete
 progress:
   total_phases: 11
   completed_phases: 5
-  total_plans: 42
+  total_plans: 47
   completed_plans: 42
-  percent: 91
+  percent: 89
 ---
 
 # Project State
@@ -29,9 +29,9 @@ Phase: 49 (impersonation-architecture) — CLOSED 2026-04-30
 Plan: —
 Parent: —
 Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
-Status: Phase 49 CLOSED — verifier PASS 6/6, redeem-route Astro v6 BLOCKER fixed via gap-closure rename.
+Status: Ready to execute
 Next: Phase 50 (Impersonation UI — IMPER-01, IMPER-05). Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also unblocked.
-Last activity: 2026-04-30 -- Phase 49 closed (verifier PASS, redeem-route rename gap-closure landed)
+Last activity: 2026-04-30 -- Phase 47 planning complete
 
 ## v5.3 Phase Map
 
@@ -141,7 +141,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-30T15:28:14.657Z
-Stopped at: Phase 49 context gathered (4 areas: schema, fresh-auth, exit-restore, audit doc)
-Resume file: .planning/phases/49-impersonation-architecture/49-CONTEXT.md
+Last session: 2026-04-30T21:29:26.565Z
+Stopped at: Phase 47 UI-SPEC approved
+Resume file: .planning/phases/47-portal-layout-hoist/47-UI-SPEC.md
 Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
