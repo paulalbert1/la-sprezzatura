@@ -1,0 +1,69 @@
+---
+import {
+  DEFAULT_PORTAL_BRAND,
+  type PortalBrand,
+} from "../../lib/portal/portalBrand";
+
+interface Props {
+  tenant?: PortalBrand;
+  bare?: boolean;
+}
+
+const { tenant = DEFAULT_PORTAL_BRAND, bare = false } = Astro.props;
+
+// Role sub-label: derived from Astro.locals.role (set by middleware,
+// impersonation-aware per Phase 49 D-04). Source of truth — do NOT
+// duplicate this map outside the component. Sentence-case per UI-SPEC
+// § Copywriting (CONTEXT D-1).
+const ROLE_SUBLABEL: Record<string, string> = {
+  client: "Client portal",
+  contractor: "Trade portal",
+  building_manager: "Building portal",
+};
+const role = Astro.locals.role;
+const subLabel = role ? ROLE_SUBLABEL[role] : undefined;
+
+// Sign-out endpoint: per-route, derived from role. Existing GET handlers
+// at /portal/logout, /workorder/logout, /building/logout (UI-SPEC line 134
+// confirms current pattern — DO NOT introduce CSRF surface this phase).
+const LOGOUT_HREF: Record<string, string> = {
+  client: "/portal/logout",
+  contractor: "/workorder/logout",
+  building_manager: "/building/logout",
+};
+const logoutHref = role ? LOGOUT_HREF[role] : undefined;
+
+// Sign-out renders only when authenticated (CONTEXT D-4). Guards bare-mode
+// pages (login/role-select where role is undefined anyway) AND public PURL
+// upgrade landing where role is also undefined.
+const showSignOut = !bare && Boolean(role) && Boolean(logoutHref);
+---
+
+{!bare && (
+  <header class="px-4 pt-6 pb-4 md:px-6 md:pt-8 md:pb-6 flex items-start justify-between">
+    <div>
+      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body">
+        {tenant.wordmark}
+      </p>
+      {subLabel && (
+        <p class="text-xs text-stone/60 font-body mt-2">{subLabel}</p>
+      )}
+    </div>
+    {showSignOut && (
+      <a
+        href={logoutHref}
+        class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
+      >
+        Sign Out
+      </a>
+    )}
+  </header>
+)}
+
+{bare && (
+  <header class="px-4 pt-6 pb-4 md:px-6 md:pt-8 md:pb-6 text-center">
+    <p class="text-xs text-stone tracking-[0.2em] uppercase font-body">
+      {tenant.wordmark}
+    </p>
+  </header>
+)}
