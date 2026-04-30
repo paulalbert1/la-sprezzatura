@@ -1,9 +1,9 @@
 ---
 phase: 46-send-update-work-order-migration
 type: uat
-status: diagnosed
+status: passed
 gate: merge-gate
-verdict: REJECTED
+verdict: APPROVED
 date: 2026-04-28
 reviewer: Liz (Outlook desktop)
 cutover_commit: 6fcd666
@@ -16,7 +16,9 @@ gap_closure_commits:
   - 14dabb9  # gap-5: left-align Milestones + Procurement table cells -- regression introduced ETA mis-alignment, see gap-6
 re_test_round_2: 2026-04-28  # round 2 surfaced gap-4 and gap-5; gap-1 visually confirmed fixed
 re_test_round_3: 2026-04-29   # round 3 surfaced gap-6 (procurement layout) and gap-7 (Outlook Mac dark-mode persists); gap-1, gap-2, gap-5-light-mode-alignment visually confirmed fixed
-updated: 2026-04-29
+re_test_round_5: 2026-04-30   # round 5 close-out: Liz approved on Outlook Mac/Win/web dark + light per D-21 / D-22; all R5-T1..R5-T6 PASS at gate level
+round_5_outcome: approved
+updated: 2026-04-30
 ---
 
 # Phase 46 — Outlook Desktop Merge-Gate UAT

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46.1 round-4 plan 46.1-09 EXECUTED at b75ab0b. CR-R3-01 BLOCKER closed (className hooks now bind on rendered elements; pill <span> + EmailButton CTA carry class=\"pill-${status}\" / class=\"cta-${variant}\" alongside existing inline style). Dead [data-ogsc] .text-*/.border-cream-dark rules + [data-ogsc] * catch-all deleted. EmailShell.tsx CSS refactored to module-load-time generation from STATUS_PILL_STYLES via buildPillRules() (single source of truth; eliminates ~40 lines mirrored CSS). WR-01..06 carryovers folded: stripLeadingGreeting takes clientFirstName + case-insensitive exact-match (handles Mary-Anne, O'Brien; preserves Hi all when firstName!=match); MAX_LEN exported + textarea maxLength + character counter; MSO conditional out of <div>-in-<head> into sibling <style>; pill borderRadius deleted (Phase 46 D-3 reserves border-radius for CTA only). Single atomic commit lands 12 files (10 D-20 + SendUpdate.tsx callsite + WorkOrder snapshot). Test gate: zero NEW failures vs baseline (59 = 59); +40 passing tests. SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md. Round-5 gate next: /gsd-code-review 46.1 must report findings.blocker == 0; then Liz schedules round-5 visual UAT on Outlook for Mac/Windows/web dark + light-mode regression per D-21."
-last_updated: "2026-04-29T17:00:00.000Z"
-last_activity: 2026-04-29 -- Phase 46.1-09 executed
+stopped_at: "Phase 46 + 46.1 CLOSED 2026-04-30 -- Liz visual UAT APPROVED at round-5 close-out per D-21 / D-22. Code-fix landed at a7bd104 (46.1-10), code review clean at dd30667, Liz approved on Outlook Mac/Win/web dark + light. UAT artifacts: 46-UAT.md verdict APPROVED, 46.1-HUMAN-UAT.md status passed. Email track unblocks Phase 48 (smaller transactional emails). Portal/Impersonation track unblocked: Phase 47 + Phase 49 are parallel-eligible. NEXT: /gsd-discuss-phase 49 (Impersonation Architecture -- view-as-contractor / view-as-building-manager, IMPER-02..08) -- direct hit on contractor + building-manager parity ask."
+last_updated: "2026-04-30T14:40:00.000Z"
+last_activity: 2026-04-30 -- Phase 46/46.1 close-out approved (round-5 UAT)
 progress:
   total_phases: 11
-  completed_phases: 3
-  total_plans: 31
-  completed_plans: 31
+  completed_phases: 4
+  total_plans: 32
+  completed_plans: 32
   percent: 100
 ---
 
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 46.1 — merge-gate-gap-closure
+**Current focus:** Phase 46 + 46.1 closed; Phase 49 (Impersonation Architecture) is the next discuss target.
 
 ## Current Position
 
-Phase: 46.1 (merge-gate-gap-closure) — ROUND 4 EXECUTED (46.1-09 committed at b75ab0b)
-Plan: 9 of 9 complete in code; SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md
-Parent: Phase 46, plan 46-03 (Tasks 1–7 complete at `6fcd666`; Task 8 Outlook desktop merge-gate REJECTED — closure gates on round-5 visual UAT)
-Plans: 9 of 9 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7; round 4: 46.1-09 b75ab0b CR-R3-01 BLOCKER + WR carryovers).
-Status: Round-4 code complete. Round-5 code review + visual UAT are the close-out gates per D-21.
-Next: /gsd-code-review 46.1 — must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check (verify: pill chrome + CTA bg survive auto-darken; gap-1..7 fixes still render correctly; admin compose UI maxLength + character counter live). On clean visual UAT, parent UAT 46-UAT.md replays for round-5 close-out; on `approved`, Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
-Last activity: 2026-04-29 -- Phase 46.1-09 executed at b75ab0b
+Phase: 46 + 46.1 — CLOSED (2026-04-30)
+Plan: —
+Parent: —
+Plans: 10 of 10 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7; round 4: 46.1-09 b75ab0b CR-R3-01 BLOCKER + WR carryovers; round 5: 46.1-10 a7bd104 CR-R4-01 BLOCKER + WR-R4 fold-ins, code review clean dd30667).
+Status: v5.3 Email track CLOSED; Portal/Impersonation track UNBLOCKED.
+Next: `/gsd-discuss-phase 49` — Impersonation Architecture (IMPER-02..08). Phase 49 is parallel-eligible with Phase 47 (Portal Layout Hoist). Phase 48 (smaller transactional emails — work-order access, building access, artifact-ready) now also unblocked since Phase 46 closed; can run anytime.
+Last activity: 2026-04-30 -- Phase 46/46.1 close-out approved (round-5 UAT)
 
 ## v5.3 Phase Map
 
@@ -39,8 +39,8 @@ Last activity: 2026-04-29 -- Phase 46.1-09 executed at b75ab0b
 |-------|------|------|--------------|--------|
 | 45 | Email Foundations | 4 (EMAIL-08..11) | 5 | **Complete** (5/5 plans, EMAIL-08..11 satisfied) — closed 2026-04-26 |
 | 45.5 | Linha → Sprezza Hub Platform Rename | 0 (architectural rebrand) | 2 | **Complete** (2/2 plans, verifier PASS 8/8) — closed 2026-04-27 |
-| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | 46-01 ✓, 46-02 superseded, 46-04 ✓, 46-03 cutover landed at `6fcd666` but **merge-gate REJECTED** — see 46-UAT.md; closure gates on 46.1 |
-| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 9 | **Round-4 code complete** (9/9 plans) — round-5 code review + Liz visual UAT are the close-out gates per D-21. Round 1 ✓ (46.1-01..03), Round 2 ✓ (46.1-04 gap-4, 46.1-05 gap-5), Round 3 ✓ (46.1-06 SPIKE, 46.1-07 gap-6 widths, 46.1-08 gap-7 fix), Round 4 ✓ (46.1-09 CR-R3-01 BLOCKER + WR-01..06 carryovers at b75ab0b). |
+| 46 | Send Update + Work Order Migration | 5 (EMAIL-01, 02, 03, 06, 07) | 4 | **Complete** — cutover at `6fcd666`, gap closure via 46.1, round-5 visual UAT APPROVED 2026-04-30 (`46-UAT.md` verdict APPROVED). |
+| 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 10 | **Complete** (10/10 plans) — round-5 code-fix at a7bd104, code review clean at dd30667, Liz visual UAT approved 2026-04-30 per D-21 / D-22 (`46.1-HUMAN-UAT.md` status passed). |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
 | 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
