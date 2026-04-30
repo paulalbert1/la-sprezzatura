@@ -88,7 +88,13 @@ export async function createSession(
   tenantId?: string,
 ): Promise<string> {
   const sessionToken = generatePortalToken(32);
-  const sessionData: SessionData = { entityId, role };
+  // Phase 49 (Plan 49-01): mintedAt is set on every session write so the
+  // impersonation mint endpoint (IMPER-08) can enforce a fresh-auth window.
+  const sessionData: SessionData = {
+    entityId,
+    role,
+    mintedAt: new Date().toISOString(),
+  };
   if (tenantId) sessionData.tenantId = tenantId;
   await redis.set(`session:${sessionToken}`, JSON.stringify(sessionData), { ex: SESSION_TTL });
 
@@ -125,11 +131,14 @@ export async function createPurlSession(
   portalToken: string,
 ): Promise<string> {
   const sessionToken = generatePortalToken(32);
+  // Phase 49 (Plan 49-01): mintedAt is set on every session write
+  // (single source of truth per RESEARCH Open Q1).
   const sessionData: SessionData = {
     entityId: clientId,
     role: 'client',
     source: 'purl',
     portalTokenHash: hashPortalToken(portalToken),
+    mintedAt: new Date().toISOString(),
   };
   await redis.set(
     `session:${sessionToken}`,

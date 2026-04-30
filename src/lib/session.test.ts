@@ -227,3 +227,79 @@ describe("Phase 49 SessionData extensions", () => {
     expect(result?.mintedAt).toBeUndefined();
   });
 });
+
+// --- Phase 49 mintedAt-on-write tests (Plan 49-01 Task 2) ---
+
+describe("Phase 49 mintedAt is set on every session write", () => {
+  beforeEach(() => {
+    mockRedisGet.mockReset();
+    mockRedisSet.mockReset().mockResolvedValue("OK");
+    mockRedisDel.mockReset().mockResolvedValue(1);
+  });
+
+  it("createSession writes mintedAt as ISO8601 string parseable by new Date()", async () => {
+    const { createSession } = await import("./session");
+    const cookies = makeCookieStub();
+
+    await createSession(
+      cookies as unknown as Parameters<typeof createSession>[0],
+      "u@x.com",
+      "admin",
+      "tenant-1",
+    );
+
+    expect(mockRedisSet).toHaveBeenCalledTimes(1);
+    const payload = mockRedisSet.mock.calls[0][1] as string;
+    const parsed = JSON.parse(payload);
+    expect(typeof parsed.mintedAt).toBe("string");
+    expect(Number.isNaN(new Date(parsed.mintedAt).getTime())).toBe(false);
+    // Strict ISO8601 check: round-trip must be identical.
+    expect(new Date(parsed.mintedAt).toISOString()).toBe(parsed.mintedAt);
+  });
+
+  it("createPurlSession writes mintedAt as ISO8601 string", async () => {
+    const { createPurlSession } = await import("./session");
+    const cookies = makeCookieStub();
+
+    await createPurlSession(
+      cookies as unknown as Parameters<typeof createPurlSession>[0],
+      "client-1",
+      "tok",
+    );
+
+    expect(mockRedisSet).toHaveBeenCalledTimes(1);
+    const payload = mockRedisSet.mock.calls[0][1] as string;
+    const parsed = JSON.parse(payload);
+    expect(typeof parsed.mintedAt).toBe("string");
+    expect(Number.isNaN(new Date(parsed.mintedAt).getTime())).toBe(false);
+    expect(new Date(parsed.mintedAt).toISOString()).toBe(parsed.mintedAt);
+    // Existing PURL fields stay intact.
+    expect(parsed.entityId).toBe("client-1");
+    expect(parsed.role).toBe("client");
+    expect(parsed.source).toBe("purl");
+    expect(typeof parsed.portalTokenHash).toBe("string");
+  });
+
+  it("mintedAt is set within the last 5 seconds (clock-bounded sanity)", async () => {
+    const { createSession } = await import("./session");
+    const cookies = makeCookieStub();
+
+    const before = Date.now();
+    await createSession(
+      cookies as unknown as Parameters<typeof createSession>[0],
+      "u@x.com",
+      "admin",
+      "tenant-1",
+    );
+    const after = Date.now();
+
+    const payload = mockRedisSet.mock.calls[0][1] as string;
+    const parsed = JSON.parse(payload);
+    const mintedAtMs = new Date(parsed.mintedAt).getTime();
+    expect(mintedAtMs).toBeGreaterThanOrEqual(before);
+    expect(mintedAtMs).toBeLessThanOrEqual(after);
+    // Belt-and-braces: also satisfies plan's 5-second window guard.
+    expect(mintedAtMs).toBeGreaterThan(Date.now() - 5_000);
+    expect(mintedAtMs).toBeLessThanOrEqual(Date.now());
+  });
+});
