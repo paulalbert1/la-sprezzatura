@@ -287,9 +287,10 @@ export const PROJECT_DETAIL_QUERY = `
         }
       }
     }),
-    artifacts[] {
+    "artifacts": artifacts[shareableWithClient == true] {
       _key,
       artifactType,
+      shareableWithClient,
       customTypeName,
       currentVersionKey,
       signedFile {
@@ -597,6 +598,7 @@ export const SEND_UPDATE_PROJECT_QUERY = `
     }),
     artifacts[] {
       _key, artifactType, customTypeName,
+      shareableWithClient,
       currentVersionKey,
       "hasApproval": count(decisionLog[action == "approved"]) > 0
     },
@@ -1038,6 +1040,7 @@ const ADMIN_ARTIFACT_QUERY = `
     "artifacts": artifacts[] {
       _key,
       artifactType,
+      shareableWithClient,
       customTypeName,
       currentVersionKey,
       "signedFile": signedFile {

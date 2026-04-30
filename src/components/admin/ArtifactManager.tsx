@@ -6,6 +6,8 @@ import {
   Download,
   RefreshCw,
   Plus,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   type Artifact,
@@ -102,12 +104,14 @@ function DocRow({
   projectId,
   onUploadVersion,
   onRename,
+  onToggleShareable,
 }: {
   artifact: Artifact;
   typeKey: string;
   projectId: string;
   onUploadVersion: (artifactKey: string) => void;
   onRename: (artifactKey: string, name: string) => void;
+  onToggleShareable: (artifactKey: string, next: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -173,6 +177,40 @@ function DocRow({
             )}
           </div>
         </div>
+
+        {/* Persistent shareable toggle. Always visible (not hover-gated) so
+            the share state of every artifact is scannable at a glance --
+            controls portal visibility per the shareableWithClient field on
+            the artifact subdocument. */}
+        <button
+          type="button"
+          aria-label={
+            artifact.shareableWithClient
+              ? "Hide from client portal"
+              : "Share with client portal"
+          }
+          title={
+            artifact.shareableWithClient
+              ? "Visible on client portal — click to hide"
+              : "Hidden from client portal — click to share"
+          }
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleShareable(artifact._key, !artifact.shareableWithClient);
+          }}
+          className={`shrink-0 inline-flex items-center gap-1.5 text-[11px] font-body px-2 py-1 rounded-md border transition-colors ${
+            artifact.shareableWithClient
+              ? "border-[#A8C98C] bg-[#EDF5E8] text-[#3A6620] hover:bg-[#DDE9D2]"
+              : "border-stone-light/30 bg-stone-light/5 text-stone-light hover:bg-stone-light/15"
+          }`}
+        >
+          {artifact.shareableWithClient ? (
+            <Eye size={12} aria-hidden="true" />
+          ) : (
+            <EyeOff size={12} aria-hidden="true" />
+          )}
+          {artifact.shareableWithClient ? "Shared" : "Hidden"}
+        </button>
 
         {/* Hover actions */}
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -253,6 +291,7 @@ function TypeBucket({
   onAddNew,
   onUploadVersion,
   onRename,
+  onToggleShareable,
 }: {
   typeKey: string;
   label: string;
@@ -266,6 +305,7 @@ function TypeBucket({
   onAddNew: (name: string) => void;
   onUploadVersion: (artifactKey: string) => void;
   onRename: (artifactKey: string, name: string) => void;
+  onToggleShareable: (artifactKey: string, next: boolean) => void;
 }) {
   const count = instances.length;
   const [expanded, setExpanded] = useState(count > 0);
@@ -352,6 +392,7 @@ function TypeBucket({
               projectId={projectId}
               onUploadVersion={onUploadVersion}
               onRename={onRename}
+              onToggleShareable={onToggleShareable}
             />
           ))}
 
@@ -616,6 +657,55 @@ export default function ArtifactManager({
     }
   }
 
+  async function handleToggleShareable(artifactKey: string, next: boolean) {
+    const typeKey = Object.keys(docsByType).find((t) =>
+      docsByType[t].some((a) => a._key === artifactKey),
+    );
+    if (!typeKey) return;
+
+    // Optimistic update -- the toggle pill flips immediately so the
+    // operator sees the share state change without a round-trip blink.
+    // On failure, revert + surface error.
+    const prevValue = docsByType[typeKey].find(
+      (a) => a._key === artifactKey,
+    )?.shareableWithClient;
+
+    setDocsByType((prev) => ({
+      ...prev,
+      [typeKey]: prev[typeKey].map((a) =>
+        a._key === artifactKey ? { ...a, shareableWithClient: next } : a,
+      ),
+    }));
+
+    try {
+      const res = await fetch("/api/admin/artifact-crud", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "setShareable",
+          projectId,
+          artifactKey,
+          shareableWithClient: next,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Toggle failed");
+      }
+    } catch (err: any) {
+      // Revert optimistic update on failure
+      setDocsByType((prev) => ({
+        ...prev,
+        [typeKey]: prev[typeKey].map((a) =>
+          a._key === artifactKey
+            ? { ...a, shareableWithClient: prevValue }
+            : a,
+        ),
+      }));
+      setError(err.message || "Could not change share state");
+    }
+  }
+
   return (
     <div>
       <input
@@ -671,6 +761,7 @@ export default function ArtifactManager({
               triggerFilePicker(typeKey, artifactKey)
             }
             onRename={handleRename}
+            onToggleShareable={handleToggleShareable}
           />
         ))}
       </div>

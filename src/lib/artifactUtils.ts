@@ -54,6 +54,13 @@ export type InvestmentSummary = {
 export type Artifact = {
   _key: string;
   artifactType: string;
+  /**
+   * When true, this artifact appears on the client portal project page.
+   * When false or undefined (default), the artifact is admin-only.
+   * Drives the artifacts[shareableWithClient == true] filter in
+   * PROJECT_DETAIL_QUERY (src/sanity/queries.ts).
+   */
+  shareableWithClient?: boolean;
   customTypeName?: string;
   currentVersionKey?: string;
   signedFile?: {

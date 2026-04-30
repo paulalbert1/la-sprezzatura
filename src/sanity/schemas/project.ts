@@ -885,6 +885,14 @@ export const project = defineType({
               },
             }),
             defineField({
+              name: "shareableWithClient",
+              title: "Shareable with client",
+              type: "boolean",
+              description:
+                "When enabled, this artifact appears on the client portal project page. When disabled (default), the artifact is admin-only. Toggle this to expose proposals, drawings, contracts, etc. to the client.",
+              initialValue: false,
+            }),
+            defineField({
               name: "customTypeName",
               title: "Custom Type Name",
               type: "string",

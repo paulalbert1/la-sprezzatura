@@ -59,6 +59,26 @@ vi.mock("resend", () => ({
   },
 }));
 
+// Stub getTenantBrand so the test doesn't need to model the third Sanity
+// fetch the production handler issues to resolve the tenant brand. The
+// returned shape mirrors LA_SPREZZATURA_TENANT and keeps every field
+// populated so EmailShell rendering inside the handler doesn't fall
+// through any "if (!tenant.X)" gates the snapshot tests would care about.
+vi.mock("../../../../../lib/email/tenantBrand", () => ({
+  getTenantBrand: vi.fn().mockResolvedValue({
+    wordmark: "LA SPREZZATURA",
+    signoffNameFormal: "Elizabeth Lewis",
+    signoffNameCasual: "Elizabeth",
+    signoffLocation: "Darien, CT",
+  }),
+  LA_SPREZZATURA_TENANT: {
+    wordmark: "LA SPREZZATURA",
+    signoffNameFormal: "Elizabeth Lewis",
+    signoffNameCasual: "Elizabeth",
+    signoffLocation: "Darien, CT",
+  },
+}));
+
 import { POST } from "./send";
 
 function makeCookies(): AstroCookies {

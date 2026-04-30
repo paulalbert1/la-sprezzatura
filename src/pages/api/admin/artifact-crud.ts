@@ -182,6 +182,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
+    if (action === "setShareable") {
+      const { shareableWithClient } = body as {
+        shareableWithClient?: unknown;
+      };
+      if (!projectId || !artifactKey) {
+        return new Response(
+          JSON.stringify({ error: "Missing required fields" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+      if (typeof shareableWithClient !== "boolean") {
+        return new Response(
+          JSON.stringify({ error: "shareableWithClient must be a boolean" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      await client
+        .patch(projectId)
+        .set({
+          [`artifacts[_key=="${artifactKey}"].shareableWithClient`]:
+            shareableWithClient,
+        })
+        .commit();
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
