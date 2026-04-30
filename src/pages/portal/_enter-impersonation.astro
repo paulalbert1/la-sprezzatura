@@ -1,0 +1,56 @@
+---
+/**
+ * Phase 49 Plan 05 — cookie-hop redeem route.
+ *
+ * GET /portal/_enter-impersonation?token=<one-shot>
+ *
+ * The new tab opens this URL after Plan 04's mint endpoint hands back
+ * `{ url }`. This route:
+ *   1. Redeems the one-shot token via redis.getdel inside
+ *      `redeemImpersonationToken` (Plan 03).
+ *   2. Captures the admin's current portal_session cookie value
+ *      (the originalAdminSessionToken — D-15).
+ *   3. EXPIREs the original admin Redis session for max(adminTtlRemaining,
+ *      1860) seconds = 30 min + 60s buffer (D-09) — calls `redis.expire`
+ *      after `redis.ttl` returns the remaining lifetime.
+ *      ↳ Pitfall G: the expire is awaited; failure aborts BEFORE the cookie
+ *        is rewritten so we never leave a broken cookie state.
+ *   4. Calls `createImpersonationSession` to mint the wrapped-admin session
+ *      and rewrite the portal_session cookie in the new tab only (D-06).
+ *      ↳ Pitfall A is handled inside `redeemImpersonationToken` (Plan 03):
+ *        Upstash auto-parsed object / JSON string / fail-closed branches.
+ *   5. Redirects into /portal/dashboard, /workorder/dashboard, or
+ *      /building/dashboard based on payload.role.
+ *
+ * Cross-tab cookie-hop note (Pitfall B): the admin's tab does NOT change.
+ * portal_session is overwritten ONLY in this new tab's response chain.
+ * Cross-subdomain warning is a v5.4 deferral.
+ *
+ * Failure modes (all redirect; never throw):
+ *   - Missing token query param            → /admin?error=impersonation-expired
+ *   - redis.getdel returns null             → /admin?error=impersonation-expired
+ *   - Malformed payload (Pitfall A exhausted) → /admin?error=impersonation-expired
+ *   - Missing portal_session cookie         → /admin?error=impersonation-failed
+ *   - getSession returns null               → /admin?error=impersonation-failed
+ *   - redis.expire rejects (Pitfall G)      → /admin?error=impersonation-failed
+ *
+ * The orchestration logic lives in `_enter-impersonation.helper.ts` so it can
+ * be unit-tested directly (Astro frontmatter is not unit-testable).
+ *
+ * NOTE: Per RESEARCH Open Q2, this route MUST be in PUBLIC_PATHS in
+ * `src/middleware.ts`. Plan 49-07 already added it (commit 6b5bc62).
+ *
+ * See .planning/phases/49-impersonation-architecture/49-05-PLAN.md.
+ */
+export const prerender = false;
+
+import { processImpersonationRedeem } from "./_enter-impersonation.helper";
+
+const token = Astro.url.searchParams.get("token");
+const { to } = await processImpersonationRedeem({
+  token,
+  cookies: Astro.cookies,
+});
+
+return Astro.redirect(to);
+---
