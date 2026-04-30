@@ -18,7 +18,9 @@ vi.mock("../redis", () => ({
   },
 }));
 
-const mockGenerateToken = vi.fn(() => "test-token-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+const mockGenerateToken: ReturnType<typeof vi.fn> = vi.fn(
+  () => "test-token-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+);
 vi.mock("../generateToken", () => ({
   generatePortalToken: (...args: unknown[]) => mockGenerateToken(...args),
 }));
@@ -27,7 +29,7 @@ vi.mock("../generateToken", () => ({
 // only verifies that mint awaits/calls it. Stub is identity-safe.
 const mockWriteStartAndTimeoutAuditDocs = vi.fn().mockResolvedValue(undefined);
 const mockWriteExitAuditDoc = vi.fn().mockResolvedValue(undefined);
-const mockGetTenantClient = vi.fn(() => ({
+const mockGetTenantClient: ReturnType<typeof vi.fn> = vi.fn(() => ({
   create: vi.fn().mockResolvedValue({ _id: "x" }),
   delete: vi.fn().mockResolvedValue({ results: [] }),
 }));
