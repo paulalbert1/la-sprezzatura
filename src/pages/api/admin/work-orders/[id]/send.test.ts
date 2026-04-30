@@ -95,9 +95,13 @@ type RouteCtx = {
   request: Request;
   cookies: AstroCookies;
   params: { id: string };
+  locals?: Record<string, unknown>;
 };
 const callPost = (ctx: RouteCtx): Promise<Response> =>
-  (POST as unknown as (c: RouteCtx) => Promise<Response>)(ctx);
+  (POST as unknown as (c: RouteCtx) => Promise<Response>)({
+    locals: {},
+    ...ctx,
+  });
 
 function adminSession() {
   mockGetSession.mockResolvedValue({
@@ -357,5 +361,87 @@ describe("POST /api/admin/work-orders/[id]/send", () => {
     const appendArgs = mockAppend.mock.calls[0];
     const entry = appendArgs[1][0];
     expect(entry.resendId).toBe("");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 49 Plan 08 (IMPER-03 belt-and-braces) — 403 gate when impersonating
+// Source of truth: .planning/phases/49-impersonation-architecture/49-CONTEXT.md
+// D-14 — 403 specifically (NOT 401) so future telemetry can distinguish
+// "impersonation tried to email" from generic mutation blocks. Gate is
+// inserted between the tenant gate and the workOrderId guard so a session
+// without tenantId still receives "No tenant context" first.
+// ---------------------------------------------------------------------------
+
+describe("POST /api/admin/work-orders/[id]/send — Phase 49 IMPER-03 belt-and-braces", () => {
+  const impersonatingLocals = {
+    impersonating: {
+      adminEmail: "liz@lasprezz.com",
+      adminEntityId: "admin-1",
+      mintedAt: "2026-04-30T12:00:00.000Z",
+    },
+  };
+
+  it("returns 403 with body { error: 'Cannot send email during impersonation' } when locals.impersonating is set", async () => {
+    adminSession();
+    const res = await callPost({
+      request: makeRequest(),
+      cookies: makeCookies(),
+      params: { id: "WO-1" },
+      locals: impersonatingLocals,
+    });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body).toEqual({ error: "Cannot send email during impersonation" });
+  });
+
+  it("never invokes resend.emails.send when locals.impersonating is set (IMPER-03 ground truth)", async () => {
+    adminSession();
+    await callPost({
+      request: makeRequest(),
+      cookies: makeCookies(),
+      params: { id: "WO-1" },
+      locals: impersonatingLocals,
+    });
+    expect(mockResendSend).not.toHaveBeenCalled();
+    // Sanity fetches must also be skipped — gate fires BEFORE workOrder fetch.
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("does NOT 403 when locals.impersonating is undefined (no regression on happy path)", async () => {
+    adminSession();
+    mockFetch
+      .mockResolvedValueOnce(workOrderSnapshot())
+      .mockResolvedValueOnce({ defaultFromEmail: "", defaultCcEmail: "" });
+    const res = await callPost({
+      request: makeRequest(),
+      cookies: makeCookies(),
+      params: { id: "WO-1" },
+      locals: {},
+    });
+    expect(res.status).not.toBe(403);
+  });
+
+  it("gate fires AFTER tenant gate — admin without tenantId still receives 'No tenant context' first (placement order)", async () => {
+    // Admin session without tenantId; impersonating set.
+    mockGetSession.mockResolvedValueOnce({
+      entityId: "p@lasprezz.com",
+      role: "admin",
+      // tenantId intentionally absent
+    });
+    const res = await callPost({
+      request: makeRequest(),
+      cookies: makeCookies(),
+      params: { id: "WO-1" },
+      locals: impersonatingLocals,
+    });
+    // Tenant gate (403 "No tenant context") fires before the impersonation
+    // gate. Both return 403 status, but the body distinguishes them — and
+    // this test asserts the precedence so future telemetry never confuses
+    // tenant-missing with impersonation-attempted.
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("No tenant context");
+    expect(body.error).not.toBe("Cannot send email during impersonation");
   });
 });
