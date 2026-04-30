@@ -74,7 +74,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return next();
 
     const session = await getSession(context.cookies);
-    if (!session || session.role !== "client") {
+    if (!session) {
+      return context.redirect("/portal/login");
+    }
+    // Phase 49 Plan 07 D-04: when session.impersonating is set, the role
+    // gate checks the VIEWER role (impersonating.role), not session.role
+    // (which stays 'admin' per D-01). Without impersonating, fall back to
+    // session.role for backward compat.
+    const viewerEntity = session.impersonating?.entityId ?? session.entityId;
+    const viewerRole = session.impersonating?.role ?? session.role;
+    if (viewerRole !== "client") {
       return context.redirect("/portal/login");
     }
 
@@ -103,8 +112,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
       }
     }
 
-    context.locals.clientId = session.entityId;
-    context.locals.role = session.role;
+    // Phase 49 Plan 07 D-04: locals reflect viewer identity. tenantId stays
+    // from session (admin's tenantId is the impersonation's tenantId per
+    // D-01 + the Plan 04 mint enforces payload.tenantId === session.tenantId).
+    context.locals.clientId = (viewerRole === "client") ? viewerEntity : undefined;
+    context.locals.role = viewerRole;
+    context.locals.tenantId = session.tenantId;
+    if (session.impersonating) {
+      context.locals.impersonating = {
+        adminEmail: session.impersonating.adminEmail,
+        adminEntityId: session.entityId, // STAYS admin (D-01)
+        mintedAt: session.impersonating.mintedAt,
+      };
+    }
     return next();
   }
 
@@ -113,12 +133,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return next();
 
     const session = await getSession(context.cookies);
-    if (!session || session.role !== "contractor") {
+    if (!session) {
+      return context.redirect("/workorder/login");
+    }
+    const viewerEntity = session.impersonating?.entityId ?? session.entityId;
+    const viewerRole = session.impersonating?.role ?? session.role;
+    if (viewerRole !== "contractor") {
       return context.redirect("/workorder/login");
     }
 
-    context.locals.contractorId = session.entityId;
-    context.locals.role = session.role;
+    context.locals.contractorId = (viewerRole === "contractor") ? viewerEntity : undefined;
+    context.locals.role = viewerRole;
+    context.locals.tenantId = session.tenantId;
+    if (session.impersonating) {
+      context.locals.impersonating = {
+        adminEmail: session.impersonating.adminEmail,
+        adminEntityId: session.entityId, // STAYS admin (D-01)
+        mintedAt: session.impersonating.mintedAt,
+      };
+    }
     return next();
   }
 
@@ -127,12 +160,25 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return next();
 
     const session = await getSession(context.cookies);
-    if (!session || session.role !== "building_manager") {
+    if (!session) {
+      return context.redirect("/building/login");
+    }
+    const viewerEntity = session.impersonating?.entityId ?? session.entityId;
+    const viewerRole = session.impersonating?.role ?? session.role;
+    if (viewerRole !== "building_manager") {
       return context.redirect("/building/login");
     }
 
-    context.locals.buildingManagerEmail = session.entityId;
-    context.locals.role = session.role;
+    context.locals.buildingManagerEmail = (viewerRole === "building_manager") ? viewerEntity : undefined;
+    context.locals.role = viewerRole;
+    context.locals.tenantId = session.tenantId;
+    if (session.impersonating) {
+      context.locals.impersonating = {
+        adminEmail: session.impersonating.adminEmail,
+        adminEntityId: session.entityId, // STAYS admin (D-01)
+        mintedAt: session.impersonating.mintedAt,
+      };
+    }
     return next();
   }
 
@@ -161,22 +207,40 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // them, so the path-prefixed branches above never run. Hydrate locals from
   // the session so each action's own auth gate sees what the calling page saw.
   // No redirect — actions are POST-only; let the action enforce its own role gate.
+  //
+  // Phase 49 Plan 07 D-04 + RESEARCH Pitfall F: this branch MUST also honor
+  // session.impersonating. Without it, an Astro Action invoked during
+  // impersonation would record createdBy: <admin@email> instead of being
+  // routed through the viewer identity. The /api/* sibling read-only gate
+  // 401s mutating Astro Actions before this branch runs, but safe-method
+  // actions and downstream handlers still rely on locals reflecting the viewer.
   if (pathname.startsWith("/_actions/")) {
     const session = await getSession(context.cookies);
     if (session) {
-      context.locals.role = session.role;
-      if (session.role === "admin" && session.tenantId) {
+      const viewerEntity = session.impersonating?.entityId ?? session.entityId;
+      const viewerRole = session.impersonating?.role ?? session.role;
+      context.locals.role = viewerRole;
+      if (viewerRole === "admin" && session.tenantId) {
         context.locals.tenantId = session.tenantId;
         const adminEntry = getTenantByAdminEmail(session.entityId)?.admins.find(
           (a) => a.email.toLowerCase() === session.entityId.toLowerCase(),
         );
         context.locals.sanityUserId = adminEntry?.sanityUserId;
-      } else if (session.role === "client") {
-        context.locals.clientId = session.entityId;
-      } else if (session.role === "contractor") {
-        context.locals.contractorId = session.entityId;
-      } else if (session.role === "building_manager") {
-        context.locals.buildingManagerEmail = session.entityId;
+      } else if (viewerRole === "client") {
+        context.locals.clientId = viewerEntity;
+      } else if (viewerRole === "contractor") {
+        context.locals.contractorId = viewerEntity;
+      } else if (viewerRole === "building_manager") {
+        context.locals.buildingManagerEmail = viewerEntity;
+      }
+      // tenantId carries from session for ALL impersonation cases (D-01).
+      if (session.impersonating) {
+        context.locals.tenantId = session.tenantId;
+        context.locals.impersonating = {
+          adminEmail: session.impersonating.adminEmail,
+          adminEntityId: session.entityId, // STAYS admin (D-01)
+          mintedAt: session.impersonating.mintedAt,
+        };
       }
     }
     return next();

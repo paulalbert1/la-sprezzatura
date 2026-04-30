@@ -103,14 +103,15 @@ describe("middleware", () => {
     expect(middlewareSource).toContain('redirect("/workorder/login")');
   });
 
-  it("checks session.role for client portal routes", () => {
-    expect(middlewareSource).toMatch(/session\.role\s*!==\s*["']client["']/);
+  it("checks session.role for client portal routes (via viewerRole — D-04)", () => {
+    // Phase 49 Plan 07 D-04: gate now uses viewerRole = impersonating?.role ??
+    // session.role so impersonation sessions are honored. The literal
+    // 'client' must still appear in the gate.
+    expect(middlewareSource).toMatch(/viewerRole\s*!==\s*["']client["']/);
   });
 
-  it("checks session.role for contractor workorder routes", () => {
-    expect(middlewareSource).toMatch(
-      /session\.role\s*!==\s*["']contractor["']/,
-    );
+  it("checks session.role for contractor workorder routes (via viewerRole — D-04)", () => {
+    expect(middlewareSource).toMatch(/viewerRole\s*!==\s*["']contractor["']/);
   });
 
   it("sets context.locals.contractorId for workorder routes", () => {
@@ -135,10 +136,8 @@ describe("middleware", () => {
     expect(middlewareSource).toContain('"/building"');
   });
 
-  it("checks session.role for building manager routes", () => {
-    expect(middlewareSource).toMatch(
-      /session\.role\s*!==\s*["']building_manager["']/,
-    );
+  it("checks session.role for building manager routes (via viewerRole — D-04)", () => {
+    expect(middlewareSource).toMatch(/viewerRole\s*!==\s*["']building_manager["']/);
   });
 
   it("redirects to /building/login for unauthenticated building manager requests", () => {
