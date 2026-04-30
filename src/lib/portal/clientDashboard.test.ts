@@ -113,10 +113,10 @@ describe("clientDashboard resolver (Phase 34 Plan 06)", () => {
 
     // Three projects:
     //   - active (no completedAt) → visible
-    //   - completed >365 days ago → hidden (past warranty window)
-    //   - reopened (overrides warranty window) → visible
-    const pastWarranty = new Date();
-    pastWarranty.setDate(pastWarranty.getDate() - 400);
+    //   - completed >30 days ago → hidden (past auto-window)
+    //   - reopened (overrides auto-window) → visible
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
     getProjectsByClientIdMock.mockResolvedValueOnce([
       {
@@ -132,7 +132,7 @@ describe("clientDashboard resolver (Phase 34 Plan 06)", () => {
         title: "Old Done",
         pipelineStage: "closeout",
         engagementType: "styling-refreshing",
-        completedAt: pastWarranty.toISOString(),
+        completedAt: sixtyDaysAgo.toISOString(),
         projectStatus: "completed",
       },
       {
@@ -140,7 +140,7 @@ describe("clientDashboard resolver (Phase 34 Plan 06)", () => {
         title: "Reopened",
         pipelineStage: "installation",
         engagementType: "full-interior-design",
-        completedAt: pastWarranty.toISOString(),
+        completedAt: sixtyDaysAgo.toISOString(),
         projectStatus: "reopened",
       },
     ]);

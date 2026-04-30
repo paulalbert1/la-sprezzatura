@@ -18,6 +18,7 @@ import { sanityClient } from "sanity:client";
 import {
   isProjectCompleted,
   isProjectReopened,
+  isProjectVisible,
 } from "../../../lib/projectVisibility";
 import { getPortalBrand } from "../../../lib/portal/portalBrand";
 
@@ -35,6 +36,13 @@ if (!projectId) {
 // Fetch full project detail (scoped to this client)
 const project = await getProjectDetail(projectId, clientId);
 if (!project) {
+  return Astro.redirect("/portal/dashboard");
+}
+
+// Enforce client portal visibility at the page level. Without this gate
+// a client who knows the URL could load an expired or manually-hidden
+// project's detail data even though it's filtered off their dashboard.
+if (!isProjectVisible(project)) {
   return Astro.redirect("/portal/dashboard");
 }
 

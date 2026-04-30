@@ -313,6 +313,22 @@ export const project = defineType({
       },
     }),
     defineField({
+      name: "clientPortalVisibility",
+      title: "Client Portal Visibility",
+      type: "string",
+      group: "portal",
+      initialValue: "auto",
+      description:
+        "Controls whether this project appears on the client's portal. Auto: shown while active and for 30 days after completion (default). Always shown: extends visibility past 30 days (use for warranty access). Always hidden: hides regardless of project state.",
+      options: {
+        list: [
+          { title: "Auto (default 30-day rule)", value: "auto" },
+          { title: "Always shown", value: "shown" },
+          { title: "Always hidden", value: "hidden" },
+        ],
+      },
+    }),
+    defineField({
       name: "completedAt",
       title: "Completed At",
       type: "datetime",

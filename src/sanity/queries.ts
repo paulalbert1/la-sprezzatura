@@ -221,6 +221,7 @@ export const PROJECTS_BY_CLIENT_QUERY = `
     engagementType,
     completedAt,
     projectStatus,
+    clientPortalVisibility,
     "isPrimary": clients[client._ref == $clientId][0].isPrimary
   }
 `;
@@ -254,6 +255,7 @@ export const PROJECT_DETAIL_QUERY = `
     engagementType,
     projectStatus,
     completedAt,
+    clientPortalVisibility,
     isCommercial,
     "isPrimary": clients[client._ref == $clientId][0].isPrimary,
     milestones[] | order(date asc) {
