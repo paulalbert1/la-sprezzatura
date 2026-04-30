@@ -114,7 +114,7 @@ function adaptProjectForEmail(
   };
 }
 
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request, cookies, locals }) => {
   try {
     // T-34-03: admin-only gate. Reject BEFORE body parsing.
     const session = await getSession(cookies);
@@ -122,6 +122,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
+    // Phase 49 D-14 (IMPER-03) — belt-and-braces 403 gate. The middleware
+    // 401 (Plan 07) is the primary block; this layer is depth-of-defense
+    // and ensures resend.emails.send is unreachable from an impersonated
+    // session. 403 specifically (not 401) so future telemetry can
+    // distinguish "impersonation tried to email" from generic mutation
+    // blocks.
+    if (locals.impersonating) {
+      return new Response(
+        JSON.stringify({ error: "Cannot send email during impersonation" }),
+        { status: 403, headers: { "Content-Type": "application/json" } },
       );
     }
 
