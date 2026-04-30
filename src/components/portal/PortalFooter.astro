@@ -1,0 +1,26 @@
+---
+import {
+  DEFAULT_PORTAL_BRAND,
+  type PortalBrand,
+} from "../../lib/portal/portalBrand";
+
+interface Props {
+  tenant?: PortalBrand;
+}
+
+const { tenant = DEFAULT_PORTAL_BRAND } = Astro.props;
+---
+
+<footer class="mt-auto py-8 text-center">
+  <p class="text-xs text-stone tracking-widest uppercase font-body">
+    {tenant.displayName} &bull; Interior Design
+  </p>
+  <p class="text-xs text-stone-light mt-2 font-body">
+    <a
+      href={`mailto:${tenant.contactEmail}`}
+      class="hover:text-terracotta transition-colors"
+    >
+      {tenant.contactEmail}
+    </a>
+  </p>
+</footer>
