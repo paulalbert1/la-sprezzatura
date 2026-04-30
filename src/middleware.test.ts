@@ -632,3 +632,165 @@ describe("Phase 49 impersonation gate", () => {
     expect(getSessionMock).toHaveBeenCalledTimes(1);
   });
 });
+
+// Phase 49 Plan 07 Task 2: D-04 + RESEARCH Pitfall F locals hydration in
+// the 3 role branches (/portal, /workorder, /building) AND in the
+// /_actions/* branch. When session.impersonating is set, locals.role and
+// locals.{clientId|contractorId|buildingManagerEmail} reflect the VIEWER
+// (impersonated identity) and locals.impersonating carries the admin
+// attribution per D-04. adminEntityId stays the admin's session entityId
+// per D-01.
+describe("Phase 49 locals hydration (D-04 + Pitfall F)", () => {
+  const ADMIN_EMAIL = "liz@lasprezz.com";
+  const ADMIN_TENANT = "tenant-1";
+  const MINTED_AT = "2026-04-30T12:00:00.000Z";
+
+  function makeImpersonatingSession(
+    role: "client" | "contractor" | "building_manager",
+    entityId: string,
+  ) {
+    return {
+      entityId: ADMIN_EMAIL,
+      role: "admin" as const,
+      tenantId: ADMIN_TENANT,
+      mintedAt: MINTED_AT,
+      impersonating: {
+        role,
+        entityId,
+        projectId: "proj-1",
+        tenantId: ADMIN_TENANT,
+        adminEmail: ADMIN_EMAIL,
+        mintedAt: MINTED_AT,
+        originalAdminSessionToken: "tok-orig",
+      },
+    };
+  }
+
+  beforeEach(async () => {
+    vi.resetModules();
+    sanityFetchMock.mockReset();
+    getSessionMock.mockReset();
+    clearSessionMock.mockReset();
+    hashPortalTokenMock.mockReset();
+    hashPortalTokenMock.mockImplementation((t: string) => `hash(${t})`);
+    timingSafeEqualHashMock.mockReset();
+    timingSafeEqualHashMock.mockImplementation((a: string, b: string) => a === b);
+    getTenantByAdminEmailMock.mockReset();
+  });
+
+  async function loadMiddleware() {
+    const mod = await import("./middleware");
+    return mod.onRequest;
+  }
+
+  // Test 1: /portal/* role branch hydration
+  it("/portal/* with impersonating session: locals.clientId reflects viewer, role='client', impersonating set", async () => {
+    getSessionMock.mockResolvedValue(
+      makeImpersonatingSession("client", "recipient-x"),
+    );
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/portal/dashboard" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(next).toHaveBeenCalled();
+    expect(ctx.locals.clientId).toBe("recipient-x");
+    expect(ctx.locals.role).toBe("client");
+    expect(ctx.locals.tenantId).toBe(ADMIN_TENANT);
+    expect(ctx.locals.impersonating).toEqual({
+      adminEmail: ADMIN_EMAIL,
+      adminEntityId: ADMIN_EMAIL,
+      mintedAt: MINTED_AT,
+    });
+  });
+
+  // Test 2: /workorder/* role branch hydration
+  it("/workorder/* with impersonating session: locals.contractorId reflects viewer, role='contractor', impersonating set", async () => {
+    getSessionMock.mockResolvedValue(
+      makeImpersonatingSession("contractor", "contractor-y"),
+    );
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/workorder/dashboard" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(next).toHaveBeenCalled();
+    expect(ctx.locals.contractorId).toBe("contractor-y");
+    expect(ctx.locals.role).toBe("contractor");
+    expect(ctx.locals.impersonating).toEqual({
+      adminEmail: ADMIN_EMAIL,
+      adminEntityId: ADMIN_EMAIL,
+      mintedAt: MINTED_AT,
+    });
+  });
+
+  // Test 3: /building/* role branch hydration
+  it("/building/* with impersonating session: locals.buildingManagerEmail reflects viewer, role='building_manager', impersonating set", async () => {
+    getSessionMock.mockResolvedValue(
+      makeImpersonatingSession("building_manager", "bm-z@example.com"),
+    );
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/building/dashboard" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(next).toHaveBeenCalled();
+    expect(ctx.locals.buildingManagerEmail).toBe("bm-z@example.com");
+    expect(ctx.locals.role).toBe("building_manager");
+    expect(ctx.locals.impersonating).toEqual({
+      adminEmail: ADMIN_EMAIL,
+      adminEntityId: ADMIN_EMAIL,
+      mintedAt: MINTED_AT,
+    });
+  });
+
+  // Test 4: PITFALL F regression guard — /_actions/* MUST hydrate from viewer
+  it("Pitfall F: locals.clientId reflects viewer NOT admin in /_actions/* branch", async () => {
+    getSessionMock.mockResolvedValue(
+      makeImpersonatingSession("client", "recipient-x"),
+    );
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({
+      pathname: "/_actions/some-action/",
+      method: "POST",
+    });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(next).toHaveBeenCalled();
+    // Critical: clientId is the VIEWER, not the admin's session.entityId
+    expect(ctx.locals.clientId).toBe("recipient-x");
+    expect(ctx.locals.clientId).not.toBe(ADMIN_EMAIL);
+    expect(ctx.locals.role).toBe("client");
+    expect(ctx.locals.impersonating).toEqual({
+      adminEmail: ADMIN_EMAIL,
+      adminEntityId: ADMIN_EMAIL,
+      mintedAt: MINTED_AT,
+    });
+  });
+
+  // Test 5: no impersonation falls through (backward compat)
+  it("/portal/* with plain client session (no impersonating): locals.clientId from session.entityId, impersonating undefined", async () => {
+    getSessionMock.mockResolvedValue({
+      entityId: "client-1",
+      role: "client",
+    });
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/portal/dashboard" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect(ctx.locals.clientId).toBe("client-1");
+    expect(ctx.locals.role).toBe("client");
+    expect(ctx.locals.impersonating).toBeUndefined();
+  });
+
+  // Test 6: D-01 invariant — adminEntityId in locals.impersonating === session.entityId
+  it("D-01 invariant: locals.impersonating.adminEntityId === session.entityId (admin's entityId)", async () => {
+    getSessionMock.mockResolvedValue(
+      makeImpersonatingSession("client", "recipient-x"),
+    );
+    const onRequest = await loadMiddleware();
+    const ctx = buildContext({ pathname: "/portal/dashboard" });
+    const next = vi.fn(async () => new Response("ok"));
+    await onRequest(ctx as any, next);
+    expect((ctx.locals.impersonating as { adminEntityId: string }).adminEntityId).toBe(
+      ADMIN_EMAIL,
+    );
+  });
+});
