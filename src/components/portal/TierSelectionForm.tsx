@@ -8,6 +8,7 @@ interface Props {
   projectId: string;
   artifactKey: string;
   columns?: number;
+  contactEmail?: string;
 }
 
 const EAGERNESS_LABELS = [
@@ -23,6 +24,7 @@ export default function TierSelectionForm({
   projectId,
   artifactKey,
   columns = 2,
+  contactEmail = "office@lasprezz.com",
 }: Props) {
   const [state, setState] = useState<FormState>("idle");
   const [selectedTierKey, setSelectedTierKey] = useState("");
@@ -48,7 +50,7 @@ export default function TierSelectionForm({
 
     if (error) {
       setErrorMessage(
-        "Something went wrong. Please try again or contact liz@lasprezz.com.",
+        `Something went wrong. Please try again or contact ${contactEmail}.`,
       );
       setState("error");
     } else {

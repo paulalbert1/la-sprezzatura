@@ -1,12 +1,23 @@
 ---
 import { Font } from "astro:assets";
 import "../../styles/global.css";
+import {
+  DEFAULT_PORTAL_BRAND,
+  type PortalBrand,
+} from "../../lib/portal/portalBrand";
 
 interface Props {
   title: string;
+  /**
+   * Optional brand strings sourced from siteSettings via getPortalBrand().
+   * Pages that fetch brand data themselves should pass it through; pages
+   * that don't fall back to DEFAULT_PORTAL_BRAND so the layout always has
+   * something to render.
+   */
+  tenant?: PortalBrand;
 }
 
-const { title } = Astro.props;
+const { title, tenant = DEFAULT_PORTAL_BRAND } = Astro.props;
 
 // Preview mode: detect ?preview=1 query param. The "Open portal as
 // {client}" button on /admin/clients/[clientId] sets this so the
@@ -56,14 +67,14 @@ const previewMode = Astro.url.searchParams.get("preview") === "1";
     <slot />
     <footer class="mt-auto py-8 text-center">
       <p class="text-xs text-stone tracking-widest uppercase font-body">
-        La Sprezzatura &bull; Interior Design
+        {tenant.displayName} &bull; Interior Design
       </p>
       <p class="text-xs text-stone-light mt-2 font-body">
         <a
-          href="mailto:office@lasprezz.com"
+          href={`mailto:${tenant.contactEmail}`}
           class="hover:text-terracotta transition-colors"
         >
-          office@lasprezz.com
+          {tenant.contactEmail}
         </a>
       </p>
     </footer>

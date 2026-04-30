@@ -4,6 +4,7 @@ import { useState } from "react";
 interface Props {
   projectId: string;
   assignmentKey: string;
+  contactEmail?: string;
 }
 
 type Status = "collapsed" | "editing" | "submitting" | "success" | "error";
@@ -11,6 +12,7 @@ type Status = "collapsed" | "editing" | "submitting" | "success" | "error";
 export default function ContractorNoteForm({
   projectId,
   assignmentKey,
+  contactEmail = "office@lasprezz.com",
 }: Props) {
   const [status, setStatus] = useState<Status>("collapsed");
   const [text, setText] = useState("");
@@ -58,7 +60,7 @@ export default function ContractorNoteForm({
           className="border border-terracotta/30 bg-terracotta/5 px-5 py-4 text-sm text-charcoal font-body mb-4"
           role="alert"
         >
-          Something went wrong. Please try again or contact liz@lasprezz.com.
+          Something went wrong. Please try again or contact {contactEmail}.
         </div>
         <button
           type="button"

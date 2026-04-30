@@ -3,6 +3,10 @@ export const prerender = false;
 
 import PortalLayout from "../../components/portal/PortalLayout.astro";
 import LoginForm from "../../components/portal/LoginForm.tsx";
+import { sanityClient } from "sanity:client";
+import { getPortalBrand } from "../../lib/portal/portalBrand";
+
+const tenant = await getPortalBrand(sanityClient);
 
 // Check for error query param (e.g., from expired magic link redirect)
 const errorParam = Astro.url.searchParams.get("error");
@@ -12,12 +16,12 @@ if (errorParam === "expired") {
 }
 ---
 
-<PortalLayout title="Login | La Sprezzatura">
+<PortalLayout title={`Login | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1 flex items-center justify-center px-6">
     <div class="w-full max-w-md text-center">
       {/* Brand mark */}
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-        La Sprezzatura
+        {tenant.wordmark}
       </p>
 
       {/* Heading */}
@@ -31,7 +35,7 @@ if (errorParam === "expired") {
       </p>
 
       {/* Login form (React, client:load for interactivity) */}
-      <LoginForm client:load initialError={initialError} />
+      <LoginForm client:load initialError={initialError} contactEmail={tenant.contactEmail} />
     </div>
   </main>
 </PortalLayout>

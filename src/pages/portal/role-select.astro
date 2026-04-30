@@ -4,6 +4,10 @@ export const prerender = false;
 import PortalLayout from "../../components/portal/PortalLayout.astro";
 import RoleSelectionForm from "../../components/portal/RoleSelectionForm.tsx";
 import { createSession } from "../../lib/session";
+import { sanityClient } from "sanity:client";
+import { getPortalBrand } from "../../lib/portal/portalBrand";
+
+const tenant = await getPortalBrand(sanityClient);
 
 // Handle POST: create session with selected role
 if (Astro.request.method === "POST") {
@@ -36,12 +40,12 @@ if (!clientId && !contractorId && !buildingManagerEmail) {
 }
 ---
 
-<PortalLayout title="Choose Your Portal | La Sprezzatura">
+<PortalLayout title={`Choose Your Portal | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1 flex items-center justify-center px-6">
     <div class="w-full max-w-sm text-center">
       {/* Brand mark */}
       <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-        La Sprezzatura
+        {tenant.wordmark}
       </p>
 
       {/* Heading */}

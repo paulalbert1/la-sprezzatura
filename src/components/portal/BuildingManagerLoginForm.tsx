@@ -8,7 +8,13 @@ interface FormState {
   emailError?: string;
 }
 
-export default function BuildingManagerLoginForm({ initialError }: { initialError?: string }) {
+export default function BuildingManagerLoginForm({
+  initialError,
+  contactEmail = "office@lasprezz.com",
+}: {
+  initialError?: string;
+  contactEmail?: string;
+}) {
   const [state, setState] = useState<FormState>({
     status: "idle",
     errorMessage: initialError,
@@ -41,7 +47,7 @@ export default function BuildingManagerLoginForm({ initialError }: { initialErro
       const message =
         error.code === "TOO_MANY_REQUESTS"
           ? "Too many requests. Please wait a few minutes and try again."
-          : "Something went wrong. Please try again or contact liz@lasprezz.com.";
+          : `Something went wrong. Please try again or contact ${contactEmail}.`;
       setState({ status: "error", errorMessage: message });
     } else {
       setState({ status: "success", submittedEmail: email.trim() });

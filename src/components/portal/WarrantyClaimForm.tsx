@@ -3,6 +3,7 @@ import { useState } from "react";
 
 interface Props {
   projectId: string;
+  contactEmail?: string;
 }
 
 interface FormState {
@@ -10,7 +11,10 @@ interface FormState {
   errorMessage?: string;
 }
 
-export default function WarrantyClaimForm({ projectId }: Props) {
+export default function WarrantyClaimForm({
+  projectId,
+  contactEmail = "office@lasprezz.com",
+}: Props) {
   const [state, setState] = useState<FormState>({ status: "idle" });
   const [description, setDescription] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
@@ -35,7 +39,7 @@ export default function WarrantyClaimForm({ projectId }: Props) {
       const message =
         error.code === "TOO_MANY_REQUESTS"
           ? "Too many requests. Please wait a few minutes and try again."
-          : "Something went wrong. Please try again or contact liz@lasprezz.com.";
+          : `Something went wrong. Please try again or contact ${contactEmail}.`;
       setState({ status: "error", errorMessage: message });
     } else {
       setState({ status: "success" });

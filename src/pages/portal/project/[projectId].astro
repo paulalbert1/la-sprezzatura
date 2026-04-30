@@ -19,6 +19,9 @@ import {
   isProjectCompleted,
   isProjectReopened,
 } from "../../../lib/projectVisibility";
+import { getPortalBrand } from "../../../lib/portal/portalBrand";
+
+const tenant = await getPortalBrand(sanityClient);
 
 // clientId injected by middleware (guaranteed by auth guard)
 const clientId = Astro.locals.clientId!;
@@ -44,7 +47,7 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
 
 ---
 
-<PortalLayout title={`${project.title} | La Sprezzatura`}>
+<PortalLayout title={`${project.title} | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1">
     <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
       <a href="/portal/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
@@ -54,7 +57,7 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
       <p
         class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"
       >
-        La Sprezzatura
+        {tenant.wordmark}
       </p>
 
       <ProjectHeader project={project} />
@@ -95,7 +98,7 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
 
       <!-- Warranty claim form (reopened projects only) -->
       {isReopened && (
-        <WarrantyClaimForm client:load projectId={project._id} />
+        <WarrantyClaimForm client:load projectId={project._id} contactEmail={tenant.contactEmail} />
       )}
 
       <div class="mt-16 text-center">

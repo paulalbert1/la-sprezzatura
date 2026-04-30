@@ -5,6 +5,7 @@ interface Props {
   projectId: string;
   targetKey: string;
   targetType: "milestone" | "artifact";
+  contactEmail?: string;
 }
 
 type Status = "collapsed" | "editing" | "submitting" | "success" | "error";
@@ -13,6 +14,7 @@ export default function ClientNoteForm({
   projectId,
   targetKey,
   targetType,
+  contactEmail = "office@lasprezz.com",
 }: Props) {
   const [status, setStatus] = useState<Status>("collapsed");
   const [text, setText] = useState("");
@@ -38,7 +40,7 @@ export default function ClientNoteForm({
 
     if (error) {
       setErrorMessage(
-        "Something went wrong. Please try again or contact liz@lasprezz.com.",
+        `Something went wrong. Please try again or contact ${contactEmail}.`,
       );
       setStatus("error");
     } else {

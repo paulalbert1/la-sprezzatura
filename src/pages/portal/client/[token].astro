@@ -26,6 +26,10 @@ import { getClientDashboardData } from "../../../lib/portal/clientDashboard";
 import { createPurlSession } from "../../../lib/session";
 import { STAGE_META, type StageKey } from "../../../lib/portalStages";
 import { ENGAGEMENT_LABELS } from "../../../lib/portal/engagementLabels";
+import { sanityClient } from "sanity:client";
+import { getPortalBrand } from "../../../lib/portal/portalBrand";
+
+const tenant = await getPortalBrand(sanityClient);
 
 const { token } = Astro.params;
 const data = token ? await getClientDashboardData(token) : null;
@@ -45,16 +49,16 @@ if (data) {
 
 const firstName = data?.client.name?.split(" ")[0] ?? "";
 const pageTitle = data
-  ? `Welcome, ${firstName} | La Sprezzatura`
-  : "Portal link expired | La Sprezzatura";
+  ? `Welcome, ${firstName} | ${tenant.displayName}`
+  : `Portal link expired | ${tenant.displayName}`;
 ---
 
-<PortalLayout title={pageTitle}>
+<PortalLayout title={pageTitle} tenant={tenant}>
   {!data ? (
     <main class="flex-1">
       <div class="max-w-2xl mx-auto px-6 py-12 md:py-20 text-center">
         <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-          La Sprezzatura
+          {tenant.wordmark}
         </p>
         <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
           Your portal link has expired or is invalid
@@ -64,10 +68,10 @@ const pageTitle = data
           you a new one.
         </p>
         <a
-          href="mailto:office@lasprezz.com"
+          href={`mailto:${tenant.contactEmail}`}
           class="inline-block border border-stone-light/40 px-6 py-3 text-sm tracking-widest uppercase text-stone hover:text-terracotta hover:border-terracotta transition-colors font-body"
         >
-          office@lasprezz.com
+          {tenant.contactEmail}
         </a>
       </div>
     </main>
@@ -76,7 +80,7 @@ const pageTitle = data
       <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
         {/* Brand eyebrow */}
         <p class="text-xs text-stone tracking-[0.2em] uppercase font-body text-center mb-6">
-          La Sprezzatura
+          {tenant.wordmark}
         </p>
 
         {/* Welcome headline */}
@@ -86,7 +90,7 @@ const pageTitle = data
 
         {/* Helper copy */}
         <p class="text-sm md:text-base text-stone font-body text-center mb-8">
-          Here are your projects with La Sprezzatura.
+          Here are your projects with {tenant.displayName}.
         </p>
 
         {data.projects.length === 0 ? (
@@ -137,10 +141,10 @@ const pageTitle = data
             Questions? Email
             {" "}
             <a
-              href="mailto:office@lasprezz.com"
+              href={`mailto:${tenant.contactEmail}`}
               class="hover:text-terracotta transition-colors underline underline-offset-2"
             >
-              office@lasprezz.com
+              {tenant.contactEmail}
             </a>
           </p>
         </div>

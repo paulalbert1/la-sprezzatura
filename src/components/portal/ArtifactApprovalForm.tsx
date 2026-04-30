@@ -5,6 +5,7 @@ interface Props {
   projectId: string;
   artifactKey: string;
   versionKey: string;
+  contactEmail?: string;
 }
 
 type Status =
@@ -19,6 +20,7 @@ export default function ArtifactApprovalForm({
   projectId,
   artifactKey,
   versionKey,
+  contactEmail = "office@lasprezz.com",
 }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [confirmed, setConfirmed] = useState(false);
@@ -37,7 +39,7 @@ export default function ArtifactApprovalForm({
 
     if (error) {
       setErrorMessage(
-        "Something went wrong. Please try again or contact liz@lasprezz.com.",
+        `Something went wrong. Please try again or contact ${contactEmail}.`,
       );
       setStatus("error");
     } else {
@@ -58,7 +60,7 @@ export default function ArtifactApprovalForm({
 
     if (error) {
       setErrorMessage(
-        "Something went wrong. Please try again or contact liz@lasprezz.com.",
+        `Something went wrong. Please try again or contact ${contactEmail}.`,
       );
       setStatus("error");
     } else {
