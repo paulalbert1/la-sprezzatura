@@ -446,7 +446,7 @@ Plans:
 **UI hint**: yes
 
 ### Phase 49: Impersonation Architecture
-**Goal**: The server-side foundation for designer impersonation is in place — wrapped admin session schema (`impersonatedBy` field), one-shot mint/redeem token flow with Redis GETDEL, dedicated `impersonationAudit` Sanity document, middleware-enforced read-only gate on every mutation endpoint, hard 30-minute TTL, and a CI test that proves cross-tenant impersonation is structurally impossible — so the UI in Phase 50 can surface the feature against a load-bearing security boundary that's already proven correct.
+**Goal**: The server-side foundation for designer impersonation is in place — wrapped admin session schema (`impersonating` field per D-02), one-shot mint/redeem token flow with Redis GETDEL, dedicated `impersonationAudit` Sanity document, middleware-enforced read-only gate on every mutation endpoint, hard 30-minute TTL, fresh-admin-auth requirement (15-min threshold per D-10), and a CI test that proves cross-tenant impersonation is structurally impossible — so the UI in Phase 50 can surface the feature against a load-bearing security boundary that's already proven correct.
 **Depends on**: v5.0 (Phase 29 tenant model + session middleware); none from email/layout tracks (parallelizable)
 **Requirements**: IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08
 **Success Criteria** (what must be TRUE):
@@ -456,7 +456,19 @@ Plans:
   4. Every impersonation start, exit, and timeout creates an append-only entry on the `impersonationAudit` Sanity document with admin email, target role + entityId, tenantId, projectId, mintedAt, exitedAt, and exit reason — verified by reading the audit doc after a manual end-to-end run (IMPER-06)
   5. A CI test on every PR sends a cross-tenant `recipientId` to `/api/admin/impersonate` and asserts the response is 403 with no Redis token written (IMPER-07)
   6. Impersonation start requires fresh admin authentication: if the admin session was minted more than the configured threshold ago, the mint endpoint returns 401 with a re-prompt code instead of issuing a token (IMPER-08)
-**Plans**: TBD
+**Plans**: 10 plans
+
+Plans:
+- [ ] 49-01-PLAN.md — Wave 1: SessionData extension (mintedAt + impersonating per D-02) + App.Locals augmentation (D-04)
+- [ ] 49-02-PLAN.md — Wave 1: impersonationAudit Sanity schema (D-17) + schemaTypes registration
+- [ ] 49-03-PLAN.md — Wave 2: src/lib/auth/impersonation.ts — mint/redeem/exit + 4 audit writers + sha256 hash (D-06, D-08, D-15, D-17, D-18, D-20)
+- [ ] 49-04-PLAN.md — Wave 3: POST /api/admin/impersonate — admin gate + fresh-auth (D-10..D-12) + tenant-scoped GROQ (D-05) + mint
+- [ ] 49-05-PLAN.md — Wave 3: GET /portal/_enter-impersonation — one-shot redeem + cookie hop + 30-min session (D-08, D-09)
+- [ ] 49-06-PLAN.md — Wave 3: POST /api/admin/impersonate/exit + POST /api/admin/logout (D-15, D-16, D-20)
+- [ ] 49-07-PLAN.md — Wave 2: middleware sibling read-only gate (D-13) + PUBLIC_PATHS + Pitfall F locals hydration in 4 branches (D-04)
+- [ ] 49-08-PLAN.md — Wave 4: belt-and-braces 403 at both Resend call sites (D-14, IMPER-03)
+- [ ] 49-09-PLAN.md — Wave 5: 5 named CI tests imper-02/03/04/07/08 (D-21) + RESEARCH negative tests
+- [ ] 49-10-PLAN.md — Wave 5: .env.example IMPERSONATION_FRESH_AUTH_MAX_AGE_SEC (D-10) + [BLOCKING] phase-level typecheck + full vitest gate
 
 ### Phase 50: Impersonation UI
 **Goal**: Designer-facing surfaces — the recipient picker on admin entity detail pages, the one-shot impersonation start flow that opens in a new tab, and the persistent banner with admin identity, target identity, and one-click exit rendered on every recipient route — make Phase 49's architecture usable. The banner self-gates so it renders correctly on `/portal/*`, `/workorder/*`, and `/building/*` even though only `/portal/*` uses the new `PortalLayout` shell.

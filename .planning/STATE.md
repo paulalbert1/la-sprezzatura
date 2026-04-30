@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
-stopped_at: "Phase 46 + 46.1 CLOSED 2026-04-30 -- Liz visual UAT APPROVED at round-5 close-out per D-21 / D-22. Code-fix landed at a7bd104 (46.1-10), code review clean at dd30667, Liz approved on Outlook Mac/Win/web dark + light. UAT artifacts: 46-UAT.md verdict APPROVED, 46.1-HUMAN-UAT.md status passed. Email track unblocks Phase 48 (smaller transactional emails). Portal/Impersonation track unblocked: Phase 47 + Phase 49 are parallel-eligible. NEXT: /gsd-discuss-phase 49 (Impersonation Architecture -- view-as-contractor / view-as-building-manager, IMPER-02..08) -- direct hit on contractor + building-manager parity ask."
-last_updated: "2026-04-30T14:40:00.000Z"
-last_activity: 2026-04-30 -- Phase 46/46.1 close-out approved (round-5 UAT)
+stopped_at: "Phase 49 context gathered (4 areas: schema, fresh-auth, exit-restore, audit doc)"
+last_updated: "2026-04-30T16:32:02.147Z"
+last_activity: 2026-04-30 -- Phase 49 execution started
 progress:
   total_phases: 11
   completed_phases: 4
-  total_plans: 32
+  total_plans: 42
   completed_plans: 32
-  percent: 100
+  percent: 76
 ---
 
 # Project State
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 46 + 46.1 closed; Phase 49 (Impersonation Architecture) is the next discuss target.
+**Current focus:** Phase 49 — impersonation-architecture
 
 ## Current Position
 
-Phase: 46 + 46.1 — CLOSED (2026-04-30)
-Plan: —
+Phase: 49 (impersonation-architecture) — EXECUTING
+Plan: 1 of 10
 Parent: —
 Plans: 10 of 10 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7; round 4: 46.1-09 b75ab0b CR-R3-01 BLOCKER + WR carryovers; round 5: 46.1-10 a7bd104 CR-R4-01 BLOCKER + WR-R4 fold-ins, code review clean dd30667).
-Status: v5.3 Email track CLOSED; Portal/Impersonation track UNBLOCKED.
+Status: Executing Phase 49
 Next: `/gsd-discuss-phase 49` — Impersonation Architecture (IMPER-02..08). Phase 49 is parallel-eligible with Phase 47 (Portal Layout Hoist). Phase 48 (smaller transactional emails — work-order access, building access, artifact-ready) now also unblocked since Phase 46 closed; can run anytime.
-Last activity: 2026-04-30 -- Phase 46/46.1 close-out approved (round-5 UAT)
+Last activity: 2026-04-30 -- Phase 49 execution started
 
 ## v5.3 Phase Map
 
@@ -141,7 +141,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-29T17:00:00.000Z
-Stopped at: Phase 46.1-09 (round-4 BLOCKER closure) executed at b75ab0b. Single atomic commit lands 12 files: D-15 className binding on pill <span> + EmailButton CTA (HARD verification gate PASSED -- 4 pill-* + 5 cta-* matches in regenerated SendUpdate snapshot); D-16/D-17 dead-rule deletion; D-18 buildPillRules() CSS-gen from STATUS_PILL_STYLES + className-binding-shape test rewrite; D-19 WR-01/02/03/05/06 carryovers folded. Test gate: 59 failures = baseline (zero new); +40 passing tests. SUMMARY at .planning/phases/46.1-merge-gate-gap-closure/46.1-09-SUMMARY.md. No AI attribution. No new deps.
-Resume file: None
+Last session: 2026-04-30T15:28:14.657Z
+Stopped at: Phase 49 context gathered (4 areas: schema, fresh-auth, exit-restore, audit doc)
+Resume file: .planning/phases/49-impersonation-architecture/49-CONTEXT.md
 Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
