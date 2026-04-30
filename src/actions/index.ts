@@ -16,6 +16,7 @@ import {
   contractorNoteSchema,
   selectTierSchema,
   archiveProjectSchema,
+  setClientPortalVisibilitySchema,
 } from "./portalSchemas";
 
 export { warrantyClaimSchema };
@@ -608,6 +609,29 @@ export const server = {
       // Idempotent: clearing archivedAt on a non-archived project is a no-op patch.
       await tenantClient.patch(input.projectId).set({ archivedAt: null }).commit();
       return { success: true };
+    },
+  }),
+
+  // Admin-only override of the per-project client portal visibility flag.
+  // Same auth gate as archiveProject (tenantId + sanityUserId from middleware).
+  // The schema defines the three valid values; isProjectVisible / getProjectAccessState
+  // in src/lib/projectVisibility.ts consume this field at render time.
+  setClientPortalVisibility: defineAction({
+    accept: "json",
+    input: setClientPortalVisibilitySchema,
+    handler: async (input, context) => {
+      const tenantId = context.locals.tenantId;
+      const sanityUserId = context.locals.sanityUserId;
+      if (!tenantId || !sanityUserId) {
+        throw new ActionError({ code: "UNAUTHORIZED", message: "Admin session required." });
+      }
+
+      const tenantClient = getTenantClient(tenantId);
+      await tenantClient
+        .patch(input.projectId)
+        .set({ clientPortalVisibility: input.value })
+        .commit();
+      return { success: true, value: input.value };
     },
   }),
 

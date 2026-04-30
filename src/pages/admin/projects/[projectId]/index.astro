@@ -20,6 +20,7 @@ import { getLatestWorkOrderByContractor } from "../../../../lib/workOrder/getLat
 import QuickAssignTypeahead from "../../../../components/admin/QuickAssignTypeahead.tsx";
 import SendUpdateButton from "../../../../components/admin/SendUpdateButton.tsx";
 import ProjectArchiveMenu from "../../../../components/admin/ProjectArchiveMenu.tsx";
+import ProjectVisibilityMenu from "../../../../components/admin/ProjectVisibilityMenu.tsx";
 import {
   getAdminProjectDetail,
   RENDERING_SESSIONS_BY_PROJECT_QUERY,
@@ -233,6 +234,11 @@ const breadcrumbs = [
             {stageChangedLabel && (
               <span class="text-[11.5px]" style="color: #9E8E80;">{stageChangedLabel}</span>
             )}
+            <ProjectVisibilityMenu
+              client:load
+              projectId={projectId}
+              value={(project.clientPortalVisibility as "auto" | "shown" | "hidden") || "auto"}
+            />
           </div>
         )}
         {project.projectClients && project.projectClients[0] && (

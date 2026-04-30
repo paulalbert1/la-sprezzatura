@@ -5,7 +5,7 @@ import PortalLayout from "../../components/portal/PortalLayout.astro";
 import StatusBadge from "../../components/portal/StatusBadge.astro";
 import { getProjectsByClientId, getClientById } from "../../sanity/queries";
 import { STAGE_META, type StageKey } from "../../lib/portalStages";
-import { isProjectVisible } from "../../lib/projectVisibility";
+import { getProjectAccessState } from "../../lib/projectVisibility";
 import { ENGAGEMENT_LABELS } from "../../lib/portal/engagementLabels";
 import { sanityClient } from "sanity:client";
 import { getPortalBrand } from "../../lib/portal/portalBrand";
@@ -20,15 +20,30 @@ const client = await getClientById(clientId);
 const firstName = client?.name?.split(" ")[0] || "there";
 
 // Fetch all portal-enabled projects for this client
-const projects = await getProjectsByClientId(clientId) || [];
+const projects = (await getProjectsByClientId(clientId)) || [];
 
-// Single-project clients see their project card (no auto-redirect,
-// so "Back to Dashboard" from the project detail page works)
+// Classify each project via getProjectAccessState so we can render:
+//   active            -> top "Active" grid (full link cards)
+//   completed-visible -> inside Past Projects accordion as link cards
+//   expired           -> inside Past Projects accordion as greyed-out stubs
+//                        ("Access expired - contact your designer to extend")
+//   hidden            -> not surfaced at all
+type Bucket = {
+  project: any;
+  state: ReturnType<typeof getProjectAccessState>;
+};
 
-// Filter by 30-day visibility window, then separate active vs completed
-const visibleProjects = projects.filter((p: any) => isProjectVisible(p));
-const activeProjects = visibleProjects.filter((p: any) => p.projectStatus !== "completed");
-const completedProjects = visibleProjects.filter((p: any) => p.projectStatus === "completed");
+const classified: Bucket[] = projects.map((p: any) => ({
+  project: p,
+  state: getProjectAccessState(p),
+}));
+
+const activeProjects = classified
+  .filter((b) => b.state === "active")
+  .map((b) => b.project);
+const pastProjects = classified.filter(
+  (b) => b.state === "completed-visible" || b.state === "expired",
+);
 const activeCount = activeProjects.length;
 ---
 
@@ -104,34 +119,74 @@ const activeCount = activeProjects.length;
         </div>
       )}
 
-      {/* Completed projects */}
-      {completedProjects.length > 0 && (
-        <>
-          <p class="text-xs text-stone uppercase tracking-widest font-body mt-10 mb-4">
-            Completed Projects
-          </p>
+      {/* Past projects accordion: completed-visible cards + expired stubs.
+          Uses native <details> so the toggle is keyboard-accessible without
+          shipping JS. Closed by default — clients land focused on active work. */}
+      {pastProjects.length > 0 && (
+        <details class="group mt-10 border-t border-stone-light/30 pt-6">
+          <summary
+            class="flex items-center justify-between cursor-pointer list-none text-xs text-stone uppercase tracking-widest font-body py-2 px-1 -mx-1 rounded hover:text-terracotta transition-colors focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none"
+          >
+            <span>
+              Past Projects
+              <span class="text-stone/60 normal-case tracking-normal ml-2">
+                ({pastProjects.length})
+              </span>
+            </span>
+            <span
+              aria-hidden="true"
+              class="text-base transition-transform group-open:rotate-180"
+            >
+              &#x25BE;
+            </span>
+          </summary>
+
           <div class:list={[
-            "grid gap-4",
-            completedProjects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1",
+            "grid gap-4 mt-4",
+            pastProjects.length >= 2 ? "md:grid-cols-2" : "grid-cols-1",
           ]}>
-            {completedProjects.map((project: any) => (
-              <a
-                href={`/portal/project/${project._id}`}
-                class="block bg-cream-dark border border-stone-light/30 p-6 hover:border-terracotta/40 transition-colors cursor-pointer rounded-lg focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none"
-              >
-                <h3 class="font-heading text-xl font-light text-stone mb-2">
-                  {project.title}
-                </h3>
-                {project.engagementType && (
-                  <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
-                    {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+            {pastProjects.map(({ project, state }) => {
+              if (state === "completed-visible") {
+                return (
+                  <a
+                    href={`/portal/project/${project._id}`}
+                    class="block bg-cream-dark border border-stone-light/30 p-6 hover:border-terracotta/40 transition-colors cursor-pointer rounded-lg focus-visible:ring-2 focus-visible:ring-terracotta focus-visible:outline-none"
+                  >
+                    <h3 class="font-heading text-xl font-light text-stone mb-2">
+                      {project.title}
+                    </h3>
+                    {project.engagementType && (
+                      <p class="text-xs text-stone uppercase tracking-wider font-body mb-3">
+                        {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+                      </p>
+                    )}
+                    <StatusBadge stage="Closeout" isComplete={true} />
+                  </a>
+                );
+              }
+              // state === "expired": no link, no detail data; just a greyed
+              // stub explaining what happened and how to recover access.
+              return (
+                <div
+                  aria-disabled="true"
+                  class="block bg-cream-dark/50 border border-stone-light/20 p-6 rounded-lg opacity-70"
+                >
+                  <h3 class="font-heading text-xl font-light text-stone/70 mb-2">
+                    {project.title}
+                  </h3>
+                  {project.engagementType && (
+                    <p class="text-xs text-stone/60 uppercase tracking-wider font-body mb-3">
+                      {ENGAGEMENT_LABELS[project.engagementType] || project.engagementType}
+                    </p>
+                  )}
+                  <p class="text-xs text-stone/70 font-body leading-relaxed">
+                    Access expired — contact your designer to extend.
                   </p>
-                )}
-                <StatusBadge stage="Closeout" isComplete={true} />
-              </a>
-            ))}
+                </div>
+              );
+            })}
           </div>
-        </>
+        </details>
       )}
 
       {/* Sign out link */}

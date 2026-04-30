@@ -306,3 +306,41 @@ describe("selectTier schema (Phase 9)", () => {
     }
   });
 });
+
+import { setClientPortalVisibilitySchema } from "./portalSchemas";
+
+describe("setClientPortalVisibility schema", () => {
+  it.each(["auto", "shown", "hidden"] as const)(
+    'accepts value="%s"',
+    (value) => {
+      const result = setClientPortalVisibilitySchema.safeParse({
+        projectId: "proj1",
+        value,
+      });
+      expect(result.success).toBe(true);
+    },
+  );
+
+  it("rejects unknown enum values", () => {
+    const result = setClientPortalVisibilitySchema.safeParse({
+      projectId: "proj1",
+      value: "always",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects empty projectId", () => {
+    const result = setClientPortalVisibilitySchema.safeParse({
+      projectId: "",
+      value: "auto",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects missing value field", () => {
+    const result = setClientPortalVisibilitySchema.safeParse({
+      projectId: "proj1",
+    });
+    expect(result.success).toBe(false);
+  });
+});

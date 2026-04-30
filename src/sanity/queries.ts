@@ -927,6 +927,7 @@ const ADMIN_PROJECT_DETAIL_QUERY = `
     engagementType,
     completedAt,
     archivedAt,
+    clientPortalVisibility,
     "projectAddress": projectAddress { street, city, state, zip },
     "stageChangedAt": coalesce(pipelineStageChangedAt, _createdAt),
     "milestones": milestones[] | order(date asc) {

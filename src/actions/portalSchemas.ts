@@ -52,3 +52,10 @@ export const selectTierSchema = z.object({
 export const archiveProjectSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
 });
+
+// clientPortalVisibility override (auto / shown / hidden) — see
+// src/sanity/schemas/project.ts and src/lib/projectVisibility.ts.
+export const setClientPortalVisibilitySchema = z.object({
+  projectId: z.string().min(1, "projectId is required"),
+  value: z.enum(["auto", "shown", "hidden"]),
+});
