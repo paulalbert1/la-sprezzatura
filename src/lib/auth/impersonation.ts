@@ -17,8 +17,8 @@
  *  - createImpersonationSession keeps role='admin' (D-01) and stashes the
  *    original admin session token inside `impersonating.originalAdminSessionToken`
  *    (D-15) for cookie-restore at exit time. TTL is 30 min (D-09 / IMPER-04).
- *  - All audit writes go via getTenantClient(tenantId); never sanityWriteClient
- *    (D-19).
+ *  - All audit writes go via getTenantClient(tenantId); the global write
+ *    client is forbidden (D-19) since it bypasses tenant dataset routing.
  *
  * See .planning/phases/49-impersonation-architecture/49-CONTEXT.md
  * (D-01, D-04, D-06, D-08, D-09, D-15, D-17, D-18, D-19, D-20).
@@ -245,7 +245,8 @@ function buildAuditDocBase(
  * exit deletes the timeout doc and creates a fresh exit doc — see
  * writeExitAuditDoc.
  *
- * Tenant-scoped via getTenantClient (D-19). NEVER sanityWriteClient.
+ * Tenant-scoped via getTenantClient (D-19) — the global write client is
+ * forbidden because it bypasses dataset routing.
  */
 export async function writeStartAndTimeoutAuditDocs(
   tenantId: string,
