@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: executing
-stopped_at: "Phase 49 context gathered (4 areas: schema, fresh-auth, exit-restore, audit doc)"
-last_updated: "2026-04-30T16:32:02.147Z"
-last_activity: 2026-04-30 -- Phase 49 execution started
+status: Phase 49 CLOSED — Phase 50 (Impersonation UI) unblocked.
+stopped_at: "Phase 49 closed — verifier PASS 6/6 + gap-closure rename of redeem route (Astro v6 underscore exclusion)"
+last_updated: "2026-04-30T20:45:00.000Z"
+last_activity: 2026-04-30 -- Phase 49 closed (verifier PASS, redeem-route rename gap-closure landed)
 progress:
   total_phases: 11
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 42
-  completed_plans: 32
-  percent: 76
+  completed_plans: 42
+  percent: 91
 ---
 
 # Project State
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 49 — impersonation-architecture
+**Current focus:** Phase 49 CLOSED. Phase 50 (Impersonation UI — IMPER-01, IMPER-05) is unblocked. Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also available.
 
 ## Current Position
 
-Phase: 49 (impersonation-architecture) — EXECUTING
-Plan: 1 of 10
+Phase: 49 (impersonation-architecture) — CLOSED 2026-04-30
+Plan: —
 Parent: —
-Plans: 10 of 10 complete (round 1: 46.1-01 eaea038, 46.1-02 9b5cb08, 46.1-03 889477e; round 2: 46.1-04 f867da6, 46.1-05 14dabb9; round 3: 46.1-06 af52ca5 SPIKE, 46.1-07 016c41c gap-6, 46.1-08 9f9cd05 gap-7; round 4: 46.1-09 b75ab0b CR-R3-01 BLOCKER + WR carryovers; round 5: 46.1-10 a7bd104 CR-R4-01 BLOCKER + WR-R4 fold-ins, code review clean dd30667).
-Status: Executing Phase 49
-Next: `/gsd-discuss-phase 49` — Impersonation Architecture (IMPER-02..08). Phase 49 is parallel-eligible with Phase 47 (Portal Layout Hoist). Phase 48 (smaller transactional emails — work-order access, building access, artifact-ready) now also unblocked since Phase 46 closed; can run anytime.
-Last activity: 2026-04-30 -- Phase 49 execution started
+Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
+Status: Phase 49 CLOSED — verifier PASS 6/6, redeem-route Astro v6 BLOCKER fixed via gap-closure rename.
+Next: Phase 50 (Impersonation UI — IMPER-01, IMPER-05). Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also unblocked.
+Last activity: 2026-04-30 -- Phase 49 closed (verifier PASS, redeem-route rename gap-closure landed)
 
 ## v5.3 Phase Map
 
@@ -43,7 +43,7 @@ Last activity: 2026-04-30 -- Phase 49 execution started
 | 46.1 | Merge-Gate Gap Closure | 0 (gap closure of 46 UAT) | 10 | **Complete** (10/10 plans) — round-5 code-fix at a7bd104, code review clean at dd30667, Liz visual UAT approved 2026-04-30 per D-21 / D-22 (`46.1-HUMAN-UAT.md` status passed). |
 | 47 | Portal Layout Hoist | 1 (PORTAL-05) | TBD | Not started |
 | 48 | Smaller Transactional Emails | 2 (EMAIL-04, 05) | TBD | Not started |
-| 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | TBD | Not started |
+| 49 | Impersonation Architecture | 6 (IMPER-02, 03, 04, 06, 07, 08) | 10 | **Complete** (10/10 plans, verifier PASS 6/6) — closed 2026-04-30 with gap-closure rename of redeem route (Astro v6 `_*` exclusion). All IMPER reqs satisfied; D-21 canonical CI tests in place. |
 | 50 | Impersonation UI | 2 (IMPER-01, 05) | TBD | Not started |
 | 51 | Portal Visual + Voice Pass | 6 (PORTAL-01, 02, 03, 06, AUTH-01, 02) | TBD | Not started |
 | 52 | Cross-Cutting QA / UAT | 1 (PORTAL-04) | TBD | Not started |
