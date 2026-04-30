@@ -2,7 +2,7 @@
 /**
  * Phase 49 Plan 05 — cookie-hop redeem route.
  *
- * GET /portal/_enter-impersonation?token=<one-shot>
+ * GET /portal/enter-impersonation?token=<one-shot>
  *
  * The new tab opens this URL after Plan 04's mint endpoint hands back
  * `{ url }`. This route:
@@ -34,7 +34,7 @@
  *   - getSession returns null               → /admin?error=impersonation-failed
  *   - redis.expire rejects (Pitfall G)      → /admin?error=impersonation-failed
  *
- * The orchestration logic lives in `_enter-impersonation.helper.ts` so it can
+ * The orchestration logic lives in `enter-impersonation.helper.ts` so it can
  * be unit-tested directly (Astro frontmatter is not unit-testable).
  *
  * NOTE: Per RESEARCH Open Q2, this route MUST be in PUBLIC_PATHS in
@@ -44,7 +44,7 @@
  */
 export const prerender = false;
 
-import { processImpersonationRedeem } from "./_enter-impersonation.helper";
+import { processImpersonationRedeem } from "./enter-impersonation.helper";
 
 const token = Astro.url.searchParams.get("token");
 const { to } = await processImpersonationRedeem({

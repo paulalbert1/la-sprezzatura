@@ -514,9 +514,9 @@ describe("Phase 49 impersonation gate", () => {
   }
 
   // Test 1 (PUBLIC_PATHS extension)
-  it("GET /portal/_enter-impersonation passes the middleware without a session (PUBLIC_PATHS)", async () => {
+  it("GET /portal/enter-impersonation passes the middleware without a session (PUBLIC_PATHS)", async () => {
     const onRequest = await loadMiddleware();
-    const ctx = buildContext({ pathname: "/portal/_enter-impersonation" });
+    const ctx = buildContext({ pathname: "/portal/enter-impersonation" });
     const next = vi.fn(async () => new Response("ok"));
     await onRequest(ctx as any, next);
     expect(next).toHaveBeenCalled();

@@ -1,8 +1,8 @@
-// src/pages/portal/_enter-impersonation.test.ts
+// src/pages/portal/enter-impersonation.test.ts
 // Phase 49 Plan 05 — tests for the cookie-hop redeem route.
 //
 // Coverage (all 8 tests target the pure helper extracted to
-// `_enter-impersonation.helper.ts`; the .astro frontmatter is a thin shim
+// `enter-impersonation.helper.ts`; the .astro frontmatter is a thin shim
 // that translates `{ kind:'redirect', to }` into `Astro.redirect(to)`):
 //
 //   - Test 1: happy path — token redeemed, admin session captured, redis.expire
@@ -65,7 +65,7 @@ vi.mock("../../lib/session", () => ({
 }));
 
 // Import under test AFTER vi.mock hoisted calls.
-import { processImpersonationRedeem } from "./_enter-impersonation.helper";
+import { processImpersonationRedeem } from "./enter-impersonation.helper";
 import type { ImpersonationPayload } from "../../lib/auth/impersonation";
 import type { SessionData } from "../../lib/session";
 

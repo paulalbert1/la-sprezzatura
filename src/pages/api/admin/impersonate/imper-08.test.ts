@@ -94,7 +94,7 @@ beforeEach(() => {
   // Default happy-path mint return — used only when the fresh-auth gate passes.
   mockMint.mockResolvedValue({
     token: "abc123",
-    url: "/portal/_enter-impersonation?token=abc123",
+    url: "/portal/enter-impersonation?token=abc123",
   });
 });
 
@@ -215,7 +215,7 @@ describe("IMPER-08 — fresh-auth threshold (D-10..D-12 / D-21 #5)", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.url).toMatch(/^\/portal\/_enter-impersonation\?token=/);
+    expect(body.url).toMatch(/^\/portal\/enter-impersonation\?token=/);
     expect(mockMint).toHaveBeenCalledTimes(1);
   });
 });

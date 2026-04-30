@@ -131,7 +131,7 @@ describe("hashImpersonationToken", () => {
 });
 
 describe("mintImpersonationToken", () => {
-  it("Test 2: returns { token, url } with /portal/_enter-impersonation URL shape", async () => {
+  it("Test 2: returns { token, url } with /portal/enter-impersonation URL shape", async () => {
     mockGenerateToken.mockReturnValueOnce(
       "abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abcd",
     );
@@ -144,7 +144,7 @@ describe("mintImpersonationToken", () => {
     );
     expect(result.token.length).toBe(64);
     expect(result.url).toBe(
-      "/portal/_enter-impersonation?token=abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abcd",
+      "/portal/enter-impersonation?token=abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abcd",
     );
   });
 

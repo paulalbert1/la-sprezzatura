@@ -1,7 +1,7 @@
 /**
  * Phase 49 Plan 05 — cookie-hop redeem helper.
  *
- * The pure-function core of `/portal/_enter-impersonation`. Extracted from the
+ * The pure-function core of `/portal/enter-impersonation`. Extracted from the
  * .astro frontmatter so it is unit-testable (Astro pages do not reliably
  * support `import { fn } from './page.astro'`). The .astro shim translates
  * the returned `{ kind:'redirect', to }` into `Astro.redirect(to)`.

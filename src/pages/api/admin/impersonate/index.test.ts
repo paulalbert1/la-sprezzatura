@@ -96,7 +96,7 @@ beforeEach(() => {
   // Default happy-path mint return — overridden per test as needed.
   mockMint.mockResolvedValue({
     token: "abcdef0123456789",
-    url: "/portal/_enter-impersonation?token=abcdef0123456789",
+    url: "/portal/enter-impersonation?token=abcdef0123456789",
   });
 });
 
@@ -271,7 +271,7 @@ describe("POST /api/admin/impersonate", () => {
       .mockResolvedValueOnce({ _id: "project-cottage", title: "Cottage Reno" });
     mockMint.mockResolvedValueOnce({
       token: "abc123def456",
-      url: "/portal/_enter-impersonation?token=abc123def456",
+      url: "/portal/enter-impersonation?token=abc123def456",
     });
 
     const res = await callPost({
@@ -281,7 +281,7 @@ describe("POST /api/admin/impersonate", () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.url).toMatch(/^\/portal\/_enter-impersonation\?token=[A-Za-z0-9]+$/);
+    expect(body.url).toMatch(/^\/portal\/enter-impersonation\?token=[A-Za-z0-9]+$/);
     expect(mockMint).toHaveBeenCalledTimes(1);
 
     const callArg = mockMint.mock.calls[0][0];

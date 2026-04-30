@@ -14,7 +14,7 @@ const PUBLIC_PATHS = [
   // impersonated session from a one-shot ticket; it must be reachable
   // WITHOUT an existing role-matched session (RESEARCH Open Q2). The
   // route handler itself validates the ticket and mints the session.
-  "/portal/_enter-impersonation",
+  "/portal/enter-impersonation",
   // Phase 34 Plan 06 KR-7: the /portal/client/[token] route MUST be public
   // so the route handler itself can mint the PURL session cookie. Trailing
   // slash so a bare /portal/client visit (without token) still falls through

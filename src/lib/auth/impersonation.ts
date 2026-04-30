@@ -103,7 +103,7 @@ export async function mintImpersonationToken(args: {
 
   return {
     token,
-    url: `/portal/_enter-impersonation?token=${token}`,
+    url: `/portal/enter-impersonation?token=${token}`,
   };
 }
 
