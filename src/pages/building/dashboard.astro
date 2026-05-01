@@ -3,6 +3,10 @@ export const prerender = false;
 
 import PortalLayout from "../../components/portal/PortalLayout.astro";
 import { getProjectsByBuildingManagerEmail } from "../../sanity/queries";
+import { sanityClient } from "sanity:client";
+import { getPortalBrand } from "../../lib/portal/portalBrand";
+
+const tenant = await getPortalBrand(sanityClient);
 
 // buildingManagerEmail injected by middleware (guaranteed by auth guard)
 const email = Astro.locals.buildingManagerEmail!;
@@ -20,15 +24,9 @@ function formatAddress(addr: any): string {
 }
 ---
 
-<PortalLayout title="Building Portal | La Sprezzatura">
+<PortalLayout title={`Building Portal | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {/* Brand mark */}
-      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
-        La Sprezzatura
-      </p>
-      <p class="text-xs text-stone/60 font-body text-center mb-4 -mt-6">Building Manager Portal</p>
-
       {/* Greeting */}
       <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
         Welcome
@@ -64,15 +62,6 @@ function formatAddress(addr: any): string {
         </div>
       )}
 
-      {/* Sign out link */}
-      <div class="mt-16 text-center">
-        <a
-          href="/building/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body py-2 px-4 border border-stone-light/30 rounded"
-        >
-          Sign Out
-        </a>
-      </div>
     </div>
   </main>
 </PortalLayout>
