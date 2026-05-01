@@ -449,7 +449,13 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Every transactional invitation email (Work Order, artifact-ready, contractor access, building access) shows a visible "or paste this link" line under the primary CTA with the literal URL selectable for copy-paste — verified by sending a test of each template type to a corporate inbox that strips the CTA button (EMAIL-04)
   2. Every transactional invitation email includes copy stating how long the link remains valid, sourced from the same TTL constant the redemption endpoint enforces (EMAIL-05)
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [x] 48-01-PLAN.md — Wave 1: Foundation — src/lib/portal/tokenTtl.ts (D-04, D-05) + tenantBrand D-14 fix + SAMPLE_TENANT A2 fix + Phase 46 snapshot regen
+- [ ] 48-02-PLAN.md — Wave 2: Three new react-email templates (workOrderAccess, buildingAccess, artifactReady) with EMAIL-04 + EMAIL-05 (and D-08 negative for artifactReady)
+- [ ] 48-03-PLAN.md — Wave 3: Rewire 3 API routes (send-workorder-access, send-building-access, notify-artifact) — react-email render + MAGIC_LINK_ACCESS_TTL_SECONDS + getTenantBrand at call site (D-15)
+- [ ] 48-04-PLAN.md — Wave 4: EMAIL-05 drift-guard integration tests (D-07) — vi.doMock + dynamic-import the route to assert redis.set ex: AND email body change in lockstep
 **UI hint**: yes
 
 ### Phase 49: Impersonation Architecture
@@ -539,7 +545,7 @@ Plans:
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 47 | v5.3 | 5/5 | Complete    | 2026-05-01 |
-| 48 | v5.3 | 0/TBD | Not started | - |
+| 48 | v5.3 | 1/4 | In Progress|  |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |
 | 51 | v5.3 | 0/TBD | Not started | - |

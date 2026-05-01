@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: ready_to_plan
+status: executing
 stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-05-01T01:59:37.693Z"
+last_updated: "2026-05-01T03:30:14.507Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 11
-  completed_phases: 7
-  total_plans: 47
-  completed_plans: 47
-  percent: 64
+  completed_phases: 6
+  total_plans: 51
+  completed_plans: 48
+  percent: 94
 ---
 
 # Project State
@@ -21,15 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 47 — portal-layout-hoist
+**Current focus:** Phase 48 — smaller-transactional-emails
 
 ## Current Position
 
-Phase: 49
-Plan: Not started
+Phase: 48 (smaller-transactional-emails) — EXECUTING
+Plan: 2 of 4
 Parent: —
 Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
-Status: Ready to plan
+Status: Ready to execute
 Next: Phase 50 (Impersonation UI — IMPER-01, IMPER-05). Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also unblocked.
 Last activity: 2026-05-01
 
@@ -66,6 +66,7 @@ Email track and Portal/Impersonation track share zero files (other than possibly
 - **D-4** (Phase 45-01): `@vitejs/plugin-react` pinned at `^5.2.0` (not RESEARCH.md's `^6.0.1`). `^6` requires `vite@^8` peer; the entire tree (Astro 6.0.4, Vitest 3.2.4, Sanity 5.16, `@tailwindcss/vite` 4.2.2) resolves `vite@7.3.1`. `^5.2.0` matches the version already deduped in the tree as a transitive of `@astrojs/react@5.0.0` and satisfies Pitfall 1 fix (transitive → direct) without forcing a vite-8 cascade. Reconsider when Astro 7 / Vitest 4 land.
 - **D-5** (Phase 45-02): `src/lib/brand-tokens.ts` is the typed source of truth (23 colors, 4 fonts, 2 spacing tokens). `scripts/generate-theme-css.ts` exports a pure `buildThemeCss(tokens)` plus a CLI entry that writes `src/styles/_generated-theme.css` byte-idempotently. `global.css` `@import`s the generated file; out-of-scope tokens (`--container-text`, `--animate-fade-in-up`, `@keyframes`, `@theme inline` font bridge) stay CSS-only per D-07. CI freshness gate: `npm run theme:gen && git diff --exit-code src/styles/_generated-theme.css`. EMAIL-08 satisfied.
 - **D-6** (Phase 45-02): Test co-location confirmed for `src/lib/brand-tokens.test.ts` (NOT `src/lib/__tests__/brand-tokens.test.ts`) — every other `*.test.ts` in `src/lib/` is co-located. Same convention applies to forthcoming `src/emails/scaffold.test.ts` in 45-04.
+- **D-14** (Phase 48-01): `LA_SPREZZATURA_TENANT.signoffNameFormal` corrected from "Elizabeth Lewis" to "Elizabeth Olivier"; `SAMPLE_TENANT` updated in sync (A2); Phase 46 SendUpdate snapshot regenerated. Single-file `tokenTtl.ts` chosen (constants + helper co-located) per 48-PATTERNS.md.
 
 ## Accumulated Context
 
@@ -148,7 +149,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-01T01:59:26.361Z
+Last session: 2026-05-01T03:30:14.502Z
 Stopped at: Phase 47 UI-SPEC approved
 Resume file: None
 Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
