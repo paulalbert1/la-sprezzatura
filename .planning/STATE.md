@@ -4,14 +4,14 @@ milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
 stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-05-01T00:33:50.575Z"
+last_updated: "2026-05-01T00:44:35.713Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 11
   completed_phases: 5
   total_plans: 47
-  completed_plans: 45
-  percent: 96
+  completed_plans: 46
+  percent: 98
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 ## Current Position
 
 Phase: 47 (portal-layout-hoist) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Parent: —
 Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
 Status: Ready to execute
@@ -127,6 +127,7 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - [Phase 47]: 47-02: PortalLayout banner-slot wrapper carries no sticky/z-index classes — UI-SPEC line 60-62 assigns sticky positioning to eventual real banner content (Phase 50), not the slot wrapper. Wrapper is plain layout glue with role=region/aria-label=Notifications a11y landmark.
 - [Phase 47]: 47-02: PortalLayout body composition order locked: banner-slot wrapper → legacy ?preview=1 block (preserved byte-equivalent) → PortalHeader → page <slot/> → PortalFooter. CONTEXT D-3 explicit — Phase 50 removes the ?preview=1 block; Phase 47 preserves it.
 - [Phase ?]: [Phase 47]: 47-03: 5 /portal/* pages migrated off inlined chrome — wordmark, role sub-label, and sign-out now sourced exclusively from PortalLayout shell. /portal/login and /portal/role-select adopt bare prop; /portal/[token] stays default mode (Astro.locals.role undefined → wordmark-only auto-fallback).
+- [Phase 47]: 47-04: 3 /workorder/* pages migrated off inlined chrome -- all three now fetch tenant via getPortalBrand (none did before); legacy 'Contractor Portal' Title-Case sub-label retired in favor of PortalHeader 'Trade portal' (sentence case, v5.2 trades unification); workorder/login adopts bare prop.
 
 ### Pending Todos
 
@@ -146,7 +147,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-05-01T00:33:47.296Z
+Last session: 2026-05-01T00:38:53.094Z
 Stopped at: Phase 47 UI-SPEC approved
 Resume file: None
 Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
