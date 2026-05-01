@@ -58,6 +58,22 @@ const services = [
     idealFor:
       "Homeowners who love their space but feel it needs a refresh. We honor what you have while making it feel new.",
   },
+  {
+    _id: "commercial-design",
+    title: "Commercial Design",
+    tagline: "Spaces that work as hard as you do",
+    description:
+      "Restaurants, boutique hotels, offices, and retail spaces designed to feel as considered as a private home. We bring the same eye for materials, light, and detail to commercial work — with the durability, code awareness, and timelines the setting demands.",
+    features: [
+      "Concept development and brand-aligned design direction",
+      "Space planning for flow, function, and guest experience",
+      "Material and finish selection for high-traffic environments",
+      "FF&E sourcing and procurement at commercial scale",
+      "Coordination with architects, contractors, and trades",
+    ],
+    idealFor:
+      "Restaurateurs, hoteliers, and business owners who want a space that reflects their brand and stands up to daily life.",
+  },
 ];
 ---
 
@@ -73,15 +89,15 @@ const services = [
       data-animate="fade-up"
     >
       At La Sprezzatura, design is a collaboration, not a transaction.
-      Whether you're transforming an entire home or simply need a discerning eye
-      for an afternoon, we meet you where you are with the same level of care
-      and intention.
+      Whether you're transforming a home, opening a restaurant, or just need a
+      discerning eye for an afternoon, we meet you where you are with the same
+      level of care and intention.
     </p>
   </section>
 
   <!-- Service Cards -->
   <section class="pb-20 md:pb-28 px-6 max-w-[1200px] mx-auto">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
       {
         services.map((service) => (
           <article
