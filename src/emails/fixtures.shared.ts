@@ -15,7 +15,7 @@ import type { TenantBrand } from "../lib/email/tenantBrand";
 
 export const SAMPLE_TENANT: TenantBrand = {
   wordmark: "LA SPREZZATURA",
-  signoffNameFormal: "Elizabeth Lewis",
+  signoffNameFormal: "Elizabeth Olivier",   // sync with D-14 update to LA_SPREZZATURA_TENANT
   signoffNameCasual: "Elizabeth",
   signoffLocation: "Darien, CT",
 };

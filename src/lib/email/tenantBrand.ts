@@ -30,7 +30,7 @@ export interface TenantBrand {
 // fixtures.shared.ts and existing snapshot baselines stay byte-identical.
 export const LA_SPREZZATURA_TENANT: TenantBrand = {
   wordmark: "LA SPREZZATURA",
-  signoffNameFormal: "Elizabeth Lewis",
+  signoffNameFormal: "Elizabeth Olivier",   // D-14 fix: was "Elizabeth Lewis" (incorrect)
   signoffNameCasual: "Elizabeth",
   signoffLocation: "Darien, CT",
 };
