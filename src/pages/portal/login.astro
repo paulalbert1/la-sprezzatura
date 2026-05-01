@@ -16,14 +16,9 @@ if (errorParam === "expired") {
 }
 ---
 
-<PortalLayout title={`Login | ${tenant.displayName}`} tenant={tenant}>
+<PortalLayout title={`Login | ${tenant.displayName}`} tenant={tenant} bare>
   <main class="flex-1 flex items-center justify-center px-6">
     <div class="w-full max-w-md text-center">
-      {/* Brand mark */}
-      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-        {tenant.wordmark}
-      </p>
-
       {/* Heading */}
       <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal mb-3">
         Welcome to Your Portal

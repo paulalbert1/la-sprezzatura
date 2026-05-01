@@ -40,14 +40,9 @@ if (!clientId && !contractorId && !buildingManagerEmail) {
 }
 ---
 
-<PortalLayout title={`Choose Your Portal | ${tenant.displayName}`} tenant={tenant}>
+<PortalLayout title={`Choose Your Portal | ${tenant.displayName}`} tenant={tenant} bare>
   <main class="flex-1 flex items-center justify-center px-6">
     <div class="w-full max-w-sm text-center">
-      {/* Brand mark */}
-      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-        {tenant.wordmark}
-      </p>
-
       {/* Heading */}
       <h2 class="font-heading text-2xl font-light text-charcoal mb-3">
         Choose Your Portal
