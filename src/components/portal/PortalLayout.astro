@@ -5,6 +5,9 @@ import {
   DEFAULT_PORTAL_BRAND,
   type PortalBrand,
 } from "../../lib/portal/portalBrand";
+import PortalHeader from "./PortalHeader.astro";
+import PortalFooter from "./PortalFooter.astro";
+import ImpersonationBannerStub from "./ImpersonationBannerStub.astro";
 
 interface Props {
   title: string;
@@ -15,9 +18,15 @@ interface Props {
    * something to render.
    */
   tenant?: PortalBrand;
+  /**
+   * Phase 47 D-2: when true, renders only the wordmark in the header
+   * (centered, no role sub-label, no sign-out). Used by /portal/login,
+   * /portal/role-select, /workorder/login, /building/login.
+   */
+  bare?: boolean;
 }
 
-const { title, tenant = DEFAULT_PORTAL_BRAND } = Astro.props;
+const { title, tenant = DEFAULT_PORTAL_BRAND, bare = false } = Astro.props;
 
 // Preview mode: detect ?preview=1 query param. The "Open portal as
 // {client}" button on /admin/clients/[clientId] sets this so the
@@ -25,6 +34,10 @@ const { title, tenant = DEFAULT_PORTAL_BRAND } = Astro.props;
 // the param is forgeable (anyone with the URL could append it) and
 // has no security implication -- it just renders a banner. The client
 // would never legitimately have ?preview=1 in their URL.
+//
+// Phase 50 will REMOVE this block (CONTEXT D-3) — superseded by the
+// real impersonation banner that fills the <slot name="banner"> below.
+// Phase 47 leaves it untouched.
 const previewMode = Astro.url.searchParams.get("preview") === "1";
 ---
 
@@ -39,6 +52,15 @@ const previewMode = Astro.url.searchParams.get("preview") === "1";
     <title>{title}</title>
   </head>
   <body class="bg-cream text-charcoal font-body min-h-screen flex flex-col">
+    {/* Banner slot — Phase 47 D-3. Phase 50 fills with real ImpersonationBanner
+        driven by Astro.locals.impersonating. Stub renders an invisible div so
+        Plan 01's slot-wiring test passes; empty state has zero rendered height. */}
+    <div role="region" aria-label="Notifications">
+      <slot name="banner">
+        <ImpersonationBannerStub />
+      </slot>
+    </div>
+
     {previewMode && (
       <div
         id="preview-banner"
@@ -64,19 +86,11 @@ const previewMode = Astro.url.searchParams.get("preview") === "1";
         }
       </script>
     )}
+
+    <PortalHeader tenant={tenant} bare={bare} />
+
     <slot />
-    <footer class="mt-auto py-8 text-center">
-      <p class="text-xs text-stone tracking-widest uppercase font-body">
-        {tenant.displayName} &bull; Interior Design
-      </p>
-      <p class="text-xs text-stone-light mt-2 font-body">
-        <a
-          href={`mailto:${tenant.contactEmail}`}
-          class="hover:text-terracotta transition-colors"
-        >
-          {tenant.contactEmail}
-        </a>
-      </p>
-    </footer>
+
+    <PortalFooter tenant={tenant} />
   </body>
 </html>
