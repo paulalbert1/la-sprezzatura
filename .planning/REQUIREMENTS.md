@@ -36,7 +36,7 @@
 - [ ] **PORTAL-02**: Each major section of the project portal shows when it was last updated (last-activity timestamp)
 - [ ] **PORTAL-03**: All portal pages render correctly at 375×667 mobile viewport — no horizontal scroll, readable body text, tap targets ≥44pt
 - [ ] **PORTAL-04**: Representative portal routes (project, dashboard, login, verify) pass WCAG 2.1 AA assertions via @axe-core/playwright
-- [ ] **PORTAL-05**: Portal header and footer chrome is consistent across every portal page, sourced from a single layout shell (PortalLayout + extracted components)
+- [x] **PORTAL-05**: Portal header and footer chrome is consistent across every portal page, sourced from a single layout shell (PortalLayout + extracted components)
 - [ ] **PORTAL-06**: Portal voice and visual rhythm match the admin's card-header band system (`.card-header`, brand tokens, sentence-case-via-CSS-uppercase)
 
 ### Portal Auth Flows (AUTH)

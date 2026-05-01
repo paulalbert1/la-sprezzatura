@@ -326,7 +326,7 @@ Plans:
 - [x] **Phase 45.5: Linha → Sprezza Hub Platform Rename** — 0 numbered reqs (architectural rebrand). Complete 2026-04-27. Admin chrome (AdminNav, login, trades pages) reads "Sprezza Hub"; Send Update + Work Order email footers carry "Sent via Sprezza Hub" attribution; `src/lib/email/system.ts` forward-looking sender constants stub added. Zero `Linha` references remain in src/, docs/ (excluding frozen specs), or scripts/. Tenant brand surfaces (LA SPREZZATURA wordmark, public marketing site, sender domain lasprezz.com, tenants.json slug, package.json name) byte-identical. 7 email-snapshot tests flipped FAIL → PASS post-snapshot-regen; full-suite test count improved 68 → 60 failures with zero new failures.
 - [x] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — cutover at `6fcd666`. Merge-gate REJECTED 2026-04-28 (3 findings, see `46-UAT.md`) → resolved through Phase 46.1 across 5 rounds → Liz round-5 visual UAT **APPROVED 2026-04-30** per D-21 / D-22; `46-UAT.md` verdict APPROVED. **Closed 2026-04-30.**
 - [x] **Phase 46.1: Merge-Gate Gap Closure** — 0 numbered reqs (gap-closure of Phase 46 merge-gate UAT). 10/10 plans complete: round-1 ✓ (46.1-01..03 gap-1/2/3), round-2 ✓ (46.1-04 gap-4 / 46.1-05 gap-5), round-3 ✓ (46.1-06 SPIKE, 46.1-07 gap-6, 46.1-08 gap-7), round-4 ✓ (46.1-09 CR-R3-01 + WR-01..06 at b75ab0b), round-5 ✓ (46.1-10 a7bd104 CR-R4-01 + WR-R4 fold-ins, code review clean dd30667). Liz visual UAT **APPROVED 2026-04-30** at the close-out gate (`46.1-HUMAN-UAT.md` status: passed). **Closed 2026-04-30.**
-- [ ] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05)
+- [x] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05) (completed 2026-05-01)
 - [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
 - [ ] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08)
 - [ ] **Phase 50: Impersonation UI** — 2 reqs (IMPER-01, IMPER-05)
@@ -439,7 +439,7 @@ Plans:
 - [x] 47-02-PLAN.md — Wave 2: Wire PortalLayout to mount header + footer + banner slot + bare prop (1 modified file)
 - [x] 47-03-PLAN.md — Wave 3: Migrate /portal/* pages — strip inlined chrome from dashboard, project, [token], login, role-select (5 files)
 - [x] 47-04-PLAN.md — Wave 3: Migrate /workorder/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
-- [ ] 47-05-PLAN.md — Wave 3: Migrate /building/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
+- [x] 47-05-PLAN.md — Wave 3: Migrate /building/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
 **UI hint**: yes
 
 ### Phase 48: Smaller Transactional Emails
@@ -538,7 +538,7 @@ Plans:
 | 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
-| 47 | v5.3 | 4/5 | In Progress|  |
+| 47 | v5.3 | 5/5 | Complete   | 2026-05-01 |
 | 48 | v5.3 | 0/TBD | Not started | - |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |
