@@ -7,8 +7,9 @@ dist/
 # Astro
 .astro/
 
-# Environment variables
-.env
+# Environment variables (.env.example is the tracked template)
+.env*
+!.env.example
 
 # Vercel
 .vercel/
@@ -20,7 +21,6 @@ dist/
 .superpowers/
 .planning/
 .vercel
-.env*.local
 .playwright-mcp/
 .claude/
 
