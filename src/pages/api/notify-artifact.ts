@@ -3,6 +3,10 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { sanityWriteClient } from "../../sanity/writeClient";
 import { generatePortalToken } from "../../lib/generateToken";
+import { render } from "@react-email/render";
+import { createElement } from "react";
+import { ArtifactReady } from "../../emails/artifactReady/ArtifactReady";
+import { getTenantBrand } from "../../lib/email/tenantBrand";
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -18,6 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Fetch project with clients and artifact info
     const project = await sanityWriteClient.fetch(
       `*[_type == "project" && _id == $projectId][0] {
+        _id,
         title,
         clients[] { client-> { _id, name, email } },
         artifacts[_key == $artifactKey][0] {
@@ -51,52 +56,32 @@ export const POST: APIRoute = async ({ request }) => {
       const resend = new Resend(apiKey);
       const baseUrl = import.meta.env.SITE || "https://lasprezz.com";
 
+      // Pitfall 7: resolve tenant ONCE before the loop. N client sends issue
+      // exactly 1 tenant fetch, not N.
+      const tenant = await getTenantBrand(sanityWriteClient);
+      const portalHref = `${baseUrl}/portal/dashboard`;
+
       for (const clientEntry of project.clients || []) {
         const client = clientEntry.client;
         if (!client?.email) continue;
 
-        const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background-color:#FAF8F5;font-family:system-ui,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;">
-    <tr>
-      <td style="padding:32px 32px 24px;text-align:center;">
-        <p style="margin:0;font-size:11px;color:#8A8478;text-transform:uppercase;letter-spacing:0.2em;">La Sprezzatura</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="background-color:#FFFFFF;padding:40px 32px;">
-        <h1 style="margin:0 0 16px;font-family:Georgia,serif;font-weight:300;font-size:24px;color:#2C2926;text-align:center;">
-          New ${artifactLabel} Available
-        </h1>
-        <p style="margin:0 0 24px;font-size:16px;color:#2C2926;line-height:1.7;text-align:center;">
-          Liz has uploaded a new ${artifactLabel.toLowerCase()} for your review on ${project.title}.
-        </p>
-        <div style="text-align:center;margin:32px 0;">
-          <a href="${baseUrl}/portal/dashboard"
-             style="display:inline-block;background-color:#C4836A;color:#FFFFFF;text-decoration:none;padding:16px 32px;font-size:14px;letter-spacing:0.1em;text-transform:uppercase;">
-            View in Your Portal
-          </a>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:24px 32px;text-align:center;">
-        <p style="margin:0;font-size:12px;color:#B8B0A4;line-height:1.6;">
-          This is an automated message from La Sprezzatura.
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+        const element = createElement(ArtifactReady, {
+          client: { name: client.name, email: client.email },
+          project: { _id: project._id, title: project.title },
+          artifactLabel,
+          portalHref,
+          preheader: `New ${artifactLabel} for ${project.title}`,
+          tenant,
+        });
+        const html = await render(element);
+        const text = await render(element, { plainText: true });
 
         await resend.emails.send({
           from: "La Sprezzatura <noreply@send.lasprezz.com>",
           to: [client.email],
-          subject: `New ${artifactLabel} for ${project.title}`,
+          subject: `New ${artifactLabel} for ${project.title}`,   // D-13: unchanged
           html,
+          text,
         });
       }
     } else {
