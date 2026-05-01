@@ -283,9 +283,9 @@ describe("SendUpdate (Phase 46-04 redesign)", () => {
     expect(html).toContain("Sent via Sprezza Hub");
   });
 
-  it("Footer signature is 'Elizabeth Lewis' (D-29 formal register)", async () => {
+  it("Footer signature is 'Elizabeth Olivier' (D-14 fix; D-29 formal register)", async () => {
     const html = await render(createElement(SendUpdate, FIXTURES.full()));
-    expect(html).toContain("Elizabeth Lewis");
+    expect(html).toContain("Elizabeth Olivier");
   });
 
   it("Reply-affordance copy is locked string (D-9 regression guard)", async () => {
