@@ -13,11 +13,6 @@ const tenant = await getPortalBrand(sanityClient);
 <PortalLayout title={`Portal Upgraded | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1 flex items-center justify-center px-6">
     <div class="text-center max-w-md">
-      {/* Brand mark */}
-      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8">
-        {tenant.wordmark}
-      </p>
-
       <h1 class="font-heading text-3xl font-light text-charcoal mb-4">
         We've Upgraded Your Portal
       </h1>
