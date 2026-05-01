@@ -437,7 +437,7 @@ Plans:
 Plans:
 - [x] 47-01-PLAN.md — Wave 1: Create PortalHeader.astro + PortalFooter.astro + ImpersonationBannerStub.astro + PortalHeader.test.ts (4 new files)
 - [x] 47-02-PLAN.md — Wave 2: Wire PortalLayout to mount header + footer + banner slot + bare prop (1 modified file)
-- [ ] 47-03-PLAN.md — Wave 3: Migrate /portal/* pages — strip inlined chrome from dashboard, project, [token], login, role-select (5 files)
+- [x] 47-03-PLAN.md — Wave 3: Migrate /portal/* pages — strip inlined chrome from dashboard, project, [token], login, role-select (5 files)
 - [ ] 47-04-PLAN.md — Wave 3: Migrate /workorder/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
 - [ ] 47-05-PLAN.md — Wave 3: Migrate /building/* pages — add tenant fetch + strip inlined chrome from dashboard, project/[projectId], login (3 files)
 **UI hint**: yes
@@ -538,7 +538,7 @@ Plans:
 | 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
-| 47 | v5.3 | 2/5 | In Progress|  |
+| 47 | v5.3 | 3/5 | In Progress|  |
 | 48 | v5.3 | 0/TBD | Not started | - |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |
