@@ -538,7 +538,7 @@ Plans:
 | 45 | v5.3 | 4/4 | Complete   | 2026-04-26 |
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
-| 47 | v5.3 | 5/5 | Complete   | 2026-05-01 |
+| 47 | v5.3 | 5/5 | Complete    | 2026-05-01 |
 | 48 | v5.3 | 0/TBD | Not started | - |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |

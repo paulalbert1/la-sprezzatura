@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
-status: verifying
+status: ready_to_plan
 stopped_at: Phase 47 UI-SPEC approved
 last_updated: "2026-05-01T01:59:37.693Z"
 last_activity: 2026-05-01
 progress:
   total_phases: 11
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 47
   completed_plans: 47
-  percent: 100
+  percent: 64
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-23)
 
 ## Current Position
 
-Phase: 47 (portal-layout-hoist) — EXECUTING
-Plan: 5 of 5
+Phase: 49
+Plan: Not started
 Parent: —
 Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
-Status: Phase complete — ready for verification
+Status: Ready to plan
 Next: Phase 50 (Impersonation UI — IMPER-01, IMPER-05). Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also unblocked.
 Last activity: 2026-05-01
 
