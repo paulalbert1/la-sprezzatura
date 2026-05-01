@@ -454,7 +454,7 @@ Plans:
 Plans:
 - [x] 48-01-PLAN.md — Wave 1: Foundation — src/lib/portal/tokenTtl.ts (D-04, D-05) + tenantBrand D-14 fix + SAMPLE_TENANT A2 fix + Phase 46 snapshot regen
 - [x] 48-02-PLAN.md — Wave 2: Three new react-email templates (workOrderAccess, buildingAccess, artifactReady) with EMAIL-04 + EMAIL-05 (and D-08 negative for artifactReady)
-- [ ] 48-03-PLAN.md — Wave 3: Rewire 3 API routes (send-workorder-access, send-building-access, notify-artifact) — react-email render + MAGIC_LINK_ACCESS_TTL_SECONDS + getTenantBrand at call site (D-15)
+- [x] 48-03-PLAN.md — Wave 3: Rewire 3 API routes (send-workorder-access, send-building-access, notify-artifact) — react-email render + MAGIC_LINK_ACCESS_TTL_SECONDS + getTenantBrand at call site (D-15)
 - [ ] 48-04-PLAN.md — Wave 4: EMAIL-05 drift-guard integration tests (D-07) — vi.doMock + dynamic-import the route to assert redis.set ex: AND email body change in lockstep
 **UI hint**: yes
 
@@ -545,7 +545,7 @@ Plans:
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 47 | v5.3 | 5/5 | Complete    | 2026-05-01 |
-| 48 | v5.3 | 2/4 | In Progress|  |
+| 48 | v5.3 | 3/4 | In Progress|  |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |
 | 51 | v5.3 | 0/TBD | Not started | - |
