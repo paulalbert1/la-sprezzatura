@@ -4,14 +4,14 @@ milestone: v5.3
 milestone_name: Third-Party Views & Outbound Email Polish
 status: executing
 stopped_at: Phase 47 UI-SPEC approved
-last_updated: "2026-04-30T22:30:47.307Z"
-last_activity: 2026-04-30 -- Phase 47 planning complete
+last_updated: "2026-05-01T00:12:09.610Z"
+last_activity: 2026-05-01
 progress:
   total_phases: 11
   completed_phases: 5
   total_plans: 47
-  completed_plans: 42
-  percent: 89
+  completed_plans: 43
+  percent: 91
 ---
 
 # Project State
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-23)
 
 **Core value:** A visually stunning portfolio site that makes La Sprezzatura look as polished and intentional as Liz's design work
-**Current focus:** Phase 49 CLOSED. Phase 50 (Impersonation UI — IMPER-01, IMPER-05) is unblocked. Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also available.
+**Current focus:** Phase 47 — portal-layout-hoist
 
 ## Current Position
 
-Phase: 49 (impersonation-architecture) — CLOSED 2026-04-30
-Plan: —
+Phase: 47 (portal-layout-hoist) — EXECUTING
+Plan: 2 of 5
 Parent: —
 Plans: 10 of 10 complete (49-01 913f149/a3d04f9/48bdc7f session schema; 49-02 4169c68/64c8e10/e85c1cc impersonationAudit; 49-03 691d207/6e59f87/b3268bc auth lib; 49-04 20cb2df/a995d88 mint endpoint; 49-05 3d7b8f9/c4d2ec2 redeem route; 49-06 60f56ab/c9442fa/9ebe2f0/7e272b0 exit+admin-logout; 49-07 fc5bd6e/6b5bc62/a94a033/a2808a6 middleware gates; 49-08 b78a3db/0431b13/af3b6be/4674fdd Resend 403; 49-09 89d3161/5d4937d D-21 CI tests; 49-10 5f4b46f env doc + 59a0eea phase-close summary; gap-closure rename f3228ef).
 Status: Ready to execute
 Next: Phase 50 (Impersonation UI — IMPER-01, IMPER-05). Phase 47 (Portal Layout Hoist) and Phase 48 (smaller transactional emails) also unblocked.
-Last activity: 2026-04-30 -- Phase 47 planning complete
+Last activity: 2026-05-01
 
 ## v5.3 Phase Map
 
@@ -122,6 +122,8 @@ Carried from v5.1 / v5.2 / Phase 44 boundary. Full history:
 - [Phase ?]: 46.1-07: Locked Procurement column widths to 60/22/18 via Column width attribute + verticalAlign:top on body-row Columns + outer Section paddingTop:16 wrapper. Closes UAT gap-6.
 - [Phase ?]: 46.1-08: applied chosen combination (a) <table bgcolor> body wrapper + (b) @media (prefers-color-scheme: dark) + (d) inline body-attribute paint per 46.1-SPIKE-OUTLOOK-MAC.md, ADDITIVE on top of the existing 46.1-04 lock. (c) class-hook selectors REJECTED -- shares failing <style>-block delivery vehicle. Closes parent UAT 46-UAT.md gap-7 code-fix half (round-4 Liz visual re-test is the human gate).
 - [Phase ?]: 46.1-09 (round 4): CR-R3-01 BLOCKER closed by binding literal class strings (pill-${status} on Procurement.tsx pill <span>; cta-${variant} on EmailButton.tsx Button) so the [data-ogsc]/[data-ogsb] lock rules actually fire on rendered elements. Verified at HARD task-1 gate: snapshot regen produces 4 class="pill-*" matches + 5 class="cta-*" matches. EmailShell.tsx CSS refactored to module-load-time generation from STATUS_PILL_STYLES via buildPillRules() (D-18 IN-R3-02 -- single source of truth; ~40 lines of mirrored CSS eliminated). Dead [data-ogsc] .text-* + .border-cream-dark + universal-selector catch-all rules deleted (D-16/D-17). WR-01/02 stripLeadingGreeting tightened (clientFirstName param + case-insensitive exact-match; preserves "Hi all," when firstName!=match; handles Mary-Anne, O'Brien). WR-03 MAX_LEN exported + textarea maxLength + character counter wired (PersonalNoteParseError unreachable from admin UI). WR-05 MSO conditional out of <div>-in-<head> into sibling <style>. WR-06 pill borderRadius deleted (Phase 46 D-3 reserves border-radius for CTA only).
+- [Phase 47]: 47-01: Sign-out remains a GET anchor (UI-SPEC line 134 overrides CONTEXT D-4 form-post wording); CSRF refactor explicitly deferred to a future security task.
+- [Phase 47]: 47-01: Role sub-label map and logout endpoint map both live inside PortalHeader.astro as the single source of truth — pages must NOT duplicate them.
 
 ### Pending Todos
 
@@ -141,7 +143,7 @@ Carried forward:
 
 ## Session Continuity
 
-Last session: 2026-04-30T21:29:26.565Z
+Last session: 2026-05-01T00:09:32.729Z
 Stopped at: Phase 47 UI-SPEC approved
-Resume file: .planning/phases/47-portal-layout-hoist/47-UI-SPEC.md
+Resume file: None
 Next action: /gsd-code-review 46.1 (round-5 review) -- must report findings.blocker == 0 against round-3 file set + new files (SendUpdateModal.tsx, personalNoteMarkdown.ts, Body.tsx). On clean review, notify Liz to schedule round-5 visual UAT on Outlook for Mac dark + Outlook for Windows dark + Outlook web dark + light-mode regression check per D-21. On `approved`, parent UAT 46-UAT.md replays for round-5 close-out; Phase 46 closes for real and v5.3 unblocks. Hard exclusion per D-21: no new spike (the 46.1-06 spike + round-3 SPIKE.md findings are sufficient).
