@@ -10,9 +10,12 @@ import {
 } from "../../../sanity/queries";
 import { formatCurrency } from "../../../lib/formatCurrency";
 import { PortableText } from "astro-portabletext";
+import { sanityClient } from "sanity:client";
+import { getPortalBrand } from "../../../lib/portal/portalBrand";
 
 // contractorId injected by middleware (guaranteed by auth guard)
 const contractorId = Astro.locals.contractorId!;
+const tenant = await getPortalBrand(sanityClient);
 
 // Get projectId from dynamic route param
 const projectId = Astro.params.projectId;
@@ -57,19 +60,12 @@ const addressStr = [
   .join(", ");
 ---
 
-<PortalLayout title={`${project.title} | Work Order | La Sprezzatura`}>
+<PortalLayout title={`${project.title} | Work Order | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1">
     <div class="max-w-3xl mx-auto px-6 py-12 md:py-20">
       <a href="/workorder/dashboard" class="inline-flex items-center gap-1 text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body mb-6">
         <span>&larr;</span> Back to Dashboard
       </a>
-
-      {/* Brand mark */}
-      <p
-        class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"
-      >
-        La Sprezzatura
-      </p>
 
       {/* Page header */}
       <h1
@@ -321,15 +317,6 @@ const addressStr = [
         </div>
       </section>
 
-      {/* Sign Out */}
-      <div class="mt-16 text-center">
-        <a
-          href="/workorder/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
-        >
-          Sign Out
-        </a>
-      </div>
     </div>
   </main>
 </PortalLayout>
