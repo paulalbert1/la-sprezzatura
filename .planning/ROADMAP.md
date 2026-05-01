@@ -327,7 +327,7 @@ Plans:
 - [x] **Phase 46: Send Update + Work Order Migration** — 5 reqs (EMAIL-01, EMAIL-02, EMAIL-03, EMAIL-06, EMAIL-07) — cutover at `6fcd666`. Merge-gate REJECTED 2026-04-28 (3 findings, see `46-UAT.md`) → resolved through Phase 46.1 across 5 rounds → Liz round-5 visual UAT **APPROVED 2026-04-30** per D-21 / D-22; `46-UAT.md` verdict APPROVED. **Closed 2026-04-30.**
 - [x] **Phase 46.1: Merge-Gate Gap Closure** — 0 numbered reqs (gap-closure of Phase 46 merge-gate UAT). 10/10 plans complete: round-1 ✓ (46.1-01..03 gap-1/2/3), round-2 ✓ (46.1-04 gap-4 / 46.1-05 gap-5), round-3 ✓ (46.1-06 SPIKE, 46.1-07 gap-6, 46.1-08 gap-7), round-4 ✓ (46.1-09 CR-R3-01 + WR-01..06 at b75ab0b), round-5 ✓ (46.1-10 a7bd104 CR-R4-01 + WR-R4 fold-ins, code review clean dd30667). Liz visual UAT **APPROVED 2026-04-30** at the close-out gate (`46.1-HUMAN-UAT.md` status: passed). **Closed 2026-04-30.**
 - [x] **Phase 47: Portal Layout Hoist** — 1 req (PORTAL-05) (completed 2026-05-01)
-- [ ] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05)
+- [x] **Phase 48: Smaller Transactional Emails** — 2 reqs (EMAIL-04, EMAIL-05) (completed 2026-05-01)
 - [x] **Phase 49: Impersonation Architecture** — 6 reqs (IMPER-02, IMPER-03, IMPER-04, IMPER-06, IMPER-07, IMPER-08) (completed 2026-04-30; verification PASS, gap-closure commit `f3228ef` resolved Astro v6 underscore-route issue)
 - [ ] **Phase 50: Impersonation UI** — 2 reqs (IMPER-01, IMPER-05)
 - [ ] **Phase 51: Portal Visual + Voice Pass** — 6 reqs (PORTAL-01, PORTAL-02, PORTAL-03, PORTAL-06, AUTH-01, AUTH-02)
@@ -455,7 +455,7 @@ Plans:
 - [x] 48-01-PLAN.md — Wave 1: Foundation — src/lib/portal/tokenTtl.ts (D-04, D-05) + tenantBrand D-14 fix + SAMPLE_TENANT A2 fix + Phase 46 snapshot regen
 - [x] 48-02-PLAN.md — Wave 2: Three new react-email templates (workOrderAccess, buildingAccess, artifactReady) with EMAIL-04 + EMAIL-05 (and D-08 negative for artifactReady)
 - [x] 48-03-PLAN.md — Wave 3: Rewire 3 API routes (send-workorder-access, send-building-access, notify-artifact) — react-email render + MAGIC_LINK_ACCESS_TTL_SECONDS + getTenantBrand at call site (D-15)
-- [ ] 48-04-PLAN.md — Wave 4: EMAIL-05 drift-guard integration tests (D-07) — vi.doMock + dynamic-import the route to assert redis.set ex: AND email body change in lockstep
+- [x] 48-04-PLAN.md — Wave 4: EMAIL-05 drift-guard integration tests (D-07) — vi.doMock + dynamic-import the route to assert redis.set ex: AND email body change in lockstep
 **UI hint**: yes
 
 ### Phase 49: Impersonation Architecture
@@ -545,7 +545,7 @@ Plans:
 | 46 | v5.3 | 4/4 | Complete   | 2026-04-30 |
 | 46.1 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 47 | v5.3 | 5/5 | Complete    | 2026-05-01 |
-| 48 | v5.3 | 3/4 | In Progress|  |
+| 48 | v5.3 | 4/4 | Complete   | 2026-05-01 |
 | 49 | v5.3 | 10/10 | Complete   | 2026-04-30 |
 | 50 | v5.3 | 0/TBD | Not started | - |
 | 51 | v5.3 | 0/TBD | Not started | - |
