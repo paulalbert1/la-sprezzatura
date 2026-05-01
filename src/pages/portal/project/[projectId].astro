@@ -62,12 +62,6 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
         <span>&larr;</span> Back to Dashboard
       </a>
 
-      <p
-        class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center"
-      >
-        {tenant.wordmark}
-      </p>
-
       <ProjectHeader project={project} />
       <ConfidentialityBanner />
 
@@ -109,14 +103,6 @@ const designOptions: any[] = (await sanityClient.fetch(DESIGN_OPTIONS_BY_PROJECT
         <WarrantyClaimForm client:load projectId={project._id} contactEmail={tenant.contactEmail} />
       )}
 
-      <div class="mt-16 text-center">
-        <a
-          href="/portal/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body"
-        >
-          Sign Out
-        </a>
-      </div>
     </div>
   </main>
 </PortalLayout>

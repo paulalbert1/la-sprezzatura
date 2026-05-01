@@ -50,12 +50,6 @@ const activeCount = activeProjects.length;
 <PortalLayout title={`Dashboard | ${tenant.displayName}`} tenant={tenant}>
   <main class="flex-1">
     <div class="max-w-2xl mx-auto px-6 py-12 md:py-20">
-      {/* Brand mark */}
-      <p class="text-xs text-stone tracking-[0.2em] uppercase font-body mb-8 text-center">
-        {tenant.wordmark}
-      </p>
-      <p class="text-xs text-stone/60 font-body text-center mb-4 -mt-6">Client Portal</p>
-
       {/* Greeting */}
       <h1 class="font-heading text-4xl md:text-5xl font-light text-charcoal text-center mb-2">
         Welcome back, {firstName}
@@ -189,15 +183,6 @@ const activeCount = activeProjects.length;
         </details>
       )}
 
-      {/* Sign out link */}
-      <div class="mt-16 text-center">
-        <a
-          href="/portal/logout"
-          class="text-xs text-stone hover:text-terracotta transition-colors uppercase tracking-widest font-body py-2 px-4 border border-stone-light/30 rounded"
-        >
-          Sign Out
-        </a>
-      </div>
     </div>
   </main>
 </PortalLayout>
